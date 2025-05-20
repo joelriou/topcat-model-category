@@ -351,7 +351,7 @@ lemma map₂_map₁_apply {n : ℕ} (x : π n (Subcomplex.fiber p b) (basePoint 
   dsimp
   rw [Subcomplex.fiber_ι_comp, comp_const]
 
-variable [Fibration p] [IsFibrant E]
+variable [Fibration p] [IsFibrant E] (he)
 
 @[simp]
 lemma δ'_map₂_apply {n : ℕ} (x : π (n + 1) E e) (i : Fin (n + 2)) :
@@ -367,6 +367,83 @@ lemma map₁_δ'_apply {n : ℕ} (x : π (n + 1) B b) (i : Fin (n + 2)) :
   have h := deltaStruct he s i
   rw [δ'_mk_eq_of_deltaStruct h, mapπ_mk, π.mk_eq_one_iff]
   exact ⟨h.relStruct₀⟩
+
+variable {he} in
+lemma exists_of_δ'_eq_one {n : ℕ} {x : π (n + 1) B b} {i : Fin (n + 2)}
+    (hx : δ' p he n i x = 1) :
+    ∃ (y : π (n + 1) E e), map₂ p he (n + 1) y = x := by
+  obtain ⟨x, rfl⟩ := x.mk_surjective
+  change _ = π.mk _ at hx
+  rw [δ'_mk_iff_nonempty_deltaStruct] at hx
+  obtain ⟨h⟩ := hx
+  refine ⟨π.mk (.mk h.map (fun j ↦ ?_)), ?_⟩
+  · by_cases hj : j = i
+    · subst hj
+      simp
+    · exact h.δ_map_eq_const j hj
+  · simp only [map₂, mapπ_mk]
+    congr
+    ext : 1
+    exact h.map_p
+
+lemma δ'_eq_one_iff {n : ℕ} (x : π (n + 1) B b) (i : Fin (n + 2))  :
+    δ' p he n i x = 1 ↔ ∃ (y : π (n + 1) E e), map₂ p he (n + 1) y = x :=
+  ⟨exists_of_δ'_eq_one, by rintro ⟨y, rfl⟩; simp⟩
+
+variable {he}
+
+lemma exists_of_map₁_eq_one {n : ℕ} {x : π n (Subcomplex.fiber p b) (basePoint p he)}
+    (hx : map₁ p he n x = 1) (i : Fin (n + 2)):
+    ∃ (y : π (n + 1) B b), δ' p he n i y = x := by
+  obtain ⟨x, rfl⟩ := x.mk_surjective
+  obtain ⟨s, hs, hs₀⟩ : ∃ (s : Δ[n + 1] ⟶ E),
+        (∀ (j : Fin (n + 2)) (hj : j ≠ i), stdSimplex.δ j ≫ s = const e) ∧
+          stdSimplex.δ i ≫ s = x.map ≫ Subcomplex.ι _ := by
+    change _ = π.mk _ at hx
+    simp only [map₁, mapπ_mk] at hx
+    rw [π.mk_eq_mk_iff] at hx
+    by_cases hi : i = 0
+    · subst hi
+      replace hx := hx.some
+      refine ⟨hx.map, fun j hj ↦ ?_, hx.δ_castSucc_map⟩
+      obtain ⟨j, rfl⟩ := Fin.eq_succ_of_ne_zero hj
+      by_cases hj : j = 0
+      · subst hj
+        exact hx.δ_succ_map
+      · obtain ⟨j, rfl⟩ := Fin.eq_succ_of_ne_zero hj
+        exact hx.δ_map_of_gt _ (by simp only [Fin.succ_lt_succ_iff, Fin.succ_pos])
+    · obtain ⟨i, rfl⟩ := Fin.eq_succ_of_ne_zero hi
+      replace hx := hx.some.symm.relStruct i
+      refine ⟨hx.map, fun j hj ↦ ?_, by simp⟩
+      obtain hj | rfl | hj := lt_trichotomy j i.succ
+      · obtain hj | rfl := (Fin.le_castSucc_iff.2 hj).lt_or_eq
+        · apply hx.δ_map_of_lt j hj
+        · simp
+      · simp at hj
+      · apply hx.δ_map_of_gt j hj
+  refine ⟨π.mk (.mk (s ≫ p) ?_), ?_⟩
+  · intro j
+    by_cases hj : j = i
+    · subst hj
+      simp [reassoc_of% hs₀]
+    · rw [reassoc_of% (hs j hj), const_comp, he]
+  · rw [δ'_mk_iff_nonempty_deltaStruct]
+    exact ⟨{ map := s }⟩
+
+lemma map₁_eq_one_iff {n : ℕ} (x : π n (Subcomplex.fiber p b) (basePoint p he)) (i : Fin (n + 2)) :
+    map₁ p he n x = 1 ↔ ∃ (y : π (n + 1) B b), δ' p he n i y = x :=
+  ⟨fun hx ↦ exists_of_map₁_eq_one hx i, by rintro ⟨y, rfl⟩; simp⟩
+
+lemma exists_of_map₂_eq_one {n : ℕ} {x : π n E e} (hx : map₂ p he n x = 1) :
+    ∃ (y : π n (Subcomplex.fiber p b) (basePoint p he)), map₁ p he n y = x := by
+  obtain ⟨x, rfl⟩ := x.mk_surjective
+  sorry
+
+variable (he) in
+lemma map₂_eq_one_iff {n : ℕ} (x : π n E e) :
+    map₂ p he n x = 1 ↔
+      ∃ (y : π n (Subcomplex.fiber p b) (basePoint p he)), map₁ p he n y = x :=
+  ⟨fun hx ↦ exists_of_map₂_eq_one hx, by rintro ⟨y, rfl⟩; simp⟩
 
 end HomotopySequence
 
