@@ -107,6 +107,11 @@ lemma hom_ext_rightTensor {X Y : SSet.{u}} {f g : (boundary 1 : SSet) ⊗ X ⟶ 
     f = g := by
   apply BinaryCofan.IsColimit.hom_ext (isColimitRightTensor X) <;> assumption
 
+lemma hom_ext_leftTensor {X Y : SSet.{u}} {f g : X ⊗ (boundary 1 : SSet) ⟶ Y}
+    (h₀ : X ◁ ι₀ ≫ f = X ◁ ι₀ ≫ g) (h₁ : X ◁ ι₁ ≫ f = X ◁ ι₁≫ g) :
+    f = g := by
+  apply BinaryCofan.IsColimit.hom_ext (isColimitLeftTensor X) <;> assumption
+
 end boundary₁
 
 namespace KanComplex

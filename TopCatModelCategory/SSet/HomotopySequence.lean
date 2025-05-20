@@ -1,9 +1,13 @@
 import TopCatModelCategory.SSet.Fiber
+import TopCatModelCategory.SSet.AnodyneExtensionsAdjunctions
+import TopCatModelCategory.SSet.FundamentalGroupoid
 import TopCatModelCategory.SSet.HomotopyGroup
+--import Mathlib.CategoryTheory.Limits.Shapes.BinaryProducts
 
 universe u
 
 open HomotopicalAlgebra CategoryTheory Simplicial SSet.modelCategoryQuillen
+  MonoidalCategory ChosenFiniteProducts Limits
 
 namespace SSet
 
@@ -124,7 +128,7 @@ lemma exists_deltaStruct [Fibration p] (s : B.PtSimplex (n + 1) b) (i : Fin (n +
           rintro rfl
           simp at hj
 
-noncomputable def δ'' [Fibration p] (s : B.PtSimplex (n + 1) b) (i : Fin (n + 2)):
+noncomputable def δ'' [Fibration p] (s : B.PtSimplex (n + 1) b) (i : Fin (n + 2)) :
     PtSimplex _ n (basePoint p he) :=
   (exists_deltaStruct he s i).choose
 
@@ -133,10 +137,92 @@ noncomputable def deltaStruct [Fibration p] (s : B.PtSimplex (n + 1) b) (i : Fin
   (exists_deltaStruct he s i).choose_spec.some
 
 variable {he} in
-def uniqueδ'' [Fibration p] {s s' : B.PtSimplex (n + 1) b} {i : Fin (n + 2)}
+noncomputable def uniqueδ'' [Fibration p] {s s' : B.PtSimplex (n + 1) b} {i : Fin (n + 2)}
     {t t' : PtSimplex _ n (basePoint p he)} (hst : DeltaStruct s t i) (hst' : DeltaStruct s' t' i)
     (hs : s.Homotopy s') :
-    t.Homotopy t' := sorry
+    t.Homotopy t' := Nonempty.some (by
+  obtain ⟨α, hα₀, hα₁⟩ : ∃ (α : Δ[n + 1] ⊗ ∂Δ[1] ⟶ E),
+    _ ◁ boundary₁.ι₀ ≫ α = fst _ _ ≫ hst.map ∧
+    _ ◁ boundary₁.ι₁ ≫ α = fst _ _ ≫ hst'.map := by
+      obtain ⟨α', hα'₀, hα'₁⟩ :=
+        BinaryCofan.IsColimit.desc' (boundary₁.isColimitLeftTensor Δ[n + 1])
+          (fst _ _ ≫ hst.map) (fst _ _ ≫ hst'.map)
+      exact ⟨α', by simpa, by simpa⟩
+  obtain ⟨φ, hφ₁, hφ₂⟩ := (Subcomplex.unionProd.isPushout Λ[n + 1, i] ∂Δ[1]).exists_desc α
+    (const e) (by
+      apply boundary₁.hom_ext_leftTensor
+      · rw [MonoidalCategory.whisker_exchange_assoc, hα₀,
+          ← cancel_epi (stdSimplex.rightUnitor _).inv,
+          whiskerRight_fst_assoc, stdSimplex.rightUnitor_inv_fst_assoc, comp_const,
+          comp_const]
+        exact horn.hom_ext' (fun j hj ↦ by simpa using hst.δ_map_eq_const j hj)
+      · rw [MonoidalCategory.whisker_exchange_assoc, hα₁,
+          ← cancel_epi (stdSimplex.rightUnitor _).inv,
+          whiskerRight_fst_assoc, stdSimplex.rightUnitor_inv_fst_assoc, comp_const,
+          comp_const]
+        exact horn.hom_ext' (fun j hj ↦ by simpa using hst'.δ_map_eq_const j hj))
+  have := (anodyneExtensions.subcomplex_unionProd_mem_of_left _ (boundary 1)
+    (anodyneExtensions.horn_ι_mem n i)).hasLeftLiftingProperty p
+  have sq : CommSq φ ((horn (n + 1) i).unionProd (boundary 1)).ι p hs.h := ⟨by
+    apply (Subcomplex.unionProd.isPushout _ _).hom_ext
+    . rw [reassoc_of% hφ₁]
+      apply boundary₁.hom_ext_leftTensor
+      · rw [reassoc_of% hα₀, hst.map_p, Subcomplex.unionProd.ι₁_ι_assoc,
+          ← MonoidalCategory.whiskerLeft_comp_assoc, boundary₁.ι₀_ι, ← hs.h₀,
+          ← stdSimplex.rightUnitor_inv_map_δ_one_assoc,
+          stdSimplex.fst_rightUnitor_inv_assoc]
+      · rw [reassoc_of% hα₁, hst'.map_p, Subcomplex.unionProd.ι₁_ι_assoc,
+          ← MonoidalCategory.whiskerLeft_comp_assoc, boundary₁.ι₁_ι, ← hs.h₁,
+          ← stdSimplex.rightUnitor_inv_map_δ_zero_assoc,
+          stdSimplex.fst_rightUnitor_inv_assoc]
+    · have := Subcomplex.homOfLE (horn_le_boundary i) ▷ Δ[1] ≫= hs.rel.symm
+      rw [Subcomplex.ofSimplex_ι, comp_const] at this
+      rwa [reassoc_of% hφ₂, const_comp, he, Subcomplex.unionProd.ι₂_ι_assoc]⟩
+  have hsq₀ : ι₀ ≫ sq.lift = hst.map := by
+    rw [← cancel_epi (stdSimplex.rightUnitor _).hom, stdSimplex.rightUnitor_hom, ← hα₀, ← hφ₁]
+    conv_rhs => rw [← sq.fac_left]
+    rfl
+  have hsq₁ : ι₁ ≫ sq.lift = hst'.map := by
+    rw [← cancel_epi (stdSimplex.rightUnitor _).hom, stdSimplex.rightUnitor_hom, ← hα₁, ← hφ₁]
+    conv_rhs => rw [← sq.fac_left]
+    rfl
+  refine ⟨{
+      h := Subcomplex.lift (stdSimplex.δ i ▷ _ ≫ sq.lift) (by
+        have := boundary.ι i ▷ Δ[1] ≫= hs.rel
+        rw [← MonoidalCategory.comp_whiskerRight_assoc, boundary.ι_ι,
+          Subcomplex.ofSimplex_ι, comp_const, comp_const, comp_const] at this
+        rwa [Subcomplex.preimage_eq_top_iff, Subcomplex.range_le_fiber_iff,
+          Category.assoc, sq.fac_right])
+      h₀ := by
+        rw [← cancel_mono (Subcomplex.ι _), Category.assoc, Subcomplex.lift_ι,
+          ι₀_comp_assoc, hsq₀, hst.δ_map]
+      h₁ := by
+        rw [← cancel_mono (Subcomplex.ι _), Category.assoc, Subcomplex.lift_ι,
+          ι₁_comp_assoc, hsq₁, hst'.δ_map]
+      rel := by
+        rw [← cancel_mono (Subcomplex.ι _)]
+        simp only [Category.assoc, Subcomplex.lift_ι, Subpresheaf.toPresheaf_obj,
+          Subcomplex.ofSimplex_ι, comp_const, const_comp, Subpresheaf.ι_app, basePoint_coe]
+        obtain _ | n := n
+        · ext
+        have (k : Fin (n + 3)) (hki : k ≠ i) : stdSimplex.δ k ▷ _ ≫ sq.lift = const e := by
+          have := (horn.ι i k hki ▷ _ ≫ Subcomplex.unionProd.ι₂ _ _) ≫= sq.fac_left
+          rwa [Category.assoc, Category.assoc, hφ₂, comp_const] at this
+        apply boundary.hom_ext_tensorRight
+        intro j
+        obtain ⟨k, hki, l, fac⟩ : ∃ (k : Fin (n + 3)) (hki : k ≠ i) (l : Fin (n + 2)),
+          stdSimplex.{u}.δ j ≫ stdSimplex.δ i = stdSimplex.δ l ≫ stdSimplex.δ k := by
+            by_cases hj : j.castSucc < i
+            · obtain ⟨i, rfl⟩ := Fin.eq_succ_of_ne_zero (Fin.ne_zero_of_lt hj)
+              exact ⟨j.castSucc, hj.ne, _, stdSimplex.δ_comp_δ (Fin.succ_le_succ_iff.1 hj)⟩
+            · simp only [not_lt] at hj
+              obtain ⟨i, rfl⟩ := Fin.eq_castSucc_of_ne_last
+                (Fin.ne_last_of_lt (Fin.le_castSucc_iff.1 hj))
+              exact ⟨_, fun h ↦ by simp [← h] at hj, _,
+                (stdSimplex.δ_comp_δ (Fin.castSucc_le_castSucc_iff.1 hj)).symm⟩
+        rw [comp_const, ← comp_whiskerRight_assoc, boundary.ι_ι, ← comp_whiskerRight_assoc,
+          fac, comp_whiskerRight_assoc, this k hki, comp_const]
+  }⟩)
 
 end
 

@@ -299,6 +299,17 @@ lemma exists_desc {i : Fin (n + 3)} {X : SSet.{u}} (f : ({i}ᶜ : Set _) → ((�
     rw [← cancel_epi (faceSingletonComplIso j.1).inv, ← hφ,
       faceSingletonComplIso_inv_ι_assoc]⟩
 
+lemma hom_ext' {i : Fin (n + 2)} {X : SSet.{u}} {f g : (Λ[n + 1, i] : SSet)⟶ X}
+    (h : ∀ (j : Fin (n + 2)) (hij : j ≠ i), horn.ι i j hij ≫ f = horn.ι i j hij ≫ g) :
+    f = g := by
+  apply Multicofork.IsColimit.hom_ext
+    (Subcomplex.multicoforkIsColimit (multicoequalizerDiagram i))
+  intro ⟨j, hj⟩
+  dsimp [CompleteLattice.MulticoequalizerDiagram.multicofork, Multicofork.ofπ,
+    Multicofork.map, Multicofork.π]
+  rw [← cancel_epi (stdSimplex.faceSingletonComplIso j).hom]
+  exact h _ hj
+
 end horn
 
 namespace horn₃₁

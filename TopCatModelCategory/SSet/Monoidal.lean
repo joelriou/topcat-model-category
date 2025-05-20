@@ -101,6 +101,7 @@ lemma _root_.SSet.ι₁_stdSimplex_zero :
   ext : 1
   all_goals exact yonedaEquiv.injective (by ext i; fin_cases i; rfl)
 
+@[simps -isSimp]
 noncomputable def rightUnitor : X ⊗ Δ[0] ≅ X where
   hom := fst _ _
   inv := lift (𝟙 X) (isTerminalObj₀.from _)
