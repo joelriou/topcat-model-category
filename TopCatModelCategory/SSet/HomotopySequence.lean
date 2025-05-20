@@ -224,6 +224,12 @@ noncomputable def uniqueδ'' [Fibration p] {s s' : B.PtSimplex (n + 1) b} {i : F
           fac, comp_whiskerRight_assoc, this k hki, comp_const]
   }⟩)
 
+variable {he} in
+def deltaStructOfHomotopy [Fibration p] {s : B.PtSimplex (n + 1) b} {i : Fin (n + 2)}
+    {t t' : PtSimplex _ n (basePoint p he)} (hst : DeltaStruct s t i) (h : t.Homotopy t') :
+    DeltaStruct s t' i := by
+  sorry
+
 end
 
 variable (p he n) in
@@ -238,6 +244,16 @@ lemma δ'_mk_eq_of_deltaStruct {n : ℕ} [Fibration p] [IsFibrant E] [IsFibrant 
     (h : DeltaStruct x t i) :
     δ' p he n i (π.mk x) = π.mk t :=
   Quot.sound ⟨uniqueδ'' (deltaStruct he x i) h (.refl x)⟩
+
+lemma δ'_mk_iff_nonempty_deltaStruct {n : ℕ} [Fibration p] [IsFibrant E] [IsFibrant B]
+    {i : Fin (n + 2)} (s : B.PtSimplex (n + 1) b)
+    {t : SSet.PtSimplex (Subcomplex.fiber p b) n (basePoint p he)} :
+    δ' p he n i (π.mk s) = π.mk t ↔ Nonempty (DeltaStruct s t i) := by
+  refine ⟨fun h ↦ ?_, fun ⟨hst⟩ ↦ δ'_mk_eq_of_deltaStruct hst⟩
+  replace h : (δ'' he s i).Homotopy t := by
+    rw [δ'_mk_eq_of_deltaStruct (deltaStruct he s i), π.mk_eq_mk_iff] at h
+    exact h.some.homotopy
+  exact ⟨deltaStructOfHomotopy (deltaStruct he s i) h⟩
 
 variable [IsFibrant B]
 
