@@ -2,7 +2,6 @@ import TopCatModelCategory.SSet.Fiber
 import TopCatModelCategory.SSet.AnodyneExtensionsAdjunctions
 import TopCatModelCategory.SSet.FundamentalGroupoid
 import TopCatModelCategory.SSet.HomotopyGroup
---import Mathlib.CategoryTheory.Limits.Shapes.BinaryProducts
 
 universe u
 
@@ -225,10 +224,94 @@ noncomputable def uniqueδ'' [Fibration p] {s s' : B.PtSimplex (n + 1) b} {i : F
   }⟩)
 
 variable {he} in
-def deltaStructOfHomotopy [Fibration p] {s : B.PtSimplex (n + 1) b} {i : Fin (n + 2)}
+noncomputable def deltaStructOfHomotopy
+    [Fibration p] {s : B.PtSimplex (n + 1) b} {i : Fin (n + 2)}
     {t t' : PtSimplex _ n (basePoint p he)} (hst : DeltaStruct s t i) (h : t.Homotopy t') :
-    DeltaStruct s t' i := by
-  sorry
+    DeltaStruct s t' i := Nonempty.some (by
+  obtain ⟨α, hα₀, hα⟩ : ∃ (α : (boundary (n + 1) : SSet) ⊗ Δ[1] ⟶ E),
+      (∀ (j : Fin (n + 2)) (hj : j ≠ i), (boundary.ι j ▷ Δ[1]) ≫ α = const e) ∧
+      (boundary.ι i ▷ Δ[1] ≫ α = h.h ≫ Subcomplex.ι _) := by
+    obtain _ | n := n
+    · fin_cases i
+      · obtain ⟨α, hα₀, hα₁⟩ := BinaryCofan.IsColimit.desc'
+          (boundary₁.isColimitRightTensor.{u} Δ[1]) (const e) (h.h ≫ Subcomplex.ι _)
+        dsimp at hα₀ hα₁ ⊢
+        refine ⟨α, ?_, ?_⟩
+        · intro j hj
+          fin_cases j
+          · simp at hj
+          · rw [← hα₀]
+            congr
+            simp [← cancel_mono (Subcomplex.ι _)]
+        · rw [← hα₁]
+          congr
+          simp [← cancel_mono (Subcomplex.ι _)]
+      · obtain ⟨α, hα₀, hα₁⟩ := BinaryCofan.IsColimit.desc'
+          (boundary₁.isColimitRightTensor.{u} Δ[1]) (h.h ≫ Subcomplex.ι _) (const e)
+        dsimp at hα₀ hα₁ ⊢
+        refine ⟨α, ?_, ?_⟩
+        · intro j hj
+          fin_cases j
+          · rw [← hα₁]
+            congr
+            simp [← cancel_mono (Subcomplex.ι _)]
+          · simp at hj
+        · rw [← hα₀]
+          congr
+          simp [← cancel_mono (Subcomplex.ι _)]
+    · let f (j : Fin (n + 3)) : Δ[n + 1] ⊗ Δ[1] ⟶ E :=
+        if j = i then h.h ≫ Subcomplex.ι _ else const e
+      have hf (j : Fin (n + 3)) (k : Fin (n + 2)) :
+          stdSimplex.δ k ▷ _ ≫ f j = const e := by
+        dsimp [f]
+        split_ifs with hj
+        · subst hj
+          have := boundary.ι k ▷ _ ≫= h.rel
+          rw [← comp_whiskerRight_assoc, boundary.ι_ι, const_comp, comp_const, comp_const,
+            Subcomplex.ofSimplex_ι, const_app, SimplexCategory.const_eq_id,
+            op_id, FunctorToTypes.map_id_apply] at this
+          rw [reassoc_of% this, const_comp, Subpresheaf.ι_app, basePoint_coe]
+        · simp
+      obtain ⟨α, hα⟩ := boundary.exists_tensorRight_desc f (by simp [hf])
+      dsimp [f] at hα
+      refine ⟨α, fun j hj ↦ by rw [hα, if_neg hj], by rw [hα, if_pos rfl]⟩
+  obtain ⟨φ, hφ₁, hφ₂⟩ := (Subcomplex.unionProd.isPushout (boundary (n + 1))
+    (stdSimplex.face {(0 : Fin 2)})).exists_desc (fst _ _ ≫ hst.map) α (by
+      rw [← cancel_epi (_ ◁ (stdSimplex.faceSingletonIso (0 : Fin 2)).hom),
+        whiskerRight_fst_assoc, whiskerLeft_fst_assoc,
+        ← MonoidalCategory.whiskerLeft_comp_assoc,
+        stdSimplex.faceSingletonIso_zero_hom_comp_ι_eq_δ]
+      refine boundary.hom_ext_tensorRight (fun j ↦ ?_)
+      rw [whiskerRight_fst_assoc, boundary.ι_ι_assoc, ← whisker_exchange_assoc]
+      by_cases hj : j = i
+      · subst hj
+        rw [hα, hst.δ_map, ← h.h₀, Category.assoc,
+          ← stdSimplex.faceSingletonIso_zero_hom_comp_ι_eq_δ]
+        rfl
+      · rw [hα₀ j hj, hst.δ_map_eq_const j hj, comp_const, comp_const])
+  have sq : CommSq φ (Subcomplex.ι _) p (fst _ _ ≫ s.map) := ⟨by
+    apply (Subcomplex.unionProd.isPushout _ _).hom_ext
+    · simp [reassoc_of% hφ₁]
+    · simp only [reassoc_of% hφ₂, Subcomplex.unionProd.ι₂_ι_assoc,
+        whiskerRight_fst_assoc, Subcomplex.RelativeMorphism.comm,
+        Subcomplex.ofSimplex_ι, comp_const]
+      refine boundary.hom_ext_tensorRight (fun j ↦ ?_)
+      rw [comp_const]
+      by_cases hj : j = i
+      · subst hj
+        rw [reassoc_of% hα, Subcomplex.fiber_ι_comp, comp_const]
+      · rw [reassoc_of% (hα₀ j hj), const_comp, he]⟩
+  have := (anodyneExtensions.subcomplex_unionProd_mem_of_right (boundary (n + 1))
+    _ (anodyneExtensions.face 0)).hasLeftLiftingProperty p
+  have fac (j) := (ι₁ ≫ boundary.ι j ▷ _ ≫ Subcomplex.unionProd.ι₂ _ _) ≫= sq.fac_left
+  simp only [Category.assoc, hφ₂, Subcomplex.unionProd.ι₂_ι_assoc,
+    ← comp_whiskerRight_assoc, boundary.ι_ι, ι₁_comp_assoc (Y := Δ[n + 1])] at fac
+  refine ⟨{
+    map := ι₁ ≫ sq.lift
+    map_p := by simp
+    δ_map := by rw [fac, hα, h.h₁_assoc]
+    δ_map_eq_const j hj := by rw [fac, hα₀ _ hj, comp_const] }⟩
+  )
 
 end
 
