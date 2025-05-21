@@ -1,17 +1,86 @@
-import TopCatModelCategory.SSet.FundamentalGroupoid
-import TopCatModelCategory.SSet.HomotopyGroup
+import TopCatModelCategory.SSet.KanComplexW
 import TopCatModelCategory.SSet.PiZero
 
 universe u
 
 open CategoryTheory Simplicial HomotopicalAlgebra
-  SSet.modelCategoryQuillen MonoidalCategory
+  SSet.modelCategoryQuillen MonoidalCategory ChosenFiniteProducts
 
 namespace SSet
 
 variable {X Y : SSet.{u}}
 
 namespace KanComplex
+
+def π₀EquivπZero (x : X _⦋0⦌) : π₀ X ≃ π 0 X x where
+  toFun := Quot.lift (fun a ↦ π.mk ((PtSimplex.equiv₀ x).symm a)) (by
+    rintro a b ⟨s, h₀, h₁⟩
+    apply Quot.sound
+    dsimp
+    refine ⟨{
+      h := snd _ _ ≫ yonedaEquiv.symm s
+      h₀ := by
+        apply yonedaEquiv.injective
+        simp [PtSimplex.equiv₀, ← h₀, yonedaEquiv, yonedaCompUliftFunctorEquiv,
+          SimplicialObject.δ ]
+        apply congr_fun
+        congr 2
+        ext i
+        fin_cases i
+        rfl
+      h₁ := by
+        apply yonedaEquiv.injective
+        simp [PtSimplex.equiv₀, ← h₁, yonedaEquiv, yonedaCompUliftFunctorEquiv,
+          SimplicialObject.δ ]
+        apply congr_fun
+        congr 2
+        ext i
+        fin_cases i
+        rfl
+      rel := by ext
+    }⟩)
+  invFun := Quot.lift (fun f ↦ π₀.mk (yonedaEquiv f.map)) (by
+    rintro f g ⟨h⟩
+    apply π₀.sound (yonedaEquiv ((stdSimplex.leftUnitor _).inv ≫ h.h))
+    · rw [← h.h₀]
+      apply yonedaEquiv.symm.injective
+      rw [Equiv.symm_apply_apply, yonedaEquiv_symm_δ, Equiv.symm_apply_apply,
+        ← ι₀_stdSimplex_zero_assoc]
+    · rw [← h.h₁]
+      apply yonedaEquiv.symm.injective
+      rw [Equiv.symm_apply_apply, yonedaEquiv_symm_δ, Equiv.symm_apply_apply,
+        ← ι₁_stdSimplex_zero_assoc])
+  left_inv a := by
+    obtain ⟨a, rfl⟩ := a.mk_surjective
+    apply congr_arg π₀.mk
+    simp [PtSimplex.equiv₀]
+  right_inv f := by
+    obtain ⟨f, rfl⟩ := f.mk_surjective
+    apply congr_arg π.mk
+    exact (PtSimplex.equiv₀ x).injective (by simp [PtSimplex.equiv₀])
+
+@[simp]
+lemma π₀EquivπZero_mk (x a : X _⦋0⦌) :
+    π₀EquivπZero x (π₀.mk a) = π.mk ((PtSimplex.equiv₀ x).symm a) := rfl
+
+lemma mapπ_comp_π₀EquivπZero
+    (f : X ⟶ Y) (x : X _⦋0⦌) (y : Y _⦋0⦌) (h : f.app _ x = y) :
+    mapπ f 0 x y h ∘ π₀EquivπZero x =
+      π₀EquivπZero y ∘ mapπ₀ f := by
+  ext a
+  obtain ⟨a, rfl⟩ := a.mk_surjective
+  simp
+  congr
+  apply (PtSimplex.equiv₀ y).injective
+  simp [PtSimplex.equiv₀]
+
+lemma bijective_mapπ₀_iff_bijective_mapπ_zero (f : X ⟶ Y)
+    (x : X _⦋0⦌) (y : Y _⦋0⦌) (h : f.app _ x = y) :
+    Function.Bijective (mapπ f 0 x y h) ↔
+      Function.Bijective (mapπ₀ f) := by
+  rw [← Function.Bijective.of_comp_iff _ (π₀EquivπZero x).bijective]
+  rw [← Function.Bijective.of_comp_iff' (π₀EquivπZero y).bijective]
+  rw [mapπ_comp_π₀EquivπZero]
 
 namespace FundamentalGroupoid
 
@@ -149,6 +218,11 @@ def homEquiv {x : X _⦋0⦌} : (mk x ⟶ mk x) ≃ π 1 X x where
     obtain ⟨s, rfl⟩ := s.mk_surjective
     rfl
 
+@[simp]
+lemma homEquiv_homMk {x : X _⦋0⦌} (e : Edge (.mk x) (.mk x)) :
+    homEquiv (homMk e) = π.mk (edgeEquiv e) :=
+  rfl
+
 @[simps]
 def Edge.CompStruct.mulStruct {x : X _⦋0⦌} {f g fg : Edge (.mk x) (.mk x)}
     (h : Edge.CompStruct f g fg) :
@@ -164,7 +238,93 @@ lemma homEquiv_comp {x : X _⦋0⦌} (f g : mk x ⟶ mk x) :
   obtain ⟨g, rfl⟩ := homMk_surjective g
   exact (π.mul_eq_of_mulStruct (Edge.compStruct f g).mulStruct).symm
 
+variable [IsFibrant Y]
+
+lemma homEquiv_map {x : X _⦋0⦌} (φ : mk x ⟶ mk x) (f : X ⟶ Y) :
+    homEquiv ((mapFundamentalGroupoid f).map φ) = mapπ f _ _ _ rfl (homEquiv φ) := by
+  obtain ⟨φ, rfl⟩ := homMk_surjective φ
+  aesop
+
+lemma mapπ_comp_homEquiv (f : X ⟶ Y) (x : X _⦋0⦌) :
+    mapπ f 1 x _ rfl ∘ homEquiv =
+    homEquiv ∘ (mapFundamentalGroupoid f).map (X := .mk x) (Y := .mk x) := by
+  ext φ
+  exact (homEquiv_map φ f).symm
+
+lemma bijective_mapπ_one_iff (f : X ⟶ Y) {x : X _⦋0⦌} {y : Y _⦋0⦌} (h : f.app _ x = y) :
+    Function.Bijective (mapπ f 1 x y h) ↔
+      Function.Bijective ((mapFundamentalGroupoid f).map (X := .mk x) (Y := .mk x)) := by
+  subst h
+  rw [← Function.Bijective.of_comp_iff _ (homEquiv (x := x)).bijective,
+    ← Function.Bijective.of_comp_iff' (homEquiv (x := f.app _ x)).bijective,
+    mapπ_comp_homEquiv]
+  rfl
+
 end FundamentalGroupoid
+
+section
+
+variable [IsFibrant X] [IsFibrant Y] (f : X ⟶ Y)
+
+lemma isEquivalence_mapFundamentalGroupoid_iff :
+    (mapFundamentalGroupoid f).IsEquivalence ↔
+      Function.Bijective (mapπ₀ f) ∧
+        ∀ (x : X _⦋0⦌) (y : Y _⦋0⦌) (h : f.app _ x = y),
+          Function.Bijective (mapπ f 1 x y h) := by
+  constructor
+  · intro
+    constructor
+    · constructor
+      · rw [FundamentalGroupoid.mapπ₀_injective_iff]
+        intro _ _ e
+        exact ⟨(mapFundamentalGroupoid f).preimageIso e⟩
+      · rw [FundamentalGroupoid.mapπ₀_surjective_iff]
+        infer_instance
+    · intro x y h
+      rw [FundamentalGroupoid.bijective_mapπ_one_iff]
+      apply Functor.FullyFaithful.map_bijective
+      apply Functor.FullyFaithful.ofFullyFaithful
+  · rintro ⟨h₀, h₁⟩
+    simp only [FundamentalGroupoid.bijective_mapπ_one_iff] at h₁
+    have : (mapFundamentalGroupoid f).EssSurj := by
+      rw [← FundamentalGroupoid.mapπ₀_surjective_iff]
+      exact h₀.2
+    have : (mapFundamentalGroupoid f).Faithful := ⟨by
+      intro x₀ x₁ g g' h
+      have e : x₁ ≅ x₀ := (asIso g).symm
+      rw [← cancel_mono e.hom]
+      exact (h₁ x₀.pt _ rfl).1 (by aesop)⟩
+    have : (mapFundamentalGroupoid f).Full := ⟨fun {x₀ x₁} φ ↦ by
+      have e : x₁ ≅ x₀ :=
+        ((FundamentalGroupoid.mapπ₀_injective_iff f).1 h₀.1 _ _ (asIso φ).symm).some
+      obtain ⟨g, hg⟩ := (h₁ x₀.pt _ rfl).2 (φ ≫ (mapFundamentalGroupoid f).map e.hom)
+      exact ⟨g ≫ e.inv, by aesop⟩⟩
+    exact { }
+
+lemma W_iff :
+    W f ↔ Function.Bijective (mapπ₀ f) ∧
+      ∀ (n : ℕ) (x : X _⦋0⦌) (y : Y _⦋0⦌) (h : f.app _ x = y),
+        Function.Bijective (mapπ f (n + 1) x y h) := by
+  constructor
+  · intro hf
+    exact ⟨((isEquivalence_mapFundamentalGroupoid_iff f).1 hf.isEquivalence).1,
+      fun _ ↦ hf.bijective _⟩
+  · rintro ⟨hf₀, hf⟩
+    apply W.mk
+    · rw [isEquivalence_mapFundamentalGroupoid_iff]
+      exact ⟨hf₀, fun x y h ↦ hf 0 x y h⟩
+    · rintro (_ | n)
+      · intro x y h
+        simpa only [bijective_mapπ₀_iff_bijective_mapπ_zero]
+      · exact hf _
+
+end
+
+lemma W.bijective_mapπ₀ {f : X ⟶ Y} (hf : W f) : Function.Bijective (mapπ₀ f) := by
+  have := hf.isFibrant_src
+  have := hf.isFibrant_tgt
+  rw [W_iff] at hf
+  exact hf.1
 
 end KanComplex
 
