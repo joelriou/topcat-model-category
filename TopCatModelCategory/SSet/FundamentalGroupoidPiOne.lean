@@ -1,10 +1,11 @@
 import TopCatModelCategory.SSet.FundamentalGroupoid
+import TopCatModelCategory.SSet.HomotopyGroup
 import TopCatModelCategory.SSet.PiZero
 
 universe u
 
 open CategoryTheory Simplicial HomotopicalAlgebra
-  SSet.modelCategoryQuillen
+  SSet.modelCategoryQuillen MonoidalCategory
 
 namespace SSet
 
@@ -116,6 +117,52 @@ lemma mapπ₀_injective_of_full [(mapFundamentalGroupoid f).Full] :
   exact ⟨asIso ((mapFundamentalGroupoid f).map_surjective e.hom).choose⟩
 
 end
+
+@[simps apply_map symm_apply_map]
+def edgeEquiv {x : X _⦋0⦌} :
+    Edge (.mk x) (.mk x) ≃ X.PtSimplex 1 x where
+  toFun e := { map := e.map }
+  invFun s := { map := s.map }
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+def homEquiv {x : X _⦋0⦌} : (mk x ⟶ mk x) ≃ π 1 X x where
+  toFun := Quot.lift (fun e ↦ π.mk (edgeEquiv e)) (fun e₁ e₂ ⟨h⟩ ↦ by
+    rw [π.mk_eq_mk_iff]
+    refine ⟨PtSimplex.Homotopy.relStruct₀ ?_⟩
+    exact
+      { h := h.h
+        h₀ := h.h₀
+        h₁ := h.h₁
+        rel := by apply boundary₁.hom_ext_rightTensor <;> simp })
+  invFun := Quot.lift (fun s ↦ homMk (edgeEquiv.symm s)) (fun s₁ s₂ ⟨h⟩ ↦ by
+    apply homMk_eq_of_homotopy
+    exact
+      { h := h.h
+        h₀ := h.h₀
+        h₁ := h.h₁
+        rel := by apply boundary₁.hom_ext_rightTensor <;> simp })
+  left_inv e := by
+    obtain ⟨e, rfl⟩ := homMk_surjective e
+    rfl
+  right_inv s := by
+    obtain ⟨s, rfl⟩ := s.mk_surjective
+    rfl
+
+@[simps]
+def Edge.CompStruct.mulStruct {x : X _⦋0⦌} {f g fg : Edge (.mk x) (.mk x)}
+    (h : Edge.CompStruct f g fg) :
+    PtSimplex.MulStruct (edgeEquiv f) (edgeEquiv g) (edgeEquiv fg) 0 where
+  map := h.map
+  δ_map_of_gt j hj := by
+    have : 2 < j.1 := by simpa [Fin.lt_iff_val_lt_val] using hj
+    omega
+
+lemma homEquiv_comp {x : X _⦋0⦌} (f g : mk x ⟶ mk x) :
+    homEquiv (f ≫ g) = homEquiv f * homEquiv g := by
+  obtain ⟨f, rfl⟩ := homMk_surjective f
+  obtain ⟨g, rfl⟩ := homMk_surjective g
+  exact (π.mul_eq_of_mulStruct (Edge.compStruct f g).mulStruct).symm
 
 end FundamentalGroupoid
 
