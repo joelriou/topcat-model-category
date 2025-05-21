@@ -456,37 +456,39 @@ lemma exists_of_map₂_eq_one {n : ℕ} {x : π n E e} (hx : map₂ p he n x = 1
         hx.h₀, PtSimplex.pushforward_map]
     · rw [reassoc_of% hφ₂, Subcomplex.unionProd.ι₂_ι_assoc, hx.rel, const_comp,
         Subcomplex.ofSimplex_ι, he, comp_const, comp_const]⟩
-  obtain _ | n := n
-  · sorry
-  · refine ⟨π.mk (.mk (Subcomplex.lift (ι₁ ≫ sq.lift) ?_) (fun i ↦ ?_)), ?_⟩
-    · rw [Subcomplex.preimage_eq_top_iff, Subcomplex.range_le_fiber_iff, Category.assoc,
+  refine ⟨π.mk { map := Subcomplex.lift (ι₁ ≫ sq.lift) ?_, comm := ?_ }, ?_⟩
+  · rw [Subcomplex.preimage_eq_top_iff, Subcomplex.range_le_fiber_iff, Category.assoc,
         sq.fac_right, hx.h₁, Subcomplex.RelativeMorphism.const_map]
-    · have := ι₁ ≫= boundary.ι i ▷ _ ≫= (Subcomplex.unionProd.ι₂ _ _ ≫= sq.fac_left)
+  · obtain _ | n := n
+    · ext
+    · refine boundary.hom_ext (fun i ↦ ?_)
+      have := ι₁ ≫= boundary.ι i ▷ _ ≫= (Subcomplex.unionProd.ι₂ _ _ ≫= sq.fac_left)
       rw [Subcomplex.unionProd.ι₂_ι_assoc, ← comp_whiskerRight_assoc,
         boundary.ι_ι, ι₁_comp_assoc, hφ₂, comp_const, comp_const] at this
-      rwa [← cancel_mono (Subcomplex.ι _), Category.assoc, Subcomplex.lift_ι, const_comp,
+      rwa [← cancel_mono (Subcomplex.ι _), Category.assoc, Category.assoc, Subcomplex.lift_ι,
+        boundary.ι_ι_assoc, Subcomplex.ofSimplex_ι, comp_const, comp_const, const_comp,
         Subpresheaf.ι_app, basePoint_coe]
-    · symm
-      simp only [map₁, mapπ_mk, π.mk_eq_mk_iff]
-      refine ⟨PtSimplex.Homotopy.relStruct₀ ?_⟩
-      refine {
-        h := sq.lift
-        h₀ := by
-          have := Subcomplex.unionProd.ι₁ _ _ ≫= sq.fac_left
-          rwa [Subcomplex.unionProd.ι₁_ι_assoc, hφ₁,
-            ← cancel_epi (_ ◁ (stdSimplex.faceSingletonIso (0 : Fin 2)).hom),
-            ← cancel_epi (stdSimplex.rightUnitor _).inv,
-            whiskerLeft_fst_assoc, stdSimplex.rightUnitor_inv_fst_assoc,
-            ← MonoidalCategory.whiskerLeft_comp_assoc,
-            stdSimplex.faceSingletonIso_zero_hom_comp_ι_eq_δ,
-            stdSimplex.rightUnitor_inv_map_δ_one_assoc] at this
-        h₁ := by simp
-        rel := by
-          have := Subcomplex.unionProd.ι₂ _ _ ≫= sq.fac_left
-          rw [Subcomplex.unionProd.ι₂_ι_assoc, hφ₂] at this
-          rwa [const_comp, comp_const, Subcomplex.ofSimplex_ι, const_app,
-            SimplexCategory.const_eq_id, op_id, FunctorToTypes.map_id_apply]
-      }
+  · symm
+    simp only [map₁, mapπ_mk, π.mk_eq_mk_iff]
+    refine ⟨PtSimplex.Homotopy.relStruct₀ ?_⟩
+    exact {
+      h := sq.lift
+      h₀ := by
+        have := Subcomplex.unionProd.ι₁ _ _ ≫= sq.fac_left
+        rwa [Subcomplex.unionProd.ι₁_ι_assoc, hφ₁,
+          ← cancel_epi (_ ◁ (stdSimplex.faceSingletonIso (0 : Fin 2)).hom),
+          ← cancel_epi (stdSimplex.rightUnitor _).inv,
+          whiskerLeft_fst_assoc, stdSimplex.rightUnitor_inv_fst_assoc,
+          ← MonoidalCategory.whiskerLeft_comp_assoc,
+          stdSimplex.faceSingletonIso_zero_hom_comp_ι_eq_δ,
+          stdSimplex.rightUnitor_inv_map_δ_one_assoc] at this
+      h₁ := by simp
+      rel := by
+        have := Subcomplex.unionProd.ι₂ _ _ ≫= sq.fac_left
+        rw [Subcomplex.unionProd.ι₂_ι_assoc, hφ₂] at this
+        rwa [const_comp, comp_const, Subcomplex.ofSimplex_ι, const_app,
+          SimplexCategory.const_eq_id, op_id, FunctorToTypes.map_id_apply]
+    }
 
 variable (he) in
 lemma map₂_eq_one_iff {n : ℕ} (x : π n E e) :
