@@ -146,8 +146,7 @@ end
 
 section
 
-variable {E B : SSet.{u}} {p : E ⟶ B} [IsFibrant E] [IsFibrant B]
-  [Fibration p]
+variable {E B : SSet.{u}} {p : E ⟶ B} [IsFibrant B] [Fibration p]
   (hp : KanComplex.W p)
 
 include hp
@@ -155,13 +154,27 @@ include hp
 lemma W.hasLiftingPropertyFixedTop_const (n : ℕ) (e : E _⦋0⦌) :
     HasLiftingPropertyFixedTop (boundary n).ι p (const e) := by
   have := hp
-  sorry
+  intro b sq
+  obtain ⟨b, rfl⟩ : ∃ (b' : B.PtSimplex n (p.app _ e)), b'.map = b := ⟨{
+    map := b
+    comm := by simp [← sq.w] }, rfl⟩
+  obtain ⟨s, hs⟩ : ∃ (s : E.PtSimplex n e), mapπ p n e _ rfl (π.mk s) = π.mk b := by
+    obtain ⟨s, hs⟩ := (hp.bijective n e _ rfl).2 (π.mk b)
+    obtain ⟨s, rfl⟩ := s.mk_surjective
+    exact ⟨s, hs⟩
+  simp only [mapπ_mk, π.mk_eq_mk_iff] at hs
+  replace hs := hs.some.homotopy
+  have sq' : CommSq (const e) (∂Δ[n].ι ▷ Δ[1]) p hs.h := ⟨by simp⟩
+  rw [← hasLift_iff_of_deformation (sq := sq') (t₀ := const e) (t₁ := const e) (by simp)
+    (by simp) (b₁ := b.map) rfl (by simp)]
+  exact ⟨⟨{ l := s.map }⟩⟩
+
+variable [IsFibrant E]
 
 lemma W.hasLiftingPropertyFixedTop_face {n : ℕ} (t : (∂Δ[n + 1] : SSet) ⟶ E)
     (e : E _⦋0⦌) (ht : ∀ (i : Fin (n + 2)) (_ : i ≠ 0),
       boundary.ι i ≫ t = const e) :
     HasLiftingPropertyFixedTop (boundary (n + 1)).ι p t := by
-  have := hp.hasLiftingPropertyFixedTop_const (n + 1) e
   obtain ⟨u, hu⟩ : ∃ (u : E.PtSimplex n e), u.map = boundary.ι 0 ≫ t := ⟨{
     map := boundary.ι 0 ≫ t
     comm := by
@@ -234,8 +247,14 @@ lemma W.hasLiftingPropertyFixedTop_face {n : ℕ} (t : (∂Δ[n + 1] : SSet) ⟶
 
 lemma W.hasLiftingPropertyFixedTop {n : ℕ} (t : (∂Δ[n] : SSet) ⟶ E) :
     HasLiftingPropertyFixedTop (boundary n).ι p t := by
-  have := hp
-  sorry
+  obtain _ | n := n
+  · intro b sq
+    have : Nonempty (E _⦋0⦌) := (by
+      obtain ⟨b, _⟩ := hp.bijective_mapπ₀.2 (π₀.mk (yonedaEquiv b))
+      exact ⟨b.mk_surjective.choose⟩)
+    obtain rfl : t = const (Classical.arbitrary _) := by ext
+    apply hp.hasLiftingPropertyFixedTop_const
+  · sorry
 
 end
 
