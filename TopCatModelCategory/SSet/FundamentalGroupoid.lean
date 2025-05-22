@@ -63,6 +63,20 @@ lemma ι₁_ι : ι₁.{u} ≫ (boundary 1).ι = stdSimplex.δ 0 := by
   fin_cases i
   rfl
 
+lemma ι₀_eq_ι_one : ι₀.{u} = boundary.ι 1 := by
+  rw [← cancel_mono (Subcomplex.ι _)]
+  apply yonedaEquiv.injective
+  ext i
+  fin_cases i
+  rfl
+
+lemma ι₁_eq_ι_zero : ι₁.{u} = boundary.ι 0 := by
+  rw [← cancel_mono (Subcomplex.ι _)]
+  apply yonedaEquiv.injective
+  ext i
+  fin_cases i
+  rfl
+
 lemma isPushout : IsPushout (initial.to _) (initial.to _) ι₀.{u} ι₁.{u} :=
   sq.{u}.isPushout.of_iso' (initialIsoIsInitial (Subcomplex.isInitialBot _))
     (stdSimplex.isoOfRepresentableBy

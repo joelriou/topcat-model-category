@@ -7,7 +7,7 @@ import TopCatModelCategory.SSet.SmallObject
 universe u
 
 open HomotopicalAlgebra CategoryTheory Simplicial
-  SSet.modelCategoryQuillen
+  SSet.modelCategoryQuillen MonoidalCategory Limits
 
 namespace SSet
 
@@ -51,8 +51,7 @@ lemma subsingleton_π_of_rlp_I (n : ℕ) (x : F _⦋0⦌) :
   obtain _ | n := n
   · rw [← (π₀EquivπZero x).subsingleton_congr]
     exact subsingleton_π₀_of_rlp_I hp
-  suffices ∀ (s : π (n + 1) F x), s = 1 from
-    ⟨fun _ _ ↦ by simp [this]⟩
+  suffices ∀ (s : π (n + 1) F x), s = 1 from ⟨by aesop⟩
   intro s
   obtain ⟨s, rfl⟩ := s.mk_surjective
   change _ = π.mk _
@@ -69,13 +68,7 @@ lemma subsingleton_π_of_rlp_I (n : ℕ) (x : F _⦋0⦌) :
   have := hp _ ⟨n + 2⟩
   have (i : Fin (n + 3)) : stdSimplex.δ i ≫ sq.lift = boundary.ι i ≫ φ := by
     rw [← boundary.ι_ι_assoc, sq.fac_left]
-  exact ⟨{
-    map := sq.lift
-    δ_map_of_gt j hj := by rw [this, hφ _ (by rintro rfl; simp at hj)]
-    δ_map_of_lt j hj := by simp at hj
-    δ_succ_map := by rw [this, hφ _ (by simp), Subcomplex.RelativeMorphism.const_map]
-    δ_castSucc_map := by rw [this, Fin.castSucc_zero, hφ₀]
-  }⟩
+  exact ⟨{ map := sq.lift }⟩
 
 end
 
@@ -151,11 +144,107 @@ lemma W.of_rlp_I [IsFibrant E] [IsFibrant B] : KanComplex.W p := by
 
 end
 
+section
+
+variable {E B : SSet.{u}} {p : E ⟶ B} [IsFibrant E] [IsFibrant B]
+  [Fibration p]
+  (hp : KanComplex.W p)
+
+include hp
+
+lemma W.hasLiftingPropertyFixedTop_const (n : ℕ) (e : E _⦋0⦌) :
+    HasLiftingPropertyFixedTop (boundary n).ι p (const e) := by
+  have := hp
+  sorry
+
+lemma W.hasLiftingPropertyFixedTop_face {n : ℕ} (t : (∂Δ[n + 1] : SSet) ⟶ E)
+    (e : E _⦋0⦌) (ht : ∀ (i : Fin (n + 2)) (_ : i ≠ 0),
+      boundary.ι i ≫ t = const e) :
+    HasLiftingPropertyFixedTop (boundary (n + 1)).ι p t := by
+  have := hp.hasLiftingPropertyFixedTop_const (n + 1) e
+  obtain ⟨u, hu⟩ : ∃ (u : E.PtSimplex n e), u.map = boundary.ι 0 ≫ t := ⟨{
+    map := boundary.ι 0 ≫ t
+    comm := by
+      obtain _ | n := n
+      · ext
+      ext i : 1
+      rw [boundary.ι_ι_assoc, Subcomplex.ofSimplex_ι, comp_const, comp_const]
+      have : stdSimplex.{u}.δ i ≫ boundary.ι (0 : Fin (n + 3)) =
+          stdSimplex.{u}.δ 0 ≫ boundary.ι i.succ := by
+        simp only [← cancel_mono (Subcomplex.ι _), Category.assoc, boundary.ι_ι]
+        exact (stdSimplex.δ_comp_δ (i := 0) (j := i) (by simp)).symm
+      rw [reassoc_of% this, ht _ (Fin.succ_ne_zero _), comp_const]}, rfl⟩
+  intro b sq
+  have h : π.mk u = 1 := (hp.bijective n e _ rfl).1 (by
+    simp only [mapπ_mk, mapπ_one]
+    rw [π.mk_eq_one_iff]
+    have (i : Fin (n + 2)) : stdSimplex.δ i ≫ b = boundary.ι i ≫ t ≫ p := by
+      rw [sq.w, boundary.ι_ι_assoc]
+    exact ⟨{
+      map := b
+      δ_succ_map := by simp [this, reassoc_of% (ht 1 (by simp))]
+      δ_map_of_gt j hj := by simp [this, reassoc_of% (ht j (by aesop))]
+    }⟩)
+  rw [π.mk_eq_one_iff] at h
+  replace h := h.some.homotopy
+  obtain ⟨H, h₀, h₁⟩ : ∃ (H : (∂Δ[n + 1] : SSet) ⊗ Δ[1] ⟶ E), ι₀ ≫ H = t ∧
+      ι₁ ≫ H = const e := by
+    obtain _ | n := n
+    · have ht₁ : boundary₁.ι₁ ≫ t = u.map := by rw [boundary₁.ι₁_eq_ι_zero, hu]
+      have ht₀ : boundary₁.ι₀ ≫ t = const e := by rw [boundary₁.ι₀_eq_ι_one, ht 1 (by simp)]
+      obtain ⟨H, h₀, h₁⟩ :=
+        BinaryCofan.IsColimit.desc' (h := boundary₁.isColimitRightTensor Δ[1])
+          (const e) h.h
+      dsimp at H h₀ h₁
+      refine ⟨H, ?_, ?_⟩
+      · apply boundary₁.hom_ext
+        · rw [← ι₀_comp_assoc, h₀, comp_const, ht₀]
+        · rw [← ι₀_comp_assoc, h₁, ht₁, h.h₀]
+      · apply boundary₁.hom_ext
+        · rw [← ι₁_comp_assoc, h₀, comp_const, comp_const]
+        · rw [← ι₁_comp_assoc, h₁, h.h₁, comp_const,
+            Subcomplex.RelativeMorphism.const_map]
+    · let f (i : Fin (n + 3)) : Δ[n + 1] ⊗ Δ[1] ⟶ E :=
+        if i = 0 then h.h else const e
+      obtain ⟨H, h'⟩ := boundary.exists_tensorRight_desc f (by
+        intro j k hjk
+        by_cases hj : j = 0
+        · subst hj
+          obtain ⟨k, rfl⟩  := Fin.eq_succ_of_ne_zero hjk.ne'
+          simpa only [f, if_neg hjk.ne', Fin.pred_succ, comp_const, reduceIte,
+            Subcomplex.ofSimplex_ι, comp_const, ← comp_whiskerRight_assoc,
+            boundary.ι_ι] using (boundary.ι k ▷ _) ≫= h.rel
+        · dsimp [f]
+          rw [if_neg hj, if_neg (by rintro rfl; simp at hjk)]
+          simp)
+      refine ⟨H, ?_, ?_⟩
+      · ext i : 1
+        by_cases hi : i = 0
+        · subst hi
+          simp only [← ι₀_comp_assoc, h', f, if_pos, h.h₀, hu]
+        · simp only [← ι₀_comp_assoc, h', f, if_neg hi, comp_const, ht i hi]
+      · ext i : 1
+        by_cases hi : i = 0
+        · subst hi
+          simp only [← ι₁_comp_assoc, h', f, if_pos, h.h₁,
+            Subcomplex.RelativeMorphism.const_map, comp_const]
+        · simp only [← ι₁_comp_assoc, h', f, if_neg hi, comp_const]
+  apply (hasLiftingPropertyFixedTop_iff_of_deformation p H h₀ h₁).2
+    (hp.hasLiftingPropertyFixedTop_const (n + 1) e)
+
+lemma W.hasLiftingPropertyFixedTop {n : ℕ} (t : (∂Δ[n] : SSet) ⟶ E) :
+    HasLiftingPropertyFixedTop (boundary n).ι p t := by
+  have := hp
+  sorry
+
+end
+
 lemma weakEquivalence_iff_of_fibration {E B : SSet.{0}} (p : E ⟶ B)
     [IsFibrant E] [IsFibrant B] [Fibration p] :
-    I.rlp p ↔ KanComplex.W p := by
-  refine ⟨fun hp ↦ W.of_rlp_I hp, ?_⟩
-  sorry
+    I.rlp p ↔ KanComplex.W p :=
+  ⟨fun hp ↦ W.of_rlp_I hp, fun hp ↦ by
+    rintro _ _ _ ⟨n⟩
+    exact ⟨fun _ ↦ hp.hasLiftingPropertyFixedTop _ _ _⟩⟩
 
 end KanComplex
 

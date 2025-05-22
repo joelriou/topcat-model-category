@@ -83,7 +83,7 @@ end
 
 section
 
-variable {B X Y : SSet.{u}} {A : B.Subcomplex} {p : X ⟶ Y}
+variable {B X Y : SSet.{u}} {A : B.Subcomplex} (p : X ⟶ Y)
 variable (t : (A : SSet) ⊗ Δ[1] ⟶ X) {t₀ t₁ : (A : SSet) ⟶ X}
   (ht₀ : ι₀ ≫ t = t₀) (ht₁ : ι₁ ≫ t = t₁)
 
