@@ -51,6 +51,11 @@ namespace SSet
 
 namespace anodyneExtensions
 
+lemma δ_mem (i : Fin 2) : anodyneExtensions.{u} (stdSimplex.δ i) := by
+  refine (MorphismProperty.arrow_mk_iso_iff _ ?_).2 (anodyneExtensions.horn_ι_mem 0 i.rev)
+  exact Arrow.isoMk (horn₁.iso _) (Iso.refl _) (by fin_cases i <;> simp)
+
+
 namespace subcomplex_unionProd_face_ι_mem
 
 variable {n : ℕ}
