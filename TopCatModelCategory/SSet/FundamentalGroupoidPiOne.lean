@@ -326,6 +326,17 @@ lemma W.bijective_mapπ₀ {f : X ⟶ Y} (hf : W f) : Function.Bijective (mapπ�
   rw [W_iff] at hf
   exact hf.1
 
+lemma π₀_mk_eq_π₀_mk_iff [IsFibrant X] (x y : X _⦋0⦌) :
+    π₀.mk x = π₀.mk y ↔
+      Nonempty (FundamentalGroupoid.Edge (.mk x) (.mk y)) := by
+  rw [FundamentalGroupoid.π₀_mk_eq_π₀_mk_iff]
+  constructor
+  · rintro h
+    obtain ⟨e, _⟩ := FundamentalGroupoid.homMk_surjective h.some.hom
+    exact ⟨e⟩
+  · rintro ⟨h⟩
+    exact ⟨asIso (FundamentalGroupoid.homMk h)⟩
+
 end KanComplex
 
 end SSet

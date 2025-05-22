@@ -176,12 +176,29 @@ section
 variable {X Y : SSet.{u}} [IsFibrant X] [IsFibrant Y] (f : X ⟶ Y) (n : ℕ)
   (x : X _⦋0⦌) (y : Y _⦋0⦌) (h : f.app _ x = y)
 
-def mapπ_mul (i : Fin (n + 1)) (p q : π (n + 1) X x) :
+lemma mapπ_mul' (i : Fin (n + 1)) (p q : π (n + 1) X x) :
     mapπ f (n + 1) x y h (π.mul i p q) =
     π.mul i (mapπ f (n + 1) x y h p) (mapπ f (n + 1) x y h q) := by
   obtain ⟨p, rfl⟩ := p.mk_surjective
   obtain ⟨q, rfl⟩ := q.mk_surjective
   exact (π.mul_eq_of_mulStruct ((π.mulStruct p q i).pushforward f y h)).symm
+
+lemma mapπ_mul (p q : π (n + 1) X x) :
+    mapπ f (n + 1) x y h (p * q) =
+      mapπ f (n + 1) x y h p * mapπ f (n + 1) x y h q := by
+  apply mapπ_mul'
+
+omit [IsFibrant X] [IsFibrant Y] in
+@[simp]
+lemma mapπ_one : mapπ f n x y h 1 = 1 := by
+  change π.mk _ = π.mk _
+  congr 1
+  aesop
+
+lemma mapπ_inv (p : π (n + 1) X x) :
+    mapπ f (n + 1) x y h (p⁻¹) = (mapπ f (n + 1) x y h p)⁻¹ := by
+  symm
+  rw [← inv_mul_eq_one, inv_inv, ← mapπ_mul, mul_inv_cancel, mapπ_one]
 
 end
 
