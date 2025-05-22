@@ -170,4 +170,8 @@ lemma yonedaEquiv_fst {n : ℕ} (f : Δ[n] ⟶ X ⊗ Y) :
 lemma yonedaEquiv_snd {n : ℕ} (f : Δ[n] ⟶ X ⊗ Y) :
     (yonedaEquiv f).2 = yonedaEquiv (f ≫ snd _ _) := rfl
 
+lemma const_ihom₀Equiv_symm_apply (Z : SSet.{u}) (f : X ⟶ Y) :
+    (const (ihom₀Equiv.symm f) : Z ⟶ _) = MonoidalClosed.curry (fst _ _ ≫ f) :=
+  rfl
+
 end SSet

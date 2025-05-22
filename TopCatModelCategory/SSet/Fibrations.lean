@@ -331,7 +331,21 @@ noncomputable def ihomToPullbackTgt₀Mk :
         simp only [yonedaEquiv_symm_zero, const_comp, yonedaEquiv₀,
           ← ihom₀Equiv_symm_comp, ← ihom₀Equiv_symm_comp', sq.w]))))
 
-noncomputable def ihomToPullbackFiber : ((ihom B).obj X).Subcomplex :=
+@[simp]
+lemma pullback_fst_app_ihomToPullbackTgt₀Mk :
+    (pullback.fst ((ihom A).map p) ((pre i).app Y)).app _
+      (ihomToPullbackTgt₀Mk sq) = ihom₀Equiv.symm t := by
+  apply yonedaEquiv.symm.injective
+  simp [← yonedaEquiv_symm_comp, ihomToPullbackTgt₀Mk]
+
+@[simp]
+lemma pullback_snd_app_ihomToPullbackTgt₀Mk :
+    (pullback.snd ((ihom A).map p) ((pre i).app Y)).app _
+      (ihomToPullbackTgt₀Mk sq) = ihom₀Equiv.symm b := by
+  apply yonedaEquiv.symm.injective
+  simp [← yonedaEquiv_symm_comp, ihomToPullbackTgt₀Mk]
+
+noncomputable abbrev ihomToPullbackFiber : ((ihom B).obj X).Subcomplex :=
   Subcomplex.fiber (ihomToPullback i p)
     (ihomToPullbackTgt₀Mk sq)
 
@@ -461,5 +475,6 @@ lemma homotopy_extension_property₁ {E K L : SSet.{u}} (i : K ⟶ L) (p : E ⟶
   · rw [← ht₂]
     conv_rhs => rw [← sq.fac_left, pushout.inr_desc_assoc]
   · exact sq.fac_right
+
 
 end SSet

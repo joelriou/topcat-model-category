@@ -30,6 +30,7 @@ import TopCatModelCategory.SSet.Boundary
 import TopCatModelCategory.SSet.CategoryWithFibrations
 import TopCatModelCategory.SSet.ChosenFiniteProducts
 import TopCatModelCategory.SSet.Coproducts
+import TopCatModelCategory.SSet.Deformation
 import TopCatModelCategory.SSet.DeformationRetract
 import TopCatModelCategory.SSet.Degenerate
 import TopCatModelCategory.SSet.DimensionCoproducts
