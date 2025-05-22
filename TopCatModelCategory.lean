@@ -68,6 +68,7 @@ import TopCatModelCategory.SSet.Pseudofunctor
 import TopCatModelCategory.SSet.PtSimplex
 import TopCatModelCategory.SSet.SimplexCategory
 import TopCatModelCategory.SSet.Skeleton
+import TopCatModelCategory.SSet.SmallObject
 import TopCatModelCategory.SSet.Square
 import TopCatModelCategory.SSet.StandardSimplex
 import TopCatModelCategory.SSet.StrictSegal

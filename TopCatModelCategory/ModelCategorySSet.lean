@@ -3,12 +3,9 @@ import Mathlib.AlgebraicTopology.SingularSet
 import TopCatModelCategory.MorphismProperty
 import TopCatModelCategory.ModelCategory
 import TopCatModelCategory.Factorization
-import TopCatModelCategory.SSet.Skeleton
 import TopCatModelCategory.ModelCategoryTopCat
-import TopCatModelCategory.SSet.CategoryWithFibrations
-import TopCatModelCategory.SSet.Presentable
 import TopCatModelCategory.JoyalTrickDual
-import Mathlib.CategoryTheory.SmallObject.Basic
+import TopCatModelCategory.SSet.SmallObject
 
 open HomotopicalAlgebra CategoryTheory Limits
 
@@ -26,39 +23,6 @@ instance (K : Type u) [LinearOrder K] : HasIterationOfShape K SSet.{u} where
 
 attribute [local instance] Cardinal.aleph0_isRegular
   Cardinal.orderbot_aleph0_ord_to_type
-
-instance (J : Type u) [SmallCategory J] [IsFiltered J] (X : SSet.{u}) [X.IsFinite] :
-    PreservesColimitsOfShape J (coyoneda.obj (Opposite.op X)) := by
-  have : IsCardinalFiltered J Cardinal.aleph0.{u} := by
-    rwa [isCardinalFiltered_aleph0_iff]
-  exact preservesColimitsOfShape_of_isCardinalPresentable _ (Cardinal.aleph0.{u}) _
-
-instance isCardinalForSmallObjectArgument_I :
-    I.{u}.IsCardinalForSmallObjectArgument Cardinal.aleph0.{u} where
-  hasIterationOfShape := by infer_instance
-  preservesColimit i hi f hf := by
-    obtain ⟨n⟩ := hi
-    infer_instance
-  isSmall := by
-    dsimp [I]
-    infer_instance
-
-instance isCardinalForSmallObjectArgument_J :
-    J.{u}.IsCardinalForSmallObjectArgument Cardinal.aleph0.{u} where
-  hasIterationOfShape := by infer_instance
-  preservesColimit i hi f hf := by
-    simp only [J, iSup_iff] at hi
-    obtain ⟨n, ⟨i⟩⟩ := hi
-    infer_instance
-  isSmall := by
-    dsimp [J]
-    infer_instance
-
-instance : HasSmallObjectArgument.{u} I.{u} where
-  exists_cardinal := ⟨Cardinal.aleph0.{u}, inferInstance, inferInstance, inferInstance⟩
-
-instance : HasSmallObjectArgument.{u} J.{u} where
-  exists_cardinal := ⟨Cardinal.aleph0.{u}, inferInstance, inferInstance, inferInstance⟩
 
 instance : CategoryWithWeakEquivalences SSet.{0} where
   weakEquivalences :=
@@ -88,11 +52,6 @@ instance : (cofibrations SSet).IsStableUnderRetracts := by
 instance : (fibrations SSet).IsStableUnderRetracts := by
   rw [fibrations_eq]
   infer_instance
-
-lemma rlp_I_le_rlp_J : I.{u}.rlp ≤ J.{u}.rlp := by
-  rw [← le_llp_iff_le_rlp, llp_rlp_of_isCardinalForSmallObjectArgument _ .aleph0,
-    transfiniteCompositions_pushouts_coproducts]
-  exact J_le_monomorphisms.trans (le_retracts _)
 
 instance : toTop.IsLeftAdjoint := ⟨_, ⟨sSetTopAdj⟩⟩
 

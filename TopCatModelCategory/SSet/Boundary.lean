@@ -322,6 +322,9 @@ lemma exists_tensorRight_desc {X Y : SSet.{u}} (f : Fin (n + 3) → ((Δ[n + 1] 
     simpa using (β_ _ _).hom ≫= hf j k hjk)
   exact ⟨(β_ _ _).hom ≫ ψ, fun j ↦ by simpa using (β_ _ _).hom ≫= hψ j⟩
 
+def isInitial : IsInitial (boundary.{u} 0 : SSet) := by
+  simpa using Subcomplex.botIsInitial
+
 end boundary
 
 end SSet
