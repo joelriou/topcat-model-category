@@ -1,3 +1,4 @@
+import TopCatModelCategory.SSet.Deformation
 import TopCatModelCategory.SSet.KanComplexW
 import TopCatModelCategory.SSet.FundamentalGroupoidPiOne
 import TopCatModelCategory.SSet.HomotopySequence
@@ -91,23 +92,6 @@ lemma fiber_rlp_I (b : B _⦋0⦌) :
   MorphismProperty.of_isPullback (Subcomplex.fiber_isPullback p b) hp
 
 variable [IsFibrant E] [IsFibrant B]
-/-
-    obtain ⟨x₀, rfl⟩ := x₀.mk_surjective
-    obtain ⟨x₁, rfl⟩ := x₁.mk_surjective
-    have sq :
-      CommSq (boundary₁.desc x₀ x₁) (boundary 1).ι p
-        (stdSimplex.isTerminalObj₀.from _) :=
-      ⟨stdSimplex.isTerminalObj₀.hom_ext _ _⟩
-    have := hp _ ⟨1⟩
-    apply π₀.sound (yonedaEquiv sq.lift)
-    · apply yonedaEquiv.symm.injective
-      rw [← boundary₁.ι₀_desc x₀ x₁, ← boundary₁.ι₀ ≫= sq.fac_left,
-        boundary₁.ι₀_ι_assoc, yonedaEquiv_symm_δ, Equiv.symm_apply_apply]
-    · apply yonedaEquiv.symm.injective
-      rw [← boundary₁.ι₁_desc x₀ x₁, ← boundary₁.ι₁ ≫= sq.fac_left,
-        boundary₁.ι₁_ι_assoc, yonedaEquiv_symm_δ, Equiv.symm_apply_apply]
-
--/
 
 omit [IsFibrant E] in
 lemma bijective_mapπ₀ : Function.Bijective (mapπ₀ p) := by
