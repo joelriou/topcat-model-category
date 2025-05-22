@@ -4,6 +4,7 @@ import TopCatModelCategory.SSet.Boundary
 universe u
 
 open CategoryTheory Category Limits Simplicial Opposite
+  MonoidalCategory ChosenFiniteProducts
 
 namespace SSet
 
@@ -489,11 +490,33 @@ lemma iso₁_hom_ι : (iso.{u} 1).hom ≫ Λ[1, 1].ι = stdSimplex.δ 0 := by
   rfl
 
 @[reassoc (attr := simp)]
+lemma iso₁_inv_δ_zero : (iso.{u} 1).inv ≫ stdSimplex.δ 0 = Λ[1, 1].ι := by
+  rw [← iso₁_hom_ι, Iso.inv_hom_id_assoc]
+
+@[reassoc (attr := simp)]
 lemma iso₀_hom_ι : (iso.{u} 0).hom ≫ Λ[1, 0].ι = stdSimplex.δ 1 := by
   rw [ι_eq, comp_const]
   apply yonedaEquiv.injective
   ext j
   fin_cases j
+  rfl
+
+@[reassoc (attr := simp)]
+lemma iso₀_inv_δ_one : (iso.{u} 0).inv ≫ stdSimplex.δ 1 = Λ[1, 0].ι := by
+  rw [← iso₀_hom_ι, Iso.inv_hom_id_assoc]
+
+@[reassoc (attr := simp)]
+lemma whiskerLeft_iso₁_inv_comp_rightUnitor_hom (X : SSet.{u}) :
+    X ◁ (horn₁.iso 1).inv ≫ (stdSimplex.rightUnitor X).hom = fst _ _ := by
+  rw [← cancel_epi (X ◁ (horn₁.iso 1).hom), ← MonoidalCategory.whiskerLeft_comp_assoc,
+    Iso.hom_inv_id, MonoidalCategory.whiskerLeft_id, id_comp, whiskerLeft_fst]
+  rfl
+
+@[reassoc (attr := simp)]
+lemma whiskerLeft_iso₀_inv_comp_rightUnitor_hom (X : SSet.{u}) :
+    X ◁ (horn₁.iso 0).inv ≫ (stdSimplex.rightUnitor X).hom = fst _ _ := by
+  rw [← cancel_epi (X ◁ (horn₁.iso 0).hom), ← MonoidalCategory.whiskerLeft_comp_assoc,
+    Iso.hom_inv_id, MonoidalCategory.whiskerLeft_id, id_comp, whiskerLeft_fst]
   rfl
 
 lemma eq_ofSimplex : Λ[1, i] = Subcomplex.ofSimplex.{u} (stdSimplex.obj₀Equiv.symm i) := by
