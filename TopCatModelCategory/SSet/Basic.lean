@@ -59,4 +59,7 @@ lemma yonedaEquiv_symm_zero {X : SSet.{u}} (x : X _⦋0⦌) :
   apply yonedaEquiv.injective
   simp [yonedaEquiv_const]
 
+protected abbrev evaluation : SimplexCategoryᵒᵖ ⥤ SSet.{u} ⥤ Type u :=
+  evaluation _ _
+
 end SSet

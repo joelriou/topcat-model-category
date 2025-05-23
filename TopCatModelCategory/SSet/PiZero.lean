@@ -1,8 +1,10 @@
 import Mathlib.AlgebraicTopology.SimplicialSet.Basic
+import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Equalizers
+import TopCatModelCategory.SSet.Basic
 
 universe u
 
-open CategoryTheory Simplicial
+open CategoryTheory Simplicial Limits Opposite
 
 namespace SSet
 
@@ -41,5 +43,34 @@ lemma mapπ₀_comp_apply (f : X ⟶ Y) (g : Y ⟶ Z) (x : π₀ X) :
     mapπ₀ (f ≫ g) x = mapπ₀ g (mapπ₀ f x) := by
   obtain ⟨x, rfl⟩ := x.mk_surjective
   simp
+
+@[simps]
+def π₀Functor : SSet.{u} ⥤ Type u where
+  obj X := π₀ X
+  map f := mapπ₀ f
+
+def toπ₀NatTrans : SSet.evaluation.obj (op ⦋0⦌) ⟶ π₀Functor.{u} where
+  app X := π₀.mk
+
+abbrev coforkπ₀Functor :
+    Cofork (SSet.evaluation.{u}.map (SimplexCategory.δ (1 : Fin 2)).op)
+      (SSet.evaluation.map (SimplexCategory.δ (0 : Fin 2)).op) :=
+  Cofork.ofπ toπ₀NatTrans (by
+    ext X s
+    exact π₀.sound s rfl rfl)
+
+def isColimitCoforkπ₀Functor : IsColimit coforkπ₀Functor.{u} :=
+  evaluationJointlyReflectsColimits _ (fun X ↦
+    (isColimitMapCoconeCoforkEquiv _ _).2
+      (Cofork.IsColimit.mk _ (fun s ↦ Quot.lift s.π (by
+          dsimp at s
+          rintro _ _ ⟨h, rfl, rfl⟩
+          exact congr_fun s.condition h
+          ))
+        (fun s ↦ rfl) (fun s m hm ↦ by
+          ext x
+          obtain ⟨x, rfl⟩ := x.mk_surjective
+          dsimp at s m hm x ⊢
+          exact congr_fun hm x)))
 
 end SSet
