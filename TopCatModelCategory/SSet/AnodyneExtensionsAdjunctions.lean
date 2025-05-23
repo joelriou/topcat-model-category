@@ -124,6 +124,31 @@ lemma ι_horn₁₁ : (horn₁₁ i).ι = pushout.desc ι₁ (i ▷ Δ[1]) (by s
     dsimp
     rw [pushout.inr_desc]
 
+@[simps]
+noncomputable def horn₁₀ :
+    PushoutTensor i (horn.{u} 1 0).ι where
+  pt := pushout i ι₀
+  inl := fst _ _ ≫ pushout.inl _ _
+  inr := pushout.inr _ _
+  isPushout := (IsPushout.of_hasPushout i ι₀).of_iso
+      ((stdSimplex.rightUnitor _).symm ≪≫ (Iso.refl _ ⊗ (horn₁.iso 0)))
+      ((stdSimplex.rightUnitor _).symm ≪≫ (Iso.refl _ ⊗ (horn₁.iso 0)))
+      (Iso.refl _) (Iso.refl _) (by aesop_cat) (by
+        dsimp
+        rw [Category.comp_id, id_tensorHom, Category.assoc,
+          ← MonoidalCategory.whiskerLeft_comp, horn₁.iso₀_hom_ι]
+        rfl) (by simp) (by simp)
+
+lemma ι_horn₁₀ : (horn₁₀ i).ι = pushout.desc ι₀ (i ▷ Δ[1]) (by simp) := by
+  apply (horn₁₀ i).isPushout.hom_ext
+  · rw [Functor.PushoutObjObj.inl_ι]
+    dsimp
+    rw [Category.assoc, pushout.inl_desc, horn₁.ι_eq]
+    rfl
+  · rw [Functor.PushoutObjObj.inr_ι]
+    dsimp
+    rw [pushout.inr_desc]
+
 end
 
 end PushoutTensor
@@ -338,6 +363,11 @@ lemma pushout_desc_ι₁_whiskerRight_mono {X Y : SSet.{u}} (i : X ⟶ Y) [Mono 
     anodyneExtensions (pushout.desc (f := i) (g := ι₁) ι₁ (i ▷ Δ[1]) (by simp)) := by
   rw [← PushoutTensor.ι_horn₁₁]
   exact pushoutTensorι₂ (PushoutTensor.horn₁₁ i) (horn_ι_mem 0 1)
+
+lemma pushout_desc_ι₀_whiskerRight_mono {X Y : SSet.{u}} (i : X ⟶ Y) [Mono i] :
+    anodyneExtensions (pushout.desc (f := i) (g := ι₀) ι₀ (i ▷ Δ[1]) (by simp)) := by
+  rw [← PushoutTensor.ι_horn₁₀]
+  exact pushoutTensorι₂ (PushoutTensor.horn₁₀ i) (horn_ι_mem 0 0)
 
 lemma face (i : Fin 2) : anodyneExtensions.{u} (stdSimplex.face ({i})).ι := by
   rw [← horn₁.eq_face i]

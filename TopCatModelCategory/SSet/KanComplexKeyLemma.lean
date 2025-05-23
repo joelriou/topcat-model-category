@@ -11,6 +11,51 @@ open HomotopicalAlgebra CategoryTheory Simplicial
 
 namespace SSet
 
+namespace horn
+
+@[simps]
+def obj₀Mk {n : ℕ} (i : Fin (n + 2)) (j : Fin (n + 2))
+    (hj : ∃ (k : Fin (n + 2)), k ≠ i ∧ j ≠ k):
+    (horn.{u} (n + 1) i : SSet) _⦋0⦌ :=
+  ⟨stdSimplex.obj₀Equiv.symm j, by
+    obtain ⟨k, hi, hj⟩ := hj
+    refine face_le_horn _ _ hi _ ?_
+    simp only [stdSimplex.obj₀Equiv_symm_apply, stdSimplex.mem_face_iff,
+      Finset.mem_compl, Finset.mem_singleton]
+    intro l
+    fin_cases l
+    simpa [stdSimplex.const]⟩
+
+lemma exists_contractible₀ (n : ℕ) :
+    ∃ (h : (horn.{u} (n + 1) 0 : SSet) ⊗ Δ[1] ⟶ horn (n + 1) 0),
+      ι₀ ≫ h = SSet.const (obj₀Mk 0 0 ⟨1, by simp, by simp⟩) ∧
+      ι₁ ≫ h = 𝟙 _ := by
+  let r := anodyneExtensions.retractArrowHornCastSuccι.r.{u} (0 : Fin (n + 1))
+  have hr₀ : ι₀ ≫ r = SSet.const (stdSimplex.obj₀Equiv.symm 0) := by
+    apply yonedaEquiv.injective
+    ext i
+    change min _ 0 = 0
+    dsimp [yonedaEquiv, BinaryFan.fst, Cones.postcomposeEquivalence]
+    simp
+  have hr₁ : ι₁ ≫ r = 𝟙 _ := by simp [r]
+  refine ⟨Subcomplex.lift (Subcomplex.ι _ ▷ _≫ r) ?_, ?_, ?_⟩
+  · apply le_antisymm (by simp)
+    rw [← Subcomplex.image_le_iff, Subcomplex.image_top]
+    rintro ⟨d⟩ _ ⟨⟨⟨y₁, hy₁⟩, y₂⟩, rfl⟩
+    induction' d using SimplexCategory.rec with d
+    dsimp
+    rw [horn, Set.mem_setOf_eq] at hy₁ ⊢
+    intro h
+    refine hy₁ (subset_antisymm (by simp) ?_)
+    rw [← h]
+    apply anodyneExtensions.retractArrowHornCastSuccι.range_union_singleton_le
+  · rw [← cancel_mono (Subcomplex.ι _)]
+    exact (horn (n + 1) 0).ι ≫= hr₀
+  · rw [← cancel_mono (Subcomplex.ι _)]
+    exact (horn (n + 1) 0).ι ≫= hr₁
+
+end horn
+
 namespace KanComplex
 
 section
@@ -245,6 +290,7 @@ lemma W.hasLiftingPropertyFixedTop_face {n : ℕ} (t : (∂Δ[n + 1] : SSet) ⟶
   apply (hasLiftingPropertyFixedTop_iff_of_deformation p H h₀ h₁).2
     (hp.hasLiftingPropertyFixedTop_const (n + 1) e)
 
+
 lemma W.hasLiftingPropertyFixedTop {n : ℕ} (t : (∂Δ[n] : SSet) ⟶ E) :
     HasLiftingPropertyFixedTop (boundary n).ι p t := by
   obtain _ | n := n
@@ -254,7 +300,18 @@ lemma W.hasLiftingPropertyFixedTop {n : ℕ} (t : (∂Δ[n] : SSet) ⟶ E) :
       exact ⟨b.mk_surjective.choose⟩)
     obtain rfl : t = const (Classical.arbitrary _) := by ext
     apply hp.hasLiftingPropertyFixedTop_const
-  · sorry
+  · obtain ⟨h, h₀, h₁⟩ := horn.exists_contractible₀.{u} n
+    let i : (horn.{u} (n + 1) 0 : SSet) ⟶ boundary (n + 1) :=
+      Subcomplex.homOfLE (horn_le_boundary 0)
+    let e : E _⦋0⦌  := (i ≫ t).app _ (horn.obj₀Mk 0 0 ⟨1, by simp, by simp⟩)
+    obtain ⟨φ, hφ, hφ', _⟩ := homotopy_extension_property₁ i (terminal.from E) (h ≫ i ≫ t) t
+      (by rw [reassoc_of% h₁]) (terminal.from _) (by simp) (by simp)
+    rw [← hasLiftingPropertyFixedTop_iff_of_deformation p φ rfl hφ]
+    exact hp.hasLiftingPropertyFixedTop_face _ e (fun j hj ↦ by
+      replace hφ' := (horn.ι 0 j hj ▷ _) ≫= hφ'
+      rw [← comp_whiskerRight_assoc,
+        show horn.ι 0 j hj ≫ i = boundary.ι j from rfl] at hφ'
+      rw [← ι₀_comp_assoc, hφ', ι₀_comp_assoc, reassoc_of% h₀, const_comp, comp_const])
 
 end
 

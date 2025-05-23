@@ -476,5 +476,22 @@ lemma homotopy_extension_property₁ {E K L : SSet.{u}} (i : K ⟶ L) (p : E ⟶
     conv_rhs => rw [← sq.fac_left, pushout.inr_desc_assoc]
   · exact sq.fac_right
 
+lemma homotopy_extension_property₀ {E K L : SSet.{u}} (i : K ⟶ L) (p : E ⟶ B) [Fibration p]
+    [Mono i]
+    (hE : K ⊗ Δ[1] ⟶ E) (f : L ⟶ E) (h₁ : i ≫ f = ι₀ ≫ hE)
+    (hB : L ⊗ Δ[1] ⟶ B) (h₂ : ι₀ ≫ hB = f ≫ p) (h₃ : i ▷ _ ≫ hB = hE ≫ p)  :
+    ∃ ψ : L ⊗ Δ[1] ⟶ E, ι₀ ≫ ψ = f ∧ i ▷ _ ≫ ψ = hE ∧ ψ ≫ p = hB := by
+  have h := IsPushout.of_hasPushout i ι₀
+  let l : pushout i ι₀ ⟶ L ⊗ Δ[1] := pushout.desc ι₀ (i ▷ _) (by simp)
+  have : anodyneExtensions l := anodyneExtensions.pushout_desc_ι₀_whiskerRight_mono i
+  have := this.hasLeftLiftingProperty p
+  obtain ⟨t, ht₁, ht₂⟩ := h.exists_desc _ _ h₁
+  have sq : CommSq t l p hB := ⟨by aesop⟩
+  refine ⟨sq.lift, ?_, ?_, ?_⟩
+  · rw [← ht₁]
+    conv_rhs => rw [← sq.fac_left, pushout.inl_desc_assoc]
+  · rw [← ht₂]
+    conv_rhs => rw [← sq.fac_left, pushout.inr_desc_assoc]
+  · exact sq.fac_right
 
 end SSet
