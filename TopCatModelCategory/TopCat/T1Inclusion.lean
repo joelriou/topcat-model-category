@@ -9,6 +9,47 @@ universe u
 
 open CategoryTheory Topology Limits MorphismProperty Opposite
 
+namespace Function.Injective
+
+variable {X Y : Type*} {f : X → Y} (hf : Function.Injective f)
+
+@[simps! apply]
+noncomputable def equivRange :
+    X ≃ Set.range f :=
+  Equiv.ofBijective (fun x ↦ ⟨f x, by simp⟩)
+    ⟨Function.Injective.of_comp (f := Subtype.val) hf,
+      by rintro ⟨_, x, rfl⟩; exact ⟨x, rfl⟩⟩
+
+@[simp]
+lemma apply_equivRange_symm (x : Set.range f) :
+    f (hf.equivRange.symm x) = x.1 :=
+  congr_arg Subtype.val (hf.equivRange.apply_symm_apply x)
+
+end Function.Injective
+
+namespace Topology.IsEmbedding
+
+variable {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y] {f : X → Y}
+  (h : IsEmbedding f)
+
+@[simps! toEquiv_apply]
+noncomputable def homeomorphRange : Homeomorph X (Set.range f) where
+  toEquiv := h.injective.equivRange
+  continuous_toFun := ⟨fun U hU ↦ by
+    obtain ⟨V, hV, rfl⟩ := hU
+    exact h.continuous.isOpen_preimage V hV⟩
+  continuous_invFun := ⟨fun U hU ↦ by
+    rw [h.isOpen_iff] at hU
+    obtain ⟨V, hV, rfl⟩ := hU
+    exact ⟨V, hV, by aesop⟩⟩
+
+@[simp]
+lemma apply_homeomorphRange_symm (y : Set.range f) :
+    f (h.homeomorphRange.symm y) = y.1 := by
+  simp [homeomorphRange]
+
+end Topology.IsEmbedding
+
 lemma Set.Nonempty.exists_min_of_wellFoundedLT
     {J : Type*} [LinearOrder J] [WellFoundedLT J] {S : Set J} (hS : S.Nonempty) :
     ∃ (m : J), m ∈ S ∧ ∀ i, i ∈ S → m ≤ i :=
@@ -182,7 +223,68 @@ variable {J : Type*} [LinearOrder J] [OrderBot J] [SuccOrder J]
   (hf : t₁Inclusions.TransfiniteCompositionOfShape J f) {T : TopCat.{u}}
 
 lemma range_le_of_transfiniteCompositionOfShape (g : T ⟶ Y) :
-    ∃ (j : J), Set.range g ≤ Set.range (hf.incl.app j) := by
+    ∃ (j : J), Set.range g ⊆ Set.range (hf.incl.app j) := by
+  by_contra!
+  simp only [Set.subset_def, Set.mem_range, forall_exists_index,
+    forall_apply_eq_imp_iff, not_forall, not_exists] at this
+  let R (j : J) : Set Y := Set.range (hf.incl.app j)
+  have hR : Monotone R := by
+    rintro j j' hjj' _ ⟨x, rfl⟩
+    exact ⟨hf.F.map (homOfLE hjj') x,
+      congr_fun ((forget _).congr_map (hf.incl.naturality (homOfLE hjj'))) x⟩
+  have (j : J) : ∃ (j' : J) (y : Y) (hy : y ∈ Set.range g)
+      (hj' : y ∈ R j'), y ∉ R j := by
+    obtain ⟨t, ht⟩ := this j
+    obtain ⟨j', z, hz⟩ := Types.jointly_surjective_of_isColimit
+      (isColimitOfPreserves (forget _) hf.isColimit) (g t)
+    exact ⟨j', g t, by simp, ⟨z, hz⟩, by simpa [R] using ht⟩
+  obtain ⟨j, y, hy₁, hy₂, hy₃⟩ :
+      ∃ (j : ℕ → J) (y : ℕ → Y), (Set.range y ⊆ Set.range g) ∧
+        (∀ (n : ℕ), y n ∈ R (j (n + 1))) ∧ (∀ (n : ℕ), y n ∉ R (j n)) := by
+    let s (j : J) : J := (this j).choose
+    let y (j : J) : Y := (this j).choose_spec.choose
+    have hy₁ (j : J) : y j ∈ Set.range g := (this j).choose_spec.choose_spec.choose
+    have hy₂ (j : J) : y j ∈ R (s j) := (this j).choose_spec.choose_spec.choose_spec.choose
+    have hy₃ (j : J) : y j ∉ R j := (this j).choose_spec.choose_spec.choose_spec.choose_spec
+    let j (n : ℕ) : J := Nat.iterate s n ⊥
+    have hj (n : ℕ) : j (n + 1) = s (j n) := by
+      rw [add_comm]
+      exact congr_fun (Function.iterate_add s 1 n) ⊥
+    exact ⟨j, fun n ↦ y (j n), by rintro _ ⟨n, rfl⟩; apply hy₁,
+      fun n ↦ by simpa only [hj] using hy₂ (j n), fun n ↦ hy₃ (j n)⟩
+  have hj : StrictMono j := strictMono_nat_of_lt_succ (fun n ↦ by
+    by_contra!
+    exact hy₃ n (hR this (hy₂ n)))
+  have : Function.Injective y := by
+    intro a b h
+    wlog hab : a ≤ b generalizing a b
+    · exact (this h.symm (not_le.1 hab).le).symm
+    obtain ⟨k, hk⟩ := Nat.le.dest hab
+    obtain _ | k := k
+    · simpa using hk
+    · refine (hy₃ b ?_).elim
+      rw [← h]
+      exact hR (hj.monotone (by omega)) (hy₂ a)
+  let Z : Set Y := ⋃ (n : ℕ), R (j n)
+  let F' := hj.monotone.functor ⋙ hf.F
+  let c : Cocone F' := Cocone.mk (.of Z)
+    { app n := ofHom ⟨fun x ↦ ⟨hf.incl.app (j n) x,
+        le_iSup (fun n ↦ R (j n)) n (by simp [R])⟩,
+          Continuous.subtype_mk (hf.incl.app (j n)).hom.continuous _⟩
+      naturality n₁ n₂ h := by
+        ext x : 1
+        dsimp [F']
+        simp only [Subtype.mk.injEq]
+        exact congr_fun ((forget _).congr_map
+          (hf.incl.naturality (homOfLE (hj.monotone (leOfHom h))))) x }
+  have hc : IsColimit c := sorry
+  have hZ : IsClosed Z := sorry
+  have hy₄ : Set.range y ⊆ Z := by
+    rintro _ ⟨n, rfl⟩
+    simp only [Set.mem_iUnion, Z]
+    exact ⟨_, hy₂ n⟩
+  have hy₅ (A : Set (Set.range y)) : IsClosed A := by
+    sorry
   sorry
 
 variable (T)
@@ -194,7 +296,11 @@ lemma preservesColimit_coyoneda_obj_of_compactSpace [CompactSpace T] :
     · intro g
       dsimp at g ⊢
       obtain ⟨j, hj⟩ := range_le_of_transfiniteCompositionOfShape hf g
-      sorry
+      let g' : T ⟶ .of (Set.range (hf.incl.app j)) :=
+        ofHom ⟨fun t ↦ ⟨g t, hj (by aesop)⟩, by continuity⟩
+      exact ⟨j, g' ≫ (TopCat.isoOfHomeo
+        (isT₁Inclusion_of_transfiniteCompositionOfShape (hf.ici j)).homeomorphRange).inv,
+          by aesop⟩
     · intro j g₁ g₂ hg
       have : Mono (hf.incl.app j) :=
         t₁Inclusions_le_monomorphisms _
