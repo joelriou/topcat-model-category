@@ -1,5 +1,6 @@
 import TopCatModelCategory.TopPackage
 import TopCatModelCategory.TopCat.W
+import TopCatModelCategory.TopCat.T1Inclusion
 import TopCatModelCategory.SSet.Finite
 import TopCatModelCategory.SSet.Skeleton
 import TopCatModelCategory.SSet.KanComplexKeyLemma
@@ -41,7 +42,7 @@ lemma rlp_J_iff {E B : TopCat} (p : E ⟶ B) :
     simp only [SSet.modelCategoryQuillen.J, J, iSup_iff] at h ⊢
     obtain ⟨n, ⟨i⟩⟩ := h
     exact ⟨n, ⟨i⟩⟩
-  · intro hp _ _ _ h
+  · intro hp _ _u _ h
     simp only [J, iSup_iff] at h
     obtain ⟨n, ⟨i⟩⟩ := h
     rw [sSetTopAdj.hasLiftingProperty_iff]
@@ -53,6 +54,12 @@ instance : IsSmall.{0} I := by dsimp [I]; infer_instance
 instance : IsSmall.{0} J := by dsimp [J]; infer_instance
 
 instance (X : TopCat.{0}) : IsFibrant (TopCat.toSSet.obj X) := sorry
+
+instance (T : SSet.{0}) [T.IsFinite] :
+    CompactSpace (SSet.toTop.obj T) := sorry
+
+lemma t₁Inclusions_sSet_toObj_map_of_mono {X Y : SSet.{0}} (i : X ⟶ Y) [Mono i] :
+    t₁Inclusions (SSet.toTop.map i) := sorry
 
 def packageTopCat : TopPackage.{0} TopCat.{0} where
   I' := TopCat.modelCategory.I
@@ -76,9 +83,21 @@ def packageTopCat : TopPackage.{0} TopCat.{0} where
     rw [sSetTopAdj.hasLiftingProperty_iff]
     exact hf _ (monomorphisms.infer_property _)
   -- the next two sorries were formalised in Lean 3 by Reid Barton
-  preservesColimit' := sorry
-  infiniteCompositions_le_W' := sorry
-  -- this is the key property -> it depends on a sorry in the file `SSet.KanComplexKeyLemma`
+  preservesColimit' := by
+    rintro _ ⟨⟨T, hT⟩, rfl⟩ X Y f hf
+    have : T.IsFinite := hT
+    refine TopCat.t₁Inclusions.preservesColimit_coyoneda_obj_of_compactSpace
+      ((hf.transfiniteCompositionOfShape).ofLE ?_) _
+    simp only [ofHoms_homFamily, pushouts_le_iff, coproducts_le_iff, sup_le_iff]
+    constructor
+    · intro _ _ _ ⟨n⟩
+      apply t₁Inclusions_sSet_toObj_map_of_mono
+    · intro _ _ _ h
+      simp only [J, iSup_iff] at h
+      obtain ⟨n, ⟨i⟩⟩ := h
+      apply t₁Inclusions_sSet_toObj_map_of_mono
+  infiniteCompositions_le_W' := by
+    sorry
   fibration_is_trivial_iff' {X Y} p hp := by
     rw [rlp_J_iff, ← SSet.modelCategoryQuillen.fibration_iff] at hp
     rw [weakEquivalence_iff, rlp_I_iff, SSet.KanComplex.weakEquivalence_iff_of_fibration]

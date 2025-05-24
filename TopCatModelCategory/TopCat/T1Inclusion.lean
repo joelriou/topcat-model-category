@@ -7,7 +7,7 @@ import Mathlib.Topology.Category.TopCat.Limits.Basic
 
 universe u
 
-open CategoryTheory Topology Limits MorphismProperty
+open CategoryTheory Topology Limits MorphismProperty Opposite
 
 lemma Set.Nonempty.exists_min_of_wellFoundedLT
     {J : Type*} [LinearOrder J] [WellFoundedLT J] {S : Set J} (hS : S.Nonempty) :
@@ -59,8 +59,6 @@ lemma t₁Inclusions_le_closedEmbeddings :
     t₁Inclusions.{u} ≤ closedEmbeddings := fun _ _ _ h ↦ h.toIsClosedEmbedding
 
 namespace t₁Inclusions
-
-variable {X Y : TopCat.{u}} {f : X ⟶ Y} (hf : t₁Inclusions f)
 
 instance : t₁Inclusions.{u}.IsMultiplicative where
   id_mem _ := IsT₁Inclusion.id _
@@ -170,6 +168,20 @@ instance : IsStableUnderTransfiniteComposition.{u'} t₁Inclusions.{u} where
   isStableUnderTransfiniteCompositionOfShape _ _ _ _ _ :=
     ⟨fun _ _ _ ⟨hf⟩ ↦ isT₁Inclusion_of_transfiniteCompositionOfShape hf⟩
 
+section
+
+variable {J : Type*} [LinearOrder J] [OrderBot J] [SuccOrder J]
+  [WellFoundedLT J] {X Y : TopCat.{u}} {f : X ⟶ Y}
+  (hf : t₁Inclusions.TransfiniteCompositionOfShape J f)
+  (T : TopCat.{u})
+
+lemma preservesColimit_coyoneda_obj_of_compactSpace [CompactSpace T] :
+    PreservesColimit hf.F (coyoneda.obj (op T)) := by
+  sorry
+
+end
+
 end t₁Inclusions
+
 
 end TopCat
