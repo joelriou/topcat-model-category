@@ -58,6 +58,13 @@ def t₁Inclusions : MorphismProperty TopCat.{u} :=
 lemma t₁Inclusions_le_closedEmbeddings :
     t₁Inclusions.{u} ≤ closedEmbeddings := fun _ _ _ h ↦ h.toIsClosedEmbedding
 
+lemma t₁Inclusions_le_monomorphisms :
+    t₁Inclusions.{u} ≤ monomorphisms _ := by
+  intro _ _ f hf
+  apply Functor.mono_of_mono_map (forget TopCat)
+  rw [CategoryTheory.mono_iff_injective]
+  exact hf.injective
+
 namespace t₁Inclusions
 
 instance : t₁Inclusions.{u}.IsMultiplicative where
@@ -172,11 +179,29 @@ section
 
 variable {J : Type*} [LinearOrder J] [OrderBot J] [SuccOrder J]
   [WellFoundedLT J] {X Y : TopCat.{u}} {f : X ⟶ Y}
-  (hf : t₁Inclusions.TransfiniteCompositionOfShape J f) (T : TopCat.{u})
+  (hf : t₁Inclusions.TransfiniteCompositionOfShape J f) {T : TopCat.{u}}
+
+lemma range_le_of_transfiniteCompositionOfShape (g : T ⟶ Y) :
+    ∃ (j : J), Set.range g ≤ Set.range (hf.incl.app j) := by
+  sorry
+
+variable (T)
 
 lemma preservesColimit_coyoneda_obj_of_compactSpace [CompactSpace T] :
-    PreservesColimit hf.F (coyoneda.obj (op T)) := by
-  sorry
+    PreservesColimit hf.F (coyoneda.obj (op T)) :=
+  preservesColimit_of_preserves_colimit_cocone hf.isColimit (by
+    apply Types.FilteredColimit.isColimitOf'
+    · intro g
+      dsimp at g ⊢
+      obtain ⟨j, hj⟩ := range_le_of_transfiniteCompositionOfShape hf g
+      sorry
+    · intro j g₁ g₂ hg
+      have : Mono (hf.incl.app j) :=
+        t₁Inclusions_le_monomorphisms _
+          (isT₁Inclusion_of_transfiniteCompositionOfShape (hf.ici j))
+      refine ⟨j, 𝟙 _, ?_⟩
+      simpa only [Functor.comp_obj, coyoneda_obj_obj, FunctorToTypes.map_id_apply,
+        ← cancel_mono (hf.incl.app j)])
 
 end
 
