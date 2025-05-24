@@ -172,8 +172,7 @@ section
 
 variable {J : Type*} [LinearOrder J] [OrderBot J] [SuccOrder J]
   [WellFoundedLT J] {X Y : TopCat.{u}} {f : X ⟶ Y}
-  (hf : t₁Inclusions.TransfiniteCompositionOfShape J f)
-  (T : TopCat.{u})
+  (hf : t₁Inclusions.TransfiniteCompositionOfShape J f) (T : TopCat.{u})
 
 lemma preservesColimit_coyoneda_obj_of_compactSpace [CompactSpace T] :
     PreservesColimit hf.F (coyoneda.obj (op T)) := by
