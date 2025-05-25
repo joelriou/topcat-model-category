@@ -65,7 +65,7 @@ variable {X Y Z : Type*} [TopologicalSpace X] [TopologicalSpace Y] [TopologicalS
 
 @[mk_iff]
 structure IsT₁Inclusion (f : X → Y) : Prop extends IsClosedEmbedding f where
-  isClosed_singleton  (y : Y) (_ : y ∉ Set.range f) : IsClosed {y}
+  isClosed_singleton (y : Y) (_ : y ∉ Set.range f) : IsClosed {y}
 
 lemma IsT₁Inclusion.of_homeo (e : Homeomorph X Y) :
     IsT₁Inclusion e where
@@ -89,10 +89,16 @@ lemma IsT₁Inclusion.comp {g : Y → Z} {f : X → Y}
       aesop
     · exact hg.isClosed_singleton _ hz'
 
-lemma IsT₁Inclusion.closed_of_finite {f : X → Y} (hf : IsT₁Inclusion f)
+lemma IsT₁Inclusion.isClosed_of_finite {f : X → Y} (hf : IsT₁Inclusion f)
     (S : Set Y) (h : S.Finite) (h' : S ∩ Set.range f = ⊥) :
     IsClosed S := by
-  sorry
+  have : Finite S := h
+  convert isClosed_iUnion_of_finite (s := fun (i : S) ↦ {i.1}) (by
+    rintro ⟨y, hy⟩
+    refine hf.isClosed_singleton _ (fun hy' ↦ ?_)
+    have : y ∈ (S ∩ Set.range f) := ⟨hy, hy'⟩
+    simp [h'] at this)
+  aesop
 
 end Topology
 
@@ -244,8 +250,8 @@ lemma range_le_of_transfiniteCompositionOfShape (g : T ⟶ Y) :
     obtain ⟨j', z, hz⟩ := Types.jointly_surjective_of_isColimit
       (isColimitOfPreserves (forget _) hf.isColimit) (g t)
     exact ⟨j', g t, by simp, ⟨z, hz⟩, by simpa [R] using ht⟩
-  obtain ⟨j, y, hy₁, hy₂, hy₃⟩ :
-      ∃ (j : ℕ → J) (y : ℕ → Y), (Set.range y ⊆ Set.range g) ∧
+  obtain ⟨j, hj₀, y, hy₁, hy₂, hy₃⟩ :
+      ∃ (j : ℕ → J) (hj₀ : j 0 = ⊥) (y : ℕ → Y), (Set.range y ⊆ Set.range g) ∧
         (∀ (n : ℕ), y n ∈ R (j (n + 1))) ∧ (∀ (n : ℕ), y n ∉ R (j n)) := by
     let s (j : J) : J := (this j).choose
     let y (j : J) : Y := (this j).choose_spec.choose
@@ -256,7 +262,7 @@ lemma range_le_of_transfiniteCompositionOfShape (g : T ⟶ Y) :
     have hj (n : ℕ) : j (n + 1) = s (j n) := by
       rw [add_comm]
       exact congr_fun (Function.iterate_add s 1 n) ⊥
-    exact ⟨j, fun n ↦ y (j n), by rintro _ ⟨n, rfl⟩; apply hy₁,
+    exact ⟨j, rfl, fun n ↦ y (j n), by rintro _ ⟨n, rfl⟩; apply hy₁,
       fun n ↦ by simpa only [hj] using hy₂ (j n), fun n ↦ hy₃ (j n)⟩
   have hj : StrictMono j := strictMono_nat_of_lt_succ (fun n ↦ by
     by_contra!
@@ -295,7 +301,28 @@ lemma range_le_of_transfiniteCompositionOfShape (g : T ⟶ Y) :
   have hy₆ (S : Set Y) (hS : S ⊆ Set.range y) : IsClosed S := by
     rw [hZ' _ (hS.trans hy₅)]
     intro n
-    sorry
+    apply (isT₁Inclusion_of_transfiniteCompositionOfShape hf).isClosed_of_finite
+    · let S₀ := Set.range (fun (i : Fin n) ↦ y i.1)
+      have : S₀.Finite := Set.finite_range _
+      have h : S ∩ R (j n) ⊆ S₀ := by
+        rintro t ⟨h₁, h₂⟩
+        obtain ⟨i, rfl⟩ := hS h₁
+        by_cases hi : i < n
+        · exact ⟨⟨i, hi⟩, rfl⟩
+        · simp only [not_lt] at hi
+          exact (hy₃ _ (hR (hj.monotone hi) h₂)).elim
+      let φ : (S ∩ R (j n) : Set _) → S₀ := fun x ↦ ⟨x, h x.2⟩
+      exact Finite.of_injective φ (fun _ _ h ↦ by rwa [Subtype.ext_iff] at h ⊢)
+    · ext z
+      simp only [Set.mem_inter_iff, Set.bot_eq_empty, Set.mem_empty_iff_false,
+        iff_false]
+      rintro ⟨⟨h₁, h₂⟩, h₃⟩
+      obtain ⟨m, rfl⟩ := hS h₁
+      have : Set.range f ≤ R (j 0) := by
+        simp only [Functor.const_obj_obj, hj₀, Set.le_eq_subset, R, F', Z]
+        rintro _ ⟨x, rfl⟩
+        exact ⟨hf.isoBot.inv x, congr_fun ((forget _).congr_map hf.fac) x⟩
+      exact hy₃ m (hR (hj.monotone (Nat.zero_le m)) (this h₃))
   have hy₇ : DiscreteTopology (Set.range y) := by
     rw [discreteTopology_iff_forall_isClosed]
     intro A
