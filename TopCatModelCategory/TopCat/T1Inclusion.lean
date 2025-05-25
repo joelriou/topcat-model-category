@@ -221,6 +221,7 @@ section
 variable {J : Type*} [LinearOrder J] [OrderBot J] [SuccOrder J]
   [WellFoundedLT J] {X Y : TopCat.{u}} {f : X ⟶ Y}
   (hf : t₁Inclusions.TransfiniteCompositionOfShape J f) {T : TopCat.{u}}
+  [CompactSpace T]
 
 lemma range_le_of_transfiniteCompositionOfShape (g : T ⟶ Y) :
     ∃ (j : J), Set.range g ⊆ Set.range (hf.incl.app j) := by
@@ -255,7 +256,7 @@ lemma range_le_of_transfiniteCompositionOfShape (g : T ⟶ Y) :
   have hj : StrictMono j := strictMono_nat_of_lt_succ (fun n ↦ by
     by_contra!
     exact hy₃ n (hR this (hy₂ n)))
-  have : Function.Injective y := by
+  have hy₄ : Function.Injective y := by
     intro a b h
     wlog hab : a ≤ b generalizing a b
     · exact (this h.symm (not_le.1 hab).le).symm
@@ -279,17 +280,30 @@ lemma range_le_of_transfiniteCompositionOfShape (g : T ⟶ Y) :
           (hf.incl.naturality (homOfLE (hj.monotone (leOfHom h))))) x }
   have hc : IsColimit c := sorry
   have hZ : IsClosed Z := sorry
-  have hy₄ : Set.range y ⊆ Z := by
+  have hy₅ : Set.range y ⊆ Z := by
     rintro _ ⟨n, rfl⟩
     simp only [Set.mem_iUnion, Z]
     exact ⟨_, hy₂ n⟩
-  have hy₅ (A : Set (Set.range y)) : IsClosed A := by
-    sorry
-  sorry
+  have hy₆ (S : Set Y) (hS : S ⊆ Set.range y) : IsClosed S := sorry
+  have hy₇ : DiscreteTopology (Set.range y) := by
+    rw [discreteTopology_iff_forall_isClosed]
+    intro A
+    rw [isClosed_induced_iff]
+    exact ⟨Subtype.val '' A, hy₆ _ (by simp), by simp⟩
+  have : CompactSpace (Set.range y) := by
+    rw [← isCompact_iff_compactSpace]
+    convert (IsCompact.image isCompact_univ g.hom.continuous).inter_right
+      (hy₆ _ (subset_refl _))
+    exact (Set.inter_eq_self_of_subset_right (by simpa using hy₁)).symm
+  have : Finite (Set.range y) := finite_of_compact_of_discrete
+  have : Infinite (Set.range y) :=
+    Infinite.of_injective (fun (n : ℕ) ↦ ⟨y n, by simp⟩)
+      (Function.Injective.of_comp (f := Subtype.val) hy₄)
+  exact not_finite (Set.range y)
 
 variable (T)
 
-lemma preservesColimit_coyoneda_obj_of_compactSpace [CompactSpace T] :
+lemma preservesColimit_coyoneda_obj_of_compactSpace :
     PreservesColimit hf.F (coyoneda.obj (op T)) :=
   preservesColimit_of_preserves_colimit_cocone hf.isColimit (by
     apply Types.FilteredColimit.isColimitOf'
