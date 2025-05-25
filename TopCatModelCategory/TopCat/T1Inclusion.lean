@@ -89,6 +89,11 @@ lemma IsT₁Inclusion.comp {g : Y → Z} {f : X → Y}
       aesop
     · exact hg.isClosed_singleton _ hz'
 
+lemma IsT₁Inclusion.closed_of_finite {f : X → Y} (hf : IsT₁Inclusion f)
+    (S : Set Y) (h : S.Finite) (h' : S ∩ Set.range f = ⊥) :
+    IsClosed S := by
+  sorry
+
 end Topology
 
 namespace TopCat
@@ -284,7 +289,13 @@ lemma range_le_of_transfiniteCompositionOfShape (g : T ⟶ Y) :
     rintro _ ⟨n, rfl⟩
     simp only [Set.mem_iUnion, Z]
     exact ⟨_, hy₂ n⟩
-  have hy₆ (S : Set Y) (hS : S ⊆ Set.range y) : IsClosed S := sorry
+  have hZ' (A : Set Y) (hA : A ⊆ Z) :
+      IsClosed A ↔ ∀ (n : ℕ), IsClosed (A ∩ R (j n)) := by
+    sorry
+  have hy₆ (S : Set Y) (hS : S ⊆ Set.range y) : IsClosed S := by
+    rw [hZ' _ (hS.trans hy₅)]
+    intro n
+    sorry
   have hy₇ : DiscreteTopology (Set.range y) := by
     rw [discreteTopology_iff_forall_isClosed]
     intro A
