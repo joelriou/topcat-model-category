@@ -18,7 +18,7 @@ structure DeformationRetract extends Retract X Y where
 
 namespace DeformationRetract
 
-attribute [reassoc (attr := simp)] hi h₁
+attribute [reassoc (attr := simp)] hi h₁ h₀
 
 variable {X Y} (d : DeformationRetract X Y)
 

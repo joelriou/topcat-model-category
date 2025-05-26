@@ -1,13 +1,6 @@
-import TopCatModelCategory.TopPackage
-import TopCatModelCategory.TopCat.W
-import TopCatModelCategory.TopCat.T1Inclusion
-import TopCatModelCategory.SSet.Finite
-import TopCatModelCategory.SSet.Skeleton
 import TopCatModelCategory.SSet.KanComplexKeyLemma
-import Mathlib.Topology.Category.TopCat.Limits.Basic
-import Mathlib.AlgebraicTopology.SimplicialSet.Boundary
-import Mathlib.AlgebraicTopology.SimplicialSet.Horn
-import Mathlib.AlgebraicTopology.SingularSet
+import TopCatModelCategory.TopPackage
+import TopCatModelCategory.TopCat.Adj
 
 open HomotopicalAlgebra CategoryTheory MorphismProperty
 
@@ -53,16 +46,6 @@ lemma rlp_J_iff {E B : TopCat} (p : E ⟶ B) :
 instance : IsSmall.{0} I := by dsimp [I]; infer_instance
 instance : IsSmall.{0} J := by dsimp [J]; infer_instance
 
-instance (X : TopCat.{0}) : IsFibrant (TopCat.toSSet.obj X) := by
-  sorry
-
-instance (T : SSet.{0}) [T.IsFinite] :
-    CompactSpace (SSet.toTop.obj T) := by
-  sorry
-
-lemma t₁Inclusions_sSet_toObj_map_of_mono {X Y : SSet.{0}} (i : X ⟶ Y) [Mono i] :
-    t₁Inclusions (SSet.toTop.map i) := by
-  sorry
 
 def packageTopCat : TopPackage.{0} TopCat.{0} where
   I' := TopCat.modelCategory.I

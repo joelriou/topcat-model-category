@@ -1,5 +1,6 @@
 import TopCatModelCategory.SSet.KanComplexW
 import TopCatModelCategory.SSet.Homotopy
+import TopCatModelCategory.SSet.DeformationRetract
 
 universe u
 
@@ -78,8 +79,8 @@ variable (X) in
 noncomputable def HomotopyEquiv.refl : HomotopyEquiv X X where
   hom := 𝟙 _
   inv := 𝟙 _
-  homInvId := Subcomplex.RelativeMorphism.Homotopy.ofEq (by simp)
-  invHomId := Subcomplex.RelativeMorphism.Homotopy.ofEq (by simp)
+  homInvId := .ofEq (by simp)
+  invHomId := .ofEq (by simp)
 
 @[simps]
 def HomotopyEquiv.symm (e : HomotopyEquiv X Y) : HomotopyEquiv Y X where
@@ -87,6 +88,16 @@ def HomotopyEquiv.symm (e : HomotopyEquiv X Y) : HomotopyEquiv Y X where
   inv := e.hom
   homInvId := e.invHomId
   invHomId := e.homInvId
+
+@[simps]
+noncomputable def HomotopyEquiv.ofDeformationRetract (h : DeformationRetract X Y) :
+    HomotopyEquiv X Y where
+  hom := h.i
+  inv := h.r
+  homInvId := .ofEq (by simp)
+  invHomId :=
+    { h := h.h
+      rel := by ext _ ⟨⟨_, hx⟩, _⟩; simp at hx }
 
 namespace KanComplex
 
