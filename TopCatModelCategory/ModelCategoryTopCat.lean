@@ -68,7 +68,6 @@ def packageTopCat : TopPackage.{0} TopCat.{0} where
     obtain ⟨n, ⟨i⟩⟩ := hg
     rw [sSetTopAdj.hasLiftingProperty_iff]
     exact hf _ (monomorphisms.infer_property _)
-  -- the next two sorries were formalised in Lean 3 by Reid Barton
   preservesColimit' := by
     rintro _ ⟨⟨T, hT⟩, rfl⟩ X Y f hf
     have : T.IsFinite := hT
@@ -77,11 +76,11 @@ def packageTopCat : TopPackage.{0} TopCat.{0} where
     simp only [ofHoms_homFamily, pushouts_le_iff, coproducts_le_iff, sup_le_iff]
     constructor
     · intro _ _ _ ⟨n⟩
-      apply t₁Inclusions_sSet_toObj_map_of_mono
+      apply SSet.t₁Inclusions_toObj_map_of_mono
     · intro _ _ _ h
       simp only [J, iSup_iff] at h
       obtain ⟨n, ⟨i⟩⟩ := h
-      apply t₁Inclusions_sSet_toObj_map_of_mono
+      apply SSet.t₁Inclusions_toObj_map_of_mono
   infiniteCompositions_le_W' := by
     sorry
   fibration_is_trivial_iff' {X Y} p hp := by

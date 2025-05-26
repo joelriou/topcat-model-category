@@ -4,11 +4,12 @@ import Mathlib.Topology.Category.TopCat.Limits.Basic
 import Mathlib.AlgebraicTopology.SingularSet
 import TopCatModelCategory.TopCat.W
 import TopCatModelCategory.TopCat.T1Inclusion
+import TopCatModelCategory.TopCat.DeformationRetract
 import TopCatModelCategory.SSet.Finite
 import TopCatModelCategory.SSet.Skeleton
 
 open CategoryTheory HomotopicalAlgebra SSet.modelCategoryQuillen
-  Simplicial NNReal Limits
+  Simplicial NNReal Limits MonoidalCategory Opposite
 
 scoped [Simplicial] notation "|" X "|" => SSet.toTop.obj X
 
@@ -65,6 +66,30 @@ lemma toTopHomeo_symm_naturality_apply {n m : SimplexCategory} (f : n ⟶ m)
   congr_fun (toTopHomeo_symm_naturality f) x
 
 end SimplexCategory
+
+namespace TopCat
+
+instance : toSSet.IsRightAdjoint := sSetTopAdj.isRightAdjoint
+
+@[simps symm_apply]
+def toSSetObj₀Equiv {X : TopCat.{0}} :
+    toSSet.obj X _⦋0⦌ ≃ X where
+  toFun f := f.hom.1 (default : ⦋0⦌.toTopObj)
+  invFun x := ofHom ⟨fun _ ↦ x, by continuity⟩
+  left_inv _ := by
+    apply ConcreteCategory.hom_ext
+    intro (x : ⦋0⦌.toTopObj)
+    obtain rfl := Subsingleton.elim x default
+    rfl
+  right_inv _ := rfl
+
+@[simp]
+lemma toSSet_map_const (X : TopCat.{0}) {Y : TopCat.{0}} (y : Y) :
+    toSSet.map (TopCat.const (X := X) y) =
+      SSet.const (toSSetObj₀Equiv.symm y) :=
+  rfl
+
+end TopCat
 
 namespace SSet
 
@@ -150,21 +175,106 @@ example (X : SSet) [X.IsFinite] :
       SimplexCategory.toTopObj (.mk s.1))) := by
   infer_instance
 
-end SSet
-
-namespace TopCat
-
 instance (T : SSet.{0}) [T.IsFinite] :
     CompactSpace (SSet.toTop.obj T) where
   isCompact_univ := by
     simpa using IsCompact.image CompactSpace.isCompact_univ T.continuous_sigmaToTopObj
 
-open MorphismProperty
+open TopCat
 
-lemma _root_.SSet.boundary.t₁Inclusions_toTop_map_ι (n : ℕ) :
-    t₁Inclusions (SSet.toTop.map ∂Δ[n].ι) := sorry
+namespace stdSimplex
 
-lemma t₁Inclusions_sSet_toObj_map_of_mono {X Y : SSet.{0}} (i : X ⟶ Y) [Mono i] :
+noncomputable def toTopObjHomeoUnitInterval :
+    |Δ[1]| ≃ₜ I :=
+  ((SimplexCategory.toTopHomeo _).trans SimplexCategory.toTopObjOneHomeo).trans
+    Homeomorph.ulift.symm
+
+noncomputable def toSSetObjI : Δ[1] ⟶ TopCat.toSSet.obj I :=
+  sSetTopAdj.homEquiv _ _ (ofHom (toContinuousMap toTopObjHomeoUnitInterval))
+
+@[simp]
+lemma toSSetObj_app_const_zero :
+    toSSetObjI.app (op ⦋0⦌) (const _ 0 _) = toSSetObj₀Equiv.symm 0 := sorry
+
+@[simp]
+lemma toSSetObj_app_const_one :
+    toSSetObjI.app (op ⦋0⦌) (const _ 1 _) = toSSetObj₀Equiv.symm 1 := sorry
+
+end stdSimplex
+
+end SSet
+
+namespace TopCat
+
+open Functor.Monoidal Functor.LaxMonoidal
+
+noncomputable instance : toSSet.Monoidal := toSSet.monoidalOfChosenFiniteProducts
+
+@[reassoc (attr := simp)]
+lemma sSetι₀_whiskerLeft_toSSetObjI_μIso_hom (X : TopCat.{0}) :
+    SSet.ι₀ ≫ toSSet.obj X ◁ SSet.stdSimplex.toSSetObjI ≫
+      μ TopCat.toSSet X I = toSSet.map TopCat.ι₀ := by
+  rw [← cancel_mono (μIso _ _ _).inv, Category.assoc, Category.assoc, μIso_inv,
+    μ_δ, Category.comp_id]
+  apply ChosenFiniteProducts.hom_ext <;> simp [← Functor.map_comp]
+
+@[reassoc (attr := simp)]
+lemma sSetι₁_whiskerLeft_toSSetObjI_μIso_hom (X : TopCat.{0}) :
+    SSet.ι₁ ≫ toSSet.obj X ◁ SSet.stdSimplex.toSSetObjI ≫
+      Functor.LaxMonoidal.μ TopCat.toSSet X I = toSSet.map TopCat.ι₁ := by
+  rw [← cancel_mono (μIso _ _ _).inv, Category.assoc, Category.assoc, μIso_inv,
+    μ_δ, Category.comp_id]
+  apply ChosenFiniteProducts.hom_ext <;> simp [← Functor.map_comp]
+
+namespace DeformationRetract
+
+variable (X Y : TopCat.{0})
+
+open Functor.Monoidal Functor.LaxMonoidal
+
+variable (hf : DeformationRetract X Y)
+
+noncomputable def toSSet : SSet.DeformationRetract (toSSet.obj X) (toSSet.obj Y) where
+  toRetract := hf.toRetract.map TopCat.toSSet
+  h := _ ◁ SSet.stdSimplex.toSSetObjI ≫ (μIso TopCat.toSSet _ _).hom ≫ TopCat.toSSet.map hf.h
+  hi := by
+    dsimp
+    rw [← whisker_exchange_assoc, μ_natural_left_assoc, ← Functor.map_comp, hf.hi,
+      Functor.map_comp, μ_fst_assoc, ChosenFiniteProducts.whiskerLeft_fst_assoc]
+  h₀ := by
+    dsimp
+    simpa only [sSetι₀_whiskerLeft_toSSetObjI_μIso_hom_assoc]
+      using TopCat.toSSet.congr_map hf.h₀
+  h₁ := by
+    dsimp
+    simpa only [sSetι₁_whiskerLeft_toSSetObjI_μIso_hom_assoc]
+      using TopCat.toSSet.congr_map hf.h₁
+
+end DeformationRetract
+
+end TopCat
+
+namespace SSet
+
+open MorphismProperty TopCat
+
+lemma boundary.t₁Inclusions_toTop_map_ι (n : ℕ) :
+    TopCat.t₁Inclusions (toTop.map ∂Δ[n].ι) := sorry
+
+def horn.deformationRetractToTopMap {n : ℕ} (i : Fin (n + 2)) :
+    TopCat.DeformationRetract |horn (n + 1) i| |Δ[n + 1]| := sorry
+
+@[simp]
+lemma horn.deformationRetractToTopMap_i {n : ℕ} (i : Fin (n + 2)) :
+    (horn.deformationRetractToTopMap i).i = toTop.map (horn (n + 1) i).ι := sorry
+
+@[reassoc (attr := simp)]
+lemma horn.ι_deformationRetractToTopMap_r {n : ℕ} (i : Fin (n + 2)) :
+    toTop.map (horn (n + 1) i).ι ≫ (horn.deformationRetractToTopMap i).r = 𝟙 _ := by
+  simpa only [deformationRetractToTopMap_i]
+    using (horn.deformationRetractToTopMap i).retract
+
+lemma t₁Inclusions_toObj_map_of_mono {X Y : SSet.{0}} (i : X ⟶ Y) [Mono i] :
     t₁Inclusions (SSet.toTop.map i) := by
   have : (MorphismProperty.coproducts.{0, 0, 1} I).pushouts ≤
       (t₁Inclusions.{0}).inverseImage SSet.toTop := by
@@ -178,7 +288,18 @@ lemma t₁Inclusions_sSet_toObj_map_of_mono {X Y : SSet.{0}} (i : X ⟶ Y) [Mono
   exact t₁Inclusions.isT₁Inclusion_of_transfiniteCompositionOfShape
     ((transfiniteCompositionOfMono i).ofLE this).map
 
-instance (X : TopCat.{0}) : IsFibrant (TopCat.toSSet.obj X) := by
-  sorry
+instance (Z : TopCat.{0}) : IsFibrant (TopCat.toSSet.obj Z) := by
+  rw [isFibrant_iff, fibration_iff]
+  intro _ _ _ hi
+  simp only [J, iSup_iff] at hi
+  obtain ⟨n, ⟨i⟩⟩ := hi
+  constructor
+  intro t _ sq
+  refine ⟨⟨
+    { l := sSetTopAdj.homEquiv _ _
+        ((horn.deformationRetractToTopMap i).r ≫ (sSetTopAdj.homEquiv _ _).symm t)
+      fac_left := by
+        simp [← Adjunction.homEquiv_naturality_left]
+      fac_right := Subsingleton.elim _ _ }⟩⟩
 
-end TopCat
+end SSet

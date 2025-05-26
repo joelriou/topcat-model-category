@@ -8,6 +8,13 @@ open CategoryTheory Limits MonoidalCategory
 
 namespace TopCat
 
+def const {X Y : TopCat.{u}} (y : Y) : X ⟶ Y :=
+  ofHom ⟨fun _ ↦ y, by continuity⟩
+
+@[simp]
+lemma const_apply {X Y : TopCat.{0}} (y : Y) (x : X) :
+    const y x = y := rfl
+
 instance : ChosenFiniteProducts TopCat.{u} where
   terminal := ⟨_, isTerminalPUnit⟩
   product X Y := ⟨prodBinaryFan X Y, X.prodBinaryFanIsLimit Y⟩
@@ -106,7 +113,7 @@ instance : OfNat I 1 := ⟨I.mk 1⟩
 open ChosenFiniteProducts
 
 noncomputable def ι₀ {X : TopCat.{u}} : X ⟶ X ⊗ I :=
-  lift (𝟙 X) (ofHom ⟨_, continuous_const (y := 0)⟩)
+  lift (𝟙 X) (const 0)
 
 @[reassoc (attr := simp)]
 lemma ι₀_comp {X Y : TopCat.{u}} (f : X ⟶ Y) :
@@ -117,14 +124,14 @@ lemma ι₀_fst (X : TopCat.{u}) : ι₀ ≫ fst X _ = 𝟙 X := rfl
 
 @[reassoc (attr := simp)]
 lemma ι₀_snd (X : TopCat.{u}) :
-    ι₀ ≫ snd X _ = ofHom ⟨_, continuous_const (y := 0)⟩ :=
+    ι₀ ≫ snd X _ = TopCat.const 0 :=
   rfl
 
 @[simp]
 lemma ι₀_apply {X : TopCat.{u}} (x : X) : ι₀ x = ⟨x, 0⟩ := rfl
 
 noncomputable def ι₁ {X : TopCat.{u}} : X ⟶ X ⊗ I :=
-  lift (𝟙 X) (ofHom ⟨_, continuous_const (y := 1)⟩)
+  lift (𝟙 X) (const 1)
 
 @[reassoc (attr := simp)]
 lemma ι₁_comp {X Y : TopCat.{u}} (f : X ⟶ Y) :
@@ -135,7 +142,7 @@ lemma ι₁_fst (X : TopCat.{u}) : ι₁ ≫ fst X _ = 𝟙 X := rfl
 
 @[reassoc (attr := simp)]
 lemma ι₁_snd (X : TopCat.{u}) :
-    ι₁ ≫ snd X _ = ofHom ⟨_, continuous_const (y := 1)⟩ :=
+    ι₁ ≫ snd X _ = const 1 :=
   rfl
 
 @[simp]
