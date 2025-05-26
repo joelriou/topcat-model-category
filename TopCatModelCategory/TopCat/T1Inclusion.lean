@@ -9,47 +9,6 @@ universe u
 
 open CategoryTheory Topology Limits MorphismProperty Opposite
 
-namespace Function.Injective
-
-variable {X Y : Type*} {f : X → Y} (hf : Function.Injective f)
-
-@[simps! apply]
-noncomputable def equivRange :
-    X ≃ Set.range f :=
-  Equiv.ofBijective (fun x ↦ ⟨f x, by simp⟩)
-    ⟨Function.Injective.of_comp (f := Subtype.val) hf,
-      by rintro ⟨_, x, rfl⟩; exact ⟨x, rfl⟩⟩
-
-@[simp]
-lemma apply_equivRange_symm (x : Set.range f) :
-    f (hf.equivRange.symm x) = x.1 :=
-  congr_arg Subtype.val (hf.equivRange.apply_symm_apply x)
-
-end Function.Injective
-
-namespace Topology.IsEmbedding
-
-variable {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y] {f : X → Y}
-  (h : IsEmbedding f)
-
-@[simps! toEquiv_apply]
-noncomputable def homeomorphRange : Homeomorph X (Set.range f) where
-  toEquiv := h.injective.equivRange
-  continuous_toFun := ⟨fun U hU ↦ by
-    obtain ⟨V, hV, rfl⟩ := hU
-    exact h.continuous.isOpen_preimage V hV⟩
-  continuous_invFun := ⟨fun U hU ↦ by
-    rw [h.isOpen_iff] at hU
-    obtain ⟨V, hV, rfl⟩ := hU
-    exact ⟨V, hV, by aesop⟩⟩
-
-@[simp]
-lemma apply_homeomorphRange_symm (y : Set.range f) :
-    f (h.homeomorphRange.symm y) = y.1 := by
-  simp [homeomorphRange]
-
-end Topology.IsEmbedding
-
 lemma Set.Nonempty.exists_min_of_wellFoundedLT
     {J : Type*} [LinearOrder J] [WellFoundedLT J] {S : Set J} (hS : S.Nonempty) :
     ∃ (m : J), m ∈ S ∧ ∀ i, i ∈ S → m ≤ i :=
@@ -277,27 +236,34 @@ lemma range_le_of_transfiniteCompositionOfShape (g : T ⟶ Y) :
     · refine (hy₃ b ?_).elim
       rw [← h]
       exact hR (hj.monotone (by omega)) (hy₂ a)
+  let c := closedEmbeddings.coconeOfTransfiniteCompositionOfShape
+    (hf.ofLE t₁Inclusions_le_closedEmbeddings) hj
+  have hc : IsColimit c := closedEmbeddings.isColimitCoconeOfTransfiniteCompositionOfShape
+      (hf.ofLE t₁Inclusions_le_closedEmbeddings) hj
   let Z : Set Y := ⋃ (n : ℕ), R (j n)
-  let F' := hj.monotone.functor ⋙ hf.F
-  let c : Cocone F' := Cocone.mk (.of Z)
-    { app n := ofHom ⟨fun x ↦ ⟨hf.incl.app (j n) x,
-        le_iSup (fun n ↦ R (j n)) n (by simp [R])⟩,
-          Continuous.subtype_mk (hf.incl.app (j n)).hom.continuous _⟩
-      naturality n₁ n₂ h := by
-        ext x : 1
-        dsimp [F']
-        simp only [Subtype.mk.injEq]
-        exact congr_fun ((forget _).congr_map
-          (hf.incl.naturality (homOfLE (hj.monotone (leOfHom h))))) x }
-  have hc : IsColimit c := sorry
-  have hZ : IsClosed Z := sorry
+  let ι : Z → Y := Subtype.val
+  have hι : IsClosedEmbedding ι :=
+    closedEmbeddings.coconeOfTransfiniteCompositionOfShape.closedEmbeddings_ιPoint
+      (hf.ofLE t₁Inclusions_le_closedEmbeddings) hj
   have hy₅ : Set.range y ⊆ Z := by
     rintro _ ⟨n, rfl⟩
     simp only [Set.mem_iUnion, Z]
     exact ⟨_, hy₂ n⟩
   have hZ' (A : Set Y) (hA : A ⊆ Z) :
       IsClosed A ↔ ∀ (n : ℕ), IsClosed (A ∩ R (j n)) := by
-    sorry
+    rw [hι.isClosed_iff_preimage_isClosed (hA.trans (by simp [ι])),
+      isClosed_iff_of_isColimit _ hc]
+    refine forall_congr' (fun n ↦ ?_)
+    have hn : IsClosedEmbedding (hf.incl.app (j n)) :=
+      (isT₁Inclusion_of_transfiniteCompositionOfShape (hf.ici (j n))).toIsClosedEmbedding
+    have : (c.ι.app n) ⁻¹' (ι ⁻¹' A) = (hf.incl.app (j n)) ⁻¹' (A ∩ R (j n)) := by
+      ext x
+      constructor
+      · rintro hx
+        exact ⟨hx, by simp [R]⟩
+      · rintro ⟨hx, _⟩
+        exact hx
+    rw [hn.isClosed_iff_preimage_isClosed Set.inter_subset_right, this]
   have hy₆ (S : Set Y) (hS : S ⊆ Set.range y) : IsClosed S := by
     rw [hZ' _ (hS.trans hy₅)]
     intro n
@@ -319,7 +285,7 @@ lemma range_le_of_transfiniteCompositionOfShape (g : T ⟶ Y) :
       rintro ⟨⟨h₁, h₂⟩, h₃⟩
       obtain ⟨m, rfl⟩ := hS h₁
       have : Set.range f ≤ R (j 0) := by
-        simp only [Functor.const_obj_obj, hj₀, Set.le_eq_subset, R, F', Z]
+        simp only [Functor.const_obj_obj, hj₀, Set.le_eq_subset, R, Z]
         rintro _ ⟨x, rfl⟩
         exact ⟨hf.isoBot.inv x, congr_fun ((forget _).congr_map hf.fac) x⟩
       exact hy₃ m (hR (hj.monotone (Nat.zero_le m)) (this h₃))
@@ -364,6 +330,5 @@ lemma preservesColimit_coyoneda_obj_of_compactSpace :
 end
 
 end t₁Inclusions
-
 
 end TopCat
