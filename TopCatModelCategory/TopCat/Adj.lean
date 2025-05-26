@@ -2,7 +2,6 @@ import Mathlib.AlgebraicTopology.SimplicialSet.Boundary
 import Mathlib.AlgebraicTopology.SimplicialSet.Horn
 import Mathlib.Topology.Category.TopCat.Limits.Basic
 import Mathlib.AlgebraicTopology.SingularSet
-
 import TopCatModelCategory.TopCat.W
 import TopCatModelCategory.TopCat.T1Inclusion
 import TopCatModelCategory.SSet.Finite
@@ -25,6 +24,9 @@ noncomputable def stdSimplexCompToTopIso :
     Functor.rightUnitor _ ) _ ≪≫ SSet.toTopSimplex
 
 instance : toTop.IsLeftAdjoint := sSetTopAdj.isLeftAdjoint
+
+instance {J : Type*} [LinearOrder J] :
+    PreservesWellOrderContinuousOfShape J SSet.toTop where
 
 end SSet
 
@@ -157,11 +159,26 @@ instance (T : SSet.{0}) [T.IsFinite] :
   isCompact_univ := by
     simpa using IsCompact.image CompactSpace.isCompact_univ T.continuous_sigmaToTopObj
 
-instance (X : TopCat.{0}) : IsFibrant (TopCat.toSSet.obj X) := by
-  sorry
+open MorphismProperty
+
+lemma _root_.SSet.boundary.t₁Inclusions_toTop_map_ι (n : ℕ) :
+    t₁Inclusions (SSet.toTop.map ∂Δ[n].ι) := sorry
 
 lemma t₁Inclusions_sSet_toObj_map_of_mono {X Y : SSet.{0}} (i : X ⟶ Y) [Mono i] :
     t₁Inclusions (SSet.toTop.map i) := by
+  have : (MorphismProperty.coproducts.{0, 0, 1} I).pushouts ≤
+      (t₁Inclusions.{0}).inverseImage SSet.toTop := by
+    rw [← MorphismProperty.map_le_iff]
+    refine ((coproducts I).map_pushouts_le SSet.toTop).trans ?_
+    simp only [pushouts_le_iff]
+    refine (I.map_coproducts_le SSet.toTop).trans ?_
+    simp only [coproducts_le_iff, MorphismProperty.map_le_iff]
+    intro _ _ _ ⟨n⟩
+    apply SSet.boundary.t₁Inclusions_toTop_map_ι
+  exact t₁Inclusions.isT₁Inclusion_of_transfiniteCompositionOfShape
+    ((transfiniteCompositionOfMono i).ofLE this).map
+
+instance (X : TopCat.{0}) : IsFibrant (TopCat.toSSet.obj X) := by
   sorry
 
 end TopCat
