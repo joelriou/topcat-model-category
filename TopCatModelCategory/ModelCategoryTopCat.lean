@@ -1,7 +1,8 @@
 import TopCatModelCategory.SSet.KanComplexKeyLemma
 import TopCatModelCategory.SSet.KanComplexWColimits
 import TopCatModelCategory.TopPackage
-import TopCatModelCategory.TopCat.Adj
+import TopCatModelCategory.TopCat.HornDeformationRetract
+import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
 
 open HomotopicalAlgebra CategoryTheory MorphismProperty Limits Opposite
 
