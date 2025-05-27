@@ -105,6 +105,10 @@ protected theorem lift_apply {X Y Z : TopCat.{u}} {f : X ⟶ Y} {g : X ⟶ Z} {x
 
 def I : TopCat.{u} := TopCat.of (ULift unitInterval)
 
+instance : LocallyCompactSpace I := by
+  dsimp [I]
+  infer_instance
+
 def I.mk (t : unitInterval) : I := ULift.up t
 
 instance : OfNat I 0 := ⟨I.mk 0⟩

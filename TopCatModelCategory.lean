@@ -54,6 +54,7 @@ import TopCatModelCategory.SSet.Horn
 import TopCatModelCategory.SSet.IsFiniteCoproducts
 import TopCatModelCategory.SSet.KanComplexKeyLemma
 import TopCatModelCategory.SSet.KanComplexW
+import TopCatModelCategory.SSet.KanComplexWColimits
 import TopCatModelCategory.SSet.KanComplexWHomotopy
 import TopCatModelCategory.SSet.KanComplexWRetracts
 import TopCatModelCategory.SSet.MinimalFibrations

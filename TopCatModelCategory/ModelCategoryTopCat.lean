@@ -1,8 +1,9 @@
 import TopCatModelCategory.SSet.KanComplexKeyLemma
+import TopCatModelCategory.SSet.KanComplexWColimits
 import TopCatModelCategory.TopPackage
 import TopCatModelCategory.TopCat.Adj
 
-open HomotopicalAlgebra CategoryTheory MorphismProperty
+open HomotopicalAlgebra CategoryTheory MorphismProperty Limits Opposite
 
 namespace TopCat
 
@@ -46,6 +47,71 @@ lemma rlp_J_iff {E B : TopCat} (p : E ⟶ B) :
 instance : IsSmall.{0} I := by dsimp [I]; infer_instance
 instance : IsSmall.{0} J := by dsimp [J]; infer_instance
 
+-- could be generalized to more general well ordered types...
+instance :
+    (t₁Inclusions ⊓ weakEquivalences TopCat).IsStableUnderTransfiniteCompositionOfShape ℕ where
+  le := by
+    rintro X Y f ⟨hf⟩
+    refine ⟨t₁Inclusions.isT₁Inclusion_of_transfiniteCompositionOfShape
+      (hf.ofLE inf_le_left), ?_⟩
+    rw [weakEquivalences_eq, inverseImage_iff]
+    apply (SSet.KanComplex.W.isStableUnderColimitsOfShape ℕ).colimitsOfShape_le
+    have : PreservesColimit hf.F toSSet :=
+        preservesColimit_of_preserves_colimit_cocone hf.isColimit
+          (evaluationJointlyReflectsColimits _ (fun ⟨n⟩ ↦ by
+            have : PreservesColimit hf.F _ :=
+              t₁Inclusions.preservesColimit_coyoneda_obj_of_compactSpace
+                (hf.ofLE inf_le_left) (.of n.toTopObj)
+            exact isColimitOfPreserves
+              (coyoneda.obj (op (TopCat.of n.toTopObj))) hf.isColimit))
+    have hc₁ := isColimitConstCocone ℕ (toSSet.obj X)
+    let c₂ := toSSet.mapCocone { pt := Y, ι := hf.incl }
+    let φ : (Functor.const _).obj (toSSet.obj X) ⟶ hf.F ⋙ toSSet :=
+      { app n := toSSet.map (hf.isoBot.inv ≫ hf.F.map (homOfLE bot_le))
+        naturality n₁ n₂ g := by
+          dsimp
+          simp only [Category.id_comp, ← Functor.map_comp, Category.assoc]
+          rfl }
+    have hf' (n : ℕ) : SSet.KanComplex.W (toSSet.map (hf.F.map (homOfLE bot_le : ⊥ ⟶ n))) := by
+      induction n with
+      | zero => simpa using SSet.KanComplex.W.id _
+      | succ n hn =>
+        rw [← homOfLE_comp bot_le (Nat.le_add_right n 1), Functor.map_comp,
+          Functor.map_comp]
+        exact SSet.KanComplex.W.comp _ _ hn (hf.map_mem n (by simp)).2
+    have : toSSet.map f = hc₁.desc (Cocone.mk _ (φ ≫ c₂.ι)) := hc₁.hom_ext (fun n ↦ by
+      rw [hc₁.fac]
+      dsimp [φ, c₂]
+      simp only [Category.id_comp, ← Functor.map_comp]
+      congr 1
+      simpa using hf.fac.symm)
+    rw [this]
+    refine ⟨_, _, _, _, _, isColimitOfPreserves toSSet hf.isColimit, _, fun n ↦ ?_⟩
+    dsimp [φ]
+    rw [Functor.map_comp]
+    exact MorphismProperty.comp_mem _ _ _ (.of_iso _) (hf' _)
+
+lemma deformationRetracts_le_weakEquivalences :
+    deformationRetracts ≤ weakEquivalences TopCat.{0} := by
+  rintro X Y _ ⟨r, rfl⟩
+  rw [weakEquivalences_eq, inverseImage_iff]
+  exact SSet.KanComplex.W.homotopyEquivHom (.ofDeformationRetract r.toSSet)
+
+lemma I_le_t₁Inclusions : TopCat.modelCategory.I ≤ t₁Inclusions := by
+  intro _ _ _ ⟨n⟩
+  apply SSet.t₁Inclusions_toObj_map_of_mono
+
+lemma J_le_t₁Inclusions : TopCat.modelCategory.J ≤ t₁Inclusions := by
+  intro _ _ _ h
+  simp only [J, iSup_iff] at h
+  obtain ⟨n, ⟨i⟩⟩ := h
+  apply SSet.t₁Inclusions_toObj_map_of_mono
+
+lemma J_le_deformationRetracts : TopCat.modelCategory.J ≤ deformationRetracts := by
+  intro _ _ _ h
+  simp only [J, iSup_iff] at h
+  obtain ⟨n, ⟨i⟩⟩ := h
+  exact ⟨SSet.horn.deformationRetractToTopMap i, by simp⟩
 
 def packageTopCat : TopPackage.{0} TopCat.{0} where
   I' := TopCat.modelCategory.I
@@ -74,15 +140,15 @@ def packageTopCat : TopPackage.{0} TopCat.{0} where
     refine TopCat.t₁Inclusions.preservesColimit_coyoneda_obj_of_compactSpace
       ((hf.transfiniteCompositionOfShape).ofLE ?_) _
     simp only [ofHoms_homFamily, pushouts_le_iff, coproducts_le_iff, sup_le_iff]
-    constructor
-    · intro _ _ _ ⟨n⟩
-      apply SSet.t₁Inclusions_toObj_map_of_mono
-    · intro _ _ _ h
-      simp only [J, iSup_iff] at h
-      obtain ⟨n, ⟨i⟩⟩ := h
-      apply SSet.t₁Inclusions_toObj_map_of_mono
+    exact ⟨I_le_t₁Inclusions, J_le_t₁Inclusions⟩
   infiniteCompositions_le_W' := by
-    sorry
+    refine (transfiniteCompositionsOfShape_monotone ℕ ?_).trans
+      (((t₁Inclusions ⊓ weakEquivalences TopCat).transfiniteCompositionsOfShape_le ℕ).trans
+        (by simp))
+    trans t₁Inclusions ⊓ deformationRetracts
+    · simp only [le_inf_iff, pushouts_le_iff, coproducts_le_iff]
+      exact ⟨J_le_t₁Inclusions, J_le_deformationRetracts⟩
+    · exact inf_le_inf (by simp) deformationRetracts_le_weakEquivalences
   fibration_is_trivial_iff' {X Y} p hp := by
     rw [rlp_J_iff, ← SSet.modelCategoryQuillen.fibration_iff] at hp
     rw [weakEquivalence_iff, rlp_I_iff, SSet.KanComplex.weakEquivalence_iff_of_fibration]
