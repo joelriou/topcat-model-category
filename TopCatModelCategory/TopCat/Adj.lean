@@ -28,7 +28,6 @@ instance : toTop.IsLeftAdjoint := sSetTopAdj.isLeftAdjoint
 
 instance {J : Type*} [LinearOrder J] :
     PreservesWellOrderContinuousOfShape J SSet.toTop where
-
 end SSet
 
 namespace SimplexCategory
@@ -90,6 +89,20 @@ lemma toSSet_map_const (X : TopCat.{0}) {Y : TopCat.{0}} (y : Y) :
   rfl
 
 end TopCat
+
+noncomputable instance : Unique (|Δ[0]|) := ⦋0⦌.toTopHomeo.unique
+
+lemma sSetTopAdj_homEquiv_stdSimplex_zero {X : TopCat.{0}}
+    (f : |Δ[0]| ⟶ X) :
+    sSetTopAdj.homEquiv Δ[0] X f =
+      SSet.const (TopCat.toSSetObj₀Equiv.symm (f default)) := by
+  have : sSetTopAdj.unit.app Δ[0] =
+      SSet.const (TopCat.toSSetObj₀Equiv.symm default) := by
+    apply SSet.yonedaEquiv.injective
+    apply TopCat.toSSetObj₀Equiv.injective
+    apply Subsingleton.elim
+  rw [Adjunction.homEquiv_unit, TopCat.toSSetObj₀Equiv_symm_apply, this]
+  rfl
 
 namespace SSet
 
@@ -184,21 +197,97 @@ open TopCat
 
 namespace stdSimplex
 
+
 noncomputable def toTopObjHomeoUnitInterval :
     |Δ[1]| ≃ₜ I :=
   ((SimplexCategory.toTopHomeo _).trans SimplexCategory.toTopObjOneHomeo).trans
-    Homeomorph.ulift.symm
+    (unitInterval.symmHomeomorph.trans Homeomorph.ulift.symm)
 
 noncomputable def toSSetObjI : Δ[1] ⟶ TopCat.toSSet.obj I :=
   sSetTopAdj.homEquiv _ _ (ofHom (toContinuousMap toTopObjHomeoUnitInterval))
 
 @[simp]
+lemma δ_one_toSSetObjI :
+    stdSimplex.δ 1 ≫ toSSetObjI = SSet.const (toSSetObj₀Equiv.symm 0) := by
+  dsimp only [toSSetObjI]
+  rw [← Adjunction.homEquiv_naturality_left,
+    sSetTopAdj_homEquiv_stdSimplex_zero]
+  dsimp
+  congr 3
+  ext x
+  obtain rfl := Subsingleton.elim x default
+  dsimp only [toTopObjHomeoUnitInterval]
+  simp [ContinuousMap.comp, Function.comp]
+  dsimp only [DFunLike.coe, EquivLike.coe]
+  dsimp
+  apply Homeomorph.ulift.injective
+  simp only [Homeomorph.apply_symm_apply]
+  change _ = 0
+  erw [SimplexCategory.toTopHomeo_naturality_apply]
+  have : ⦋0⦌.toTopHomeo default = default := Subsingleton.elim _ _
+  rw [this]
+  rw [Subtype.ext_iff]
+  simp [SimplexCategory.toTopObjOneHomeo]
+  trans 1 - 1
+  · congr
+    simp
+    rw [Finset.sum_eq_single 0 (by simp) (by simp; rfl)]; rfl
+  · simp
+
+@[simp]
+lemma δ_zero_toSSetObjI :
+    stdSimplex.δ 0 ≫ toSSetObjI = SSet.const (toSSetObj₀Equiv.symm 1) := by
+  -- needs cleanup...
+  dsimp only [toSSetObjI]
+  rw [← Adjunction.homEquiv_naturality_left,
+    sSetTopAdj_homEquiv_stdSimplex_zero]
+  dsimp
+  congr 3
+  ext x
+  obtain rfl := Subsingleton.elim x default
+  dsimp only [toTopObjHomeoUnitInterval]
+  simp [ContinuousMap.comp, Function.comp]
+  dsimp only [DFunLike.coe, EquivLike.coe]
+  dsimp
+  apply Homeomorph.ulift.injective
+  simp only [Homeomorph.apply_symm_apply]
+  change _ = 1
+  erw [SimplexCategory.toTopHomeo_naturality_apply]
+  have : ⦋0⦌.toTopHomeo default = default := Subsingleton.elim _ _
+  rw [this]
+  rw [Subtype.ext_iff]
+  simp [SimplexCategory.toTopObjOneHomeo]
+  change ¬ (1 = 0)
+  omega
+
+@[simp]
 lemma toSSetObj_app_const_zero :
-    toSSetObjI.app (op ⦋0⦌) (const _ 0 _) = toSSetObj₀Equiv.symm 0 := sorry
+    toSSetObjI.app (op ⦋0⦌) (const _ 0 _) = toSSetObj₀Equiv.symm 0 := by
+  -- needs cleanup...
+  apply yonedaEquiv.symm.injective
+  rw [← yonedaEquiv_symm_comp]
+  trans stdSimplex.δ 1 ≫ toSSetObjI
+  · congr
+    apply yonedaEquiv.injective
+    rw [Equiv.apply_symm_apply]
+    ext i
+    fin_cases i
+    rfl
+  · simp
 
 @[simp]
 lemma toSSetObj_app_const_one :
-    toSSetObjI.app (op ⦋0⦌) (const _ 1 _) = toSSetObj₀Equiv.symm 1 := sorry
+    toSSetObjI.app (op ⦋0⦌) (const _ 1 _) = toSSetObj₀Equiv.symm 1 := by
+  apply yonedaEquiv.symm.injective
+  rw [← yonedaEquiv_symm_comp]
+  trans stdSimplex.δ 0 ≫ toSSetObjI
+  · congr
+    apply yonedaEquiv.injective
+    rw [Equiv.apply_symm_apply]
+    ext i
+    fin_cases i
+    rfl
+  · simp
 
 end stdSimplex
 
