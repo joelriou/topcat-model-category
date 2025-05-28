@@ -114,15 +114,35 @@ noncomputable def isColimitPrecomposeObjOfIsIsoOfEpi (hc₂ : IsColimit c₂)
     (hR : ∀ (i : J.R), IsIso (φ.app (.right i)))
     (hL : ∀ (i : J.L), Epi (φ.app (.left i))) :
     IsColimit ((Cocones.precompose φ).obj c₂) :=
-  Multicofork.IsColimit.mk _ (fun s ↦ hc₂.desc (multicofork φ hR hL s)) (fun s i ↦ by
-    have := hc₂.fac (multicofork φ hR hL s) (.right i)
-    dsimp at this
-    dsimp [Cocones.precompose]
-    rw [← cancel_epi (inv (φ.app (.right i))), ← this, Multicofork.π]
-    simp)
-    sorry
+  Multicofork.IsColimit.mk _ (fun s ↦ hc₂.desc (multicofork φ hR hL s))
+    (fun s i ↦ by
+      have := hc₂.fac (multicofork φ hR hL s) (.right i)
+      dsimp at this
+      dsimp [Cocones.precompose]
+      rw [← cancel_epi (inv (φ.app (.right i))), ← this, Multicofork.π]
+      simp)
+    (fun s m hm ↦ Multicofork.IsColimit.hom_ext hc₂ (fun i ↦ by
+      have := hc₂.fac (multicofork φ hR hL s) (.right i)
+      dsimp at this ⊢
+      rw [this, ← hm]
+      dsimp only [Cocones.precompose, Multicofork.π]
+      simp))
 
 end Multicofork
+
+namespace MultispanIndex.multispan
+
+@[simps]
+def homMk (l : ∀ i, d₁.left i ⟶ d₂.left i) (r : ∀ i, d₁.right i ⟶ d₂.right i)
+    (h₁ : ∀ i, d₁.fst i ≫ r (J.fst i) = l i ≫ d₂.fst i)
+    (h₂ : ∀ i, d₁.snd i ≫ r (J.snd i) = l i ≫ d₂.snd i) :
+    d₁.multispan ⟶ d₂.multispan where
+  app i := match i with
+    | .left i => l i
+    | .right i => r i
+  naturality := by rintro (i | i) (j | j) (_ | _ | _) <;> aesop
+
+end MultispanIndex.multispan
 
 end Limits
 
