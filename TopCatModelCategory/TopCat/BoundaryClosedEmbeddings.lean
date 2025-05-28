@@ -169,30 +169,57 @@ end Subcomplex
 
 open NNReal
 
+
+namespace boundary.closedEmbeddings_toTop_map_ι
+
+variable (n : ℕ)
+
+def ι' : ⦋n⦌.toTopObj → (Fin (n + 1) → ℝ≥0) := Subtype.val
+lemma hι' : IsClosedEmbedding (ι' n) :=
+  Topology.IsClosedEmbedding.subtypeVal (IsCompact.isClosed (by
+    rw [isCompact_iff_compactSpace, Set.setOf_mem_eq]
+    infer_instance))
+
+noncomputable def ι : |Δ[n]| → (Fin (n + 1) → ℝ≥0) := ι' n ∘ ⦋n⦌.toTopHomeo
+
+lemma hι : IsClosedEmbedding (ι n) :=
+    (hι' n).comp (Homeomorph.isClosedEmbedding _)
+
+variable {n}
+
+lemma toTopSet_obj_face_compl (S : Finset (Fin (n + 1))) :
+    (Subcomplex.toTopSet (ι n)).obj (stdSimplex.face Sᶜ) =
+      ⦋n⦌.toTopObj ⊓ (⨅ (i : S), { f | f i.1 = 0}) := by
+  sorry
+
+lemma toTopSet_obj_face_singleton_compl (i : Fin (n + 1)) :
+    (Subcomplex.toTopSet (ι n)).obj
+      (stdSimplex.face {i}ᶜ) =
+    ⦋n⦌.toTopObj ⊓ { f | f i = 0 } := by
+  rw [toTopSet_obj_face_compl]
+  simp
+
+lemma toTopSet_obj_face_pair_compl (i j : Fin (n + 1)) :
+    (Subcomplex.toTopSet (ι n)).obj
+      (stdSimplex.face {i, j}ᶜ) =
+    ⦋n⦌.toTopObj ⊓ { f | f i = 0 } ⊓ { f | f j = 0 } := by
+  rw [toTopSet_obj_face_compl]
+  aesop
+
+end boundary.closedEmbeddings_toTop_map_ι
+
+open boundary.closedEmbeddings_toTop_map_ι in
 lemma boundary.closedEmbeddings_toTop_map_ι (n : ℕ) :
     TopCat.closedEmbeddings (toTop.map ∂Δ[n].ι) := by
-  let ι' : ⦋n⦌.toTopObj → (Fin (n + 1) → ℝ≥0) := Subtype.val
-  have hι' : IsClosedEmbedding ι' :=
-    Topology.IsClosedEmbedding.subtypeVal (IsCompact.isClosed (by
-      rw [isCompact_iff_compactSpace, Set.setOf_mem_eq]
-      infer_instance))
-  let ι : |Δ[n]| → (Fin (n + 1) → ℝ≥0) := ι' ∘ ⦋n⦌.toTopHomeo
-  have hι : IsClosedEmbedding ι :=
-    IsClosedEmbedding.comp hι' (Homeomorph.isClosedEmbedding _)
-  refine Subcomplex.closedEmbeddings_toTop_map_ι hι
+  refine Subcomplex.closedEmbeddings_toTop_map_ι (hι n)
     (SSet.boundary.multicoequalizerDiagram n) ?_ ?_
   · sorry
   · intro i j
     by_cases hij : i = j
     · subst hij
       simp
-    · wlog hij' : i < j generalizing i j
-      · rw [inf_comm, Finset.pair_comm]
-        exact this _ _ (Ne.symm hij) (by omega)
-      obtain _ | n := n
-      · fin_cases i; fin_cases j
-        simp at hij
-      sorry
+    · simp only [toTopSet_obj_face_compl]
+      aesop
 
 instance (n : ℕ) : T2Space |Δ[n]| := ⦋n⦌.toTopHomeo.symm.t2Space
 
