@@ -4,6 +4,18 @@ import TopCatModelCategory.TopCat.Glueing
 open CategoryTheory Simplicial MorphismProperty TopCat SSet.modelCategoryQuillen
   Topology Limits
 
+lemma Set.range_comp_eq_of_surjective {X Y Z : Type*}
+    (f : Y → Z) {g : X → Y} (hg : Function.Surjective g) :
+    Set.range (f.comp g) = Set.range f := by
+  ext z
+  simp only [mem_range, Function.comp_apply]
+  constructor
+  · rintro ⟨x, rfl⟩
+    exact ⟨g x, rfl⟩
+  · rintro ⟨y, rfl⟩
+    obtain ⟨x, rfl⟩ := hg y
+    exact ⟨x, rfl⟩
+
 namespace SSet
 
 namespace Subcomplex
@@ -14,7 +26,7 @@ variable {X : SSet}
 protected noncomputable def toTop : X.Subcomplex ⥤ TopCat :=
   toPresheafFunctor ⋙ SSet.toTop
 
-variable {Ω : Type} [TopologicalSpace Ω] (ι : |X| → Ω) (hι : IsClosedEmbedding ι)
+variable {Ω : Type} (ι : |X| → Ω)
 
 @[simps]
 def toTopSet : X.Subcomplex ⥤ Set Ω where
@@ -25,7 +37,6 @@ def toTopSet : X.Subcomplex ⥤ Set Ω where
     dsimp
     rw [← ConcreteCategory.comp_apply, ← Functor.map_comp, homOfLE_ι])
 
-omit [TopologicalSpace Ω] in
 lemma toTopSet_obj_subset (A : X.Subcomplex) : (toTopSet ι).obj A ⊆ Set.range ι := by
   rintro _ ⟨a, rfl⟩
   simp
@@ -36,9 +47,22 @@ lemma toTopSet_iSup {α : Type*} (U : α → X.Subcomplex) :
   · rw [Set.iUnion_subset_iff]
     intro i
     exact leOfHom ((toTopSet ι).map (CategoryTheory.homOfLE (le_iSup _ _)))
-  · sorry
+  · intro x hx
+    simp only [toTopSet_obj, Set.mem_range, Function.comp_apply] at hx
+    obtain ⟨x, rfl⟩ := hx
+    obtain ⟨⟨⟨n, ⟨s, hs⟩, hs'⟩, y⟩, rfl⟩ := surjective_sigmaToTopObj _ x
+    dsimp at y
+    simp only [Subpresheaf.iSup_obj, Set.mem_iUnion] at hs
+    obtain ⟨i, hi⟩ := hs
+    simp only [toTopSet_obj, Subpresheaf.toPresheaf_obj, Set.mem_iUnion, Set.mem_range,
+      Function.comp_apply]
+    refine ⟨i, toTop.map (by exact yonedaEquiv.symm ⟨s, hi⟩) (⦋n⦌.toTopHomeo.symm y), ?_⟩
+    dsimp [sigmaToTopObj]
+    rw [← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply, ← Functor.map_comp,
+      ← Functor.map_comp]
+    rfl
 
-variable {ι}
+variable {ι} [TopologicalSpace Ω] (hι : IsClosedEmbedding ι)
 
 noncomputable def toTopNatTrans : Subcomplex.toTop ⟶ toTopSet ι ⋙ Set.functorToTopCat where
   app A := ofHom ⟨fun x ↦ ⟨ι (SSet.toTop.map A.ι x), by simp⟩, by
@@ -61,7 +85,10 @@ lemma isIso_toTopNatTrans_app (A : X.Subcomplex)
 
 lemma surjective_toTopNatTrans_app (A : X.Subcomplex) :
     Function.Surjective ((toTopNatTrans hι).app A) := by
-  sorry
+  intro ⟨x, hx⟩
+  simp at hx
+  obtain ⟨y, rfl⟩ := hx
+  exact ⟨y, rfl⟩
 
 instance (A : X.Subcomplex) :
     Epi ((toTopNatTrans hι).app A) := by
@@ -169,20 +196,20 @@ end Subcomplex
 
 open NNReal
 
-namespace boundary.closedEmbeddings_toTop_map_ι
+namespace stdSimplex
 
 variable (n : ℕ)
 
-def ι' : ⦋n⦌.toTopObj → (Fin (n + 1) → ℝ≥0) := Subtype.val
-lemma hι' : IsClosedEmbedding (ι' n) :=
+def ι'ToTop : ⦋n⦌.toTopObj → (Fin (n + 1) → ℝ≥0) := Subtype.val
+lemma hι'ToTop : IsClosedEmbedding (ι'ToTop n) :=
   Topology.IsClosedEmbedding.subtypeVal (IsCompact.isClosed (by
     rw [isCompact_iff_compactSpace, Set.setOf_mem_eq]
     infer_instance))
 
-noncomputable def ι : |Δ[n]| → (Fin (n + 1) → ℝ≥0) := ι' n ∘ ⦋n⦌.toTopHomeo
+noncomputable def ιToTop : |Δ[n]| → (Fin (n + 1) → ℝ≥0) := ι'ToTop n ∘ ⦋n⦌.toTopHomeo
 
-lemma hι : IsClosedEmbedding (ι n) :=
-    (hι' n).comp (Homeomorph.isClosedEmbedding _)
+lemma hιToTop : IsClosedEmbedding (ιToTop n) :=
+    (hι'ToTop n).comp (Homeomorph.isClosedEmbedding _)
 
 variable {n}
 
@@ -240,40 +267,145 @@ lemma injective_toTop_map_face_ι (S : Finset (Fin (n + 1))) :
         aesop))
 
 lemma toTopSet_obj_face_compl (S : Finset (Fin (n + 1))) :
-    (Subcomplex.toTopSet (ι n)).obj (stdSimplex.face Sᶜ) =
+    (Subcomplex.toTopSet (ιToTop n)).obj (stdSimplex.face Sᶜ) =
       ⦋n⦌.toTopObj ⊓ (⨅ (i : S), { f | f i.1 = 0}) := by
   dsimp [Subcomplex.toTopSet]
-  sorry
+  by_cases hS : S = Finset.univ
+  · subst hS
+    trans ∅
+    · simp only [Set.range_eq_empty_iff, Finset.compl_univ, stdSimplex.face_emptySet,
+        ← Types.initial_iff_empty]
+      constructor
+      exact IsInitial.isInitialObj (toTop ⋙ forget _) _ Subcomplex.botIsInitial
+    · ext f
+      simp only [Set.mem_empty_iff_false, Set.mem_inter_iff, Set.mem_iInter, Subtype.forall,
+        Finset.mem_univ, forall_const, false_iff, not_and, not_forall]
+      intro hf
+      by_contra!
+      have (i) : f i = 0 := this _
+      replace hf := Set.mem_setOf.1 hf
+      simp [this] at hf
+  · generalize hm : Sᶜ.card = m
+    obtain _ | m := m
+    · exact (hS (by simpa using hm)).elim
+    let e := Sᶜ.orderIsoOfFin hm
+    let φ : ⦋m⦌ ⟶ ⦋n⦌ := SimplexCategory.mkHom
+      ((OrderHom.Subtype.val _).comp e.toOrderEmbedding.toOrderHom)
+    have injective_φ : Function.Injective φ :=
+      Subtype.val_injective.comp e.injective
+    have range_φ : Set.range φ = (S.toSet)ᶜ := by
+      ext x
+      simp only [Set.mem_range,
+        Finset.coe_compl, Set.mem_compl_iff, Finset.mem_coe]
+      constructor
+      · rintro ⟨y, rfl⟩
+        have := (e y).2
+        rwa [Finset.mem_compl] at this
+      · intro hx
+        exact ⟨e.symm ⟨x, by simpa⟩,
+          Subtype.ext_iff.1 (e.apply_symm_apply ⟨x, _⟩)⟩
+    let iso := stdSimplex.isoOfRepresentableBy.{0}
+          (stdSimplex.faceRepresentableBy _ _ e)
+    have hiso : (stdSimplex.face Sᶜ).ι =
+        iso.inv ≫ stdSimplex.map φ := by
+      rw [← cancel_epi iso.hom, Iso.hom_inv_id_assoc]
+      apply yonedaEquiv.injective
+      rw [yonedaEquiv_comp]
+      rfl
+    have : ιToTop n ∘ toTop.map (stdSimplex.face Sᶜ).ι =
+        Subtype.val.comp (((SimplexCategory.toTopMap φ).comp
+          ⦋m⦌.toTopHomeo).comp (toTop.map iso.inv)) := by
+      rw [← SimplexCategory.toTopHomeo_naturality,
+        hiso, Functor.map_comp]
+      rfl
+    rw [this, ← Function.comp_assoc, ← Function.comp_assoc,
+      Set.range_comp_eq_of_surjective, Set.range_comp_eq_of_surjective]
+    rotate_left
+    · apply Homeomorph.surjective
+    · apply ConcreteCategory.surjective_of_epi_of_preservesPushout
+    · have hφ (g : ⦋m⦌.toTopObj) (i : Fin (n + 1)) (hi : i ∈ S) :
+          SimplexCategory.toTopMap φ g i = 0 := by
+        dsimp [SimplexCategory.toTopMap]
+        apply Finset.sum_eq_zero
+        rintro j hj
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hj
+        have : i ∈ Sᶜ.toSet := by simp [← hj, ← range_φ]
+        simp only [Finset.coe_compl, Set.mem_compl_iff, Finset.mem_coe] at this
+        exact (this hi).elim
+      ext f
+      simp only [Set.mem_range, Function.comp_apply, Subtype.exists, Set.mem_inter_iff,
+        Set.mem_iInter, Subtype.forall]
+      constructor
+      · rintro ⟨g, hg, rfl⟩
+        exact ⟨by simp, fun i hi ↦ hφ _ _ hi⟩
+      · rintro ⟨hf, hf'⟩
+        replace hf := Set.mem_setOf.1 hf
+        replace hf' (i : Fin (n + 1)) (hi : i ∈ S) : f i = 0 := hf' i hi
+        refine ⟨f ∘ φ, ?_, ?_⟩
+        · simp only [SimplexCategory.toTopObj, SimplexCategory.len_mk, Set.mem_setOf_eq,
+            Function.comp_apply]
+          rw [← hf]
+          erw [← Finset.sum_compl_add_sum S f]
+          rw [Finset.sum_eq_zero hf', add_zero]
+          apply Finset.sum_of_injOn (e := φ)
+          · intro _ _ _ _ h
+            exact injective_φ h
+          · simp only [SimplexCategory.len_mk, Finset.coe_univ, Finset.coe_compl,
+              Set.mapsTo_univ_iff, Set.mem_compl_iff, Finset.mem_coe]
+            intro x
+            have : φ x ∈ (S.toSet)ᶜ := by simp [← range_φ]
+            simpa using this
+          · intro i hi hi'
+            exfalso
+            simp only [SimplexCategory.len_mk, Finset.mem_compl] at hi
+            apply hi
+            have : i ∉ Set.range φ := by simpa using hi'
+            rw [range_φ] at this
+            simpa [range_φ]using this
+          · tauto
+        · ext i
+          simp
+          by_cases hi : i ∈ Set.range φ
+          · obtain ⟨j, rfl⟩ := hi
+            dsimp at j
+            rw [Finset.sum_eq_single j _ (by simp)]
+            · rfl
+            · intro k hk hkj
+              exact (hkj (injective_φ (by simpa using hk))).elim
+          · rw [Finset.sum_eq_zero, hf']
+            · rw [range_φ] at hi
+              simpa using hi
+            · simp at hi ⊢
+              tauto
 
 lemma toTopSet_obj_face_singleton_compl (i : Fin (n + 1)) :
-    (Subcomplex.toTopSet (ι n)).obj
+    (Subcomplex.toTopSet (ιToTop n)).obj
       (stdSimplex.face {i}ᶜ) =
     ⦋n⦌.toTopObj ⊓ { f | f i = 0 } := by
   rw [toTopSet_obj_face_compl]
   simp
 
 lemma toTopSet_obj_face_pair_compl (i j : Fin (n + 1)) :
-    (Subcomplex.toTopSet (ι n)).obj
+    (Subcomplex.toTopSet (ιToTop n)).obj
       (stdSimplex.face {i, j}ᶜ) =
     ⦋n⦌.toTopObj ⊓ { f | f i = 0 } ⊓ { f | f j = 0 } := by
   rw [toTopSet_obj_face_compl]
   aesop
 
-end boundary.closedEmbeddings_toTop_map_ι
+end stdSimplex
 
-open boundary.closedEmbeddings_toTop_map_ι in
 lemma boundary.closedEmbeddings_toTop_map_ι (n : ℕ) :
     TopCat.closedEmbeddings (toTop.map ∂Δ[n].ι) := by
-  refine Subcomplex.closedEmbeddings_toTop_map_ι (hι n)
+  refine Subcomplex.closedEmbeddings_toTop_map_ι (stdSimplex.hιToTop n)
     (SSet.boundary.multicoequalizerDiagram n) ?_ ?_
   · intro i
-    exact ((hι n).continuous.comp (by continuity)).isClosedEmbedding
-      ((hι n).injective.comp (injective_toTop_map_face_ι _))
+    exact ((stdSimplex.hιToTop n).continuous.comp (by continuity)).isClosedEmbedding
+      ((stdSimplex.hιToTop n).injective.comp (stdSimplex.injective_toTop_map_face_ι _))
   · intro i j
     by_cases hij : i = j
     · subst hij
       simp
-    · simp only [toTopSet_obj_face_compl]
+    · simp only [stdSimplex.toTopSet_obj_face_compl]
       aesop
 
 instance (n : ℕ) : T2Space |Δ[n]| := ⦋n⦌.toTopHomeo.symm.t2Space
