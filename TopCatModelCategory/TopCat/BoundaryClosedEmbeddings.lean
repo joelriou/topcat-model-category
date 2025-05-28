@@ -25,9 +25,17 @@ def toTopSet : X.Subcomplex ⥤ Set Ω where
     dsimp
     rw [← ConcreteCategory.comp_apply, ← Functor.map_comp, homOfLE_ι])
 
+lemma toTopSet_iSup {α : Type*} (U : α → X.Subcomplex) :
+    ⋃ i, (toTopSet ι).obj (U i) = (toTopSet ι).obj (⨆ i, U i) := by
+  apply subset_antisymm
+  · rw [Set.iUnion_subset_iff]
+    intro i
+    exact leOfHom ((toTopSet ι).map (CategoryTheory.homOfLE (le_iSup _ _)))
+  · sorry
+
 variable {ι}
 
-noncomputable def toTopNaTrans : Subcomplex.toTop ⟶ toTopSet ι ⋙ Set.functorToTopCat where
+noncomputable def toTopNatTrans : Subcomplex.toTop ⟶ toTopSet ι ⋙ Set.functorToTopCat where
   app A := ofHom ⟨fun x ↦ ⟨ι (SSet.toTop.map A.ι x), by simp⟩, by
     dsimp
     exact Continuous.subtype_mk (hι.continuous.comp
@@ -39,6 +47,13 @@ noncomputable def toTopNaTrans : Subcomplex.toTop ⟶ toTopSet ι ⋙ Set.functo
     dsimp
     rw [← ConcreteCategory.comp_apply, ← Functor.map_comp, homOfLE_ι]
 
+lemma isIso_toTopNatTrans_app (A : X.Subcomplex)
+    (hA : IsClosedEmbedding (ι.comp (SSet.toTop.map A.ι))) :
+    IsIso ((toTopNatTrans hι).app A) := by
+  have : (toTopNatTrans hι).app A = (isoOfHomeo hA.homeomorphRange).hom := rfl
+  rw [this]
+  infer_instance
+
 variable {α : Type*} [Finite α] {A : X.Subcomplex} {U : α → X.Subcomplex}
   {V : α → α → X.Subcomplex}
   (h : CompleteLattice.MulticoequalizerDiagram A U V)
@@ -48,10 +63,30 @@ noncomputable def isColimitMulticoforkMapToTop :
   Multicofork.isColimitMapEquiv _ toTop
     (isColimitOfPreserves SSet.toTop (multicoforkIsColimit h))
 
+variable (hU : ∀ i, IsClosedEmbedding (ι.comp (SSet.toTop.map (U i).ι)))
+  (hV : ∀ i j, (toTopSet ι).obj (U i) ⊓ (toTopSet ι).obj (U j) = (toTopSet ι).obj (V i j))
+
+include h hU hV in
+lemma multicoequalizerDiagram_toTopSet :
+    TopCat.MulticoequalizerDiagram (X := .of Ω) ((toTopSet ι).obj A)
+      (fun i ↦ (toTopSet ι).obj (U i)) (fun i j ↦ (toTopSet ι).obj (V i j)) := by
+  apply MulticoequalizerDiagram.mk_of_isClosed
+  · constructor
+    · rw [Set.iSup_eq_iUnion, toTopSet_iSup, h.iSup_eq]
+    · exact hV
+  · intro i
+    exact (hU i).isClosed_range
+
+/-example : 0 = by
+    have := (multicoequalizerDiagram_toTopSet h hU hV).multicofork
+    sorry
+    := sorry-/
+
 end Subcomplex
 
 lemma boundary.closedEmbeddings_toTop_map_ι (n : ℕ) :
-    TopCat.closedEmbeddings (toTop.map ∂Δ[n].ι) := sorry
+    TopCat.closedEmbeddings (toTop.map ∂Δ[n].ι) := by
+  sorry
 
 instance (n : ℕ) : T2Space |Δ[n]| := ⦋n⦌.toTopHomeo.symm.t2Space
 

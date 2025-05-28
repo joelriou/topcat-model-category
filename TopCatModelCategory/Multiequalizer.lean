@@ -81,3 +81,49 @@ noncomputable def Multicofork.isColimitMapOfPreserves
 end Limits
 
 end CategoryTheory-/
+
+namespace CategoryTheory
+
+namespace Limits
+
+variable {C D : Type*} [Category C] [Category D]
+
+variable {J : MultispanShape.{w, w'}} {d₁ d₂ : MultispanIndex J C}
+  (c₂ : Multicofork d₂) (φ : d₁.multispan ⟶ d₂.multispan)
+
+namespace Multicofork
+
+namespace isColimitPrecomposeObjOfIsIsoOfEpi
+
+noncomputable abbrev multicofork
+    (hR : ∀ (i : J.R), IsIso (φ.app (.right i)))
+    (hL : ∀ (i : J.L), Epi (φ.app (.left i)))
+    (s : Multicofork d₁) : Multicofork d₂ :=
+  Multicofork.ofπ _ s.pt (fun i ↦ (inv (φ.app (.right i))) ≫ s.π i) (fun i ↦ by
+    have h₁ := φ.naturality (WalkingMultispan.Hom.fst i)
+    have h₂ := φ.naturality (WalkingMultispan.Hom.snd i)
+    rw [← cancel_epi (φ.app (.left i))]
+    dsimp at h₁ h₂ ⊢
+    rw [← reassoc_of% h₁, ← reassoc_of% h₂,
+      IsIso.hom_inv_id_assoc, IsIso.hom_inv_id_assoc, condition])
+
+end isColimitPrecomposeObjOfIsIsoOfEpi
+
+open isColimitPrecomposeObjOfIsIsoOfEpi in
+noncomputable def isColimitPrecomposeObjOfIsIsoOfEpi (hc₂ : IsColimit c₂)
+    (hR : ∀ (i : J.R), IsIso (φ.app (.right i)))
+    (hL : ∀ (i : J.L), Epi (φ.app (.left i))) :
+    IsColimit ((Cocones.precompose φ).obj c₂) :=
+  Multicofork.IsColimit.mk _ (fun s ↦ hc₂.desc (multicofork φ hR hL s)) (fun s i ↦ by
+    have := hc₂.fac (multicofork φ hR hL s) (.right i)
+    dsimp at this
+    dsimp [Cocones.precompose]
+    rw [← cancel_epi (inv (φ.app (.right i))), ← this, Multicofork.π]
+    simp)
+    sorry
+
+end Multicofork
+
+end Limits
+
+end CategoryTheory
