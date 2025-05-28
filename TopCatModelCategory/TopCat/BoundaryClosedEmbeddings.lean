@@ -1,13 +1,59 @@
 import TopCatModelCategory.TopCat.Adj
+import TopCatModelCategory.TopCat.Glueing
 
 open CategoryTheory Simplicial MorphismProperty TopCat SSet.modelCategoryQuillen
+  Topology Limits
 
 namespace SSet
 
-instance (n : ℕ) : T2Space |Δ[n]| := ⦋n⦌.toTopHomeo.symm.t2Space
+namespace Subcomplex
+
+variable {X : SSet}
+
+@[simps!]
+protected noncomputable def toTop : X.Subcomplex ⥤ TopCat :=
+  toPresheafFunctor ⋙ SSet.toTop
+
+variable {Ω : Type} [TopologicalSpace Ω] (ι : |X| → Ω) (hι : IsClosedEmbedding ι)
+
+@[simps]
+def toTopSet : X.Subcomplex ⥤ Set Ω where
+  obj A := Set.range (ι.comp (SSet.toTop.map A.ι))
+  map {A₁ A₂} f := CategoryTheory.homOfLE (by
+    rintro _ ⟨x, rfl⟩
+    refine ⟨Subcomplex.toTop.map f x, ?_⟩
+    dsimp
+    rw [← ConcreteCategory.comp_apply, ← Functor.map_comp, homOfLE_ι])
+
+variable {ι}
+
+noncomputable def toTopNaTrans : Subcomplex.toTop ⟶ toTopSet ι ⋙ Set.functorToTopCat where
+  app A := ofHom ⟨fun x ↦ ⟨ι (SSet.toTop.map A.ι x), by simp⟩, by
+    dsimp
+    exact Continuous.subtype_mk (hι.continuous.comp
+      (ContinuousMapClass.map_continuous _)) _⟩
+  naturality {A₁ A₂} f := by
+    ext x₁
+    dsimp
+    ext
+    dsimp
+    rw [← ConcreteCategory.comp_apply, ← Functor.map_comp, homOfLE_ι]
+
+variable {α : Type*} [Finite α] {A : X.Subcomplex} {U : α → X.Subcomplex}
+  {V : α → α → X.Subcomplex}
+  (h : CompleteLattice.MulticoequalizerDiagram A U V)
+
+noncomputable def isColimitMulticoforkMapToTop :
+    IsColimit (h.multicofork.map Subcomplex.toTop) :=
+  Multicofork.isColimitMapEquiv _ toTop
+    (isColimitOfPreserves SSet.toTop (multicoforkIsColimit h))
+
+end Subcomplex
 
 lemma boundary.closedEmbeddings_toTop_map_ι (n : ℕ) :
     TopCat.closedEmbeddings (toTop.map ∂Δ[n].ι) := sorry
+
+instance (n : ℕ) : T2Space |Δ[n]| := ⦋n⦌.toTopHomeo.symm.t2Space
 
 lemma boundary.t₁Inclusions_toTop_map_ι (n : ℕ) :
     TopCat.t₁Inclusions (toTop.map ∂Δ[n].ι) :=
