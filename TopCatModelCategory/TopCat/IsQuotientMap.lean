@@ -40,7 +40,6 @@ noncomputable def homeo :
       exact Continuous.smul (Continuous.inv₀ (by continuity) (by simp))
         (continuous_subtype_val)
 
-example {ι : Type*} [PartialOrder ι](a b : ι) (h : a < b) : a ≠ b := by exact ne_of_lt h
 @[simps]
 def param.p₁ : C(ℝ≥0 × Metric.sphere (0 : E) 1, ℝ≥0) where
   toFun := fun ⟨t, u⟩ ↦ t
