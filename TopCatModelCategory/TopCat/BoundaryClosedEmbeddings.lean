@@ -169,7 +169,6 @@ end Subcomplex
 
 open NNReal
 
-
 namespace boundary.closedEmbeddings_toTop_map_ι
 
 variable (n : ℕ)
@@ -187,9 +186,63 @@ lemma hι : IsClosedEmbedding (ι n) :=
 
 variable {n}
 
+lemma injective_toTopMap_stdSimplex_map_of_mono
+    {n m : SimplexCategory} (i : n ⟶ m) (hi : Mono i) :
+    Function.Injective (SimplexCategory.toTop.map i) := by
+  rw [SimplexCategory.mono_iff_injective] at hi
+  intro f₁ f₂ h
+  dsimp at h
+  rw [Subtype.ext_iff] at h ⊢
+  funext j
+  have (f : SimplexCategory.toTop.obj n) : f.1 j = SimplexCategory.toTopMap i f (i j) := by
+    dsimp
+    rw [Finset.sum_eq_single j _ (by simp)]
+    rintro b hb hb'
+    exact (hb' (hi (by simpa using hb))).elim
+  simp only [this, h]
+
+lemma injective_toTop_map_stdSimplex_map_of_mono
+    {n m : SimplexCategory} (i : n ⟶ m) (hi : Mono i) :
+    Function.Injective (toTop.map (stdSimplex.map i)) := by
+  refine ((MorphismProperty.injective _).arrow_mk_iso_iff ?_).2
+    (injective_toTopMap_stdSimplex_map_of_mono i hi)
+  refine Arrow.isoMk (isoOfHomeo n.toTopHomeo) (isoOfHomeo m.toTopHomeo) ?_
+  exact (forget _).map_injective
+    (SimplexCategory.toTopHomeo_naturality i).symm
+
+lemma injective_toTop_map_face_ι (S : Finset (Fin (n + 1))) :
+    Function.Injective (toTop.map (stdSimplex.face S).ι) := by
+  dsimp [Subcomplex.toTopSet]
+  generalize h : S.card = m
+  obtain _ | m := m
+  · have hS : IsInitial (toTop.obj (stdSimplex.face S)) := by
+      obtain rfl : S = ∅ := by rwa [← Finset.card_eq_zero]
+      rw [stdSimplex.face_emptySet]
+      apply IsInitial.isInitialObj
+      exact Subcomplex.botIsInitial
+    have := (Types.initial_iff_empty _).1 ⟨hS.isInitialObj (forget _)⟩
+    exact this.elim
+  · let e := S.orderIsoOfFin h
+    let φ : ⦋m⦌ ⟶ ⦋n⦌ := SimplexCategory.mkHom
+      ((OrderHom.Subtype.val _).comp e.toOrderEmbedding.toOrderHom)
+    have iso : Arrow.mk (stdSimplex.{0}.map φ) ≅ Arrow.mk (stdSimplex.face S).ι :=
+      Arrow.isoMk (stdSimplex.isoOfRepresentableBy (stdSimplex.faceRepresentableBy _ _ e))
+        (Iso.refl _) (by
+          dsimp
+          simp only [Category.comp_id]
+          apply yonedaEquiv.injective
+          rw [yonedaEquiv_comp]
+          rfl)
+    exact ((MorphismProperty.injective _).arrow_mk_iso_iff (toTop.mapArrow.mapIso iso)).1
+      (injective_toTop_map_stdSimplex_map_of_mono φ (by
+        rw [SimplexCategory.mono_iff_injective]
+        intro _ _ _
+        aesop))
+
 lemma toTopSet_obj_face_compl (S : Finset (Fin (n + 1))) :
     (Subcomplex.toTopSet (ι n)).obj (stdSimplex.face Sᶜ) =
       ⦋n⦌.toTopObj ⊓ (⨅ (i : S), { f | f i.1 = 0}) := by
+  dsimp [Subcomplex.toTopSet]
   sorry
 
 lemma toTopSet_obj_face_singleton_compl (i : Fin (n + 1)) :
@@ -213,7 +266,9 @@ lemma boundary.closedEmbeddings_toTop_map_ι (n : ℕ) :
     TopCat.closedEmbeddings (toTop.map ∂Δ[n].ι) := by
   refine Subcomplex.closedEmbeddings_toTop_map_ι (hι n)
     (SSet.boundary.multicoequalizerDiagram n) ?_ ?_
-  · sorry
+  · intro i
+    exact ((hι n).continuous.comp (by continuity)).isClosedEmbedding
+      ((hι n).injective.comp (injective_toTop_map_face_ι _))
   · intro i j
     by_cases hij : i = j
     · subst hij
