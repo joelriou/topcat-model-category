@@ -110,6 +110,7 @@ noncomputable abbrev multicofork
 end isColimitPrecomposeObjOfIsIsoOfEpi
 
 open isColimitPrecomposeObjOfIsIsoOfEpi in
+variable {c₂} in
 noncomputable def isColimitPrecomposeObjOfIsIsoOfEpi (hc₂ : IsColimit c₂)
     (hR : ∀ (i : J.R), IsIso (φ.app (.right i)))
     (hL : ∀ (i : J.L), Epi (φ.app (.left i))) :

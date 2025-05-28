@@ -164,8 +164,7 @@ lemma range_sigmaToTopObj (X : SSet) : Set.range X.sigmaToTopObj = Set.univ := b
 
 section
 
-instance (n : SimplexCategory) : CompactSpace n.toTopObj := by
-  rw [← isCompact_iff_compactSpace]
+lemma isCompact_toTopObj (n : SimplexCategory) : IsCompact n.toTopObj := by
   induction' n using SimplexCategory.rec with n
   let S : Set (Fin (n + 1) → ℝ≥0) := Set.pi Set.univ (fun _ ↦ Set.Iic 1)
   have hS : IsCompact S := isCompact_univ_pi (fun _ ↦ by
@@ -180,6 +179,10 @@ instance (n : SimplexCategory) : CompactSpace n.toTopObj := by
     intro i _
     simpa [Set.mem_Iic, ← hf] using Finset.sum_le_univ_sum_of_nonneg
       (f := f) (s := {i}) (by simp)
+
+instance (n : SimplexCategory) : CompactSpace n.toTopObj := by
+  rw [← isCompact_iff_compactSpace]
+  apply isCompact_toTopObj
 
 end
 
