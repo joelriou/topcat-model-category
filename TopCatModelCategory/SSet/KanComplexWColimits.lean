@@ -74,7 +74,7 @@ def naiveW : MorphismProperty SSet.{u} :=
 
 section
 
-variable (J : Type*) [Category J] [h₁ : Small.{u} J] --[LocallySmall.{u} J]
+variable (J : Type*) [Category J] [h₁ : Small.{u} J]
 
 open MorphismProperty
 
