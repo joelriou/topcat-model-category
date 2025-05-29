@@ -84,11 +84,13 @@ lemma to_quotient₁ : A.toQuotient ≫ A.quotientι₁ = ι₁ ≫ (A.prod ⊤)
 
 @[simp]
 lemma quotientι₀_app_quotient₀ :
-    A.quotientι₀.app _ A.quotient₀ = (A.prod ⊤).quotient₀ := sorry
+    A.quotientι₀.app _ A.quotient₀ = (A.prod ⊤).quotient₀ :=
+  descQuotient_app_quotient₀ _ _ _ _
 
 @[simp]
-lemma quotientι₁_app_quotient₁ :
-    A.quotientι₁.app _ A.quotient₀ = (A.prod ⊤).quotient₀ := sorry
+lemma quotientι₁_app_quotient₀ :
+    A.quotientι₁.app _ A.quotient₀ = (A.prod ⊤).quotient₀ :=
+  descQuotient_app_quotient₀ _ _ _ _
 
 protected noncomputable def πFunctor : SSet.{u} ⥤ Type u :=
   coequalizer (coyoneda.map A.quotientι₀.op) (coyoneda.map A.quotientι₁.op)
@@ -97,7 +99,7 @@ noncomputable def πNatTrans : A.πFunctor ⟶ SSet.evaluation.obj (op ⦋0⦌) 
   coequalizer.desc (coyoneda.map (const A.quotient₀ : Δ[0] ⟶ _).op ≫
     (stdSimplex.coyonedaObjIsoEvaluation 0).hom) (by
     simp only [← Functor.map_comp_assoc, ← op_comp,
-      const_comp, quotientι₀_app_quotient₀, quotientι₁_app_quotient₁])
+      const_comp, quotientι₀_app_quotient₀, quotientι₁_app_quotient₀])
 
 end Subcomplex
 
