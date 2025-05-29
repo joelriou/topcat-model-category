@@ -111,8 +111,36 @@ instance : LocallyCompactSpace I := by
 
 def I.mk (t : unitInterval) : I := ULift.up t
 
+@[continuity]
+lemma I.continuous_mk : Continuous I.mk.{u} := by
+  change Continuous ULift.up
+  continuity
+
+def I.symm : I.{u} → I.{u} := fun t ↦ I.mk (unitInterval.symm t.down)
+
+@[continuity]
+lemma I.continuous_symm : Continuous I.symm.{u} := by
+  change Continuous ((I.mk.comp unitInterval.symm).comp ULift.down)
+  continuity
+
+open NNReal
+
+def I.toNNReal (t : I.{u}) : ℝ≥0 := ⟨t.down, t.1.2.1⟩
+
+@[continuity]
+lemma I.continuous_toNNReal : Continuous I.toNNReal.{u} := by
+  change Continuous ((fun (x : unitInterval) ↦ (⟨x, x.2.1⟩ : ℝ≥0)).comp
+    (ULift.down : I.{u} → unitInterval))
+  continuity
+
 instance : OfNat I 0 := ⟨I.mk 0⟩
 instance : OfNat I 1 := ⟨I.mk 1⟩
+
+@[simp] lemma I.symm_one : I.symm 1 = 0 := by simp [I.symm]; rfl
+@[simp] lemma I.symm_zero : I.symm 0 = 1 := by simp [I.symm]; rfl
+
+@[simp] lemma I.toNNReal_zero : I.toNNReal 0 = 0 := rfl
+@[simp] lemma I.toNNReal_one : I.toNNReal 1 = 1 := rfl
 
 open ChosenFiniteProducts
 
