@@ -1,7 +1,7 @@
 import TopCatModelCategory.TopCat.Adj
 
 open CategoryTheory MorphismProperty TopCat Simplicial HomotopicalAlgebra
-  SSet.modelCategoryQuillen NNReal
+  SSet.modelCategoryQuillen NNReal MonoidalCategory
 
 namespace TopCat
 
@@ -47,11 +47,14 @@ lemma continuous_min {ι : Type*}
 
 variable (i : Fin (n + 2))
 
+lemma nonempty_image_singleton_compl (f : (ToType ⦋n + 1⦌ → ℝ≥0)) :
+    (Finset.image f ({i}ᶜ : Finset _)).Nonempty := by
+  rw [Finset.image_nonempty, ← Finset.coe_nonempty, Finset.coe_compl,
+    Finset.coe_singleton]
+  exact Set.nonempty_compl_of_nontrivial i
+
 noncomputable def μ : (ToType ⦋n + 1⦌ → ℝ≥0) → ℝ≥0 :=
-  fun f ↦ (Finset.image f ({i}ᶜ : Finset _)).min' (by
-    rw [Finset.image_nonempty, ← Finset.coe_nonempty, Finset.coe_compl,
-      Finset.coe_singleton]
-    exact Set.nonempty_compl_of_nontrivial i)
+  fun f ↦ Finset.min' _ (nonempty_image_singleton_compl i f)
 
 @[continuity]
 lemma continuous_μ : Continuous (μ i) :=
@@ -60,25 +63,105 @@ lemma continuous_μ : Continuous (μ i) :=
       Finset.coe_singleton]
     exact Set.nonempty_compl_of_nontrivial i)
 
+lemma exists_eq_μ (f : ToType ⦋n + 1⦌ → ℝ≥0) :
+    ∃ (j : Fin (n + 2)) (_ : j ≠ i), f j = μ i f := by
+  have this := Finset.min'_mem _ (nonempty_image_singleton_compl i f)
+  aesop
+
+@[simp]
+lemma μ_eq_zero (f : TopCat.horn (n + 1) i) :
+    μ i f = 0 := by
+  dsimp [μ]
+  apply le_antisymm
+  · apply Finset.min'_le
+    obtain ⟨f, hf⟩ := f
+    rw [mem_horn_iff] at hf
+    obtain ⟨_, ⟨j, hj, hj'⟩⟩ := hf
+    simp only [Finset.mem_image, Finset.mem_compl, Finset.mem_singleton]
+    exact ⟨j, hj, hj'⟩
+  · simp
+
+-- FIXME: v(i) should be -(n + 1)...
 def v : ToType ⦋n + 1⦌ → ℝ≥0 :=
   fun j ↦ if j = i then 0 else 1
 
-noncomputable def h : (ToType ⦋n + 1⦌ → ℝ≥0) × TopCat.I.{0} → (ToType ⦋n + 1⦌ → ℝ≥0) :=
+variable {i} in
+lemma v_eq_one {j : Fin (n + 2)} (hij : j ≠ i) : v i j = 1 :=
+  if_neg hij
+
+noncomputable def h' : (ToType ⦋n + 1⦌ → ℝ≥0) × TopCat.I.{0} → (ToType ⦋n + 1⦌ → ℝ≥0) :=
   fun ⟨f, t⟩ ↦ f - (TopCat.I.toNNReal (TopCat.I.symm t) * μ i f) • v i
 
 @[continuity]
-lemma continuous_h : Continuous (horn.h i) :=
+lemma continuous_h' : Continuous (horn.h' i) :=
   continuous_pi (fun j ↦ by
     apply Continuous.sub
     · exact (continuous_apply j).comp continuous_fst
     · continuity)
 
-lemma h₁ (f : ToType ⦋n + 1⦌ → ℝ≥0) :
-    h i ⟨f, 1⟩ = f := by
-  simp [h]
-  aesop
+@[simp]
+lemma h'₁ (f : ToType ⦋n + 1⦌ → ℝ≥0) :
+    h' i ⟨f, 1⟩ = f := by
+  ext
+  simp [h']
 
-def deformationRetracts_ι : TopCat.deformationRetracts (horn.ι i) := sorry
+lemma hi' (f : TopCat.horn (n + 1) i) (t : TopCat.I) :
+    h' i ⟨f, t⟩ = f := by
+  ext
+  simp [h']
+
+@[simp]
+noncomputable def h'' : ⦋n + 1⦌.toTopObj × TopCat.I.{0} → (ToType ⦋n + 1⦌ → ℝ≥0) :=
+  fun ⟨f, t⟩ ↦ h' i ⟨f.1, t⟩
+
+@[continuity]
+lemma continuous_h'' : Continuous (horn.h'' i) := by
+  let g : ⦋n + 1⦌.toTopObj × TopCat.I.{0} → (ToType ⦋n + 1⦌ → ℝ≥0) × TopCat.I.{0}  :=
+    fun x ↦ ⟨x.1.1, x.2⟩
+  have hg : Continuous g := by
+    rw [continuous_prodMk]
+    exact ⟨Continuous.fst' continuous_subtype_val, continuous_snd⟩
+  exact (continuous_h' i).comp hg
+
+@[simps! hom]
+noncomputable def h : of ⦋n + 1⦌.toTopObj ⊗ I ⟶ of ⦋n + 1⦌.toTopObj :=
+  ofHom ⟨fun x ↦ ⟨h'' i x, by
+    sorry⟩, by
+    apply Continuous.subtype_mk
+    apply continuous_h''⟩
+
+noncomputable def r : of ⦋n + 1⦌.toTopObj ⟶ of (TopCat.horn (n + 1) i) :=
+  ofHom ⟨fun f ↦ ⟨h'' i ⟨f, 0⟩, by
+    rw [mem_horn_iff]
+    refine ⟨(h i ⟨f, 0⟩).2, ?_⟩
+    obtain ⟨j, hij, hj⟩ := exists_eq_μ i f
+    exact ⟨j, hij, by simp [h', hj, v_eq_one hij]⟩⟩, by
+      apply Continuous.subtype_mk
+      let g : ⦋n + 1⦌.toTopObj → ⦋n + 1⦌.toTopObj × I.{0} :=
+        fun x ↦ ⟨x, 0⟩
+      have hg : Continuous g := by continuity
+      exact (continuous_h'' i).comp hg⟩
+
+noncomputable def deformationRetractι : TopCat.DeformationRetract
+    (of (TopCat.horn (n + 1) i)) (of ⦋n + 1⦌.toTopObj) where
+  i := horn.ι i
+  h := h i
+  r := r i
+  retract := by
+    ext f : 2
+    apply hi'
+  hi := by
+    ext ⟨f, t⟩ : 2
+    apply hi'
+  h₀ := rfl
+  h₁ := by
+    ext x : 2
+    dsimp
+    rw [ι₁_apply]
+    simp
+
+def deformationRetracts_ι : TopCat.deformationRetracts (horn.ι i) :=
+  ⟨deformationRetractι i, rfl⟩
 
 end horn
 
