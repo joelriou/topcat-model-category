@@ -42,11 +42,8 @@ lemma toTopSet_obj_subset (A : X.Subcomplex) : (toTopSet ι).obj A ⊆ Set.range
   simp
 
 lemma toTopSet_iSup {α : Type*} (U : α → X.Subcomplex) :
-    ⋃ i, (toTopSet ι).obj (U i) = (toTopSet ι).obj (⨆ i, U i) := by
+    (toTopSet ι).obj (⨆ i, U i) = ⋃ i, (toTopSet ι).obj (U i) := by
   apply subset_antisymm
-  · rw [Set.iUnion_subset_iff]
-    intro i
-    exact leOfHom ((toTopSet ι).map (CategoryTheory.homOfLE (le_iSup _ _)))
   · intro x hx
     simp only [toTopSet_obj, Set.mem_range, Function.comp_apply] at hx
     obtain ⟨x, rfl⟩ := hx
@@ -61,6 +58,9 @@ lemma toTopSet_iSup {α : Type*} (U : α → X.Subcomplex) :
     rw [← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply, ← Functor.map_comp,
       ← Functor.map_comp]
     rfl
+  · rw [Set.iUnion_subset_iff]
+    intro i
+    exact leOfHom ((toTopSet ι).map (CategoryTheory.homOfLE (le_iSup _ _)))
 
 variable {ι} [TopologicalSpace Ω] (hι : IsClosedEmbedding ι)
 
@@ -113,7 +113,7 @@ lemma multicoequalizerDiagram_toTopSet :
       (fun i ↦ (toTopSet ι).obj (U i)) (fun i j ↦ (toTopSet ι).obj (V i j)) := by
   apply MulticoequalizerDiagram.mk_of_isClosed
   · constructor
-    · rw [Set.iSup_eq_iUnion, toTopSet_iSup, h.iSup_eq]
+    · rw [Set.iSup_eq_iUnion, ← toTopSet_iSup, h.iSup_eq]
     · exact hV
   · intro i
     exact (hU i).isClosed_range
@@ -188,8 +188,8 @@ lemma closedEmbeddings_toTop_map_ι :
   · apply IsClosed.preimage continuous_subtype_val
     have := toTopSet_iSup ι U
     rw [h.iSup_eq] at this
-    change _ = Z at this
-    rw [← this]
+    change Z = _ at this
+    rw [this]
     exact isClosed_iUnion_of_finite (fun i ↦ (hU i).isClosed_range)
 
 end Subcomplex
@@ -201,12 +201,22 @@ namespace stdSimplex
 variable (n : ℕ)
 
 def ι'ToTop : ⦋n⦌.toTopObj → (Fin (n + 1) → ℝ≥0) := Subtype.val
+
 lemma hι'ToTop : IsClosedEmbedding (ι'ToTop n) :=
   Topology.IsClosedEmbedding.subtypeVal (IsCompact.isClosed (by
     rw [isCompact_iff_compactSpace, Set.setOf_mem_eq]
     infer_instance))
 
+@[simp]
+lemma range_ι'ToTop : Set.range (ι'ToTop n) = ⦋n⦌.toTopObj := by
+  simp [ι'ToTop]
+
 noncomputable def ιToTop : |Δ[n]| → (Fin (n + 1) → ℝ≥0) := ι'ToTop n ∘ ⦋n⦌.toTopHomeo
+
+@[simp]
+lemma range_ιToTop : Set.range (ιToTop n) = ⦋n⦌.toTopObj := by
+  dsimp only [ιToTop]
+  rw [Set.range_comp_eq_of_surjective _ (Homeomorph.surjective _), range_ι'ToTop]
 
 lemma hιToTop : IsClosedEmbedding (ιToTop n) :=
     (hι'ToTop n).comp (Homeomorph.isClosedEmbedding _)
@@ -427,5 +437,21 @@ lemma t₁Inclusions_toObj_map_of_mono {X Y : SSet.{0}} (i : X ⟶ Y) [Mono i] :
     apply SSet.boundary.t₁Inclusions_toTop_map_ι
   exact t₁Inclusions.isT₁Inclusion_of_transfiniteCompositionOfShape
     ((transfiniteCompositionOfMono i).ofLE this).map
+
+namespace Subcomplex
+
+variable {X : SSet.{0}} {Ω : Type} {ι : |X| → Ω}
+  [TopologicalSpace Ω] (hι : IsClosedEmbedding ι) (A : X.Subcomplex)
+
+instance : IsIso ((toTopNatTrans hι).app A) :=
+  isIso_toTopNatTrans_app hι A
+    (hι.comp (t₁Inclusions_toObj_map_of_mono A.ι).1)
+
+noncomputable def arrowMkToTopMapιIso :
+    Arrow.mk (toTop.map A.ι) ≅
+      Arrow.mk (Set.functorToTopCat.map (CategoryTheory.homOfLE (toTopSet_obj_subset ι A))) :=
+  Arrow.isoMk (asIso ((toTopNatTrans hι).app A)) (isoOfHomeo hι.homeomorphRange)
+
+end Subcomplex
 
 end SSet

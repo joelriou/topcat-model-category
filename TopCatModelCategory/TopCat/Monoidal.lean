@@ -125,11 +125,11 @@ lemma I.continuous_symm : Continuous I.symm.{u} := by
 
 open NNReal
 
-def I.toNNReal (t : I.{u}) : ℝ≥0 := ⟨t.down, t.1.2.1⟩
+def I.toℝ (t : I.{u}) : ℝ := t.down
 
 @[continuity]
-lemma I.continuous_toNNReal : Continuous I.toNNReal.{u} := by
-  change Continuous ((fun (x : unitInterval) ↦ (⟨x, x.2.1⟩ : ℝ≥0)).comp
+lemma I.continuous_toℝ : Continuous I.toℝ.{u} := by
+  change Continuous ((fun (x : unitInterval) ↦ x.1).comp
     (ULift.down : I.{u} → unitInterval))
   continuity
 
@@ -139,8 +139,8 @@ instance : OfNat I 1 := ⟨I.mk 1⟩
 @[simp] lemma I.symm_one : I.symm 1 = 0 := by simp [I.symm]; rfl
 @[simp] lemma I.symm_zero : I.symm 0 = 1 := by simp [I.symm]; rfl
 
-@[simp] lemma I.toNNReal_zero : I.toNNReal 0 = 0 := rfl
-@[simp] lemma I.toNNReal_one : I.toNNReal 1 = 1 := rfl
+@[simp] lemma I.toℝ_zero : I.toℝ 0 = 0 := rfl
+@[simp] lemma I.toℝ_one : I.toℝ 1 = 1 := rfl
 
 open ChosenFiniteProducts
 
