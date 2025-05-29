@@ -7,6 +7,42 @@ universe u
 open CategoryTheory Limits HomotopicalAlgebra SSet.modelCategoryQuillen
   Simplicial Opposite
 
+namespace CategoryTheory
+
+namespace Arrow
+
+variable {J C : Type*} [Category J] [Category C] {F : J ⥤ Arrow C}
+  {c : Cocone F}
+
+def isColimitOfLeftRight (h₁ : IsColimit (leftFunc.mapCocone c))
+    (h₂ : IsColimit (rightFunc.mapCocone c)) : IsColimit c where
+  desc s := Arrow.homMk (h₁.desc (leftFunc.mapCocone s))
+      (h₂.desc (rightFunc.mapCocone s)) (h₁.hom_ext (fun j ↦ by
+        have := h₂.fac (rightFunc.mapCocone s) j
+        rw [h₁.fac_assoc]
+        dsimp at this ⊢
+        simp [this]))
+  fac s j := by
+    ext
+    · exact h₁.fac (leftFunc.mapCocone s) j
+    · exact h₂.fac (rightFunc.mapCocone s) j
+  uniq s m hm := by
+    ext
+    · refine h₁.hom_ext (fun j ↦ ?_)
+      have := h₁.fac (leftFunc.mapCocone s) j
+      dsimp at this ⊢
+      rw [this, ← hm]
+      dsimp
+    · refine h₂.hom_ext (fun j ↦ ?_)
+      have := h₂.fac (rightFunc.mapCocone s) j
+      dsimp at this ⊢
+      rw [this, ← hm]
+      dsimp
+
+end Arrow
+
+end CategoryTheory
+
 namespace SSet
 
 def πSuccFunctor (n : ℕ) : SSet.{u} ⥤ Type u := sorry
@@ -38,11 +74,7 @@ def naiveW : MorphismProperty SSet.{u} :=
 
 section
 
-variable (J : Type*) [Category J] [h₁ : Small.{u} J]
-
-instance : PreservesColimitsOfShape J π₀Functor.{u} := by
-  have := h₁
-  sorry
+variable (J : Type*) [Category J] [h₁ : Small.{u} J] --[LocallySmall.{u} J]
 
 open MorphismProperty
 
@@ -63,10 +95,13 @@ instance (n : ℕ) : PreservesColimitsOfShape J (πSuccFunctor.{u} n) := by
   have := h₂
   sorry
 
-instance (n : ℕ) : PreservesColimitsOfShape J (πSuccArrowFunctor.{u} n) := by
-  have := h₁
-  have := h₂
-  sorry
+instance (n : ℕ) : PreservesColimitsOfShape J (πSuccArrowFunctor.{u} n) where
+  preservesColimit {F} := ⟨fun {c} hc ↦ ⟨by
+    apply Arrow.isColimitOfLeftRight
+    · exact isColimitOfPreserves (πSuccFunctor n) hc
+    · have : PreservesColimitsOfShape J (SSet.evaluation _⦋0⦌) := by
+        apply evaluation_preservesColimitsOfShape
+      exact isColimitOfPreserves (SSet.evaluation.obj (op ⦋0⦌)) hc⟩⟩
 
 lemma isStableUnderColimitsOfShape_inverseImage_cartesianMorphisms_πSuccArrowFunctor (n : ℕ) :
     ((Arrow.cartesianMorphisms _).inverseImage

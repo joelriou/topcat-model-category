@@ -1,6 +1,7 @@
 import Mathlib.AlgebraicTopology.SimplicialSet.Basic
 import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Equalizers
 import TopCatModelCategory.SSet.Basic
+import TopCatModelCategory.FunctorCategoryColimits
 
 universe u
 
@@ -72,5 +73,11 @@ def isColimitCoforkπ₀Functor : IsColimit coforkπ₀Functor.{u} :=
           obtain ⟨x, rfl⟩ := x.mk_surjective
           dsimp at s m hm x ⊢
           exact congr_fun hm x)))
+
+instance {J : Type*} [Category J] [Small.{u} J] :
+    PreservesColimitsOfShape J π₀Functor.{u} :=
+  ObjectProperty.closedUnderColimitsOfShape_preservesColimitsOfShape
+    J SSet.{u} (Type u) WalkingParallelPair isColimitCoforkπ₀Functor.{u} (by
+      rintro (_ | _) <;> apply evaluation_preservesColimitsOfShape)
 
 end SSet
