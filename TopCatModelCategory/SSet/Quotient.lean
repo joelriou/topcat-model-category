@@ -36,6 +36,12 @@ lemma quotient_hom_ext {T : SSet.{u}} {f g : A.quotient ⟶ T}
     (h₀ : f.app _ A.quotient₀ = g.app _ A.quotient₀ ) : f = g :=
   A.quotient_isPushout.hom_ext h (yonedaEquiv.injective (by simpa))
 
+@[reassoc]
+lemma comp_toQuotient_eq_const {Y : SSet.{u}} (f : Y ⟶ X) (hf : A.preimage f = ⊤) :
+    f ≫ A.toQuotient = const A.quotient₀ := by
+  have : f = A.lift f hf ≫ A.ι := rfl
+  rw [this, Category.assoc, ι_quotient, comp_const]
+
 section
 
 variable {T : SSet.{u}} (f : X ⟶ T) (t₀ : T _⦋0⦌)

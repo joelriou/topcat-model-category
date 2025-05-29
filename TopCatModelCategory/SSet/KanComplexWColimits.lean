@@ -1,11 +1,12 @@
 import TopCatModelCategory.SSet.FundamentalGroupoidPiOne
 import TopCatModelCategory.SSet.SmallObject
+import TopCatModelCategory.SSet.Quotient
 import TopCatModelCategory.Arrow
 
 universe u
 
 open CategoryTheory Limits HomotopicalAlgebra SSet.modelCategoryQuillen
-  Simplicial Opposite
+  Simplicial Opposite MonoidalCategory
 
 namespace CategoryTheory
 
@@ -45,7 +46,62 @@ end CategoryTheory
 
 namespace SSet
 
-def πSuccFunctor (n : ℕ) : SSet.{u} ⥤ Type u := sorry
+namespace Subcomplex
+
+variable {B : SSet.{u}} (A : B.Subcomplex)
+
+noncomputable def quotientι₀ : A.quotient ⟶ (A.prod (⊤ : Δ[1].Subcomplex)).quotient :=
+  A.descQuotient (ι₀ ≫ (A.prod ⊤).toQuotient) (A.prod ⊤).quotient₀ (by
+    rw [← Category.assoc]
+    apply comp_toQuotient_eq_const
+    apply le_antisymm (by simp)
+    rw [← Subcomplex.image_le_iff, image_comp, image_top]
+    rintro n b h
+    simp only [Subpresheaf.range_ι, Subpresheaf.image_obj, Set.mem_image] at h
+    obtain ⟨a, ha, ha'⟩ := h
+    rw [← ha']
+    exact ⟨ha, by simp⟩)
+
+noncomputable def quotientι₁ : A.quotient ⟶ (A.prod (⊤ : Δ[1].Subcomplex)).quotient :=
+  A.descQuotient (ι₁ ≫ (A.prod ⊤).toQuotient) (A.prod ⊤).quotient₀ (by
+    rw [← Category.assoc]
+    apply comp_toQuotient_eq_const
+    apply le_antisymm (by simp)
+    rw [← Subcomplex.image_le_iff, image_comp, image_top]
+    rintro n b h
+    simp only [Subpresheaf.range_ι, Subpresheaf.image_obj, Set.mem_image] at h
+    obtain ⟨a, ha, ha'⟩ := h
+    rw [← ha']
+    exact ⟨ha, by simp⟩)
+
+@[reassoc (attr := simp)]
+lemma to_quotient₀ : A.toQuotient ≫ A.quotientι₀ = ι₀ ≫ (A.prod ⊤).toQuotient := by
+  simp [quotientι₀]
+
+@[reassoc (attr := simp)]
+lemma to_quotient₁ : A.toQuotient ≫ A.quotientι₁ = ι₁ ≫ (A.prod ⊤).toQuotient := by
+  simp [quotientι₁]
+
+@[simp]
+lemma quotientι₀_app_quotient₀ :
+    A.quotientι₀.app _ A.quotient₀ = (A.prod ⊤).quotient₀ := sorry
+
+@[simp]
+lemma quotientι₁_app_quotient₁ :
+    A.quotientι₁.app _ A.quotient₀ = (A.prod ⊤).quotient₀ := sorry
+
+protected noncomputable def πFunctor : SSet.{u} ⥤ Type u :=
+  coequalizer (coyoneda.map A.quotientι₀.op) (coyoneda.map A.quotientι₁.op)
+
+noncomputable def πNatTrans : A.πFunctor ⟶ SSet.evaluation.obj (op ⦋0⦌) :=
+  coequalizer.desc (coyoneda.map (const A.quotient₀ : Δ[0] ⟶ _).op ≫
+    (stdSimplex.coyonedaObjIsoEvaluation 0).hom) (by
+    simp only [← Functor.map_comp_assoc, ← op_comp,
+      const_comp, quotientι₀_app_quotient₀, quotientι₁_app_quotient₁])
+
+end Subcomplex
+
+noncomputable def πSuccFunctor (n : ℕ) : SSet.{u} ⥤ Type u := (boundary (n + 1)).πFunctor
 
 def πSuccFunctorObjEquiv (n : ℕ) (X : SSet.{u}) :
     (πSuccFunctor n).obj X ≃ Σ (x : X _⦋0⦌), KanComplex.π (n + 1) X x := sorry
@@ -56,7 +112,8 @@ lemma πSuccFunctor_map_equiv_symm_apply {n : ℕ} {X : SSet.{u}} {x : X _⦋0�
     (πSuccFunctor n).map f ((πSuccFunctorObjEquiv n X).symm ⟨x, a⟩) =
       (πSuccFunctorObjEquiv n Y).symm (⟨_, KanComplex.mapπ f (n + 1) x _ rfl a⟩) := sorry
 
-def πSuccNatTrans (n : ℕ) : πSuccFunctor.{u} n ⟶ SSet.evaluation.obj (op ⦋0⦌) := sorry
+noncomputable def πSuccNatTrans (n : ℕ) : πSuccFunctor.{u} n ⟶ SSet.evaluation.obj (op ⦋0⦌) :=
+  Subcomplex.πNatTrans _
 
 @[simp]
 lemma πSuccNatTrans_app_equiv_symm_apply {n : ℕ} {X : SSet.{u}} {x : X _⦋0⦌}
@@ -64,7 +121,7 @@ lemma πSuccNatTrans_app_equiv_symm_apply {n : ℕ} {X : SSet.{u}} {x : X _⦋0�
     (πSuccNatTrans n).app X ((πSuccFunctorObjEquiv n X).symm ⟨x, a⟩) = x := sorry
 
 @[simps]
-def πSuccArrowFunctor (n : ℕ) : SSet.{u} ⥤ Arrow (Type u) where
+noncomputable def πSuccArrowFunctor (n : ℕ) : SSet.{u} ⥤ Arrow (Type u) where
   obj X := Arrow.mk ((πSuccNatTrans n).app X)
   map f := Arrow.homMk ((πSuccFunctor n).map f) (f.app _)
 

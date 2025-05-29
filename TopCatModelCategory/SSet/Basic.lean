@@ -62,4 +62,9 @@ lemma yonedaEquiv_symm_zero {X : SSet.{u}} (x : X _⦋0⦌) :
 protected abbrev evaluation : SimplexCategoryᵒᵖ ⥤ SSet.{u} ⥤ Type u :=
   evaluation _ _
 
+@[simps!]
+def stdSimplex.coyonedaObjIsoEvaluation (n : ℕ) :
+    coyoneda.obj (op (Δ[n])) ≅ SSet.evaluation.obj (op ⦋n⦌) :=
+  NatIso.ofComponents (fun X ↦ yonedaEquiv.toIso)
+
 end SSet
