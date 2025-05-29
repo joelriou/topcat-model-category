@@ -22,6 +22,15 @@ variable {C} in
 lemma cartesianMorphisms_iff {X Y : Arrow C} (f : X ⟶ Y) :
     cartesianMorphisms C f ↔ IsPullback f.left X.hom Y.hom f.right := Iff.rfl
 
+instance : (cartesianMorphisms C).RespectsIso :=
+  .of_respects_arrow_iso _ (by
+    intro f g e hf
+    simp only [Functor.id_obj, cartesianMorphisms_iff] at hf ⊢
+    exact IsPullback.of_iso hf ((leftFunc ⋙ leftFunc).mapIso e)
+      ((rightFunc ⋙ leftFunc).mapIso e) ((leftFunc ⋙ rightFunc).mapIso e)
+      ((rightFunc ⋙ rightFunc).mapIso e) (leftFunc.congr_map e.hom.w.symm)
+      (by simp) (by simp) (rightFunc.congr_map e.hom.w.symm))
+
 /-lemma isStableUnderColimitsOfShape_cartesianMorphisms (J : Type*) [Category J]
     [HasColimitsOfShape J C] [PreservesLimitsOfShape WalkingCospan (colim : (J ⥤ C) ⥤ C)] :
     (cartesianMorphisms C).IsStableUnderColimitsOfShape J := by
