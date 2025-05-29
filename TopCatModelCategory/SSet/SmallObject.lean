@@ -6,6 +6,8 @@ import Mathlib.CategoryTheory.SmallObject.Basic
 
 open HomotopicalAlgebra CategoryTheory Limits
 
+universe v' u' u
+
 namespace SSet
 
 attribute [local instance] Cardinal.fact_isRegular_aleph0
@@ -24,6 +26,13 @@ instance (J : Type u) [SmallCategory J] [IsFiltered J] (X : SSet.{u}) [X.IsFinit
   have : IsCardinalFiltered J Cardinal.aleph0.{u} := by
     rwa [isCardinalFiltered_aleph0_iff]
   exact preservesColimitsOfShape_of_isCardinalPresentable _ (Cardinal.aleph0.{u}) _
+
+instance (J : Type u') [Category.{v'} J] [IsFiltered J]
+    [Small.{u} J] [LocallySmall.{u} J] (X : SSet.{u}) [X.IsFinite] :
+    PreservesColimitsOfShape J (coyoneda.obj (Opposite.op X)) := by
+  have e := (Shrink.equivalence.{u} J).trans (ShrinkHoms.equivalence.{u} (Shrink.{u} J))
+  have := IsFiltered.of_equivalence e
+  exact preservesColimitsOfShape_of_equiv e.symm _
 
 instance isCardinalForSmallObjectArgument_I :
     I.{u}.IsCardinalForSmallObjectArgument Cardinal.aleph0.{u} where
