@@ -48,7 +48,7 @@ lemma rlp_J_iff {E B : TopCat} (p : E ⟶ B) :
 instance : IsSmall.{0} I := by dsimp [I]; infer_instance
 instance : IsSmall.{0} J := by dsimp [J]; infer_instance
 
--- could be generalized to more general well ordered types...
+-- this could be generalized to more general well ordered types...
 instance :
     (t₁Inclusions ⊓ weakEquivalences TopCat).IsStableUnderTransfiniteCompositionOfShape ℕ where
   le := by
