@@ -10,6 +10,15 @@ open CategoryTheory Limits HomotopicalAlgebra SSet.modelCategoryQuillen
 
 namespace CategoryTheory
 
+namespace Limits.Cofork.IsColimit
+
+variable {C : Type*} [Category C] {X Y : C} {f g : X ⟶ Y} {c : Cofork f g}
+
+lemma epi (hc : IsColimit c) : Epi c.π where
+  left_cancellation _ _ h := hom_ext hc h
+
+end Limits.Cofork.IsColimit
+
 namespace Arrow
 
 variable {J C : Type*} [Category J] [Category C] {F : J ⥤ Arrow C}
@@ -95,24 +104,187 @@ lemma quotientι₁_app_quotient₀ :
 protected noncomputable def πFunctor : SSet.{u} ⥤ Type u :=
   coequalizer (coyoneda.map A.quotientι₀.op) (coyoneda.map A.quotientι₁.op)
 
+noncomputable def toπFunctor : coyoneda.obj (op A.quotient) ⟶ A.πFunctor := coequalizer.π _ _
+
+@[reassoc]
+lemma πFunctor_condition :
+    coyoneda.map A.quotientι₀.op ≫ A.toπFunctor =
+      coyoneda.map A.quotientι₁.op ≫ A.toπFunctor :=
+  coequalizer.condition _ _
+
+noncomputable def isColimitπFunctor : IsColimit (Cofork.ofπ _ A.πFunctor_condition) :=
+  coequalizerIsCoequalizer _ _
+
+noncomputable def πFunctorObjCofork (X : SSet.{u}):
+    Cofork ((coyoneda.map A.quotientι₀.op).app X)
+      ((coyoneda.map A.quotientι₁.op).app X) :=
+  Cofork.ofπ (A.toπFunctor.app X) (congr_app A.πFunctor_condition X)
+
+noncomputable def isColimitπFunctorObjCofork (X : SSet.{u}) :
+    IsColimit (πFunctorObjCofork A X) :=
+  isColimitCoforkMapOfIsColimit
+    ((CategoryTheory.evaluation _ _).obj X) _ A.isColimitπFunctor
+
+variable {A X} in
+lemma toπFunctor_app_surjective : Function.Surjective (A.toπFunctor.app X) := by
+  rw [← epi_iff_surjective]
+  exact Cofork.IsColimit.epi (A.isColimitπFunctorObjCofork X)
+
 noncomputable def πNatTrans : A.πFunctor ⟶ SSet.evaluation.obj (op ⦋0⦌) :=
   coequalizer.desc (coyoneda.map (const A.quotient₀ : Δ[0] ⟶ _).op ≫
     (stdSimplex.coyonedaObjIsoEvaluation 0).hom) (by
     simp only [← Functor.map_comp_assoc, ← op_comp,
       const_comp, quotientι₀_app_quotient₀, quotientι₁_app_quotient₀])
 
+@[reassoc (attr := simp)]
+lemma toπFunctor_πNatTrans :
+    A.toπFunctor ≫ A.πNatTrans =
+    (coyoneda.map (const A.quotient₀ : Δ[0] ⟶ _).op ≫
+      (stdSimplex.coyonedaObjIsoEvaluation 0).hom) := by
+  apply Limits.coequalizer.π_desc
+
+@[simp]
+lemma πNatTrans_app_toπFunctor_app {X : SSet.{u}} (f : A.quotient ⟶ X) :
+    A.πNatTrans.app _ (A.toπFunctor.app _ f) = f.app _ A.quotient₀ := by
+  simp [← FunctorToTypes.comp, toπFunctor_πNatTrans]
+
+instance (J : Type*) [Category J] [h₁ : Small.{u} J] [LocallySmall.{u} J]
+    [IsFiltered J] [B.IsFinite] :
+    PreservesColimitsOfShape J A.πFunctor := by
+  apply ObjectProperty.closedUnderColimitsOfShape_preservesColimitsOfShape
+    J SSet.{u} (Type u) WalkingParallelPair (Subcomplex.isColimitπFunctor A)
+  rintro (_ | _) <;> simp <;> infer_instance
+
+namespace πFunctorEquiv
+
+variable {X : SSet.{u}}
+
+noncomputable def invFun' (x : X _⦋0⦌) :
+      Subcomplex.RelativeMorphism.HomotopyClass A (Subcomplex.ofSimplex x)
+        (const ⟨x, Subcomplex.mem_ofSimplex_obj x⟩) → A.πFunctor.obj X :=
+  Quot.lift (fun p ↦ A.toπFunctor.app X (A.descQuotient p.map x (by simp))) (by
+    rintro p₁ p₂ ⟨h⟩
+    let φ : (A.prod (⊤ : Subcomplex Δ[1])).quotient ⟶ X :=
+      (A.prod _).descQuotient h.h x (by
+        rw [← cancel_epi (Subcomplex.prodIso A (⊤ : Subcomplex Δ[1])).inv]
+        have : (Subcomplex.prodIso A (⊤ : Subcomplex Δ[1])).inv ≫ Subcomplex.ι _ =
+          _ ◁ Subcomplex.ι _ ≫ A.ι ▷ Δ[1] := rfl
+        rw [reassoc_of% this, h.rel]
+        rfl)
+    have hφ₁ : A.descQuotient p₁.map x (by simp) = A.quotientι₀ ≫ φ := by aesop
+    have hφ₂ : A.descQuotient p₂.map x (by simp) = A.quotientι₁ ≫ φ := by aesop
+    have := congr_fun (congr_app A.πFunctor_condition X) φ
+    dsimp at this ⊢
+    rw [hφ₁, hφ₂, this])
+
+lemma invFun'_eq {x : X _⦋0⦌}
+    (p : Subcomplex.RelativeMorphism A (Subcomplex.ofSimplex x)
+        (const ⟨x, Subcomplex.mem_ofSimplex_obj x⟩)) :
+  invFun' A x p.homotopyClass =
+    A.toπFunctor.app X (A.descQuotient p.map x (by simp)) := rfl
+
+variable (X)
+
+@[simp]
+noncomputable def invFun : (Σ (x : X _⦋0⦌),
+      Subcomplex.RelativeMorphism.HomotopyClass A (Subcomplex.ofSimplex x)
+        (const ⟨x, Subcomplex.mem_ofSimplex_obj x⟩)) → A.πFunctor.obj X :=
+  fun ⟨x, p⟩ ↦ invFun' A x p
+
+variable {X}
+
+noncomputable def toFun'' (f : A.quotient ⟶ X) (x : X _⦋0⦌) (hx : f.app _ A.quotient₀ = x) :
+    Σ (x : X _⦋0⦌), Subcomplex.RelativeMorphism.HomotopyClass A (Subcomplex.ofSimplex x)
+        (const ⟨x, Subcomplex.mem_ofSimplex_obj x⟩) :=
+  ⟨x, RelativeMorphism.homotopyClass { map := A.toQuotient ≫ f }⟩
+
+noncomputable def toFun' (f : A.quotient ⟶ X) :
+    Σ (x : X _⦋0⦌), Subcomplex.RelativeMorphism.HomotopyClass A (Subcomplex.ofSimplex x)
+        (const ⟨x, Subcomplex.mem_ofSimplex_obj x⟩) :=
+  toFun'' _ f _ rfl
+
+lemma toFun'_eq (f : A.quotient ⟶ X) (x : X _⦋0⦌) (hx : f.app _ A.quotient₀ = x) :
+    toFun' A f = ⟨x, RelativeMorphism.homotopyClass { map := A.toQuotient ≫ f }⟩ := by
+  subst hx
+  rfl
+
+variable (X)
+
+noncomputable def toFun : A.πFunctor.obj X →
+    Σ (x : X _⦋0⦌), Subcomplex.RelativeMorphism.HomotopyClass A (Subcomplex.ofSimplex x)
+        (const ⟨x, Subcomplex.mem_ofSimplex_obj x⟩) :=
+  Cofork.IsColimit.desc (A.isColimitπFunctorObjCofork X) (toFun' A) (by
+      ext h : 1
+      dsimp
+      sorry)
+
+lemma toFun_eq (f : A.quotient ⟶ X) (x : X _⦋0⦌) (hx : f.app _ A.quotient₀ = x) :
+    toFun A X (A.toπFunctor.app X f) =
+      ⟨x, RelativeMorphism.homotopyClass { map := A.toQuotient ≫ f }⟩ := by
+  have : A.toπFunctor.app X ≫ toFun A X = toFun' A :=
+    Cofork.IsColimit.π_desc' (A.isColimitπFunctorObjCofork X) _ _
+  refine (congr_fun this f).trans ?_
+  rw [toFun'_eq _ _ _ hx]
+
+@[simp]
+lemma invFun'_toFun (p : A.πFunctor.obj X) :
+    invFun' A _ (toFun A X p).2 = p := by
+  obtain ⟨f, rfl⟩ := toπFunctor_app_surjective p
+  rw [toFun_eq _ _ _ _ rfl, invFun'_eq]
+  apply congr_arg
+  aesop
+
+end πFunctorEquiv
+
+noncomputable def πFunctorEquiv (X : SSet.{u}) :
+    A.πFunctor.obj X ≃ Σ (x : X _⦋0⦌),
+      Subcomplex.RelativeMorphism.HomotopyClass A (Subcomplex.ofSimplex x)
+        (const ⟨x, Subcomplex.mem_ofSimplex_obj x⟩) where
+  toFun := πFunctorEquiv.toFun _ _
+  invFun := πFunctorEquiv.invFun _ _
+  left_inv _ := by simp
+  right_inv := by
+    rintro ⟨x, p⟩
+    obtain ⟨p, rfl⟩ := p.eq_homotopyClass
+    rw [πFunctorEquiv.invFun, πFunctorEquiv.invFun'_eq,
+      πFunctorEquiv.toFun_eq _ _ _ x (by simp)]
+    simp
+
+lemma πFunctor_map_equiv_symm_apply {X : SSet.{u}} {x : X _⦋0⦌}
+    (a : Subcomplex.RelativeMorphism.HomotopyClass A (Subcomplex.ofSimplex x)
+      (const ⟨x, Subcomplex.mem_ofSimplex_obj x⟩)) {Y : SSet.{u}} (f : X ⟶ Y) :
+    A.πFunctor.map f ((A.πFunctorEquiv X).symm ⟨x, a⟩) =
+      (A.πFunctorEquiv Y).symm ⟨f.app _ x,
+        a.postcomp (ψ := const ⟨f.app _ x, by simp⟩) { map := f } (by simp)⟩ := by
+  obtain ⟨p, rfl⟩ := a.mk_surjective
+  dsimp [πFunctorEquiv, πFunctorEquiv.invFun, πFunctorEquiv.invFun']
+  erw [RelativeMorphism.homotopyClass_postcomp]
+  dsimp [RelativeMorphism.homotopyClass]
+  rw [← FunctorToTypes.naturality]
+  apply congr_arg
+  aesop
+
+lemma πNatTrans_app_equiv_symm_apply {X : SSet.{u}} {x : X _⦋0⦌}
+    (a : Subcomplex.RelativeMorphism.HomotopyClass A (Subcomplex.ofSimplex x)
+      (const ⟨x, Subcomplex.mem_ofSimplex_obj x⟩)) :
+    A.πNatTrans.app X ((A.πFunctorEquiv X).symm ⟨x, a⟩) = x := by
+  obtain ⟨p, rfl⟩ := a.mk_surjective
+  apply (A.πNatTrans_app_toπFunctor_app (A.descQuotient p.map x (by simp))).trans (by simp)
+
 end Subcomplex
 
 noncomputable def πSuccFunctor (n : ℕ) : SSet.{u} ⥤ Type u := (boundary (n + 1)).πFunctor
 
-def πSuccFunctorObjEquiv (n : ℕ) (X : SSet.{u}) :
-    (πSuccFunctor n).obj X ≃ Σ (x : X _⦋0⦌), KanComplex.π (n + 1) X x := sorry
+noncomputable def πSuccFunctorObjEquiv (n : ℕ) (X : SSet.{u}) :
+    (πSuccFunctor n).obj X ≃ Σ (x : X _⦋0⦌), KanComplex.π (n + 1) X x := by
+  apply Subcomplex.πFunctorEquiv
 
 @[simp]
 lemma πSuccFunctor_map_equiv_symm_apply {n : ℕ} {X : SSet.{u}} {x : X _⦋0⦌}
     (a : KanComplex.π (n + 1) X x) {Y : SSet.{u}} (f : X ⟶ Y) :
     (πSuccFunctor n).map f ((πSuccFunctorObjEquiv n X).symm ⟨x, a⟩) =
-      (πSuccFunctorObjEquiv n Y).symm (⟨_, KanComplex.mapπ f (n + 1) x _ rfl a⟩) := sorry
+      (πSuccFunctorObjEquiv n Y).symm (⟨_, KanComplex.mapπ f (n + 1) x _ rfl a⟩) := by
+  apply Subcomplex.πFunctor_map_equiv_symm_apply
 
 noncomputable def πSuccNatTrans (n : ℕ) : πSuccFunctor.{u} n ⟶ SSet.evaluation.obj (op ⦋0⦌) :=
   Subcomplex.πNatTrans _
@@ -120,7 +292,8 @@ noncomputable def πSuccNatTrans (n : ℕ) : πSuccFunctor.{u} n ⟶ SSet.evalua
 @[simp]
 lemma πSuccNatTrans_app_equiv_symm_apply {n : ℕ} {X : SSet.{u}} {x : X _⦋0⦌}
     (a : KanComplex.π (n + 1) X x) :
-    (πSuccNatTrans n).app X ((πSuccFunctorObjEquiv n X).symm ⟨x, a⟩) = x := sorry
+    (πSuccNatTrans n).app X ((πSuccFunctorObjEquiv n X).symm ⟨x, a⟩) = x :=
+  Subcomplex.πNatTrans_app_equiv_symm_apply _ _
 
 @[simps]
 noncomputable def πSuccArrowFunctor (n : ℕ) : SSet.{u} ⥤ Arrow (Type u) where
@@ -147,12 +320,11 @@ lemma isStableUnderColimitsOfShape_inverseImage_isomorphisms_π₀Functor :
   apply colimitsOfShape_monotone _ _ _ (map_colimitsOfShape _ hf π₀Functor)
   rw [map_le_iff]
 
-variable [h₂ : IsFiltered J]
+variable [LocallySmall.{u} J] [IsFiltered J]
 
 instance (n : ℕ) : PreservesColimitsOfShape J (πSuccFunctor.{u} n) := by
-  have := h₁
-  have := h₂
-  sorry
+  dsimp only [πSuccFunctor]
+  infer_instance
 
 instance (n : ℕ) : PreservesColimitsOfShape J (πSuccArrowFunctor.{u} n) where
   preservesColimit {F} := ⟨fun {c} hc ↦ ⟨by

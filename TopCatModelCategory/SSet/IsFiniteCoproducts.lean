@@ -53,4 +53,8 @@ instance {J : Type u'} [Finite J] (X : J → SSet.{u}) [∀ j, (X j).IsFinite] :
     dsimp; infer_instance
   infer_instance
 
+instance (X Y : SSet.{u}) [X.IsFinite] [Y.IsFinite] : (X ⨿ Y).IsFinite := by
+  have : ∀ j, ((pair X Y).obj j).IsFinite := by rintro ⟨_ | _⟩ <;> assumption
+  infer_instance
+
 end SSet

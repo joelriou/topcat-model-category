@@ -1,4 +1,5 @@
 import TopCatModelCategory.SSet.Monoidal
+import TopCatModelCategory.SSet.IsFiniteCoproducts
 
 universe u
 
@@ -31,6 +32,7 @@ lemma quotient_isPushout : IsPushout A.ι (stdSimplex.isTerminalObj₀.from _)
   rw [Equiv.symm_apply_apply]
   apply IsPushout.of_hasPushout
 
+@[ext]
 lemma quotient_hom_ext {T : SSet.{u}} {f g : A.quotient ⟶ T}
     (h : A.toQuotient ≫ f = A.toQuotient ≫ g)
     (h₀ : f.app _ A.quotient₀ = g.app _ A.quotient₀ ) : f = g :=
@@ -60,11 +62,21 @@ noncomputable def descQuotient : A.quotient ⟶ T :=
 lemma toQuotient_descQuotient : A.toQuotient ≫ A.descQuotient f t₀ hf = f :=
   (A.exists_descQuotient f t₀ hf).choose_spec.1
 
+@[simp]
 lemma descQuotient_app_quotient₀ :
     (A.descQuotient f t₀ hf).app _ A.quotient₀ = t₀ :=
   (A.exists_descQuotient f t₀ hf).choose_spec.2
 
 end
+
+instance [X.IsFinite] : A.quotient.IsFinite := by
+  let π : Δ[0] ⨿ X ⟶ A.quotient := coprod.desc (const A.quotient₀) A.toQuotient
+  have : Epi π := ⟨fun f g h ↦ by
+    ext : 1
+    · simpa [π] using Limits.coprod.inr ≫= h
+    · apply yonedaEquiv.symm.injective
+      simpa [π] using Limits.coprod.inl ≫= h⟩
+  exact isFinite_of_epi π
 
 end Subcomplex
 
