@@ -663,13 +663,13 @@ def Hom.map {x₀ x₁ : FundamentalGroupoid X}
       rw [assoc, boundary₁.ι₀_desc_assoc,
         boundary₁.ι₀_desc_assoc,
         yonedaEquiv_symm_zero, yonedaEquiv_symm_zero,
-        Iso.inv_hom_id_assoc, const_comp,
+        Subcomplex.topIso_inv_ι_assoc, const_comp,
         FunctorToTypes.comp, const_comp]
     · dsimp
       rw [assoc, boundary₁.ι₁_desc_assoc,
         boundary₁.ι₁_desc_assoc,
         yonedaEquiv_symm_zero, yonedaEquiv_symm_zero,
-        Iso.inv_hom_id_assoc, const_comp,
+        Subcomplex.topIso_inv_ι_assoc, const_comp,
         FunctorToTypes.comp, const_comp])
 
 @[simp]

@@ -152,9 +152,12 @@ variable (S : X.Subcomplex) (T : Y.Subcomplex)
 
 variable (X)
 
-@[simps!]
+@[simps! inv_app_coe]
 def topIso : ((⊤ : X.Subcomplex) : SSet) ≅ X :=
   NatIso.ofComponents (fun n ↦ (Equiv.Set.univ (X.obj n)).toIso)
+
+@[simp]
+lemma topIso_hom : (topIso X).hom = Subcomplex.ι _ := rfl
 
 @[reassoc (attr := simp)]
 lemma topIso_inv_ι : (topIso X).inv ≫ Subpresheaf.ι _ = 𝟙 _ := rfl

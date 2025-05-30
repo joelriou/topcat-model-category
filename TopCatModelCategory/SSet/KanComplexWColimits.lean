@@ -214,9 +214,22 @@ noncomputable def toFun : A.πFunctor.obj X →
     Σ (x : X _⦋0⦌), Subcomplex.RelativeMorphism.HomotopyClass A (Subcomplex.ofSimplex x)
         (const ⟨x, Subcomplex.mem_ofSimplex_obj x⟩) :=
   Cofork.IsColimit.desc (A.isColimitπFunctorObjCofork X) (toFun' A) (by
-      ext h : 1
-      dsimp
-      sorry)
+      ext f : 1
+      dsimp at f ⊢
+      let x := f.app _ (quotient₀ _)
+      rw [toFun'_eq _ _ x (by simp [x]), toFun'_eq _ _ x (by simp [x])]
+      simp only [to_quotient₀_assoc, to_quotient₁_assoc, Sigma.mk.injEq, heq_eq_eq, true_and, x]
+      apply RelativeMorphism.Homotopy.eq
+      exact
+        { h := toQuotient _ ≫ f
+          h₀ := by simp
+          h₁ := by simp
+          rel := by
+            have : (Subcomplex.prodIso A (⊤ : Subcomplex Δ[1])).inv ≫ Subcomplex.ι _ =
+              _ ◁ Subcomplex.ι _ ≫ A.ι ▷ Δ[1] := rfl
+            rw [← cancel_epi (A.toSSet ◁ (Subcomplex.topIso Δ[1]).hom), topIso_hom,
+              ← reassoc_of% this]
+            simp })
 
 lemma toFun_eq (f : A.quotient ⟶ X) (x : X _⦋0⦌) (hx : f.app _ A.quotient₀ = x) :
     toFun A X (A.toπFunctor.app X f) =
