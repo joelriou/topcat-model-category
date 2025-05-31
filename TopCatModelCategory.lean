@@ -74,6 +74,7 @@ import TopCatModelCategory.SSet.Pseudofunctor
 import TopCatModelCategory.SSet.PtSimplex
 import TopCatModelCategory.SSet.Quotient
 import TopCatModelCategory.SSet.SimplexCategory
+import TopCatModelCategory.SSet.SingularConnected
 import TopCatModelCategory.SSet.Skeleton
 import TopCatModelCategory.SSet.SmallObject
 import TopCatModelCategory.SSet.Square
