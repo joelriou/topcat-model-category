@@ -44,6 +44,12 @@ lemma isFibrant_iff_of_isTerminal {X Y : C} (p : X ⟶ Y) (hY : IsTerminal Y) :
   apply (fibrations C).arrow_mk_iso_iff
   exact Arrow.isoMk (Iso.refl _) (IsTerminal.uniqueUpToIso hY terminalIsTerminal)
 
+lemma isFibrant_of_iso {X Y : C} (e : X ≅ Y)
+    [hX : IsFibrant X] :
+    IsFibrant Y := by
+  rw [isFibrant_iff, fibration_iff] at hX ⊢
+  exact ((fibrations C).arrow_mk_iso_iff (Arrow.isoMk e (Iso.refl _))).1 hX
+
 end
 
 end HomotopicalAlgebra

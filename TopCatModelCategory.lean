@@ -31,6 +31,7 @@ import TopCatModelCategory.SSet.AnodyneExtensionsDefs
 import TopCatModelCategory.SSet.Basic
 import TopCatModelCategory.SSet.Boundary
 import TopCatModelCategory.SSet.CategoryWithFibrations
+import TopCatModelCategory.SSet.CategoryWithWeakEquivalences
 import TopCatModelCategory.SSet.ChosenFiniteProducts
 import TopCatModelCategory.SSet.Coproducts
 import TopCatModelCategory.SSet.Deformation
@@ -41,6 +42,7 @@ import TopCatModelCategory.SSet.DimensionProd
 import TopCatModelCategory.SSet.EffectiveEpi
 import TopCatModelCategory.SSet.Evaluation
 import TopCatModelCategory.SSet.Fiber
+import TopCatModelCategory.SSet.FibrationSequence
 import TopCatModelCategory.SSet.Fibrations
 import TopCatModelCategory.SSet.Finite
 import TopCatModelCategory.SSet.FundamentalGroupoid
@@ -59,6 +61,7 @@ import TopCatModelCategory.SSet.KanComplexW
 import TopCatModelCategory.SSet.KanComplexWColimits
 import TopCatModelCategory.SSet.KanComplexWHomotopy
 import TopCatModelCategory.SSet.KanComplexWRetracts
+import TopCatModelCategory.SSet.KeyLemma
 import TopCatModelCategory.SSet.Loop
 import TopCatModelCategory.SSet.MinimalFibrations
 import TopCatModelCategory.SSet.MonoCoprod
@@ -94,6 +97,8 @@ import TopCatModelCategory.TopCat.HornDeformationRetract
 import TopCatModelCategory.TopCat.IsQuotientMap
 import TopCatModelCategory.TopCat.Monoidal
 import TopCatModelCategory.TopCat.T1Inclusion
+import TopCatModelCategory.TopCat.ToTopExact
+import TopCatModelCategory.TopCat.ToTopFibration
 import TopCatModelCategory.TopCat.W
 import TopCatModelCategory.TopCatIsColimit
 import TopCatModelCategory.TopPackage
