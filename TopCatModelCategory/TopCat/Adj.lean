@@ -71,6 +71,14 @@ namespace TopCat
 instance : toSSet.IsRightAdjoint := sSetTopAdj.isRightAdjoint
 
 @[simps symm_apply]
+def toSSetObjEquiv {X : TopCat.{0}} {n : ℕ} :
+    toSSet.obj X _⦋n⦌ ≃ C(⦋n⦌.toTopObj, X) where
+  toFun f := f.1
+  invFun f := ofHom f
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+@[simps symm_apply]
 def toSSetObj₀Equiv {X : TopCat.{0}} :
     toSSet.obj X _⦋0⦌ ≃ X where
   toFun f := f.hom.1 (default : ⦋0⦌.toTopObj)
@@ -200,11 +208,15 @@ open TopCat
 
 namespace stdSimplex
 
+def simplexCategoryToTopObjHomeoUnitInterval :
+    ⦋1⦌.toTopObj ≃ₜ I :=
+  (SimplexCategory.toTopObjOneHomeo).trans
+    (unitInterval.symmHomeomorph.trans Homeomorph.ulift.symm)
 
 noncomputable def toTopObjHomeoUnitInterval :
     |Δ[1]| ≃ₜ I :=
-  ((SimplexCategory.toTopHomeo _).trans SimplexCategory.toTopObjOneHomeo).trans
-    (unitInterval.symmHomeomorph.trans Homeomorph.ulift.symm)
+  (SimplexCategory.toTopHomeo _).trans
+    simplexCategoryToTopObjHomeoUnitInterval
 
 noncomputable def toSSetObjI : Δ[1] ⟶ TopCat.toSSet.obj I :=
   sSetTopAdj.homEquiv _ _ (ofHom (toContinuousMap toTopObjHomeoUnitInterval))
@@ -219,7 +231,7 @@ lemma δ_one_toSSetObjI :
   congr 3
   ext x
   obtain rfl := Subsingleton.elim x default
-  dsimp only [toTopObjHomeoUnitInterval]
+  dsimp only [toTopObjHomeoUnitInterval, simplexCategoryToTopObjHomeoUnitInterval]
   simp [ContinuousMap.comp, Function.comp]
   dsimp only [DFunLike.coe, EquivLike.coe]
   dsimp
@@ -248,7 +260,7 @@ lemma δ_zero_toSSetObjI :
   congr 3
   ext x
   obtain rfl := Subsingleton.elim x default
-  dsimp only [toTopObjHomeoUnitInterval]
+  dsimp only [toTopObjHomeoUnitInterval, simplexCategoryToTopObjHomeoUnitInterval]
   simp [ContinuousMap.comp, Function.comp]
   dsimp only [DFunLike.coe, EquivLike.coe]
   dsimp
@@ -295,6 +307,22 @@ lemma toSSetObj_app_const_one :
 end stdSimplex
 
 end SSet
+
+@[simp]
+lemma SimplexCategory.toTopObjOneHomeo_toTopMap_δ_one_default (x : ⦋0⦌.toTopObj):
+    SimplexCategory.toTopObjOneHomeo (SimplexCategory.toTopMap (SimplexCategory.δ 1) x) = 1 := by
+  obtain rfl := Subsingleton.elim x default
+  dsimp [SimplexCategory.toTopMap, SimplexCategory.toTopObjOneHomeo]
+  ext
+  dsimp
+  rw [Finset.sum_eq_single 0 (by simp)]; rfl
+  simp
+  rfl
+
+@[simp]
+lemma SimplexCategory.toTopObjOneHomeo_toTopMap_δ_zero_default (x : ⦋0⦌.toTopObj):
+    SimplexCategory.toTopObjOneHomeo (SimplexCategory.toTopMap (SimplexCategory.δ 0) x) = 0 := by
+  rfl
 
 namespace TopCat
 
@@ -343,5 +371,36 @@ noncomputable def toSSet : SSet.DeformationRetract (toSSet.obj X) (toSSet.obj Y)
       using TopCat.toSSet.congr_map hf.h₁
 
 end DeformationRetract
+
+lemma toSSetObj₀Equiv_toSSet_obj_δ_one (X : TopCat.{0}) (x : toSSet.obj X _⦋1⦌) :
+    toSSetObj₀Equiv ((toSSet.obj X).δ 1 x) =
+      toSSetObjEquiv x (SSet.stdSimplex.simplexCategoryToTopObjHomeoUnitInterval.{0}.symm 0) := by
+  obtain ⟨f, rfl⟩ := toSSetObjEquiv.symm.surjective x
+  rw [Equiv.apply_symm_apply]
+  apply congr_arg f
+  apply SSet.stdSimplex.simplexCategoryToTopObjHomeoUnitInterval.{0}.injective
+  apply Homeomorph.ulift.injective
+  rw [Homeomorph.apply_symm_apply]
+  erw [Homeomorph.apply_symm_apply]
+  dsimp [SSet.stdSimplex.simplexCategoryToTopObjHomeoUnitInterval, unitInterval.symm]
+  ext : 1
+  convert sub_self _
+  dsimp
+  erw [SimplexCategory.toTopObjOneHomeo_toTopMap_δ_one_default]
+  rfl
+
+lemma toSSetObj₀Equiv_toSSet_obj_δ_zero (X : TopCat.{0}) (x : toSSet.obj X _⦋1⦌) :
+    toSSetObj₀Equiv ((toSSet.obj X).δ 0 x) =
+      toSSetObjEquiv x (SSet.stdSimplex.simplexCategoryToTopObjHomeoUnitInterval.{0}.symm 1) := by
+  obtain ⟨f, rfl⟩ := toSSetObjEquiv.symm.surjective x
+  rw [Equiv.apply_symm_apply]
+  apply congr_arg f
+  apply SSet.stdSimplex.simplexCategoryToTopObjHomeoUnitInterval.{0}.injective
+  apply Homeomorph.ulift.injective
+  rw [Homeomorph.apply_symm_apply]
+  erw [Homeomorph.apply_symm_apply]
+  dsimp [SSet.stdSimplex.simplexCategoryToTopObjHomeoUnitInterval, unitInterval.symm]
+  ext : 1
+  apply sub_zero
 
 end TopCat
