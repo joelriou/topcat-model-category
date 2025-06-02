@@ -1,7 +1,8 @@
 import TopCatModelCategory.SSet.HomotopySequence
+import TopCatModelCategory.SSet.Fibrations
 
 open CategoryTheory Simplicial HomotopicalAlgebra
-  SSet.modelCategoryQuillen Limits
+  SSet.modelCategoryQuillen Limits Opposite
 
 namespace SSet
 
@@ -64,6 +65,13 @@ lemma isoFiber_hom_app_f :
       KanComplex.HomotopySequence.basePoint seq.p seq.he := by
   aesop
 
+@[simp]
+lemma isoFiber_inv_app_f :
+    seq.isoFiber.inv.app _ (KanComplex.HomotopySequence.basePoint seq.p seq.he) =
+      seq.f := by
+  rw [← isoFiber_hom_app_f]
+  exact congr_fun (seq.isoFiber.hom_inv_id_app _) _
+
 instance : IsFibrant seq.F := isFibrant_of_iso seq.isoFiber.symm
 
 end
@@ -102,6 +110,24 @@ variable {seq₁ seq₂ seq₃ : FibrationSequence.{u}} (f : seq₁ ⟶ seq₂) 
 @[reassoc, simp] lemma comp_mor₁ : (f ≫ g).mor₁ = f.mor₁ ≫ g.mor₁ := rfl
 @[reassoc, simp] lemma comp_mor₂ : (f ≫ g).mor₂ = f.mor₂ ≫ g.mor₂ := rfl
 @[reassoc, simp] lemma comp_mor₃ : (f ≫ g).mor₃ = f.mor₃ ≫ g.mor₃ := rfl
+
+end
+
+section
+
+open KanComplex
+
+variable (seq : FibrationSequence.{u}) [IsFibrant seq.B]
+
+instance : IsFibrant seq.E := by
+  rw [isFibrant_iff,
+    Subsingleton.elim (terminal.from seq.E) (seq.p ≫ terminal.from seq.B)]
+  infer_instance
+
+noncomputable def δ (n : ℕ) : π (n + 1) seq.B seq.b → π n seq.F seq.f :=
+  (mapπ seq.isoFiber.inv n
+    (HomotopySequence.basePoint seq.p seq.he) seq.f (by simp)).comp
+      (HomotopySequence.δ' seq.p seq.he n 0)
 
 end
 

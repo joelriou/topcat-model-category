@@ -7,6 +7,15 @@ universe u
 open CategoryTheory MonoidalCategory HomotopicalAlgebra Limits MonoidalClosed Opposite Simplicial
   SSet.modelCategoryQuillen
 
+namespace SSet
+
+instance {X Y Z : SSet.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) [hf : Fibration f] [hg : Fibration g] :
+    Fibration (f ≫ g) := by
+  rw [fibration_iff] at hf hg ⊢
+  apply MorphismProperty.comp_mem <;> assumption
+
+end SSet
+
 namespace CategoryTheory
 
 namespace Limits
