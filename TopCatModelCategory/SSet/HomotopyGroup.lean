@@ -55,6 +55,7 @@ lemma mapπ_id (p : π n X x) :
   obtain ⟨h, rfl⟩ := p.eq_homotopyClass
   rfl
 
+@[simps]
 def mapπEquivOfIso (e : X ≅ Y) (n : ℕ) (x : X _⦋0⦌) (y : Y _⦋0⦌) (h : e.hom.app _ x = y) :
     π n X x ≃ π n Y y where
   toFun := mapπ e.hom n x y h

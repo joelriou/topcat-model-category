@@ -34,7 +34,7 @@ def ofFibration {E B : SSet.{u}} (p : E ⟶ B) [Fibration p]
     (he : p.app _ e = b) : FibrationSequence where
   p := p
   isPullback := Subcomplex.fiber_isPullback p b
-  f := KanComplex.HomotopySequence.basePoint p he
+  f := Subcomplex.fiber.basePoint p he
   hf := rfl
   he := he
 
@@ -62,12 +62,12 @@ lemma isoFiber_inv_i : seq.isoFiber.inv ≫ seq.i = Subcomplex.ι _ :=
 @[simp]
 lemma isoFiber_hom_app_f :
     seq.isoFiber.hom.app _ seq.f =
-      KanComplex.HomotopySequence.basePoint seq.p seq.he := by
+      Subcomplex.fiber.basePoint seq.p seq.he := by
   aesop
 
 @[simp]
 lemma isoFiber_inv_app_f :
-    seq.isoFiber.inv.app _ (KanComplex.HomotopySequence.basePoint seq.p seq.he) =
+    seq.isoFiber.inv.app _ (Subcomplex.fiber.basePoint seq.p seq.he) =
       seq.f := by
   rw [← isoFiber_hom_app_f]
   exact congr_fun (seq.isoFiber.hom_inv_id_app _) _
@@ -99,6 +99,20 @@ instance : Category FibrationSequence.{u} where
       mor₂ := f.mor₂ ≫ g.mor₂
       mor₃ := f.mor₃ ≫ g.mor₃ }
 
+namespace Hom
+
+@[simp]
+lemma mor₂_app_e {seq seq' : FibrationSequence}
+    (φ : seq ⟶ seq') : φ.mor₂.app _ seq.e = seq'.e := by
+  simp only [← seq.hf, ← seq'.hf, ← φ.mor₁_app_f, ← FunctorToTypes.comp, φ.comm_i]
+
+@[simp]
+lemma mor₃_app_b {seq seq' : FibrationSequence}
+    (φ : seq ⟶ seq') : φ.mor₃.app _ seq.b = seq'.b := by
+  simp only [← seq.he, ← seq'.he, ← mor₂_app_e φ, ← FunctorToTypes.comp, φ.comm_p]
+
+end Hom
+
 @[simp] lemma id_mor₁ (seq : FibrationSequence) : Hom.mor₁ (𝟙 seq) = 𝟙 _ := rfl
 @[simp] lemma id_mor₂ (seq : FibrationSequence) : Hom.mor₂ (𝟙 seq) = 𝟙 _ := rfl
 @[simp] lemma id_mor₃ (seq : FibrationSequence) : Hom.mor₃ (𝟙 seq) = 𝟙 _ := rfl
@@ -124,12 +138,75 @@ instance : IsFibrant seq.E := by
     Subsingleton.elim (terminal.from seq.E) (seq.p ≫ terminal.from seq.B)]
   infer_instance
 
+open HomotopySequence
+
 noncomputable def δ (n : ℕ) : π (n + 1) seq.B seq.b → π n seq.F seq.f :=
   (mapπ seq.isoFiber.inv n
-    (HomotopySequence.basePoint seq.p seq.he) seq.f (by simp)).comp
+    (Subcomplex.fiber.basePoint seq.p seq.he) seq.f (by simp)).comp
       (HomotopySequence.δ' seq.p seq.he n 0)
 
+lemma exact₂ {n : ℕ} (x₂ : π n seq.E seq.e)
+    (hx₂ : mapπ seq.p n seq.e seq.b seq.he x₂ = 1) :
+    ∃ (x₁ : π n seq.F seq.f), mapπ seq.i n seq.f seq.e seq.hf x₁ = x₂ := by
+  obtain ⟨y₁, rfl⟩ := exists_of_map₂_eq_one hx₂
+  refine ⟨mapπ seq.isoFiber.inv n (Subcomplex.fiber.basePoint seq.p seq.he) seq.f (by simp) y₁, ?_⟩
+  simp only [mapπ_mapπ, isoFiber_inv_i]
+  rfl
+
+lemma exact₁ {n : ℕ} (x₁ : π n seq.F seq.f)
+    (hx₁ : mapπ seq.i n seq.f seq.e seq.hf x₁ = 1) :
+    ∃ (x₃ : π (n + 1) seq.B seq.b),
+      seq.δ n x₃ = x₁ := by
+  obtain ⟨x₃, hx₃⟩ := exists_of_map₁_eq_one
+    (x := mapπ seq.isoFiber.hom n seq.f (Subcomplex.fiber.basePoint seq.p seq.he) (by simp) x₁)
+      (by simpa only [map₁, mapπ_mapπ, isoFiber_hom_ι]) 0
+  refine ⟨x₃, ?_⟩
+  dsimp [δ]
+  simp only [hx₃, mapπ_mapπ, Iso.hom_inv_id, mapπ_id]
+
+lemma exact₃ {n : ℕ} (x₃ : π (n + 1) seq.B seq.b)
+    (hx₃ : seq.δ n x₃ = 1) :
+    ∃ (x₂ : π (n + 1) seq.E seq.e),
+      mapπ seq.p (n + 1) seq.e seq.b seq.he x₂ = x₃ := by
+  apply exists_of_δ'_eq_one (x := x₃) (i := 0)
+  apply (mapπEquivOfIso seq.isoFiber n seq.f
+    (Subcomplex.fiber.basePoint seq.p seq.he) (by simp)).symm.injective
+  simpa
+
 end
+
+open KanComplex
+
+variable {seq seq' : FibrationSequence.{u}}
+  (φ : seq ⟶ seq')
+
+@[reassoc (attr := simp)]
+lemma isoFiber_hom_mapFiber :
+    seq.isoFiber.hom ≫
+      Subcomplex.mapFiber seq.p seq'.p φ.mor₂ φ.mor₃ (by simp) seq.b seq'.b (by simp) =
+    φ.mor₁ ≫ seq'.isoFiber.hom := by
+  aesop
+
+@[reassoc (attr := simp)]
+lemma mapFiber_isoFiber_inv :
+    Subcomplex.mapFiber seq.p seq'.p φ.mor₂ φ.mor₃ (by simp) seq.b seq'.b (by simp) ≫
+      seq'.isoFiber.inv = seq.isoFiber.inv ≫ φ.mor₁ := by
+  rw [← cancel_mono (seq'.isoFiber.hom), Category.assoc, Category.assoc,
+    Iso.inv_hom_id, Category.comp_id, ← isoFiber_hom_mapFiber,
+    Iso.inv_hom_id_assoc]
+
+variable [IsFibrant seq.B] [IsFibrant seq'.B]
+noncomputable def δ_naturality_apply {n : ℕ} (x : π (n + 1) seq.B seq.b) :
+    seq'.δ n (mapπ φ.mor₃ (n + 1) seq.b seq'.b (by simp) x) =
+    mapπ φ.mor₁ n seq.f seq'.f (by simp) (seq.δ n x) := by
+  simp [δ, HomotopySequence.δ'_naturality seq.he seq'.he n 0 x _ _ φ.comm_p.symm (by simp),
+    mapπ_mapπ]
+
+noncomputable def δ_naturality (n : ℕ) :
+    (seq'.δ n).comp (mapπ φ.mor₃ (n + 1) seq.b seq'.b (by simp)) =
+      (mapπ φ.mor₁ n seq.f seq'.f (by simp)).comp (seq.δ n) := by
+  ext x
+  apply δ_naturality_apply
 
 end FibrationSequence
 

@@ -6,30 +6,27 @@ import TopCatModelCategory.SSet.HomotopyGroup
 universe u
 
 open HomotopicalAlgebra CategoryTheory Simplicial SSet.modelCategoryQuillen
-  MonoidalCategory ChosenFiniteProducts Limits
+  MonoidalCategory ChosenFiniteProducts Limits Opposite
 
 namespace SSet
 
 namespace KanComplex
 
+open Subcomplex
 namespace HomotopySequence
 
 variable {E B : SSet.{u}} (p : E ⟶ B) {b : B _⦋0⦌}
   {e : E _⦋0⦌} (he : p.app _ e = b)
 
-@[simps]
-def basePoint : (Subcomplex.fiber p b : SSet) _⦋0⦌ :=
-  ⟨e, by simpa [Subcomplex.fiber]⟩
-
-def map₁ (n : ℕ) : π n (Subcomplex.fiber p b) (basePoint p he) → π n E e :=
-  mapπ (Subcomplex.fiber p b).ι n (basePoint p he) e (by simp)
+def map₁ (n : ℕ) : π n (Subcomplex.fiber p b) (fiber.basePoint p he) → π n E e :=
+  mapπ (Subcomplex.fiber p b).ι n (fiber.basePoint p he) e (by simp)
 
 def map₂ (n : ℕ) : π n E e → π n B b := mapπ p n e b he
 
 variable {p he}
 
 structure DeltaStruct {n : ℕ} (s : B.PtSimplex (n + 1) b)
-    (t : PtSimplex _ n (basePoint p he)) (i : Fin (n + 2)) where
+    (t : PtSimplex _ n (fiber.basePoint p he)) (i : Fin (n + 2)) where
   map : Δ[n + 1] ⟶ E
   map_p : map ≫ p = s.map := by aesop_cat
   δ_map : stdSimplex.δ i ≫ map = t.map ≫ (Subcomplex.fiber p b).ι := by aesop_cat
@@ -42,7 +39,7 @@ attribute [reassoc (attr := simp)] map_p δ_map
 attribute [reassoc] δ_map_eq_const
 
 def relStructOfCastSucc {n : ℕ} {s : B.PtSimplex (n + 1) b}
-    {t : PtSimplex _ n (basePoint p he)} {i : Fin (n + 1)}
+    {t : PtSimplex _ n (fiber.basePoint p he)} {i : Fin (n + 1)}
     (h : DeltaStruct s t i.castSucc) :
       PtSimplex.RelStruct (t.pushforward (Subpresheaf.ι _) e (by simp)) .const i where
   map := h.map
@@ -53,7 +50,7 @@ def relStructOfCastSucc {n : ℕ} {s : B.PtSimplex (n + 1) b}
     simp [Fin.lt_iff_val_lt_val] at hj)
 
 def relStructOfSucc {n : ℕ} {s : B.PtSimplex (n + 1) b}
-    {t : PtSimplex _ n (basePoint p he)} {i : Fin (n + 1)}
+    {t : PtSimplex _ n (fiber.basePoint p he)} {i : Fin (n + 1)}
     (h : DeltaStruct s t i.succ) :
       PtSimplex.RelStruct .const (t.pushforward (Subpresheaf.ι _) e (by simp))  i where
   map := h.map
@@ -65,7 +62,7 @@ def relStructOfSucc {n : ℕ} {s : B.PtSimplex (n + 1) b}
   δ_map_of_gt j hj := h.δ_map_eq_const j hj.ne'
 
 noncomputable def relStruct₀ {n : ℕ} {s : B.PtSimplex (n + 1) b}
-    {t : PtSimplex _ n (basePoint p he)} {i : Fin (n + 2)} [IsFibrant E]
+    {t : PtSimplex _ n (fiber.basePoint p he)} {i : Fin (n + 2)} [IsFibrant E]
     (h : DeltaStruct s t i) :
       PtSimplex.RelStruct₀ (t.pushforward (Subpresheaf.ι _) e (by simp)) .const := by
   apply Nonempty.some
@@ -80,7 +77,7 @@ section
 variable (he) {n : ℕ}
 
 lemma exists_deltaStruct [Fibration p] (s : B.PtSimplex (n + 1) b) (i : Fin (n + 2)) :
-    ∃ (t : PtSimplex _ n (basePoint p he)),
+    ∃ (t : PtSimplex _ n (fiber.basePoint p he)),
           Nonempty (DeltaStruct s t i) := by
   have sq : CommSq (const e) (horn (n + 1) i).ι p s.map := ⟨by
     have := Subcomplex.homOfLE (horn_le_boundary i) ≫= s.comm
@@ -97,7 +94,7 @@ lemma exists_deltaStruct [Fibration p] (s : B.PtSimplex (n + 1) b) (i : Fin (n +
       Subcomplex.range_le_fiber_iff,
       Category.assoc, sq.fac_right, PtSimplex.δ_map]
   · rw [← cancel_mono (Subpresheaf.ι _),
-      Subcomplex.ofSimplex_ι, comp_const, const_comp, Subpresheaf.ι_app, basePoint_coe,
+      Subcomplex.ofSimplex_ι, comp_const, const_comp, Subpresheaf.ι_app, fiber.basePoint_coe,
       Category.assoc, Subcomplex.lift_ι]
     obtain _ | n := n
     · ext x hx
@@ -128,7 +125,7 @@ lemma exists_deltaStruct [Fibration p] (s : B.PtSimplex (n + 1) b) (i : Fin (n +
           simp at hj
 
 noncomputable def δ'' [Fibration p] (s : B.PtSimplex (n + 1) b) (i : Fin (n + 2)) :
-    PtSimplex _ n (basePoint p he) :=
+    PtSimplex _ n (fiber.basePoint p he) :=
   (exists_deltaStruct he s i).choose
 
 noncomputable def deltaStruct [Fibration p] (s : B.PtSimplex (n + 1) b) (i : Fin (n + 2)) :
@@ -137,8 +134,8 @@ noncomputable def deltaStruct [Fibration p] (s : B.PtSimplex (n + 1) b) (i : Fin
 
 variable {he} in
 noncomputable def uniqueδ'' [Fibration p] {s s' : B.PtSimplex (n + 1) b} {i : Fin (n + 2)}
-    {t t' : PtSimplex _ n (basePoint p he)} (hst : DeltaStruct s t i) (hst' : DeltaStruct s' t' i)
-    (hs : s.Homotopy s') :
+    {t t' : PtSimplex _ n (fiber.basePoint p he)} (hst : DeltaStruct s t i)
+    (hst' : DeltaStruct s' t' i) (hs : s.Homotopy s') :
     t.Homotopy t' := Nonempty.some (by
   obtain ⟨α, hα₀, hα₁⟩ : ∃ (α : Δ[n + 1] ⊗ ∂Δ[1] ⟶ E),
     _ ◁ boundary₁.ι₀ ≫ α = fst _ _ ≫ hst.map ∧
@@ -201,7 +198,7 @@ noncomputable def uniqueδ'' [Fibration p] {s s' : B.PtSimplex (n + 1) b} {i : F
       rel := by
         rw [← cancel_mono (Subcomplex.ι _)]
         simp only [Category.assoc, Subcomplex.lift_ι, Subpresheaf.toPresheaf_obj,
-          Subcomplex.ofSimplex_ι, comp_const, const_comp, Subpresheaf.ι_app, basePoint_coe]
+          Subcomplex.ofSimplex_ι, comp_const, const_comp, Subpresheaf.ι_app, fiber.basePoint_coe]
         obtain _ | n := n
         · ext
         have (k : Fin (n + 3)) (hki : k ≠ i) : stdSimplex.δ k ▷ _ ≫ sq.lift = const e := by
@@ -226,7 +223,7 @@ noncomputable def uniqueδ'' [Fibration p] {s s' : B.PtSimplex (n + 1) b} {i : F
 variable {he} in
 noncomputable def deltaStructOfHomotopy
     [Fibration p] {s : B.PtSimplex (n + 1) b} {i : Fin (n + 2)}
-    {t t' : PtSimplex _ n (basePoint p he)} (hst : DeltaStruct s t i) (h : t.Homotopy t') :
+    {t t' : PtSimplex _ n (fiber.basePoint p he)} (hst : DeltaStruct s t i) (h : t.Homotopy t') :
     DeltaStruct s t' i := Nonempty.some (by
   obtain ⟨α, hα₀, hα⟩ : ∃ (α : (boundary (n + 1) : SSet) ⊗ Δ[1] ⟶ E),
       (∀ (j : Fin (n + 2)) (hj : j ≠ i), (boundary.ι j ▷ Δ[1]) ≫ α = const e) ∧
@@ -270,7 +267,7 @@ noncomputable def deltaStructOfHomotopy
           rw [← comp_whiskerRight_assoc, boundary.ι_ι, const_comp, comp_const, comp_const,
             Subcomplex.ofSimplex_ι, const_app, SimplexCategory.const_eq_id,
             op_id, FunctorToTypes.map_id_apply] at this
-          rw [reassoc_of% this, const_comp, Subpresheaf.ι_app, basePoint_coe]
+          rw [reassoc_of% this, const_comp, Subpresheaf.ι_app, fiber.basePoint_coe]
         · simp
       obtain ⟨α, hα⟩ := boundary.exists_tensorRight_desc f (by simp [hf])
       dsimp [f] at hα
@@ -317,20 +314,20 @@ end
 
 variable (p he n) in
 noncomputable def δ' (n : ℕ) [Fibration p] [IsFibrant E] [IsFibrant B] (i : Fin (n + 2)) :
-    π (n + 1) B b → π n (Subcomplex.fiber p b) (basePoint p he) :=
+    π (n + 1) B b → π n (Subcomplex.fiber p b) (fiber.basePoint p he) :=
   Quot.lift (fun s ↦ (δ'' he s i).homotopyClass) (fun s s' hs ↦
     Quot.sound ⟨uniqueδ'' (deltaStruct he s i) (deltaStruct he s' i) hs.some⟩)
 
 lemma δ'_mk_eq_of_deltaStruct {n : ℕ} [Fibration p] [IsFibrant E] [IsFibrant B]
     {i : Fin (n + 2)} {x : B.PtSimplex (n + 1) b}
-    {t : SSet.PtSimplex (Subcomplex.fiber p b) n (basePoint p he)}
+    {t : SSet.PtSimplex (Subcomplex.fiber p b) n (fiber.basePoint p he)}
     (h : DeltaStruct x t i) :
     δ' p he n i (π.mk x) = π.mk t :=
   Quot.sound ⟨uniqueδ'' (deltaStruct he x i) h (.refl x)⟩
 
 lemma δ'_mk_iff_nonempty_deltaStruct {n : ℕ} [Fibration p] [IsFibrant E] [IsFibrant B]
     {i : Fin (n + 2)} (s : B.PtSimplex (n + 1) b)
-    {t : SSet.PtSimplex (Subcomplex.fiber p b) n (basePoint p he)} :
+    {t : SSet.PtSimplex (Subcomplex.fiber p b) n (fiber.basePoint p he)} :
     δ' p he n i (π.mk s) = π.mk t ↔ Nonempty (DeltaStruct s t i) := by
   refine ⟨fun h ↦ ?_, fun ⟨hst⟩ ↦ δ'_mk_eq_of_deltaStruct hst⟩
   replace h : (δ'' he s i).Homotopy t := by
@@ -338,10 +335,33 @@ lemma δ'_mk_iff_nonempty_deltaStruct {n : ℕ} [Fibration p] [IsFibrant E] [IsF
     exact h.some.homotopy
   exact ⟨deltaStructOfHomotopy (deltaStruct he s i) h⟩
 
+variable (he) in
+lemma δ'_naturality [Fibration p] [IsFibrant E] [IsFibrant B]
+    {E' B' : SSet.{u}} {p' : E' ⟶ B'} {e' : E' _⦋0⦌} {b' : B' _⦋0⦌} (he' : p'.app _ e' = b')
+    [Fibration p'] [IsFibrant E'] [IsFibrant B'] (n : ℕ) (i : Fin (n + 2))
+    (x : π (n + 1) B b) (α : E ⟶ E') (β : B ⟶ B') (fac : α ≫ p' = p ≫ β)
+    (h : α.app _ e = e') :
+    δ' p' he' n i (mapπ β (n + 1) b b' (by
+      rw [← he', ← he, ← h]
+      apply congr_fun (congr_app fac (op ⦋0⦌)).symm) x) =
+    mapπ (Subcomplex.mapFiber p p' α β fac b b' (by
+        rw [← he', ← he, ← h]
+        apply congr_fun (congr_app fac (op ⦋0⦌)).symm)) n (fiber.basePoint p he)
+      (fiber.basePoint p' he') (by aesop) (δ' p he n i x) := by
+  obtain ⟨s, rfl⟩ := x.mk_surjective
+  obtain ⟨t, ⟨hst⟩⟩ : ∃ (t : SSet.PtSimplex (Subcomplex.fiber p b) n (fiber.basePoint p he)),
+    Nonempty (DeltaStruct s t i) := ⟨_, ⟨deltaStruct he s i⟩⟩
+  rw [δ'_mk_eq_of_deltaStruct hst, mapπ_mk, mapπ_mk, δ'_mk_iff_nonempty_deltaStruct]
+  exact ⟨{
+      map := hst.map ≫ α
+      δ_map_eq_const j hj := by
+        rw [hst.δ_map_eq_const_assoc j hj, ← h, const_comp]
+  }⟩
+
 variable [IsFibrant B]
 
 @[simp]
-lemma map₂_map₁_apply {n : ℕ} (x : π n (Subcomplex.fiber p b) (basePoint p he)) :
+lemma map₂_map₁_apply {n : ℕ} (x : π n (Subcomplex.fiber p b) (fiber.basePoint p he)) :
     map₂ p he n (map₁ p he n x) = 1 := by
   obtain ⟨x, rfl⟩ := x.mk_surjective
   dsimp only [map₁, map₂]
@@ -392,7 +412,7 @@ lemma δ'_eq_one_iff {n : ℕ} (x : π (n + 1) B b) (i : Fin (n + 2))  :
 
 variable {he}
 
-lemma exists_of_map₁_eq_one {n : ℕ} {x : π n (Subcomplex.fiber p b) (basePoint p he)}
+lemma exists_of_map₁_eq_one {n : ℕ} {x : π n (Subcomplex.fiber p b) (fiber.basePoint p he)}
     (hx : map₁ p he n x = 1) (i : Fin (n + 2)):
     ∃ (y : π (n + 1) B b), δ' p he n i y = x := by
   obtain ⟨x, rfl⟩ := x.mk_surjective
@@ -430,12 +450,13 @@ lemma exists_of_map₁_eq_one {n : ℕ} {x : π n (Subcomplex.fiber p b) (basePo
   · rw [δ'_mk_iff_nonempty_deltaStruct]
     exact ⟨{ map := s }⟩
 
-lemma map₁_eq_one_iff {n : ℕ} (x : π n (Subcomplex.fiber p b) (basePoint p he)) (i : Fin (n + 2)) :
+lemma map₁_eq_one_iff {n : ℕ} (x : π n (Subcomplex.fiber p b)
+    (fiber.basePoint p he)) (i : Fin (n + 2)) :
     map₁ p he n x = 1 ↔ ∃ (y : π (n + 1) B b), δ' p he n i y = x :=
   ⟨fun hx ↦ exists_of_map₁_eq_one hx i, by rintro ⟨y, rfl⟩; simp⟩
 
 lemma exists_of_map₂_eq_one {n : ℕ} {x : π n E e} (hx : map₂ p he n x = 1) :
-    ∃ (y : π n (Subcomplex.fiber p b) (basePoint p he)), map₁ p he n y = x := by
+    ∃ (y : π n (Subcomplex.fiber p b) (fiber.basePoint p he)), map₁ p he n y = x := by
   obtain ⟨x, rfl⟩ := x.mk_surjective
   change _ = π.mk _ at hx
   simp only [map₂, mapπ_mk, π.mk_eq_mk_iff] at hx
@@ -467,7 +488,7 @@ lemma exists_of_map₂_eq_one {n : ℕ} {x : π n E e} (hx : map₂ p he n x = 1
         boundary.ι_ι, ι₁_comp_assoc, hφ₂, comp_const, comp_const] at this
       rwa [← cancel_mono (Subcomplex.ι _), Category.assoc, Category.assoc, Subcomplex.lift_ι,
         boundary.ι_ι_assoc, Subcomplex.ofSimplex_ι, comp_const, comp_const, const_comp,
-        Subpresheaf.ι_app, basePoint_coe]
+        Subpresheaf.ι_app, fiber.basePoint_coe]
   · symm
     simp only [map₁, mapπ_mk, π.mk_eq_mk_iff]
     refine ⟨PtSimplex.Homotopy.relStruct₀ ?_⟩
@@ -493,7 +514,7 @@ lemma exists_of_map₂_eq_one {n : ℕ} {x : π n E e} (hx : map₂ p he n x = 1
 variable (he) in
 lemma map₂_eq_one_iff {n : ℕ} (x : π n E e) :
     map₂ p he n x = 1 ↔
-      ∃ (y : π n (Subcomplex.fiber p b) (basePoint p he)), map₁ p he n y = x :=
+      ∃ (y : π n (Subcomplex.fiber p b) (fiber.basePoint p he)), map₁ p he n y = x :=
   ⟨fun hx ↦ exists_of_map₂_eq_one hx, by rintro ⟨y, rfl⟩; simp⟩
 
 end HomotopySequence

@@ -143,6 +143,42 @@ lemma fiber_isPullback :
   · dsimp
     rw [Subcomplex.ofSimplex_ι, comp_id, yonedaEquiv_symm_zero, comp_const]
 
+variable {y} in
+@[simps]
+def fiber.basePoint {x : X _⦋0⦌} (hx : f.app _ x = y) :
+    (Subcomplex.fiber f y : SSet) _⦋0⦌ :=
+  ⟨x, by simpa [Subcomplex.fiber]⟩
+
+end
+
+section
+
+variable (f : X ⟶ Y) {X' Y' : SSet.{u}} (f' : X' ⟶ Y') (α : X ⟶ X')
+    (β : Y ⟶ Y') (fac : α ≫ f' = f ≫ β) (y : Y _⦋0⦌) (y' : Y' _⦋0⦌) (h : β.app _ y = y')
+
+def mapFiber :
+    (fiber f y : SSet) ⟶ fiber f' y' :=
+  Subcomplex.lift (Subcomplex.ι _ ≫ α) (by
+    apply le_antisymm (by simp)
+    have : (range (fiber f y).ι).ι ≫ f = const y := by simp [← range_le_fiber_iff]
+    rw [← Subcomplex.image_le_iff, Subcomplex.image_top,
+      Subcomplex.range_comp, Subcomplex.le_fiber_iff,
+      ← cancel_epi (Subcomplex.toImage _ _),
+      toImage_ι_assoc, comp_const, fac, reassoc_of% this, const_comp, h])
+
+@[reassoc (attr := simp)]
+lemma mapFiber_ι :
+    mapFiber f f' α β fac y y' h ≫ (fiber f' y').ι =
+      (fiber f y).ι ≫ α := rfl
+
+@[simp]
+lemma mapFiber_app_basePoint {x : X _⦋0⦌} (hx : f.app _ x = y):
+    (mapFiber f f' α β fac y y' h).app _ (fiber.basePoint f hx) =
+      fiber.basePoint f' (x := α.app _ x) (by
+        rw [← h, ← hx]
+        apply congr_fun (congr_app fac (op ⦋0⦌))) :=
+  rfl
+
 end
 
 end Subcomplex
