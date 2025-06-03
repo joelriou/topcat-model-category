@@ -55,7 +55,7 @@ lemma π₀.eq_of_path {X : TopCat.{0}} {x y : X} (p : _root_.Path x y) :
 
 variable (X : SSet.{0})
 
-lemma surjective_mapπ₀_sSetTopAdj.unit.app :
+lemma surjective_mapπ₀_sSetTopAdj_unit_app :
     Function.Surjective (mapπ₀ (sSetTopAdj.unit.app X)) := by
   intro x
   obtain ⟨x, rfl⟩ := x.mk_surjective
@@ -86,5 +86,9 @@ lemma surjective_mapπ₀_sSetTopAdj.unit.app :
     sorry
   rw [this, Subsingleton.elim default (⦋0⦌.toTopHomeo default)]
   rfl
+
+lemma bijective_mapπ₀_sSetTopAdj_unit_app :
+    Function.Bijective (mapπ₀ (sSetTopAdj.unit.app X)) := by
+  sorry
 
 end SSet

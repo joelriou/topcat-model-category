@@ -1,5 +1,6 @@
 import TopCatModelCategory.SSet.HomotopySequence
 import TopCatModelCategory.SSet.Fibrations
+import TopCatModelCategory.SSet.Loop
 
 open CategoryTheory Simplicial HomotopicalAlgebra
   SSet.modelCategoryQuillen Limits Opposite
@@ -16,8 +17,8 @@ structure FibrationSequence where
   f : F _⦋0⦌
   e : E _⦋0⦌
   b : B _⦋0⦌
-  hf : i.app _ f = e
-  he : p.app _ e = b
+  hf : i.app _ f = e := by aesop_cat
+  he : p.app _ e = b := by aesop_cat
   isPullback : IsPullback i (stdSimplex.objZeroIsTerminal.from F)
       p (yonedaEquiv.symm b)
 
@@ -207,6 +208,30 @@ noncomputable def δ_naturality (n : ℕ) :
       (mapπ φ.mor₁ n seq.f seq'.f (by simp)).comp (seq.δ n) := by
   ext x
   apply δ_naturality_apply
+
+
+@[simps]
+protected def fiber {E B : SSet.{u}} (p : E ⟶ B) [Fibration p]
+    (e : E _⦋0⦌) (b : B _⦋0⦌)
+    (he : p.app _ e = b) : FibrationSequence where
+  f := Subcomplex.fiber.basePoint p he
+  e := e
+  isPullback := Subcomplex.fiber_isPullback p b
+
+section
+
+variable (X : SSet) [IsFibrant X] (x : X _⦋0⦌)
+
+@[simps! E B p e b]
+noncomputable def loop : FibrationSequence :=
+  FibrationSequence.fiber (X.path₀Ev₁ x) (X.path₀Const x) x
+    (by simp)
+
+@[simp] lemma loop_F : (loop X x).F = X.loop x := rfl
+@[simp] lemma loop_i : (loop X x).i = (X.loop x).ι := rfl
+@[simp] lemma loop_f : (loop X x).f = loop.basePoint X x := rfl
+
+end
 
 end FibrationSequence
 

@@ -43,6 +43,7 @@ import TopCatModelCategory.SSet.EffectiveEpi
 import TopCatModelCategory.SSet.Evaluation
 import TopCatModelCategory.SSet.Fiber
 import TopCatModelCategory.SSet.FibrationSequence
+import TopCatModelCategory.SSet.FibrationSequenceAdj
 import TopCatModelCategory.SSet.Fibrations
 import TopCatModelCategory.SSet.Finite
 import TopCatModelCategory.SSet.FundamentalGroupoid
@@ -61,6 +62,7 @@ import TopCatModelCategory.SSet.KanComplexW
 import TopCatModelCategory.SSet.KanComplexWColimits
 import TopCatModelCategory.SSet.KanComplexWHomotopy
 import TopCatModelCategory.SSet.KanComplexWRetracts
+import TopCatModelCategory.SSet.KanComplexWUnit
 import TopCatModelCategory.SSet.KeyLemma
 import TopCatModelCategory.SSet.Loop
 import TopCatModelCategory.SSet.MinimalFibrations

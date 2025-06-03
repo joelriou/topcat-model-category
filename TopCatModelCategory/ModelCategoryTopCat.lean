@@ -169,6 +169,16 @@ instance (n : ℕ) : Cofibration (toTop.map (boundary n).ι) := by
   apply MorphismProperty.le_llp_rlp
   constructor
 
+lemma fibration_toSSet_map_iff {E B : TopCat} (p : E ⟶ B) :
+    Fibration (toSSet.map p) ↔ Fibration p := by
+  symm
+  simp only [HomotopicalAlgebra.fibration_iff]
+  apply rlp_J_iff
+
+instance {E B : TopCat} (p : E ⟶ B) [Fibration p] :
+    Fibration (toSSet.map p) := by
+  rwa [fibration_toSSet_map_iff]
+
 lemma trivialCofibrations_eq_llp_rlp :
     trivialCofibrations TopCat =
       (⨆ n, ofHoms (fun i ↦ SSet.toTop.map (SSet.horn.{0} (n + 1) i).ι)).rlp.llp :=

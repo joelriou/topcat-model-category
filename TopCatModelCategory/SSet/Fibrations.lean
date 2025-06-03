@@ -14,6 +14,10 @@ instance {X Y Z : SSet.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) [hf : Fibration f] [hg :
   rw [fibration_iff] at hf hg ⊢
   apply MorphismProperty.comp_mem <;> assumption
 
+instance {X Y : SSet.{u}} (f : X ⟶ Y) [IsIso f] : Fibration f := by
+  rw [fibration_iff]
+  exact MorphismProperty.rlp_of_isIso J f
+
 end SSet
 
 namespace CategoryTheory
@@ -409,6 +413,37 @@ lemma ihomToPullbackFiber_pre_app :
 instance [Mono i] [Fibration p] :
     IsFibrant (C := SSet.{u}) (ihomToPullbackFiber sq) := by
   dsimp only [ihomToPullbackFiber]
+  infer_instance
+
+end
+
+section
+
+instance (i : A ⟶ B) : IsIso ((pre i).app (⊤_ SSet)) :=
+  ⟨(IsTerminal.isTerminalObj _ _ terminalIsTerminal).from _,
+    (IsTerminal.isTerminalObj _ _ terminalIsTerminal).hom_ext _ _,
+    (IsTerminal.isTerminalObj _ _ terminalIsTerminal).hom_ext _ _⟩
+
+instance (i : A ⟶ B) [Mono i] [IsFibrant X] :
+    Fibration ((MonoidalClosed.pre i).app X) := by
+  let h : PullbackIhom i (terminal.from X) :=
+    { pt := (ihom A).obj X
+      fst := 𝟙 _
+      snd := curry (terminal.from _)
+      isPullback := by
+        dsimp
+        apply IsPullback.of_horiz_isIso
+        constructor
+        apply IsTerminal.hom_ext
+        apply IsTerminal.isTerminalObj
+        exact terminalIsTerminal }
+  have : h.π = (pre i).app X := by
+    apply h.isPullback.hom_ext
+    · rw [h.π_fst]
+      simp [h]
+    · apply uncurry_injective
+      apply Subsingleton.elim
+  rw [← this]
   infer_instance
 
 end
