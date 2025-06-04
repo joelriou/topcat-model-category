@@ -146,6 +146,10 @@ noncomputable def δ (n : ℕ) : π (n + 1) seq.B seq.b → π n seq.F seq.f :=
     (Subcomplex.fiber.basePoint seq.p seq.he) seq.f (by simp)).comp
       (HomotopySequence.δ' seq.p seq.he n 0)
 
+@[simp]
+lemma δ_one (n : ℕ) : seq.δ n 1 = 1 := by
+  sorry
+
 lemma exact₂ {n : ℕ} (x₂ : π n seq.E seq.e)
     (hx₂ : mapπ seq.p n seq.e seq.b seq.he x₂ = 1) :
     ∃ (x₁ : π n seq.F seq.f), mapπ seq.i n seq.f seq.e seq.hf x₁ = x₂ := by
@@ -233,6 +237,10 @@ noncomputable def loop : FibrationSequence where
   i := X.loopι x
   p := X.path₀π x
   isPullback := X.isPullback_loop  x
+
+instance : IsFibrant ((loop X x).F) := by dsimp; infer_instance
+instance : IsFibrant ((loop X x).E) := by dsimp; infer_instance
+instance : IsFibrant ((loop X x).B) := by dsimp; infer_instance
 
 end
 

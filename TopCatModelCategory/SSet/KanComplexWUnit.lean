@@ -26,6 +26,9 @@ instance : IsFibrant ((toTop ⋙ TopCat.toSSet).obj X) := by dsimp; infer_instan
 
 instance [IsFibrant X] : IsFibrant ((𝟭 _).obj X) := by dsimp; infer_instance
 
+instance [IsFibrant X] (n : ℕ) (x : X _⦋0⦌) :
+    Subsingleton (π n (X.path₀ x) (X.path₀BasePoint x)) := sorry
+
 lemma W.sSetTopAdj_unit_app [IsFibrant X] :
     W (sSetTopAdj.unit.app X) := by
   revert X
@@ -46,10 +49,26 @@ lemma W.sSetTopAdj_unit_app [IsFibrant X] :
     intro X _ x
     constructor
     · rw [Group.injective_iff_of_map_mul _ (by simp [mapπ_mul])]
-      sorry
-    · intro x
-      --have ipf := ιtoTopToSSet
-      sorry
+      dsimp
+      intro y hy
+      have := (FibrationSequence.δ_naturality_apply
+        ((FibrationSequence.loop X x).ιtoTopToSSet) y).symm
+      dsimp at this
+      obtain ⟨z, rfl⟩ := (FibrationSequence.loop X x).exact₃ y
+        ((hn (X.loop x) (X.loopBasePoint x)).1 (a₂ := 1) (by simp [this, hy]))
+      obtain rfl : z = 1 := by dsimp; apply Subsingleton.elim
+      simp
+    · intro y
+      obtain ⟨z, hz⟩ := (hn _ _).2 ((FibrationSequence.loop X x).toTopToSSet.δ n y)
+      dsimp at y z hz
+      obtain ⟨w, rfl⟩ := (FibrationSequence.loop X x).exact₁ z
+        (by dsimp; apply Subsingleton.elim)
+      have : Function.Injective ((FibrationSequence.loop X x).toTopToSSet.δ n) := sorry
+      refine ⟨w, this ?_⟩
+      have := (FibrationSequence.δ_naturality_apply
+        ((FibrationSequence.loop X x).ιtoTopToSSet) w).symm
+      dsimp at w this
+      rw [← hz, this]
 
 end KanComplex
 

@@ -18,6 +18,9 @@ noncomputable def pathEv₀ : X.path ⟶ X := (Δ[1].ihomEv (stdSimplex.obj₀Eq
 
 noncomputable def pathEv₁ : X.path ⟶ X := (Δ[1].ihomEv (stdSimplex.obj₀Equiv.symm 1)).app X
 
+instance [IsFibrant X] : Fibration X.pathEv₀ := sorry
+instance [IsFibrant X] : Fibration X.pathEv₁ := sorry
+
 noncomputable def pathEv₀₁ : X.path ⟶ X ⊗ X := lift X.pathEv₀ X.pathEv₁
 
 def arrowMkPathEv₀₁Iso : Arrow.mk X.pathEv₀₁ ≅ Arrow.mk ((pre ∂Δ[1].ι).app X) := sorry
