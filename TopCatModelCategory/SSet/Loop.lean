@@ -1,17 +1,25 @@
 import TopCatModelCategory.SSet.HomotopySequence
 import TopCatModelCategory.SSet.Fibrations
 import TopCatModelCategory.SSet.KanComplexWHomotopy
+import TopCatModelCategory.SSet.FundamentalGroupoidPiOne
 import Mathlib.CategoryTheory.Adjunction.Unique
 
 universe u
 
 open CategoryTheory Monoidal Simplicial MonoidalCategory MonoidalClosed
   SSet.modelCategoryQuillen HomotopicalAlgebra Opposite
-  ChosenFiniteProducts
+  ChosenFiniteProducts Limits
 
 namespace SSet
 
 variable (X : SSet.{u})
+
+instance (A : SSet) (a : A _⦋0⦌) [IsFibrant X] :
+    Fibration ((A.ihomEv a).app X) := by
+  have : IsSplitMono (yonedaEquiv.symm a) :=
+    ⟨⟨{ retraction := stdSimplex.isTerminalObj₀.from _ }⟩⟩
+  dsimp [ihomEv]
+  infer_instance
 
 abbrev path := (ihom Δ[1]).obj X
 
@@ -19,8 +27,9 @@ noncomputable def pathEv₀ : X.path ⟶ X := (Δ[1].ihomEv (stdSimplex.obj₀Eq
 
 noncomputable def pathEv₁ : X.path ⟶ X := (Δ[1].ihomEv (stdSimplex.obj₀Equiv.symm 1)).app X
 
-instance [IsFibrant X] : Fibration X.pathEv₀ := sorry
-instance [IsFibrant X] : Fibration X.pathEv₁ := sorry
+instance [IsFibrant X] : Fibration X.pathEv₀ := by dsimp [pathEv₀]; infer_instance
+
+instance [IsFibrant X] : Fibration X.pathEv₁ := by dsimp [pathEv₁]; infer_instance
 
 noncomputable def pathEv₀₁ : X.path ⟶ X ⊗ X := lift X.pathEv₀ X.pathEv₁
 
@@ -173,11 +182,41 @@ noncomputable def pathHomotopy :
     ext _ ⟨⟨_, h⟩, _⟩
     simp at h
 
-noncomputable def path₀Homotopy :
-    Homotopy (const (X.path₀BasePoint x)) (𝟙 (X.path₀ x : SSet)) where
+noncomputable def path₀DeformationRetract : DeformationRetract Δ[0] (X.path₀ x) where
+  i := yonedaEquiv.symm (X.path₀BasePoint x)
+  r := stdSimplex.isTerminalObj₀.from _
   h := Subcomplex.lift ((X.path₀ x).ι ▷ _ ≫ X.pathHomotopy.h) sorry
-  rel := by
-    ext _ ⟨⟨_, h⟩, _⟩
-    simp at h
+  hi := Subcomplex.hom_ext _ (by
+    simp only [Category.assoc, Subcomplex.lift_ι, ← comp_whiskerRight_assoc,
+      yonedaEquiv_symm_comp, Subpresheaf.ι_app, path₀BasePoint_coe]
+    sorry)
+
+open KanComplex
+
+instance (n : ℕ) (x : Δ[0] _⦋0⦌) : Subsingleton (π.{u} n Δ[0] x) where
+  allEq s s' := by
+    obtain ⟨s, rfl⟩ := s.mk_surjective
+    obtain ⟨s', rfl⟩ := s'.mk_surjective
+    obtain rfl : s = s' := by
+      ext : 1
+      apply stdSimplex.isTerminalObj₀.hom_ext
+    rfl
+
+instance : Subsingleton (π₀ Δ[0]) where
+  allEq s s' := by
+    obtain ⟨s, rfl⟩ := s.mk_surjective
+    obtain ⟨s', rfl⟩ := s'.mk_surjective
+    obtain rfl := Subsingleton.elim s s'
+    rfl
+
+instance [IsFibrant X] (n : ℕ) (x : X _⦋0⦌) (y : (X.path₀ x : SSet) _⦋0⦌) :
+    Subsingleton (π n (X.path₀ x) y) :=
+  ((KanComplex.W.homotopyEquivInv (HomotopyEquiv.ofDeformationRetract
+    (X.path₀DeformationRetract x))).bijective n y _ rfl).1.subsingleton
+
+instance [IsFibrant X] (x : X _⦋0⦌) :
+    Subsingleton (π₀ (X.path₀ x)) :=
+  (KanComplex.W.homotopyEquivInv (HomotopyEquiv.ofDeformationRetract
+    (X.path₀DeformationRetract x))).bijective_mapπ₀.1.subsingleton
 
 end SSet

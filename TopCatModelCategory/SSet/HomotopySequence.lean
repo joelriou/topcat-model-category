@@ -410,6 +410,12 @@ lemma δ'_eq_one_iff {n : ℕ} (x : π (n + 1) B b) (i : Fin (n + 2))  :
     δ' p he n i x = 1 ↔ ∃ (y : π (n + 1) E e), map₂ p he (n + 1) y = x :=
   ⟨exists_of_δ'_eq_one, by rintro ⟨y, rfl⟩; simp⟩
 
+@[simp]
+lemma δ'_one (n : ℕ) (i : Fin (n + 2)) :
+    δ' p he n i 1 = 1 := by
+  rw [δ'_eq_one_iff]
+  exact ⟨1, by simp [map₂]⟩
+
 variable {he}
 
 lemma exists_of_map₁_eq_one {n : ℕ} {x : π n (Subcomplex.fiber p b) (fiber.basePoint p he)}

@@ -26,9 +26,6 @@ instance : IsFibrant ((toTop ⋙ TopCat.toSSet).obj X) := by dsimp; infer_instan
 
 instance [IsFibrant X] : IsFibrant ((𝟭 _).obj X) := by dsimp; infer_instance
 
-instance [IsFibrant X] (n : ℕ) (x : X _⦋0⦌) :
-    Subsingleton (π n (X.path₀ x) (X.path₀BasePoint x)) := sorry
-
 lemma W.sSetTopAdj_unit_app [IsFibrant X] :
     W (sSetTopAdj.unit.app X) := by
   revert X

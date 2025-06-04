@@ -12,9 +12,9 @@ variable (X Y : SSet.{u})
 
 structure DeformationRetract extends Retract X Y where
   h : Y ⊗ Δ[1] ⟶ Y
-  hi : toRetract.i ▷ _ ≫ h = fst _ _ ≫ toRetract.i
-  h₀ : ι₀ ≫ h = r ≫ i
-  h₁ : ι₁ ≫ h = 𝟙 Y
+  hi : toRetract.i ▷ _ ≫ h = fst _ _ ≫ toRetract.i := by aesop_cat
+  h₀ : ι₀ ≫ h = r ≫ i := by aesop_cat
+  h₁ : ι₁ ≫ h = 𝟙 Y := by aesop_cat
 
 namespace DeformationRetract
 

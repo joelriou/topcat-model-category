@@ -18,6 +18,10 @@ instance {X Y : SSet.{u}} (f : X ⟶ Y) [IsIso f] : Fibration f := by
   rw [fibration_iff]
   exact MorphismProperty.rlp_of_isIso J f
 
+instance : IsFibrant (Δ[0] : SSet) := by
+  rw [isFibrant_iff_of_isTerminal (𝟙 _) stdSimplex.isTerminalObj₀]
+  infer_instance
+
 end SSet
 
 namespace CategoryTheory

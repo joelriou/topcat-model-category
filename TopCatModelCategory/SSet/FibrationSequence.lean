@@ -148,7 +148,7 @@ noncomputable def δ (n : ℕ) : π (n + 1) seq.B seq.b → π n seq.F seq.f :=
 
 @[simp]
 lemma δ_one (n : ℕ) : seq.δ n 1 = 1 := by
-  sorry
+  simp [δ]
 
 lemma exact₂ {n : ℕ} (x₂ : π n seq.E seq.e)
     (hx₂ : mapπ seq.p n seq.e seq.b seq.he x₂ = 1) :
