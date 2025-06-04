@@ -1,6 +1,7 @@
 import Mathlib.AlgebraicTopology.SimplicialSet.Monoidal
 import Mathlib.CategoryTheory.Closed.FunctorToTypes
 import Mathlib.CategoryTheory.Closed.Monoidal
+import Mathlib.CategoryTheory.Adjunction.Unique
 import TopCatModelCategory.MonoidalClosed
 import TopCatModelCategory.SSet.Basic
 import TopCatModelCategory.SSet.StandardSimplex
@@ -8,13 +9,21 @@ import TopCatModelCategory.SSet.StandardSimplex
 universe u
 
 open CategoryTheory MonoidalCategory Simplicial Opposite Limits
-  ChosenFiniteProducts
+  ChosenFiniteProducts MonoidalClosed
 
 namespace SSet
 
 section
 
-variable {X : SSet.{u}}
+variable {X Y Z : SSet.{u}}
+
+@[simp]
+lemma lift_app_fst (f : X ⟶ Y) (g : X ⟶ Z) {n : SimplexCategoryᵒᵖ} (x : X.obj n) :
+    ((lift f g).app n x).1 = f.app n x := rfl
+
+@[simp]
+lemma lift_app_snd (f : X ⟶ Y) (g : X ⟶ Z) {n : SimplexCategoryᵒᵖ} (x : X.obj n) :
+    ((lift f g).app n x).2 = g.app n x := rfl
 
 noncomputable def ι₀ {X : SSet.{u}} : X ⟶ X ⊗ Δ[1] :=
   lift (𝟙 X) (const (stdSimplex.obj₀Equiv.{u}.symm 0))
@@ -158,7 +167,7 @@ noncomputable def ihom₀Equiv : ((ihom X).obj Y) _⦋0⦌ ≃ (X ⟶ Y) :=
 
 lemma ihom₀Equiv_symm_comp {Z : SSet.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
     ihom₀Equiv.symm (f ≫ g) =
-      ((MonoidalClosed.pre f).app Z).app (op ⦋0⦌) (ihom₀Equiv.symm g) := rfl
+      ((pre f).app Z).app (op ⦋0⦌) (ihom₀Equiv.symm g) := rfl
 
 lemma ihom₀Equiv_symm_comp' {Z : SSet.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
     ihom₀Equiv.symm (f ≫ g) =
@@ -171,7 +180,46 @@ lemma yonedaEquiv_snd {n : ℕ} (f : Δ[n] ⟶ X ⊗ Y) :
     (yonedaEquiv f).2 = yonedaEquiv (f ≫ snd _ _) := rfl
 
 lemma const_ihom₀Equiv_symm_apply (Z : SSet.{u}) (f : X ⟶ Y) :
-    (const (ihom₀Equiv.symm f) : Z ⟶ _) = MonoidalClosed.curry (fst _ _ ≫ f) :=
+    (const (ihom₀Equiv.symm f) : Z ⟶ _) = curry (fst _ _ ≫ f) :=
   rfl
+
+lemma ihom₀Equiv_symm_apply (f : X ⟶ Y) :
+    ihom₀Equiv.symm f = yonedaEquiv (curry ((stdSimplex.rightUnitor X).hom ≫ f)) := rfl
+
+namespace stdSimplex
+
+noncomputable def ihom₀ : ihom Δ[0] ≅ 𝟭 SSet.{u} :=
+  Adjunction.rightAdjointUniq (ihom.adjunction Δ[0])
+    (Adjunction.id.ofNatIsoLeft
+      (NatIso.ofComponents (fun X ↦ (leftUnitor X).symm) ))
+
+lemma ihom₀_inv_app : ihom₀.inv.app X =
+  curry (leftUnitor X).hom := rfl
+
+end stdSimplex
+
+variable (X)
+noncomputable def ihomEv (x : X _⦋0⦌) : ihom X ⟶ 𝟭 _ :=
+  pre (yonedaEquiv.symm x) ≫ stdSimplex.ihom₀.hom
+
+@[simp]
+lemma const_yonedaEquiv (f : Δ[0] ⟶ X) : const (yonedaEquiv f) = f := by
+  obtain ⟨x, rfl⟩ := yonedaEquiv.symm.surjective f
+  simp
+
+lemma ihomEv_app_app_ihom₀Equiv_symm (f : X ⟶ Y) (x : X _⦋0⦌) :
+    ((X.ihomEv x).app Y).app (op ⦋0⦌) (ihom₀Equiv.symm f) = f.app _ x := by
+  obtain ⟨g, rfl⟩ := yonedaEquiv.surjective x
+  apply yonedaEquiv.symm.injective
+  dsimp
+  rw [yonedaEquiv_symm_zero, yonedaEquiv_symm_zero, ← const_comp, ← const_comp,
+    const_yonedaEquiv, ihomEv, NatTrans.comp_app, Equiv.symm_apply_apply,
+    ← cancel_mono (stdSimplex.ihom₀.inv.app Y), Category.assoc, Category.assoc,
+    Category.assoc, Iso.hom_inv_id_app, Category.comp_id, stdSimplex.ihom₀_inv_app,
+    ← curry_natural_left, ← curry_natural_left, const_ihom₀Equiv_symm_apply, curry_pre_app,
+    whiskerRight_fst_assoc, stdSimplex.leftUnitor_hom_naturality,
+    stdSimplex.leftUnitor_hom_naturality_assoc]
+  congr 2
+  apply stdSimplex.isTerminalObj₀.hom_ext
 
 end SSet

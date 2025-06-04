@@ -630,6 +630,14 @@ lemma face_singleton_ι_eq_const {n : ℕ} (i : Fin (n + 1)) :
   induction' d using SimplexCategory.rec with d
   aesop
 
+instance (n : ℕ) (i : Fin (n + 2)) : IsSplitMono (SimplexCategory.δ i) := by
+  obtain rfl | ⟨i, rfl⟩ := i.eq_zero_or_eq_succ
+  · exact ⟨_, SimplexCategory.δ_comp_σ_self (i := 0)⟩
+  · exact ⟨_, SimplexCategory.δ_comp_σ_succ⟩
+
+instance (n : ℕ) (i : Fin (n + 2)) : Mono (stdSimplex.{u}.δ i) :=
+  inferInstanceAs (Mono (stdSimplex.{u}.map (SimplexCategory.δ i)))
+
 end stdSimplex
 
 namespace Subcomplex

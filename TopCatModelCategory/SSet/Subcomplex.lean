@@ -449,10 +449,25 @@ lemma ofSimplex_eq_range {X : SSet.{u}} {n : ℕ} (x : X _⦋n⦌) :
     Subcomplex.ofSimplex x = range (yonedaEquiv.symm x) := by
   simp only [Subcomplex.range_eq_ofSimplex, Equiv.apply_symm_apply]
 
+lemma mem_ofSimplex₀_obj_iff {X : SSet.{u}} (x : X _⦋0⦌) {n : SimplexCategory} (y : X.obj (op n)) :
+    y ∈ (Subcomplex.ofSimplex x).obj _ ↔ y = X.map (n.const ⦋0⦌ 0).op x := by
+  simp only [ofSimplex, Subpresheaf.ofSection, Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨⟨f⟩, rfl⟩
+    obtain rfl := Subsingleton.elim f (n.const ⦋0⦌ 0)
+    rfl
+  · tauto
+
 @[simp]
 lemma preimage_ι {X : SSet.{u}} (A : X.Subcomplex) :
     A.preimage A.ι = ⊤ := by
   aesop
+
+@[simp]
+lemma range_const_ι {X Y : SSet.{u}} (y : Y _⦋0⦌) :
+    (range (const y : X ⟶ Y)).ι = const y := by
+  ext ⟨n⟩ ⟨_, x, rfl⟩
+  simp
 
 /-def ofSimplex {n : ℕ} (x : X _[n]) : X.Subcomplex :=
   range ((X.yonedaEquiv (.mk n)).symm x)-/

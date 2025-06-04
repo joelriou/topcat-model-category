@@ -110,6 +110,10 @@ lemma mem_fiber_obj_zero_iff (x : X _⦋0⦌) :
     x ∈ (fiber f y).obj (op ⦋0⦌) ↔ f.app _ x = y := by
   simp [fiber]
 
+lemma mem_fiber_obj_iff {n : SimplexCategory} (x : X.obj (op n)) :
+    x ∈ (fiber f y).obj _ ↔ f.app _ x = Y.map (n.const ⦋0⦌ 0).op y := by
+  simp [fiber, mem_ofSimplex₀_obj_iff]
+
 @[simp]
 lemma range_le_fiber_iff {Z : SSet.{u}} (g : Z ⟶ X) :
     Subcomplex.range g ≤ fiber f y ↔ g ≫ f = const y := by

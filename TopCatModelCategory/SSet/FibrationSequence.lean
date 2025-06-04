@@ -222,14 +222,17 @@ section
 
 variable (X : SSet) [IsFibrant X] (x : X _⦋0⦌)
 
-@[simps! E B p e b]
-noncomputable def loop : FibrationSequence :=
-  FibrationSequence.fiber (X.path₀Ev₁ x) (X.path₀Const x) x
-    (by simp)
-
-@[simp] lemma loop_F : (loop X x).F = X.loop x := rfl
-@[simp] lemma loop_i : (loop X x).i = (X.loop x).ι := rfl
-@[simp] lemma loop_f : (loop X x).f = loop.basePoint X x := rfl
+@[simps]
+noncomputable def loop : FibrationSequence where
+  F := X.loop x
+  E := X.path₀ x
+  B := X
+  f := X.loopBasePoint x
+  e := X.path₀BasePoint x
+  b := x
+  i := X.loopι x
+  p := X.path₀π x
+  isPullback := X.isPullback_loop  x
 
 end
 

@@ -10,77 +10,126 @@ open CategoryTheory Monoidal Simplicial MonoidalCategory MonoidalClosed
 
 namespace SSet
 
-variable (X : SSet.{u}) (x : X _⦋0⦌)
+variable (X : SSet.{u})
 
-namespace stdSimplex
+abbrev path := (ihom Δ[1]).obj X
 
-noncomputable def ihom₀ : ihom Δ[0] ≅ 𝟭 SSet.{u} :=
-  Adjunction.rightAdjointUniq (ihom.adjunction Δ[0])
-    (Adjunction.id.ofNatIsoLeft
-      (NatIso.ofComponents (fun X ↦ (leftUnitor X).symm) ))
+noncomputable def pathEv₀ : X.path ⟶ X := (Δ[1].ihomEv (stdSimplex.obj₀Equiv.symm 0)).app X
 
-lemma ihom₀_inv_app : ihom₀.inv.app X =
-  curry (leftUnitor X).hom := rfl
+noncomputable def pathEv₁ : X.path ⟶ X := (Δ[1].ihomEv (stdSimplex.obj₀Equiv.symm 1)).app X
 
-end stdSimplex
+noncomputable def pathEv₀₁ : X.path ⟶ X ⊗ X := lift X.pathEv₀ X.pathEv₁
 
-noncomputable def pathEv₀ : (ihom Δ[1]).obj X ⟶ X :=
-  (pre (stdSimplex.δ (0 : Fin 2))).app X ≫
-    stdSimplex.ihom₀.hom.app _
+def arrowMkPathEv₀₁Iso : Arrow.mk X.pathEv₀₁ ≅ Arrow.mk ((pre ∂Δ[1].ι).app X) := sorry
 
-instance [IsFibrant X] (i : Fin 2) :
-    Fibration ((pre (stdSimplex.δ i)).app X) := by
-  sorry
-
-instance [IsFibrant X] : Fibration (X.pathEv₀) := by
-  dsimp [pathEv₀]
+instance [IsFibrant X] : Fibration X.pathEv₀₁ := by
+  rw [HomotopicalAlgebra.fibration_iff]
+  refine (MorphismProperty.arrow_mk_iso_iff _ X.arrowMkPathEv₀₁Iso).2 ?_
+  rw [← HomotopicalAlgebra.fibration_iff]
   infer_instance
 
-protected noncomputable def path₀ :
-    Subcomplex ((ihom Δ[1]).obj X) :=
-  Subcomplex.fiber X.pathEv₀ x
+variable (x : X _⦋0⦌)
 
-noncomputable def path₀Ev₁ : (X.path₀ x : SSet) ⟶ X :=
-  Subcomplex.ι _ ≫
-    (pre (stdSimplex.δ (1 : Fin 2))).app X ≫
-      (stdSimplex.ihom₀.app X).hom
+noncomputable def constPath : X.path _⦋0⦌ := ihom₀Equiv.symm (const x)
 
-instance [IsFibrant X] : Fibration (X.path₀Ev₁ x) := by
-  sorry
+@[simp] lemma pathEv₀_app_constPath : X.pathEv₀.app _ (X.constPath x) = x := by
+  simp [pathEv₀, constPath, ihomEv_app_app_ihom₀Equiv_symm]
 
-noncomputable def path₀Const : (X.path₀ x : SSet) _⦋0⦌ :=
-  ⟨ihom₀Equiv.symm (const x), by
-    have : curry (snd Δ[1] X) ≫ (pre (stdSimplex.δ (0 : Fin 2))).app X =
-        curry (stdSimplex.leftUnitor X).hom := by
-      apply uncurry_injective
-      rw [uncurry_curry]
-      rw [uncurry_natural_left]
-      sorry
-    simp only [SSet.path₀, pathEv₀, Subcomplex.mem_fiber_obj_zero_iff]
-    apply ((stdSimplex.ihom₀.app X).app (op ⦋0⦌)).toEquiv.symm.injective
-    dsimp
-    rw [← FunctorToTypes.comp, Iso.hom_inv_id_app,
-      NatTrans.id_app, types_id_apply,
-      stdSimplex.ihom₀_inv_app, ← this, comp_app,
-      types_comp_apply]
-    apply congr_arg
-    apply ihom₀Equiv.injective
-    rw [Equiv.apply_symm_apply]
-    rfl⟩
+@[simp] lemma pathEv₁_app_constPath : X.pathEv₁.app _ (X.constPath x) = x := by
+  simp [pathEv₁, constPath, ihomEv_app_app_ihom₀Equiv_symm]
+
+abbrev path₀ : Subcomplex X.path := Subcomplex.fiber X.pathEv₀ x
+
+def loop : Subcomplex X.path := X.path₀ x ⊓ Subcomplex.fiber X.pathEv₁ x
+
+lemma loop_le_path₀ : X.loop x ≤ X.path₀ x := inf_le_left
+
+lemma constPath_mem_path₀ : X.constPath x ∈ (X.path₀ x).obj _ := by
+  simp [Subcomplex.mem_fiber_obj_zero_iff]
+
+lemma constPath_mem_loop : X.constPath x ∈ (X.loop x).obj _ := by
+  simp [loop, Subcomplex.mem_fiber_obj_zero_iff]
+
+@[simps]
+noncomputable def path₀BasePoint : (X.path₀ x : SSet) _⦋0⦌ :=
+  ⟨_, constPath_mem_path₀ _ _⟩
+
+@[simps]
+noncomputable def loopBasePoint : (X.loop x : SSet) _⦋0⦌ :=
+  ⟨_, constPath_mem_loop _ _⟩
+
+abbrev loopι : (X.loop x : SSet) ⟶ X.path₀ x :=
+  Subcomplex.homOfLE (X.loop_le_path₀ x)
+
+noncomputable def path₀π : (X.path₀ x : SSet) ⟶ X := Subcomplex.ι _ ≫ X.pathEv₁
 
 @[simp]
-lemma path₀Ev₁_app_path₀Const :
-    (X.path₀Ev₁ x).app (op ⦋0⦌) (X.path₀Const x) = x := by
-  sorry
+lemma loopι_app_loopBasePoint : (X.loopι x).app _ (X.loopBasePoint x) = X.path₀BasePoint x := rfl
 
-def loop : Subcomplex (X.path₀ x) :=
-  Subcomplex.fiber (X.path₀Ev₁ x) x
+@[simp]
+lemma path₀π_app_basePoint : (X.path₀π x).app _ (X.path₀BasePoint x) = x := by
+  simp [path₀π]
 
 @[reassoc (attr := simp)]
-lemma loop_ι_path₀Ev₁ : (X.loop x).ι ≫ X.path₀Ev₁ x = const x := by
-  simp [loop]
+lemma loopι_path₀π : X.loopι x ≫ X.path₀π x = const x := by
+  ext n ⟨f, hf⟩
+  simp only [loop, Subpresheaf.min_obj, Set.mem_inter_iff,
+    Subcomplex.mem_fiber_obj_iff X.pathEv₁] at hf
+  tauto
 
-noncomputable def loop.basePoint : (X.loop x : SSet) _⦋0⦌ :=
-  Subcomplex.fiber.basePoint _ (path₀Ev₁_app_path₀Const X x)
+lemma isPullback_path₀ :
+    IsPullback (X.path₀ x).ι (X.path₀π x) X.pathEv₀₁
+      (lift (const x) (𝟙 _)) := by
+  let S := Subcomplex.preimage (Subcomplex.ofSimplex x) (fst X X)
+  have S_ι_fst : S.ι ≫ fst _ _ = const x := by
+    ext n ⟨⟨y₁, y₂⟩, hy⟩
+    dsimp [S] at hy
+    rw [Set.mem_preimage, Subcomplex.mem_ofSimplex₀_obj_iff] at hy
+    aesop
+  have hS : S.preimage X.pathEv₀₁ = X.path₀ x := by aesop
+  let e : (S : SSet) ≅ X :=
+    { hom := S.ι ≫ snd _ _
+      inv := S.lift (lift (const x) (𝟙 X)) (by
+        apply le_antisymm (by simp)
+        rw [← Subcomplex.image_le_iff, Subcomplex.image_top, ← Subcomplex.image_le_iff,
+          ← Subcomplex.range_comp, lift_fst, Subcomplex.le_ofSimplex_iff,
+          Subcomplex.range_const_ι]) }
+  exact (Subcomplex.preimage_isPullback S X.pathEv₀₁).of_iso
+      (Subcomplex.isoOfEq hS) (Iso.refl _) e (Iso.refl _) rfl rfl (by simp)
+      (by ext : 1 <;> aesop)
+
+instance [IsFibrant X] : Fibration (X.path₀π x) := by
+  rw [HomotopicalAlgebra.fibration_iff]
+  exact MorphismProperty.of_isPullback (X.isPullback_path₀ x) (by
+    rw [← HomotopicalAlgebra.fibration_iff]
+    infer_instance)
+
+lemma loop_eq_fiber : X.loop x = Subcomplex.fiber X.pathEv₀₁ ⟨x, x⟩ := by
+  ext ⟨n⟩ y
+  simp [loop, Subcomplex.mem_fiber_obj_iff, pathEv₀₁]
+  rw [Prod.ext_iff]
+  dsimp
+  rfl
+
+lemma isPullback_loop' :
+    IsPullback (X.loop x).ι (stdSimplex.objZeroIsTerminal.from _)
+      (X.pathEv₀₁) (yonedaEquiv.symm ⟨x, x⟩) := by
+  rw [loop_eq_fiber]
+  convert Subcomplex.fiber_isPullback X.pathEv₀₁ (x, x)
+
+lemma isPullback_loop :
+    IsPullback (X.loopι x) (stdSimplex.objZeroIsTerminal.from _)
+      (X.path₀π x) (yonedaEquiv.symm x) := by
+  rw [← IsPullback.paste_horiz_iff (X.isPullback_path₀ x)]
+  · convert X.isPullback_loop' x
+    aesop
+  · simp
+
+instance [IsFibrant X] : IsFibrant (X.loop x : SSet) := by
+  rw [isFibrant_iff_of_isTerminal (stdSimplex.objZeroIsTerminal.from _)
+    stdSimplex.objZeroIsTerminal, HomotopicalAlgebra.fibration_iff]
+  exact MorphismProperty.of_isPullback (X.isPullback_loop x) (by
+    rw [← HomotopicalAlgebra.fibration_iff]
+    infer_instance)
 
 end SSet
