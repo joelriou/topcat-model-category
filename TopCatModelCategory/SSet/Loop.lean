@@ -1,5 +1,6 @@
 import TopCatModelCategory.SSet.HomotopySequence
 import TopCatModelCategory.SSet.Fibrations
+import TopCatModelCategory.SSet.KanComplexWHomotopy
 import Mathlib.CategoryTheory.Adjunction.Unique
 
 universe u
@@ -31,15 +32,20 @@ instance [IsFibrant X] : Fibration X.pathEv₀₁ := by
   rw [← HomotopicalAlgebra.fibration_iff]
   infer_instance
 
+noncomputable def pathConst : X ⟶ X.path := curry (snd _ _)
+
 variable (x : X _⦋0⦌)
 
-noncomputable def constPath : X.path _⦋0⦌ := ihom₀Equiv.symm (const x)
+noncomputable def constPath : X.path _⦋0⦌ := X.pathConst.app _ x
+
+lemma constPath_eq : X.constPath x = ihom₀Equiv.symm (const x) :=
+  ihom₀Equiv.injective (by aesop)
 
 @[simp] lemma pathEv₀_app_constPath : X.pathEv₀.app _ (X.constPath x) = x := by
-  simp [pathEv₀, constPath, ihomEv_app_app_ihom₀Equiv_symm]
+  simp [pathEv₀, constPath_eq, ihomEv_app_app_ihom₀Equiv_symm]
 
 @[simp] lemma pathEv₁_app_constPath : X.pathEv₁.app _ (X.constPath x) = x := by
-  simp [pathEv₁, constPath, ihomEv_app_app_ihom₀Equiv_symm]
+  simp [pathEv₁, constPath_eq, ihomEv_app_app_ihom₀Equiv_symm]
 
 abbrev path₀ : Subcomplex X.path := Subcomplex.fiber X.pathEv₀ x
 
@@ -134,5 +140,44 @@ instance [IsFibrant X] : IsFibrant (X.loop x : SSet) := by
   exact MorphismProperty.of_isPullback (X.isPullback_loop x) (by
     rw [← HomotopicalAlgebra.fibration_iff]
     infer_instance)
+
+namespace stdSimplex
+
+@[simps]
+def hDelta₁OrderHom : Fin 2 × Fin 2 →o Fin 2 :=
+  ⟨fun ⟨x, y⟩ ↦ match x, y with
+    | 0, 0 => 0
+    | 0, 1 => 0
+    | 1, 0 => 0
+    | 1, 1 => 1, by
+    rw [monotone_prod_iff]
+    constructor
+    all_goals
+    · intro i j k _
+      fin_cases i <;> fin_cases j <;> fin_cases k <;> aesop⟩
+
+def hDelta₁ : Δ[1] ⊗ Δ[1] ⟶ Δ[1] :=
+  prodStdSimplex.homEquiv.symm hDelta₁OrderHom
+
+end stdSimplex
+
+noncomputable def pathHomotopy :
+    Homotopy (X.pathEv₀ ≫ X.pathConst) (𝟙 X.path) where
+  h := (β_ _ _).hom ≫ curry ((α_ _ _ _).inv ≫ uncurry ((pre stdSimplex.hDelta₁).app X))
+  h₀ := by
+    sorry
+  h₁ := by
+    rw [uncurry_pre, Subcomplex.RelativeMorphism.botEquiv_symm_apply_map]
+    sorry
+  rel := by
+    ext _ ⟨⟨_, h⟩, _⟩
+    simp at h
+
+noncomputable def path₀Homotopy :
+    Homotopy (const (X.path₀BasePoint x)) (𝟙 (X.path₀ x : SSet)) where
+  h := Subcomplex.lift ((X.path₀ x).ι ▷ _ ≫ X.pathHomotopy.h) sorry
+  rel := by
+    ext _ ⟨⟨_, h⟩, _⟩
+    simp at h
 
 end SSet
