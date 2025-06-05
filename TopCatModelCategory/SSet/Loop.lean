@@ -33,7 +33,44 @@ instance [IsFibrant X] : Fibration X.pathEv₁ := by dsimp [pathEv₁]; infer_in
 
 noncomputable def pathEv₀₁ : X.path ⟶ X ⊗ X := lift X.pathEv₀ X.pathEv₁
 
-def arrowMkPathEv₀₁Iso : Arrow.mk X.pathEv₀₁ ≅ Arrow.mk ((pre ∂Δ[1].ι).app X) := sorry
+@[simp] lemma pathEv₀₁_fst : X.pathEv₀₁ ≫ fst _ _ = X.pathEv₀ := rfl
+@[simp] lemma pathEv₀₁_snd : X.pathEv₀₁ ≫ snd _ _ = X.pathEv₁ := rfl
+
+namespace boundary₁
+
+noncomputable def ihomObjIso : (ihom (∂Δ[1] : SSet)).obj X ≅ X ⊗ X where
+  hom := lift ((pre ι₀).app X ≫ stdSimplex.ihom₀.hom.app X)
+      ((pre ι₁).app X ≫ stdSimplex.ihom₀.hom.app X)
+  inv := curry ((boundary₁.isColimitRightTensor (X ⊗ X)).desc
+      (BinaryCofan.mk (snd _ _ ≫ fst _ _) (snd _ _ ≫ snd _ _)))
+  hom_inv_id := by
+    apply uncurry_injective
+    rw [uncurry_natural_left, uncurry_curry]
+    apply hom_ext_rightTensor
+    · rw [← whisker_exchange_assoc, whiskerRight_ι₀_isColimitRightTensor_desc]
+      rfl
+    · rw [← whisker_exchange_assoc, whiskerRight_ι₁_isColimitRightTensor_desc]
+      rfl
+  inv_hom_id := by
+    ext : 1
+    · simp only [comp_lift, lift_fst, Category.id_comp, curry_pre_app_assoc,
+        whiskerRight_ι₀_isColimitRightTensor_desc]
+      dsimp
+      rw [← cancel_mono (stdSimplex.ihom₀.inv.app X), Category.assoc, Iso.hom_inv_id_app,
+        Category.comp_id]
+      rfl
+    · simp only [comp_lift, lift_snd, Category.id_comp, curry_pre_app_assoc,
+        whiskerRight_ι₁_isColimitRightTensor_desc]
+      dsimp
+      rw [← cancel_mono (stdSimplex.ihom₀.inv.app X), Category.assoc, Iso.hom_inv_id_app,
+        Category.comp_id]
+      rfl
+
+end boundary₁
+
+noncomputable def arrowMkPathEv₀₁Iso : Arrow.mk X.pathEv₀₁ ≅ Arrow.mk ((pre ∂Δ[1].ι).app X) :=
+  Iso.symm (Arrow.isoMk (Iso.refl _) (boundary₁.ihomObjIso X) (by
+    dsimp; ext : 1 <;> aesop))
 
 instance [IsFibrant X] : Fibration X.pathEv₀₁ := by
   rw [HomotopicalAlgebra.fibration_iff]

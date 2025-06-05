@@ -112,6 +112,18 @@ noncomputable def isColimitRightTensor (X : SSet.{u}) :
     IsColimit (BinaryCofan.mk (ι₀ ▷ X) (ι₁ ▷ X)) :=
   mapIsColimitOfPreservesOfIsColimit (tensorRight X) _ _ isColimit
 
+@[reassoc (attr := simp)]
+lemma whiskerRight_ι₀_isColimitRightTensor_desc
+    {X : SSet.{u}} (c : BinaryCofan (Δ[0] ⊗ X) (Δ[0] ⊗ X)) :
+    ι₀ ▷ X ≫ (isColimitRightTensor X).desc c = c.inl :=
+  (isColimitRightTensor X).fac c (.mk .left)
+
+@[reassoc (attr := simp)]
+lemma whiskerRight_ι₁_isColimitRightTensor_desc
+    {X : SSet.{u}} (c : BinaryCofan (Δ[0] ⊗ X) (Δ[0] ⊗ X)) :
+    ι₁ ▷ X ≫ (isColimitRightTensor X).desc c = c.inr :=
+  (isColimitRightTensor X).fac c (.mk .right)
+
 noncomputable def isColimitLeftTensor (X : SSet.{u}) :
     IsColimit (BinaryCofan.mk (X ◁ ι₀) (X ◁ ι₁)) :=
   mapIsColimitOfPreservesOfIsColimit (tensorLeft X) _ _ isColimit
