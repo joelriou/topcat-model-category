@@ -33,6 +33,7 @@ import TopCatModelCategory.SSet.Boundary
 import TopCatModelCategory.SSet.CategoryWithFibrations
 import TopCatModelCategory.SSet.CategoryWithWeakEquivalences
 import TopCatModelCategory.SSet.ChosenFiniteProducts
+import TopCatModelCategory.SSet.Contractible
 import TopCatModelCategory.SSet.Coproducts
 import TopCatModelCategory.SSet.Deformation
 import TopCatModelCategory.SSet.DeformationRetract

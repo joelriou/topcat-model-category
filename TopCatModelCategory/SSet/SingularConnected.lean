@@ -83,7 +83,15 @@ lemma surjective_mapπ₀_sSetTopAdj_unit_app :
     TopCat.ofHom ((TopCat.toSSetObjEquiv
       (((sSetTopAdj.unit.app Δ[n]).app (op ⦋0⦌)) (yonedaEquiv (stdSimplex.map f)))).comp
       (toContinuousMap ⦋0⦌.toTopHomeo)) := by
-    sorry
+    ext x₀
+    have h₁ : (stdSimplex.{0}.map f).app (op ⦋0⦌) (yonedaEquiv (𝟙 Δ[0])) =
+      yonedaEquiv (stdSimplex.map f) := rfl
+    have h₂ := congr_fun (congr_app (sSetTopAdj.unit.naturality (stdSimplex.map f)) (op ⦋0⦌))
+      (yonedaEquiv (𝟙 _))
+    dsimp at h₂ ⊢
+    rw [← h₁, h₂]
+    apply congr_arg (toTop.map (stdSimplex.map f))
+    apply Subsingleton.elim
   rw [this, Subsingleton.elim default (⦋0⦌.toTopHomeo default)]
   rfl
 

@@ -1,3 +1,4 @@
+import TopCatModelCategory.SSet.Contractible
 import TopCatModelCategory.SSet.HomotopySequence
 import TopCatModelCategory.SSet.Fibrations
 import TopCatModelCategory.SSet.KanComplexWHomotopy
@@ -205,55 +206,77 @@ def hDelta₁OrderHom : Fin 2 × Fin 2 →o Fin 2 :=
 def hDelta₁ : Δ[1] ⊗ Δ[1] ⟶ Δ[1] :=
   prodStdSimplex.homEquiv.symm hDelta₁OrderHom
 
+@[reassoc (attr := simp)]
+lemma whiskerLeft_δ_zero_comp_hDelta₁ :
+    _ ◁ stdSimplex.δ 0 ≫ hDelta₁ = (stdSimplex.rightUnitor _).hom := by
+  rw [← cancel_epi (stdSimplex.rightUnitor _).inv, Iso.inv_hom_id]
+  apply yonedaEquiv.injective
+  ext i
+  fin_cases i <;> rfl
+
+@[reassoc (attr := simp)]
+lemma whiskerLeft_δ_one_comp_hDelta₁ :
+    _ ◁ stdSimplex.δ 1 ≫ hDelta₁ = SSet.const (stdSimplex.obj₀Equiv.symm 0) := by
+  rw [← cancel_epi (stdSimplex.rightUnitor _).inv]
+  apply yonedaEquiv.injective
+  ext i
+  fin_cases i <;> rfl
+
+@[reassoc (attr := simp)]
+lemma const_zero_whiskerRight_comp_hDelta₁ :
+    SSet.const (X := X) (stdSimplex.const 1 0 (op ⦋0⦌)) ▷ Δ[1] ≫ stdSimplex.hDelta₁ =
+    SSet.const (stdSimplex.const 1 0 (op ⦋0⦌)) := by
+  wlog hX : X = Δ[0]
+  · exact isTerminalObj₀.from X ▷ Δ[1] ≫= this _ rfl
+  subst hX
+  rw [← cancel_epi (stdSimplex.leftUnitor _).inv]
+  apply yonedaEquiv.injective
+  ext i
+  fin_cases i <;> rfl
+
 end stdSimplex
 
 noncomputable def pathHomotopy :
     Homotopy (X.pathEv₀ ≫ X.pathConst) (𝟙 X.path) where
   h := (β_ _ _).hom ≫ curry ((α_ _ _ _).inv ≫ uncurry ((pre stdSimplex.hDelta₁).app X))
   h₀ := by
-    sorry
+    rw [uncurry_pre, Subcomplex.RelativeMorphism.botEquiv_symm_apply_map,
+      ← cancel_epi (stdSimplex.rightUnitor _).hom, stdSimplex.rightUnitor_hom_ι₀_assoc,
+      BraidedCategory.braiding_naturality_right_assoc,
+      ← curry_natural_left, associator_inv_naturality_middle_assoc,
+      ← comp_whiskerRight_assoc, stdSimplex.whiskerLeft_δ_one_comp_hDelta₁,
+      ← curry_natural_left]
+    dsimp only [pathConst]
+    rw [← curry_natural_left]
+    rfl
   h₁ := by
-    rw [uncurry_pre, Subcomplex.RelativeMorphism.botEquiv_symm_apply_map]
-    sorry
-  rel := by
-    ext _ ⟨⟨_, h⟩, _⟩
-    simp at h
-
-noncomputable def path₀DeformationRetract : DeformationRetract Δ[0] (X.path₀ x) where
-  i := yonedaEquiv.symm (X.path₀BasePoint x)
-  r := stdSimplex.isTerminalObj₀.from _
-  h := Subcomplex.lift ((X.path₀ x).ι ▷ _ ≫ X.pathHomotopy.h) sorry
-  hi := Subcomplex.hom_ext _ (by
-    simp only [Category.assoc, Subcomplex.lift_ι, ← comp_whiskerRight_assoc,
-      yonedaEquiv_symm_comp, Subpresheaf.ι_app, path₀BasePoint_coe]
-    sorry)
-
-open KanComplex
-
-instance (n : ℕ) (x : Δ[0] _⦋0⦌) : Subsingleton (π.{u} n Δ[0] x) where
-  allEq s s' := by
-    obtain ⟨s, rfl⟩ := s.mk_surjective
-    obtain ⟨s', rfl⟩ := s'.mk_surjective
-    obtain rfl : s = s' := by
-      ext : 1
-      apply stdSimplex.isTerminalObj₀.hom_ext
+    rw [uncurry_pre, Subcomplex.RelativeMorphism.botEquiv_symm_apply_map,
+      ← cancel_epi (stdSimplex.rightUnitor _).hom, stdSimplex.rightUnitor_hom_ι₁_assoc,
+      BraidedCategory.braiding_naturality_right_assoc, Category.comp_id,
+      ← curry_natural_left, associator_inv_naturality_middle_assoc,
+      ← comp_whiskerRight_assoc, stdSimplex.whiskerLeft_δ_zero_comp_hDelta₁]
+    apply uncurry_injective
     rfl
 
-instance : Subsingleton (π₀ Δ[0]) where
-  allEq s s' := by
-    obtain ⟨s, rfl⟩ := s.mk_surjective
-    obtain ⟨s', rfl⟩ := s'.mk_surjective
-    obtain rfl := Subsingleton.elim s s'
-    rfl
+@[reassoc (attr := simp)]
+lemma path₀_ι_whiskerLeft_pathHomotopy_h_pathEv₀ :
+    (X.path₀ x).ι ▷ Δ[1] ≫ X.pathHomotopy.h ≫ X.pathEv₀ = const x := by
+  dsimp only [pathHomotopy, pathEv₀, ihomEv, NatTrans.comp_app]
+  rw [Category.assoc, uncurry_pre,
+    BraidedCategory.braiding_naturality_left_assoc,
+    ← cancel_epi (β_ _ _).inv, Iso.inv_hom_id_assoc, comp_const,
+    curry_pre_app_assoc, ← curry_natural_left_assoc,
+    whiskerRight_tensor_assoc, Iso.hom_inv_id_assoc,
+    ← comp_whiskerRight_assoc, stdSimplex.obj₀Equiv_symm_apply,
+    yonedaEquiv_symm_zero, stdSimplex.const_zero_whiskerRight_comp_hDelta₁]
+  rw [associator_inv_naturality_right_assoc]
+  rw [whisker_exchange_assoc]
+  sorry
 
-instance [IsFibrant X] (n : ℕ) (x : X _⦋0⦌) (y : (X.path₀ x : SSet) _⦋0⦌) :
-    Subsingleton (π n (X.path₀ x) y) :=
-  ((KanComplex.W.homotopyEquivInv (HomotopyEquiv.ofDeformationRetract
-    (X.path₀DeformationRetract x))).bijective n y _ rfl).1.subsingleton
+noncomputable def contractiblePath₀ : Contractible (X.path₀ x) where
+  pt := X.path₀BasePoint x
+  h := { h := Subcomplex.lift ((X.path₀ x).ι ▷ _ ≫ X.pathHomotopy.h) (by simp) }
 
-instance [IsFibrant X] (x : X _⦋0⦌) :
-    Subsingleton (π₀ (X.path₀ x)) :=
-  (KanComplex.W.homotopyEquivInv (HomotopyEquiv.ofDeformationRetract
-    (X.path₀DeformationRetract x))).bijective_mapπ₀.1.subsingleton
+instance : IsContractible (X.path₀ x) := ⟨X.contractiblePath₀ x⟩
 
 end SSet

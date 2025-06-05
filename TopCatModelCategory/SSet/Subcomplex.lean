@@ -602,13 +602,11 @@ lemma preimage_eq_iff {X Y : SSet.{u}}
   rw [← mono_iff_injective]
   infer_instance
 
+@[simp]
 lemma preimage_eq_top_iff {X Y : SSet.{u}}
     (f : X ⟶ Y) (B : Y.Subcomplex) :
     B.preimage f = ⊤ ↔ range f ≤ B := by
-  constructor
-  · rintro h _ x ⟨y, rfl⟩
-    exact h.symm.le _ (by simp)
-  · aesop
+  rw [← image_top, image_le_iff, top_le_iff]
 
 @[simp]
 lemma preimage_image_of_isIso {X Y : SSet.{u}} (f : X ⟶ Y) (B : Y.Subcomplex) [IsIso f] :

@@ -222,4 +222,28 @@ lemma ihomEv_app_app_ihom₀Equiv_symm (f : X ⟶ Y) (x : X _⦋0⦌) :
   congr 2
   apply stdSimplex.isTerminalObj₀.hom_ext
 
+@[ext]
+lemma Subcomplex.bot_hom_ext {f g : ((⊥ : Subcomplex X) : SSet) ⟶ X} : f = g := by
+  ext _ ⟨_, h⟩
+  simp at h
+
+@[ext]
+lemma Subcomplex.bot_tensor_hom_ext {f g : ((⊥ : Subcomplex X) : SSet) ⊗ Y ⟶ X} : f = g := by
+  ext _ ⟨⟨_, h⟩, _⟩
+  simp at h
+
+@[ext]
+lemma Subcomplex.tensor_bot_hom_ext {f g : Y ⊗ (⊥ : Subcomplex X) ⟶ X} : f = g := by
+  ext _ ⟨_, ⟨_, h⟩⟩
+  simp at h
+
 end SSet
+
+namespace CategoryTheory
+
+variable {C : Type*} [Category C] [MonoidalCategory C] (X : C) [Closed X]
+
+/-lemma ihom.ev_app_eq (Y : C) : (ihom.ev X).app Y = MonoidalClosed.uncurry (𝟙 _) := by
+  simp [MonoidalClosed.uncurry, Adjunction.homEquiv]-/
+
+end CategoryTheory

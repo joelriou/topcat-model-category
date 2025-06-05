@@ -95,9 +95,7 @@ noncomputable def HomotopyEquiv.ofDeformationRetract (h : DeformationRetract X Y
   hom := h.i
   inv := h.r
   homInvId := .ofEq (by simp)
-  invHomId :=
-    { h := h.h
-      rel := by ext _ ⟨⟨_, hx⟩, _⟩; simp at hx }
+  invHomId := { h := h.h }
 
 namespace KanComplex
 
