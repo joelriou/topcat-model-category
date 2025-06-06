@@ -141,6 +141,17 @@ noncomputable def fiberActionStruct (e₀ : E _⦋0⦌) (h₀ : p.app _ e₀ = b
     FiberActionStruct p f e₀ (fiberAction p f e₀ h₀) :=
   (FiberActionStruct.nonempty p f e₀ h₀).choose_spec.some
 
+variable [IsFibrant B]
+
+/-noncomputable def π₀FiberAction {b₀ b₁ : FundamentalGroupoid B} :
+    (b₀ ⟶ b₁) → π₀ (Subcomplex.fiber p b₀.pt) → π₀ (Subcomplex.fiber p b₁.pt) :=
+  Quot.lift₂
+    (fun q e₀ ↦ π₀.mk ⟨fiberAction p q e₀
+      (by simpa only [Subcomplex.mem_fiber_obj_zero_iff] using e₀.2), by
+        simpa only [Subcomplex.mem_fiber_obj_zero_iff] using
+          (fiberActionStruct p q e₀ _).app_one⟩)
+    sorry sorry-/
+
 end
 
 end KanComplex.FundamentalGroupoid
