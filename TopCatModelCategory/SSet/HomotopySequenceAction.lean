@@ -63,6 +63,31 @@ lemma nonempty' (e₁ : E _⦋0⦌) (h₁ : p.app _ e₁ = b₁) :
     δ₁_map := yonedaEquiv.injective (by simp)
   }⟩⟩
 
+variable {p f}
+
+/-def comp [IsFibrant B] {b₂ : B _⦋0⦌} {f₀₁ : Edge (.mk b₀) (.mk b₁)}
+    {e₀ e₁ e₂ : E _⦋0⦌} (h₀₁ : FiberActionStruct p f₀₁ e₀ e₁)
+    {f₁₂ : Edge (.mk b₁) (.mk b₂)}
+    (h₁₂ : FiberActionStruct p f₁₂ e₁ e₂)
+    {f₀₂ : Edge (.mk b₀) (.mk b₂)}
+    (h : Edge.CompStruct f₀₁ f₁₂ f₀₂) :
+    FiberActionStruct p f₀₂ e₀ e₂ := sorry
+
+def symm [IsFibrant B] {e₀ e₁ : E _⦋0⦌} (h : FiberActionStruct p f e₀ e₁)
+    {f' : Edge (.mk b₁) (.mk b₀)} (hff' : Edge.CompStruct f' f (.id (.mk b₁))) :
+    FiberActionStruct p f' e₁ e₀ := sorry
+
+noncomputable def unique
+    [IsFibrant B] {e₀ e₀' e₁ e₁' : E _⦋0⦌} (h : FiberActionStruct p f e₀ e₁)
+    {f' : Edge (.mk b₀) (.mk b₁)} (h' : FiberActionStruct p f' e₀' e₁')
+    (hff' : f.Homotopy f')
+    (he : FiberActionStruct p (.id (.mk b₀)) e₀ e₀') :
+    FiberActionStruct p (.id (.mk b₁)) e₁ e₁' :=
+  Nonempty.some (by
+    obtain ⟨g, ⟨hg⟩⟩ := Edge.CompStruct.left_inverse f
+    exact ⟨comp (comp (h.symm hg) he (Edge.CompStruct.compId g))
+      h' (hg.assoc' hff'.homotopyL (.idComp _))⟩)-/
+
 end FiberActionStruct
 
 end KanComplex.FundamentalGroupoid
