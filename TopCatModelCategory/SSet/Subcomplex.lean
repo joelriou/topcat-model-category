@@ -23,6 +23,14 @@ universe u
 
 open CategoryTheory MonoidalCategory Simplicial Limits Opposite
 
+namespace CompleteLattice
+
+open Classical in
+abbrev CoproductDiagram {T ι : Type*} [CompleteLattice T] (A : T) (U : ι → T) :=
+    MulticoequalizerDiagram A U (fun i j ↦ if i = j then U i else ⊥)
+
+end CompleteLattice
+
 /-namespace CategoryTheory
 -- GrothendieckTopology.Subpresheaf should be moved...
 
@@ -880,6 +888,48 @@ instance : Unique ((⊥ : X.Subcomplex).toSSet ⟶ Y) where
 
 def botIsInitial : IsInitial (⊥ : X.Subcomplex).toSSet :=
   IsInitial.ofUnique _
+
+section coproducts
+
+variable {ι : Type*} {U : ι → X.Subcomplex}
+
+section
+
+variable {A : X.Subcomplex} (h : CompleteLattice.CoproductDiagram A U)
+
+abbrev cofan : Cofan (fun i ↦ (U i : SSet)) :=
+  Cofan.mk A (fun i ↦ homOfLE (by rw [← h.iSup_eq]; apply le_iSup))
+
+noncomputable def isColimitCofan : IsColimit (cofan h) :=
+  mkCofanColimit _
+    (fun s ↦ (multicoforkIsColimit h).desc
+      (Multicofork.ofπ _ s.pt (fun i ↦ s.inj i) (fun ⟨i, j⟩ ↦ by
+        by_cases hij : i = j
+        · subst hij
+          rfl
+        · apply IsInitial.hom_ext
+          dsimp
+          rw [if_neg hij]
+          exact botIsInitial)))
+    (fun s i ↦ (multicoforkIsColimit h).fac _ (.right i))
+    (fun s m hm ↦ by
+      apply Multicofork.IsColimit.hom_ext (multicoforkIsColimit h)
+      intro i
+      exact (hm i).trans ((multicoforkIsColimit h).fac
+        (Multicofork.ofπ _ s.pt (fun i ↦ s.inj i) _) (.right i)).symm)
+
+end
+
+variable (h : CompleteLattice.CoproductDiagram ⊤ U)
+
+variable (U) in
+abbrev cofan' : Cofan (fun i ↦ (U i : SSet)) :=
+  Cofan.mk X (fun i ↦ (U i).ι)
+
+noncomputable def isColimitCofan' : IsColimit (cofan' U) :=
+  IsColimit.ofIsoColimit (isColimitCofan h) (Cofan.ext (topIso X) (fun i ↦ by simp))
+
+end coproducts
 
 end Subcomplex
 

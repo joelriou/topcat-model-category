@@ -273,8 +273,7 @@ lemma π₀FiberAction_comp {b₀ b₁ b₂ : FundamentalGroupoid B}
   obtain ⟨f₀₂, ⟨h⟩⟩ := Edge.exists_compStruct f₀₁ f₁₂
   obtain ⟨e₁, ⟨h₀₁⟩⟩ := FiberActionStruct.nonempty p f₀₁ e₀ (by simpa using he₀)
   obtain ⟨e₂, ⟨h₁₂⟩⟩ := FiberActionStruct.nonempty p f₁₂ e₁ (h₀₁.app_one)
-  rw [h₀₁.π₀FiberAction_eq]
-  sorry
+  rw [h₀₁.π₀FiberAction_eq, h₁₂.π₀FiberAction_eq, h.fac, (h₀₁.comp h₁₂ h).π₀FiberAction_eq]
 
 end
 
