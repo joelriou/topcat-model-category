@@ -43,6 +43,60 @@ lemma app_one : p.app _ e₁ = b₁ := by
 
 end
 
+@[simps]
+protected def const {e₀ : E _⦋0⦌} (h₀ : p.app _ e₀ = b₀) :
+    FiberActionStruct p (.id (.mk b₀)) e₀ e₀ where
+  map := SSet.const e₀
+  map_p := by simp [h₀]
+  δ₀_map := by simp
+  δ₁_map := by simp
+
+noncomputable def ofπ₀Rel {b₀ : B _⦋0⦌} {e₀ e₁ : (Subcomplex.fiber p b₀ : SSet) _⦋0⦌}
+    (h : π₀Rel e₀ e₁) :
+    FiberActionStruct p (.id (.mk b₀)) e₀ e₁ := Nonempty.some (by
+  obtain ⟨e₀, he₀⟩ := e₀
+  obtain ⟨e₁, he₁⟩ := e₁
+  simp only [Subcomplex.mem_fiber_obj_zero_iff] at he₀ he₁
+  obtain ⟨⟨c, hc⟩, hc₀, hc₁⟩ := h
+  replace hc₀ : E.δ 1 c = e₀ := Subtype.ext_iff.1 hc₀
+  replace hc₁ : E.δ 0 c = e₁ := Subtype.ext_iff.1 hc₁
+  simp [Subcomplex.mem_fiber_obj_iff] at hc
+  refine ⟨{
+    map := yonedaEquiv.symm c
+    map_p := yonedaEquiv.injective (by simpa)
+    δ₀_map := by simp [stdSimplex.δ_comp_yonedaEquiv_symm, hc₁]
+    δ₁_map := by simp [stdSimplex.δ_comp_yonedaEquiv_symm, hc₀]
+  }⟩)
+
+section
+
+variable {p} {e₀ e₁ : E _⦋0⦌} (h : FiberActionStruct p (.id (.mk b₀)) e₀ e₁)
+
+def toFibreOneSimplex : (Subcomplex.fiber p b₀ : SSet) _⦋1⦌ :=
+  yonedaEquiv (Subcomplex.lift h.map (by simp))
+
+@[simp]
+lemma δ_one_toFibreOneSimplex :
+    (Subcomplex.fiber p b₀ : SSet).δ 1 h.toFibreOneSimplex = ⟨e₀, by simp [h.app_zero]⟩ := by
+  dsimp
+  ext
+  change E.map (SimplexCategory.δ 1).op (yonedaEquiv h.map) = e₀
+  apply yonedaEquiv.symm.injective
+  rw [yonedaEquiv_symm_map, Equiv.symm_apply_apply, yonedaEquiv_symm_zero]
+  exact h.δ₁_map
+
+@[simp]
+lemma δ_zero_toFibreOneSimplex :
+    (Subcomplex.fiber p b₀ : SSet).δ 0 h.toFibreOneSimplex = ⟨e₁, by simp [h.app_one]⟩ := by
+  dsimp
+  ext
+  change E.map (SimplexCategory.δ 0).op (yonedaEquiv h.map) = e₁
+  apply yonedaEquiv.symm.injective
+  rw [yonedaEquiv_symm_map, Equiv.symm_apply_apply, yonedaEquiv_symm_zero]
+  exact h.δ₀_map
+
+end
+
 variable [Fibration p]
 
 lemma nonempty (e₀ : E _⦋0⦌) (h₀ : p.app _ e₀ = b₀) :
@@ -143,14 +197,29 @@ noncomputable def fiberActionStruct (e₀ : E _⦋0⦌) (h₀ : p.app _ e₀ = b
 
 variable [IsFibrant B]
 
-/-noncomputable def π₀FiberAction {b₀ b₁ : FundamentalGroupoid B} :
+noncomputable def π₀FiberAction {b₀ b₁ : FundamentalGroupoid B} :
     (b₀ ⟶ b₁) → π₀ (Subcomplex.fiber p b₀.pt) → π₀ (Subcomplex.fiber p b₁.pt) :=
   Quot.lift₂
     (fun q e₀ ↦ π₀.mk ⟨fiberAction p q e₀
       (by simpa only [Subcomplex.mem_fiber_obj_zero_iff] using e₀.2), by
         simpa only [Subcomplex.mem_fiber_obj_zero_iff] using
           (fiberActionStruct p q e₀ _).app_one⟩)
-    sorry sorry-/
+    (fun q e₀ e₀' c ↦
+      π₀.sound (FiberActionStruct.unique
+        (fiberActionStruct p q e₀
+          (by simpa only [Subcomplex.mem_fiber_obj_zero_iff] using e₀.2))
+        (fiberActionStruct p q e₀'
+          (by simpa only [Subcomplex.mem_fiber_obj_zero_iff] using e₀'.2))
+        (.refl q) (.ofπ₀Rel p c)).toFibreOneSimplex (by simp) (by simp))
+    (fun q q' e₀ ⟨h⟩ ↦
+      π₀.sound (FiberActionStruct.unique
+        (fiberActionStruct p q e₀
+          (by simpa only [Subcomplex.mem_fiber_obj_zero_iff] using e₀.2))
+        (fiberActionStruct p q' e₀
+          (by simpa only [Subcomplex.mem_fiber_obj_zero_iff] using e₀.2))
+        h (.const p
+          (by simpa only [Subcomplex.mem_fiber_obj_zero_iff] using e₀.2))).toFibreOneSimplex
+        (by simp) (by simp))
 
 end
 

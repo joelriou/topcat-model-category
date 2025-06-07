@@ -19,7 +19,8 @@ lemma hasLift_iff_fiber_neq_bot {t : A ⟶ X} {b : B ⟶ Y} (sq : CommSq t i p b
   constructor
   · intro
     use ihom₀Equiv.symm sq.lift
-    simp [ihom₀Equiv_symm_mem_ihomToPullbackFiber_obj_zero_iff]
+    simp only [ihom₀Equiv_symm_mem_ihomToPullbackFiber_obj_zero_iff, CommSq.fac_left,
+      CommSq.fac_right, and_self]
   · intro ⟨f, h⟩
     obtain ⟨f, rfl⟩ := ihom₀Equiv.symm.surjective f
     simp only [ihom₀Equiv_symm_mem_ihomToPullbackFiber_obj_zero_iff] at h

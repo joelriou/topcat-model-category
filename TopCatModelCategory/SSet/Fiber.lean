@@ -106,6 +106,7 @@ variable (f : X ⟶ Y) (y : Y _⦋0⦌)
 
 def fiber : X.Subcomplex := (Subcomplex.ofSimplex y).preimage f
 
+@[simp]
 lemma mem_fiber_obj_zero_iff (x : X _⦋0⦌) :
     x ∈ (fiber f y).obj (op ⦋0⦌) ↔ f.app _ x = y := by
   simp [fiber]
