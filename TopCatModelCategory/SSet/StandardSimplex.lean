@@ -18,6 +18,10 @@ lemma yonedaEquiv₀ {X : SSet.{u}} (x : X _⦋0⦌) :
     yonedaEquiv (const x) = x :=
   yonedaEquiv.symm.injective (by simp)
 
+lemma yonedaEquiv_symm_eq_const {X : SSet.{u}} (x : X _⦋0⦌) :
+    yonedaEquiv.symm x = const x :=
+  yonedaEquiv.injective (by simp)
+
 lemma yonedaEquiv_map_comp {n m : SimplexCategory} (f : n ⟶ m) {X : SSet.{u}}
     (g : stdSimplex.obj m ⟶ X) :
     yonedaEquiv (stdSimplex.map f ≫ g) =

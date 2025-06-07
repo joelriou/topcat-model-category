@@ -51,22 +51,27 @@ protected def const {e₀ : E _⦋0⦌} (h₀ : p.app _ e₀ = b₀) :
   δ₀_map := by simp
   δ₁_map := by simp
 
-noncomputable def ofπ₀Rel {b₀ : B _⦋0⦌} {e₀ e₁ : (Subcomplex.fiber p b₀ : SSet) _⦋0⦌}
-    (h : π₀Rel e₀ e₁) :
-    FiberActionStruct p (.id (.mk b₀)) e₀ e₁ := Nonempty.some (by
+def ofEdge {b₀ : B _⦋0⦌} {e₀ e₁ : (Subcomplex.fiber p b₀ : SSet) _⦋0⦌}
+    (e : Edge (.mk e₀) (.mk e₁)) :
+    FiberActionStruct p (.id (.mk b₀)) e₀ e₁ := by
   obtain ⟨e₀, he₀⟩ := e₀
   obtain ⟨e₁, he₁⟩ := e₁
   simp only [Subcomplex.mem_fiber_obj_zero_iff] at he₀ he₁
-  obtain ⟨⟨c, hc⟩, hc₀, hc₁⟩ := h
-  replace hc₀ : E.δ 1 c = e₀ := Subtype.ext_iff.1 hc₀
-  replace hc₁ : E.δ 0 c = e₁ := Subtype.ext_iff.1 hc₁
-  simp [Subcomplex.mem_fiber_obj_iff] at hc
-  refine ⟨{
-    map := yonedaEquiv.symm c
-    map_p := yonedaEquiv.injective (by simpa)
-    δ₀_map := by simp [stdSimplex.δ_comp_yonedaEquiv_symm, hc₁]
-    δ₁_map := by simp [stdSimplex.δ_comp_yonedaEquiv_symm, hc₀]
-  }⟩)
+  refine {
+    map := e.map ≫ Subcomplex.ι _
+    map_p := by
+      simp
+    δ₀_map := by simp [e.comm₁_assoc]
+    δ₁_map := by simp [e.comm₀_assoc]
+  }
+
+noncomputable def ofπ₀Rel {b₀ : B _⦋0⦌} {e₀ e₁ : (Subcomplex.fiber p b₀ : SSet) _⦋0⦌}
+    (h : π₀Rel e₀ e₁) :
+    FiberActionStruct p (.id (.mk b₀)) e₀ e₁ := Nonempty.some (by
+  obtain ⟨c, hc₀, hc₁⟩ := h
+  refine ⟨ofEdge _ (Edge.mk (yonedaEquiv.symm c) ?_ ?_)⟩
+  · rw [stdSimplex.δ_comp_yonedaEquiv_symm, hc₀, yonedaEquiv_symm_eq_const]
+  · rw [stdSimplex.δ_comp_yonedaEquiv_symm, hc₁, yonedaEquiv_symm_eq_const])
 
 section
 
@@ -220,6 +225,56 @@ noncomputable def π₀FiberAction {b₀ b₁ : FundamentalGroupoid B} :
         h (.const p
           (by simpa only [Subcomplex.mem_fiber_obj_zero_iff] using e₀.2))).toFibreOneSimplex
         (by simp) (by simp))
+
+variable {p} in
+lemma FiberActionStruct.π₀FiberAction_eq
+    {b₀ b₁ : FundamentalGroupoid B} {f : b₀.Edge b₁}
+    {e₀ e₁ : E _⦋0⦌}
+    (h : FiberActionStruct p f e₀ e₁) :
+    π₀FiberAction p (FundamentalGroupoid.homMk f) (π₀.mk ⟨e₀, by
+      simp only [Subcomplex.mem_fiber_obj_zero_iff, h.app_zero]⟩) =
+    π₀.mk (X := Subcomplex.fiber p b₁.pt) ⟨e₁, by
+      simp only [Subcomplex.mem_fiber_obj_zero_iff, h.app_one]⟩ :=
+  π₀.sound
+    (FiberActionStruct.unique (fiberActionStruct p f e₀ h.app_zero) h (.refl _)
+        (.const _ h.app_zero)).toFibreOneSimplex
+      (by simp) (by simp)
+
+lemma π₀FiberAction_mk_eq_iff
+    {b₀ b₁ : FundamentalGroupoid B} (f : b₀.Edge b₁)
+    (e₀ : (Subcomplex.fiber p b₀.pt : SSet) _⦋0⦌)
+    (e₁ : (Subcomplex.fiber p b₁.pt : SSet) _⦋0⦌) :
+    π₀FiberAction p (FundamentalGroupoid.homMk f) (π₀.mk e₀) = π₀.mk e₁ ↔
+      Nonempty (FiberActionStruct p f e₀ e₁) := by
+  constructor
+  · intro h
+    change π₀.mk _ = _ at h
+    rw [KanComplex.π₀_mk_eq_π₀_mk_iff] at h
+    obtain ⟨h⟩ := h
+    exact ⟨FiberActionStruct.comp (fiberActionStruct p f e₀
+      (by simpa only [Subcomplex.mem_fiber_obj_zero_iff] using e₀.2))
+      (FiberActionStruct.ofEdge p h) (.compId _)⟩
+  · rintro ⟨h⟩
+    exact h.π₀FiberAction_eq
+
+lemma π₀FiberAction_id (b₀ : FundamentalGroupoid B)
+    (s : π₀ (Subcomplex.fiber p b₀.pt)) :
+    π₀FiberAction p (𝟙 b₀) s = s := by
+  obtain ⟨e₀, rfl⟩ := s.mk_surjective
+  apply FiberActionStruct.π₀FiberAction_eq
+  exact .const _ (by simpa only [Subcomplex.mem_fiber_obj_zero_iff] using e₀.2)
+
+lemma π₀FiberAction_comp {b₀ b₁ b₂ : FundamentalGroupoid B}
+    (f : b₀ ⟶ b₁) (g : b₁ ⟶ b₂) (s : π₀ (Subcomplex.fiber p b₀.pt)) :
+    π₀FiberAction p (f ≫ g) s = π₀FiberAction p g (π₀FiberAction p f s) := by
+  obtain ⟨⟨e₀, he₀⟩, rfl⟩ := s.mk_surjective
+  obtain ⟨f₀₁, rfl⟩ := homMk_surjective f
+  obtain ⟨f₁₂, rfl⟩ := homMk_surjective g
+  obtain ⟨f₀₂, ⟨h⟩⟩ := Edge.exists_compStruct f₀₁ f₁₂
+  obtain ⟨e₁, ⟨h₀₁⟩⟩ := FiberActionStruct.nonempty p f₀₁ e₀ (by simpa using he₀)
+  obtain ⟨e₂, ⟨h₁₂⟩⟩ := FiberActionStruct.nonempty p f₁₂ e₁ (h₀₁.app_one)
+  rw [h₀₁.π₀FiberAction_eq]
+  sorry
 
 end
 
