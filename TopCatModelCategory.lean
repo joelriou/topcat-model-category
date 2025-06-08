@@ -95,6 +95,7 @@ import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
 import TopCatModelCategory.TopCat.ClosedEmbeddings
 import TopCatModelCategory.TopCat.Colimits
 import TopCatModelCategory.TopCat.CompactOpen
+import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
 import TopCatModelCategory.TopCat.DeformationRetract
 import TopCatModelCategory.TopCat.Glueing
 import TopCatModelCategory.TopCat.HornDeformationRetract
