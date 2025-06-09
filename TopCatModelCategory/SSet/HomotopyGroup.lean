@@ -161,13 +161,13 @@ lemma inv_mul (i : Fin (n + 1)) (f : π (n + 1) X x) :
     mul i (inv i f) f = 1 := (exists_left_inverse i f).choose_spec
 
 noncomputable instance : Mul (π (n + 1) X x) where
-  mul := mul 0
+  mul := mul (Fin.last _)
 
 noncomputable instance : Group (π (n + 1) X x) where
-  mul_assoc := mul_assoc 0
-  one_mul := one_mul 0
-  mul_one := mul_one 0
-  inv := inv 0
+  mul_assoc := mul_assoc (Fin.last _)
+  one_mul := one_mul (Fin.last _)
+  mul_one := mul_one (Fin.last _)
+  inv := inv (Fin.last _)
   inv_mul_cancel _ := inv_mul _ _
 
 end π
