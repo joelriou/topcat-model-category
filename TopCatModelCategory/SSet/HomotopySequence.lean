@@ -416,6 +416,112 @@ lemma δ'_one (n : ℕ) (i : Fin (n + 2)) :
   rw [δ'_eq_one_iff]
   exact ⟨1, by simp [map₂]⟩
 
+@[simp]
+lemma δ'_zero_mul {n : ℕ} (s s' : π (n + 2) B b) :
+    δ' p he (n + 1) 0 (s * s') =
+      δ' p he (n + 1) 0 s * δ' p he (n + 1) 0 s' := by
+  obtain ⟨s₀₁, rfl⟩ := s.mk_surjective
+  obtain ⟨s₁₂, rfl⟩ := s'.mk_surjective
+  obtain ⟨s₀₂, ⟨hs⟩⟩ := PtSimplex.MulStruct.nonempty s₀₁ s₁₂ (Fin.last _)
+  rw [hs.mul_eq]
+  obtain ⟨f₀₁, ⟨t₀₁⟩⟩ := exists_deltaStruct he s₀₁ 0
+  obtain ⟨f₁₂, ⟨t₁₂⟩⟩ := exists_deltaStruct he s₁₂ 0
+  obtain ⟨f₀₂, ⟨t₀₂⟩⟩ := exists_deltaStruct he s₀₂ 0
+  rw [δ'_mk_eq_of_deltaStruct t₀₁, δ'_mk_eq_of_deltaStruct t₁₂,
+    δ'_mk_eq_of_deltaStruct t₀₂]
+  let f (i : Fin (n + 4)) : Δ[n + 2] ⟶ E :=
+    if i.1 ≤ n then const e
+    else if i.1 = n + 1 then t₁₂.map else if i.1 = n + 2 then t₀₂.map else t₀₁.map
+  have hf₁₂ : f ⟨n + 1, by simp⟩ = t₁₂.map := by aesop
+  have hf₀₂ : f ⟨n + 2, by simp⟩ = t₀₂.map := by aesop
+  have hf₀₁ : f ⟨n + 3, by simp⟩ = t₀₁.map := by aesop
+  have hf (i : Fin (n + 4)) (hi : i.1 ≤ n) : f ⟨i, by omega⟩ = const e := if_pos hi
+  have hf' (i : Fin (n + 4)) (j : Fin (n + 2)) :
+      stdSimplex.δ j.succ ≫ f i = const e := by
+    dsimp [f]
+    split_ifs
+    · simp
+    all_goals
+    · apply DeltaStruct.δ_map_eq_const _ _ j.succ_ne_zero
+  obtain ⟨φ, hφ⟩ := horn.exists_desc (n := n + 1) (i := 0) (X := E) (fun i ↦ f i) (by
+    rintro ⟨j, hj⟩ ⟨k, hk⟩ hjk
+    obtain ⟨j, rfl⟩ := j.eq_castSucc_of_ne_last (Fin.ne_last_of_lt hjk)
+    obtain ⟨j, rfl⟩ := j.eq_succ_of_ne_zero (by simpa using hj)
+    obtain ⟨k, rfl⟩ := k.eq_succ_of_ne_zero (by simpa using hk)
+    obtain ⟨k, rfl⟩ := k.eq_succ_of_ne_zero (Fin.ne_zero_of_lt
+      (show j.castSucc < k by simpa using hjk))
+    simp only [Fin.castSucc_lt_succ_iff] at hjk
+    simp only [Fin.castPred_castSucc, Fin.pred_succ, hf'])
+  have sq : CommSq φ Λ[n + 3, 0].ι p hs.map := ⟨horn.hom_ext' (fun j hj ↦ by
+    have := hφ ⟨j, hj⟩
+    dsimp at this
+    rw [reassoc_of% this, horn.ι_ι_assoc]
+    by_cases hj₀ : j.1 ≤ n
+    · rw [hf _ hj₀, const_comp, he, hs.δ_map_of_lt j (by simp [Fin.lt_iff_val_lt_val]; omega)]
+    · simp only [not_le, ← Nat.add_one_le_iff] at hj₀
+      by_cases hj₁ : j.1 ≤ n + 1
+      · obtain rfl : j = ⟨n + 1, by simp⟩ := by
+          rw [Fin.ext_iff]
+          exact le_antisymm hj₁ hj₀
+        rw [hf₁₂, t₁₂.map_p, ← hs.δ_castSucc_castSucc_map]
+        rfl
+      · simp only [not_le, ← Nat.add_one_le_iff] at hj₁
+        by_cases hj₂ : j.1 ≤ n + 2
+        · obtain rfl : j = ⟨n + 2, by simp⟩ := by
+            rw [Fin.ext_iff]
+            exact le_antisymm hj₂ hj₁
+          rw [hf₀₂, t₀₂.map_p, ← hs.δ_castSucc_succ_map]
+          rfl
+        · simp only [not_le, ← Nat.add_one_le_iff] at hj₂
+          obtain rfl : j = ⟨n + 3, by simp⟩ := le_antisymm j.le_last hj₂
+          rw [hf₀₁, t₀₁.map_p, ← hs.δ_succ_succ_map]
+          rfl
+      )⟩
+  have hsq (i : Fin (n + 4)) (hi : i ≠ 0) :
+      stdSimplex.δ i ≫ sq.lift = f i := by
+    have := horn.ι 0 i hi ≫= sq.fac_left
+    rw [horn.ι_ι_assoc] at this
+    rw [this]
+    exact hφ ⟨i, hi⟩
+  refine (PtSimplex.MulStruct.mul_eq
+    { map := Subcomplex.lift (stdSimplex.δ 0 ≫ sq.lift) (by
+        simp only [preimage_eq_top_iff, range_le_fiber_iff,
+          Category.assoc, CommSq.fac_right,
+          hs.δ_map_of_lt 0 (by simp [Fin.lt_iff_val_lt_val])])
+      δ_castSucc_castSucc_map := by
+        ext : 1
+        have := stdSimplex.{u}.δ_comp_δ (n := n + 1) (i := 0) (j := ⟨n, by omega⟩) (by simp)
+        dsimp at this
+        simp only [Category.assoc, lift_ι, Subpresheaf.toPresheaf_obj, ← t₁₂.δ_map,
+          ← hf₁₂, ← hsq ⟨n + 1, by simp⟩ (by simp), reassoc_of% this]
+        rfl
+      δ_castSucc_succ_map := by
+        ext : 1
+        have := stdSimplex.{u}.δ_comp_δ (n := n + 1) (i := 0) (j := ⟨n + 1, by omega⟩) (by simp)
+        dsimp at this
+        simp only [Fin.succ_last, Nat.succ_eq_add_one, Category.assoc, lift_ι,
+          Subpresheaf.toPresheaf_obj, ← t₀₂.δ_map, ← hf₀₂, ← hsq ⟨n + 2, by simp⟩ (by simp),
+          reassoc_of% this]
+        rfl
+      δ_succ_succ_map := by
+        ext : 1
+        have := stdSimplex.{u}.δ_comp_δ (n := n + 1) (i := 0) (j := ⟨n + 2, by omega⟩) (by simp)
+        dsimp at this
+        simp only [Fin.succ_last, Nat.succ_eq_add_one, Category.assoc, lift_ι,
+          Subpresheaf.toPresheaf_obj, ← t₀₁.δ_map, ← hf₀₁, ← hsq ⟨n + 3, by simp⟩ (by simp),
+          reassoc_of% this]
+        rfl
+      δ_map_of_lt j hj := by
+        ext : 1
+        have := stdSimplex.{u}.δ_comp_δ (n := n + 1) (i := 0) (j := j) (by simp)
+        dsimp at this
+        simp only [Category.assoc, lift_ι, const_comp, Subpresheaf.ι_app, fiber.basePoint_coe,
+          ← reassoc_of% this, hsq j.succ j.succ_ne_zero,
+          show f j.succ = const e from hf j.succ (by
+            simp [Fin.lt_iff_val_lt_val] at hj ⊢
+            omega), comp_const]
+      δ_map_of_gt j hj := (not_lt.2 j.le_last hj).elim }).symm
+
 variable {he}
 
 lemma exists_of_map₁_eq_one {n : ℕ} {x : π n (Subcomplex.fiber p b) (fiber.basePoint p he)}

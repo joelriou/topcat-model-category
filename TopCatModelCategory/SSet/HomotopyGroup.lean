@@ -203,6 +203,14 @@ lemma mapπ_inv (p : π (n + 1) X x) :
 
 end
 
+
 end KanComplex
+
+open KanComplex
+
+lemma PtSimplex.MulStruct.mul_eq {X : SSet.{u}} [IsFibrant X] {n : ℕ} {x : X _⦋0⦌}
+    {g₁ g₂ g₁₂ : X.PtSimplex (n + 1) x}
+    (h : PtSimplex.MulStruct g₁ g₂ g₁₂ (Fin.last _)) : π.mk g₁ * π.mk g₂ = π.mk g₁₂ :=
+  KanComplex.π.mul_eq_of_mulStruct h
 
 end SSet
