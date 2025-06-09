@@ -223,6 +223,10 @@ lemma homEquiv_homMk {x : X _⦋0⦌} (e : Edge (.mk x) (.mk x)) :
     homEquiv (homMk e) = π.mk (edgeEquiv e) :=
   rfl
 
+@[simp]
+lemma homEquiv_symm_mk {x : X _⦋0⦌} (s : X.PtSimplex 1 x) :
+    homEquiv.symm (π.mk s) = homMk (edgeEquiv.symm s) := rfl
+
 @[simps]
 def Edge.CompStruct.mulStruct {x : X _⦋0⦌} {f g fg : Edge (.mk x) (.mk x)}
     (h : Edge.CompStruct f g fg) :

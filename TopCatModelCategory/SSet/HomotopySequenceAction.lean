@@ -257,6 +257,7 @@ lemma π₀FiberAction_mk_eq_iff
   · rintro ⟨h⟩
     exact h.π₀FiberAction_eq
 
+@[simp]
 lemma π₀FiberAction_id (b₀ : FundamentalGroupoid B)
     (s : π₀ (Subcomplex.fiber p b₀.pt)) :
     π₀FiberAction p (𝟙 b₀) s = s := by
@@ -309,5 +310,36 @@ lemma fiber_neq_bot_iff_of_edge {E B : SSet.{u}} (p : E ⟶ B) [Fibration p] {b�
     exact ⟨e₀, by simp only [mem_fiber_obj_zero_iff, h.app_zero]⟩
 
 end Subcomplex
+
+namespace KanComplex
+
+namespace HomotopySequence
+
+open FundamentalGroupoid
+
+variable {E B : SSet.{u}} (p : E ⟶ B) [Fibration p] [IsFibrant B] [IsFibrant E]
+    {e : E _⦋0⦌} {b : B _⦋0⦌} (he : p.app _ e = b)
+
+lemma δ'_eq_π₀FiberAction
+    (g : π 1 B b) : δ' p he 0 0 g =
+      π₀EquivπZero _ (π₀FiberAction p (homEquiv.symm g)
+        (π₀.mk (Subcomplex.fiber.basePoint p he))) := by
+  obtain ⟨g, rfl⟩ := g.mk_surjective
+  obtain ⟨s, ⟨h⟩⟩ := exists_deltaStruct he g 0
+  obtain ⟨e₁, rfl⟩ := (PtSimplex.equiv₀ _).symm.surjective s
+  have h' : FiberActionStruct p (edgeEquiv.symm g) e e₁ :=
+    { map := h.map
+      δ₀_map := by
+        have := yonedaEquiv_symm_zero e₁
+        rw [h.δ_map, PtSimplex.equiv₀_symm_apply_map]
+        dsimp at this ⊢
+        rw [this, const_comp, Subpresheaf.ι_app]
+      δ₁_map := by simpa using h.δ_map_eq_const 1 (by simp) }
+  rw [δ'_mk_eq_of_deltaStruct h, homEquiv_symm_mk]
+  simp [Subcomplex.fiber.basePoint, h'.π₀FiberAction_eq]
+
+end HomotopySequence
+
+end KanComplex
 
 end SSet
