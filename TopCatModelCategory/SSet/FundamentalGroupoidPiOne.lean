@@ -242,6 +242,11 @@ lemma homEquiv_comp {x : X _⦋0⦌} (f g : mk x ⟶ mk x) :
   obtain ⟨g, rfl⟩ := homMk_surjective g
   exact (π.mul_eq_of_mulStruct (Edge.compStruct f g).mulStruct).symm
 
+lemma homEquiv_symm_mul {x : X _⦋0⦌} (g₁ g₂ : π 1 X x) :
+    homEquiv.symm (g₁ * g₂) = homEquiv.symm g₁ ≫ homEquiv.symm g₂ := by
+  apply homEquiv.injective
+  simp only [homEquiv_comp, Equiv.apply_symm_apply]
+
 variable [IsFibrant Y]
 
 lemma homEquiv_map {x : X _⦋0⦌} (φ : mk x ⟶ mk x) (f : X ⟶ Y) :

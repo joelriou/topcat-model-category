@@ -276,6 +276,13 @@ lemma π₀FiberAction_comp {b₀ b₁ b₂ : FundamentalGroupoid B}
   obtain ⟨e₂, ⟨h₁₂⟩⟩ := FiberActionStruct.nonempty p f₁₂ e₁ (h₀₁.app_one)
   rw [h₀₁.π₀FiberAction_eq, h₁₂.π₀FiberAction_eq, h.fac, (h₀₁.comp h₁₂ h).π₀FiberAction_eq]
 
+lemma π₀FiberAction_bijective {b₀ b₁ : FundamentalGroupoid B} (f : b₀ ⟶ b₁) :
+    Function.Bijective (π₀FiberAction p f) := by
+  refine (Equiv.mk (π₀FiberAction p f) (π₀FiberAction p (inv f)) ?_ ?_).bijective
+  all_goals
+  · intro
+    simp [← π₀FiberAction_comp]
+
 end
 
 end KanComplex.FundamentalGroupoid
@@ -320,8 +327,8 @@ open FundamentalGroupoid
 variable {E B : SSet.{u}} (p : E ⟶ B) [Fibration p] [IsFibrant B] [IsFibrant E]
     {e : E _⦋0⦌} {b : B _⦋0⦌} (he : p.app _ e = b)
 
-lemma δ'_eq_π₀FiberAction
-    (g : π 1 B b) : δ' p he 0 0 g =
+lemma δ'_eq_π₀FiberAction (g : π 1 B b) :
+    δ' p he 0 0 g =
       π₀EquivπZero _ (π₀FiberAction p (homEquiv.symm g)
         (π₀.mk (Subcomplex.fiber.basePoint p he))) := by
   obtain ⟨g, rfl⟩ := g.mk_surjective
@@ -337,6 +344,28 @@ lemma δ'_eq_π₀FiberAction
       δ₁_map := by simpa using h.δ_map_eq_const 1 (by simp) }
   rw [δ'_mk_eq_of_deltaStruct h, homEquiv_symm_mk]
   simp [Subcomplex.fiber.basePoint, h'.π₀FiberAction_eq]
+
+lemma π₀EquivπZero_symm_δ'_eq_π₀FiberAction (g : π 1 B b) :
+    (π₀EquivπZero _).symm (δ' p he 0 0 g) =
+      π₀FiberAction p (homEquiv.symm g)
+        (π₀.mk (Subcomplex.fiber.basePoint p he)) := by
+  rw [δ'_eq_π₀FiberAction, Equiv.symm_apply_apply]
+
+lemma eq_mul_of_δ'_eq_δ' (g₁ g₂ : π 1 B b)
+    (h : δ' p he 0 0 g₁ = δ' p he 0 0 g₂) :
+    ∃ (u : π 1 E e), g₂ = mapπ p 1 e b he u * g₁ := by
+  obtain ⟨v, rfl⟩ : ∃ v, g₂ = v * g₁ := ⟨g₂ * g₁⁻¹, by simp⟩
+  rw [δ'_eq_π₀FiberAction, δ'_eq_π₀FiberAction, homEquiv_symm_mul,
+    π₀FiberAction_comp] at h
+  replace h := congr_arg (fun x ↦ (π₀EquivπZero (Subcomplex.fiber.basePoint p he)) x)
+    ((π₀FiberAction_bijective _ _).injective ((π₀EquivπZero _).injective h))
+  dsimp at h
+  rw [← δ'_eq_π₀FiberAction] at h
+  obtain ⟨u, rfl⟩ := exists_of_δ'_eq_one (h.symm.trans (by
+    congr
+    ext : 1
+    apply yonedaEquiv_symm_eq_const))
+  exact ⟨u, by simp [map₂]⟩
 
 end HomotopySequence
 

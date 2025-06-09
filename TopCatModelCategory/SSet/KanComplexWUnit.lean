@@ -4,18 +4,6 @@ import TopCatModelCategory.SSet.SingularConnected
 open CategoryTheory HomotopicalAlgebra SSet.modelCategoryQuillen
   Simplicial
 
-lemma Group.injective_iff_of_map_mul {α β : Type*} [Group α] [Group β]
-    (f : α → β) (hf : ∀ x y, f (x * y) = f x * f y) :
-    Function.Injective f ↔ ∀ x, f x = 1 → x = 1 := by
-  let φ : α →* β := MonoidHom.mk' f hf
-  have f_one : f 1 = 1 := φ.map_one
-  constructor
-  · intro hf' x hx
-    exact hf' (by rw [f_one, hx])
-  · intro hf' x y hxy
-    obtain ⟨u, rfl⟩ : ∃ u, x * u = y := ⟨_, mul_inv_cancel_left x y⟩
-    rw [hf' u (by simpa only [hf, left_eq_mul] using hxy), mul_one]
-
 namespace SSet
 
 namespace KanComplex
@@ -60,8 +48,7 @@ lemma W.sSetTopAdj_unit_app [IsFibrant X] :
       dsimp at y z hz
       obtain ⟨w, rfl⟩ := (FibrationSequence.loop X x).exact₁ z
         (by dsimp; apply Subsingleton.elim)
-      have : Function.Injective ((FibrationSequence.loop X x).toTopToSSet.δ n) := sorry
-      refine ⟨w, this ?_⟩
+      refine ⟨w, (FibrationSequence.bijective_δ_toTopToSSet_loop X x n).1 ?_⟩
       have := (FibrationSequence.δ_naturality_apply
         ((FibrationSequence.loop X x).ιtoTopToSSet) w).symm
       dsimp at w this

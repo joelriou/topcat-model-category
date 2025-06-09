@@ -48,6 +48,20 @@ noncomputable def ιtoTopToSSet : seq ⟶ seq.toTopToSSet where
   mor₂ := sSetTopAdj.unit.app _
   mor₃ := sSetTopAdj.unit.app _
 
+open KanComplex
+
+instance (X : SSet.{0}) [X.IsContractible] :
+    (TopCat.toSSet.obj (SSet.toTop.obj X)).IsContractible := sorry
+
+instance (X : SSet.{0}) [IsFibrant X] (x : X _⦋0⦌) :
+    (loop X x).toTopToSSet.E.IsContractible := by
+  dsimp
+  infer_instance
+
+lemma bijective_δ_toTopToSSet_loop (X : SSet.{0}) [IsFibrant X] (x : X _⦋0⦌) (n : ℕ) :
+    Function.Bijective ((FibrationSequence.loop X x).toTopToSSet.δ n) := by
+  apply bijective_δ
+
 end FibrationSequence
 
 end SSet

@@ -1,9 +1,21 @@
-import TopCatModelCategory.SSet.HomotopySequence
+import TopCatModelCategory.SSet.HomotopySequenceAction
 import TopCatModelCategory.SSet.Fibrations
 import TopCatModelCategory.SSet.Loop
 
 open CategoryTheory Simplicial HomotopicalAlgebra
   SSet.modelCategoryQuillen Limits Opposite
+
+lemma Group.injective_iff_of_map_mul {α β : Type*} [Group α] [Group β]
+    (f : α → β) (hf : ∀ x y, f (x * y) = f x * f y) :
+    Function.Injective f ↔ ∀ x, f x = 1 → x = 1 := by
+  let φ : α →* β := MonoidHom.mk' f hf
+  have f_one : f 1 = 1 := φ.map_one
+  constructor
+  · intro hf' x hx
+    exact hf' (by rw [f_one, hx])
+  · intro hf' x y hxy
+    obtain ⟨u, rfl⟩ : ∃ u, x * u = y := ⟨_, mul_inv_cancel_left x y⟩
+    rw [hf' u (by simpa only [hf, left_eq_mul] using hxy), mul_one]
 
 namespace SSet
 
@@ -150,6 +162,18 @@ noncomputable def δ (n : ℕ) : π (n + 1) seq.B seq.b → π n seq.F seq.f :=
 lemma δ_one (n : ℕ) : seq.δ n 1 = 1 := by
   simp [δ]
 
+@[simp]
+lemma δ_mul {n : ℕ} (x₁ x₂ : π (n + 2) seq.B seq.b) :
+    seq.δ (n + 1) (x₁ * x₂) = seq.δ (n + 1) x₁ * seq.δ (n + 1) x₂ := by
+  simp [δ, mapπ_mul]
+
+lemma eq_mul_of_δ_eq_δ (g₁ g₂ : π 1 seq.B seq.b)
+    (h : seq.δ 0 g₁ = seq.δ 0 g₂) :
+    ∃ (u : π 1 seq.E seq.e), g₂ = mapπ seq.p 1 seq.e seq.b seq.he u * g₁ :=
+  KanComplex.HomotopySequence.eq_mul_of_δ'_eq_δ' seq.p seq.he g₁ g₂
+    ((mapπEquivOfIso seq.isoFiber 0 seq.f (Subcomplex.fiber.basePoint seq.p seq.he)
+      (by simp)).symm.injective h)
+
 lemma exact₂ {n : ℕ} (x₂ : π n seq.E seq.e)
     (hx₂ : mapπ seq.p n seq.e seq.b seq.he x₂ = 1) :
     ∃ (x₁ : π n seq.F seq.f), mapπ seq.i n seq.f seq.e seq.hf x₁ = x₂ := by
@@ -243,6 +267,33 @@ instance : IsFibrant ((loop X x).E) := by dsimp; infer_instance
 instance : IsFibrant ((loop X x).B) := by dsimp; infer_instance
 
 end
+
+lemma surjective_δ (n : ℕ) [IsContractible seq.E] :
+    Function.Surjective (seq.δ n) :=
+  fun f ↦ seq.exact₁ f (Subsingleton.elim _ _)
+
+lemma injective_δ_succ (n : ℕ) [IsContractible seq.E] :
+    Function.Injective (seq.δ (n + 1)) := by
+  rw [Group.injective_iff_of_map_mul _ (by simp)]
+  intro b hb
+  obtain ⟨e, rfl⟩ := seq.exact₃ b hb
+  obtain rfl := Subsingleton.elim e 1
+  simp only [mapπ_one]
+
+lemma injective_δ_zero [IsContractible seq.E] :
+    Function.Injective (seq.δ 0) := by
+  intro g₁ g₂ h
+  obtain ⟨u, rfl⟩ := seq.eq_mul_of_δ_eq_δ _ _ h
+  obtain rfl := Subsingleton.elim u 1
+  simp
+
+lemma bijective_δ (n : ℕ) [IsContractible seq.E] :
+    Function.Bijective (seq.δ n) := by
+  constructor
+  · obtain _ | n := n
+    · exact seq.injective_δ_zero
+    · exact seq.injective_δ_succ n
+  · exact seq.surjective_δ n
 
 end FibrationSequence
 

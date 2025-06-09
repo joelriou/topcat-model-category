@@ -7,6 +7,7 @@ import TopCatModelCategory.TopCat.T1Inclusion
 import TopCatModelCategory.TopCat.DeformationRetract
 import TopCatModelCategory.SSet.Finite
 import TopCatModelCategory.SSet.Skeleton
+import TopCatModelCategory.SSet.Contractible
 
 open CategoryTheory HomotopicalAlgebra SSet.modelCategoryQuillen
   Simplicial NNReal Limits MonoidalCategory Opposite
