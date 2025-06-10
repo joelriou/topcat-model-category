@@ -4,7 +4,7 @@ import TopCatModelCategory.SSet.FiberwiseHomotopy
 universe u
 
 open CategoryTheory MonoidalCategory Simplicial HomotopicalAlgebra
-  SSet.modelCategoryQuillen ChosenFiniteProducts
+  SSet.modelCategoryQuillen ChosenFiniteProducts Limits
 
 namespace SSet
 
@@ -22,20 +22,19 @@ lemma injective_app_of_minimalFibration (n : SimplexCategoryᵒᵖ) :
   induction' n using SimplexCategory.rec with n
   induction' n using Nat.strong_induction_on with n hn
   intro s₁ s₂ hs
-  have := (anodyneExtensions.subcomplex_unionProd_mem_of_right.{u}
-    (boundary n) _ (anodyneExtensions.face 0)).hasLeftLiftingProperty p
-  let t : B _⦋n⦌  := p.app _ s₁
-  have sq : CommSq sorry ((∂Δ[n]).unionProd (stdSimplex.face {(0 : Fin 2)})).ι p
-      (fst _ _ ≫ yonedaEquiv.symm t) := sorry
-  let ρ : SimplexOverRelStruct p s₁ s₂ :=
-    { h := sq.lift
-      h₀ := sorry
-      h₁ := sorry
-      π := sorry
-      d := sorry
-      hπ := sorry
-      hd := sorry }
-  exact ρ.eq
+  obtain ⟨t, ht₁, ht₂⟩ : ∃ (t : B _⦋n⦌), p.app _ s₁ = t ∧ p.app _ s₂ = t := ⟨_, rfl, by
+    convert congr_arg (p.app _ ) hs.symm using 1
+    all_goals
+    · conv_lhs => rw [← hu.fac₀]; dsimp⟩
+  have : ∃ (w : (∂Δ[n] : SSet) ⟶ E), ∂Δ[n].ι ≫ yonedaEquiv.symm s₁ = w ∧
+      ∂Δ[n].ι ≫ yonedaEquiv.symm s₂ = w := ⟨_, rfl, by
+    obtain _ | n := n
+    · ext
+    · refine boundary.hom_ext (fun j ↦ ?_)
+      simp only [boundary.ι_ι_assoc, stdSimplex.δ_comp_yonedaEquiv_symm]
+      congr 1
+      exact hn _ (by simp) (by simp only [SSet.δ_naturality_apply, hs])⟩
+  sorry
 
 lemma surjective_app_of_minimalFibration (n : SimplexCategoryᵒᵖ) :
     Function.Surjective (u.app n) := by
