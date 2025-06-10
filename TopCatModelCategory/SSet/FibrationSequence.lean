@@ -295,6 +295,18 @@ lemma bijective_δ (n : ℕ) [IsContractible seq.E] :
     · exact seq.injective_δ_succ n
   · exact seq.surjective_δ n
 
+lemma bijective_mapπ_succ_p (n : ℕ)
+    [Subsingleton (π n seq.F seq.f)] [Subsingleton (π (n + 1) seq.F seq.f)] :
+    Function.Bijective (mapπ seq.p (n + 1) seq.e seq.b seq.he) := by
+  constructor
+  · rw [Group.injective_iff_of_map_mul _ (by simp [mapπ_mul])]
+    intro x hx
+    obtain ⟨y, rfl⟩ := seq.exact₂ x hx
+    obtain rfl := Subsingleton.elim y 1
+    simp
+  · intro x
+    exact seq.exact₃ x (Subsingleton.elim _ _)
+
 end FibrationSequence
 
 end SSet

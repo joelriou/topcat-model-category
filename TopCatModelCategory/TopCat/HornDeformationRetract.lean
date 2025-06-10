@@ -261,4 +261,8 @@ instance (Z : TopCat.{0}) : IsFibrant (TopCat.toSSet.obj Z) := by
         simp [← Adjunction.homEquiv_naturality_left]
       fac_right := Subsingleton.elim _ _ }⟩⟩
 
+instance (X : SSet.{0}) : IsFibrant ((SSet.toTop ⋙ TopCat.toSSet).obj X) := by
+  dsimp
+  infer_instance
+
 end SSet

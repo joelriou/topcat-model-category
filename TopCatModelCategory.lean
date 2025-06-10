@@ -44,6 +44,7 @@ import TopCatModelCategory.SSet.DimensionProd
 import TopCatModelCategory.SSet.EffectiveEpi
 import TopCatModelCategory.SSet.Evaluation
 import TopCatModelCategory.SSet.Fiber
+import TopCatModelCategory.SSet.FiberwiseHomotopy
 import TopCatModelCategory.SSet.FibrationSequence
 import TopCatModelCategory.SSet.FibrationSequenceAdj
 import TopCatModelCategory.SSet.Fibrations
@@ -68,6 +69,7 @@ import TopCatModelCategory.SSet.KanComplexWUnit
 import TopCatModelCategory.SSet.KeyLemma
 import TopCatModelCategory.SSet.Loop
 import TopCatModelCategory.SSet.MinimalFibrations
+import TopCatModelCategory.SSet.MinimalFibrationsLemmas
 import TopCatModelCategory.SSet.MonoCoprod
 import TopCatModelCategory.SSet.Monoidal
 import TopCatModelCategory.SSet.Monomorphisms

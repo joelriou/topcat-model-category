@@ -1,5 +1,8 @@
 import TopCatModelCategory.SSet.CategoryWithWeakEquivalences
 import TopCatModelCategory.SSet.SingularConnected
+import TopCatModelCategory.SSet.FibrationSequenceAdj
+import TopCatModelCategory.SSet.KanComplexWUnit
+import TopCatModelCategory.SSet.KanComplexKeyLemma
 
 open CategoryTheory HomotopicalAlgebra Simplicial Opposite Limits
 
@@ -78,10 +81,37 @@ lemma bijective_mapπ₀_toSSet_map_toTop_map :
   dsimp
   rw [← mapπ₀_comp_apply, ← mapπ₀_comp_apply, Adjunction.unit_naturality]
 
+open KanComplex
+
 lemma weakEquivalence : WeakEquivalence p := by
+  have : Fibration p := by
+    rw [fibration_iff]
+    exact rlp_I_le_rlp_J _ hp
   rw [weakEquivalence_iff, TopCat.modelCategory.weakEquivalence_iff, KanComplex.W_iff]
   refine ⟨bijective_mapπ₀_toSSet_map_toTop_map hp, fun n ↦ ?_⟩
-  sorry
+  suffices ∀ (e : E _⦋0⦌) (b : TopCat.toSSet.obj (toTop.obj B) _⦋0⦌) (he),
+      Function.Bijective (mapπ (TopCat.toSSet.map (toTop.map p)) (n + 1)
+        ((sSetTopAdj.unit.app E).app _ e) b he) by
+    rintro e' _ rfl
+    obtain ⟨e, ⟨iso⟩⟩ :
+      ∃ (e : E _⦋0⦌), Nonempty (FundamentalGroupoid.mk ((sSetTopAdj.unit.app E).app _ e) ≅
+          FundamentalGroupoid.mk e') := by
+        obtain ⟨e, he⟩ := (bijective_mapπ₀_sSetTopAdj_unit_app _).2 (π₀.mk e')
+        obtain ⟨e, rfl⟩ := e.mk_surjective
+        exact ⟨e, by simpa [← FundamentalGroupoid.π₀_mk_eq_π₀_mk_iff] using he⟩
+    exact KanComplex.W.bijective_of_iso iso (this e _ rfl)
+  intro e b' he'
+  obtain ⟨b, he, rfl⟩ : ∃ (b : B _⦋0⦌), p.app _ e = b ∧ b' = (sSetTopAdj.unit.app B).app _ b := by
+    refine ⟨_, rfl, ?_⟩
+    rw [← he', ← FunctorToTypes.comp, ← FunctorToTypes.comp, sSetTopAdj.unit_naturality]
+  let fib := FibrationSequence.ofFibration p he
+  have (n : ℕ) : Subsingleton (π n fib.F fib.f) :=
+    ((W.of_rlp_I (MorphismProperty.of_isPullback
+      fib.isPullback hp)).bijective n fib.f _ rfl).injective.subsingleton
+  have (n : ℕ) : Subsingleton (π n fib.toTopToSSet.F fib.toTopToSSet.f) :=
+    ((W.sSetTopAdj_unit_app fib.F).bijective n fib.f fib.toTopToSSet.f rfl).2.subsingleton
+      (α := π n fib.F fib.f)
+  apply fib.toTopToSSet.bijective_mapπ_succ_p
 
 end rlp_I
 
