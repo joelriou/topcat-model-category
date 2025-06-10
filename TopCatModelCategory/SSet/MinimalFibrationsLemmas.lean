@@ -9,6 +9,7 @@ open CategoryTheory MonoidalCategory Simplicial HomotopicalAlgebra
 namespace SSet
 
 namespace FiberwiseHomotopy
+
 variable {E B : SSet.{u}} {p : E ⟶ B} [MinimalFibration p]
   {u : E ⟶ E} (hu : FiberwiseHomotopy p p u (𝟙 _))
 
