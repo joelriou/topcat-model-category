@@ -575,6 +575,58 @@ lemma exists_path_composition₀_above_of_fibration'
   simp [this]
   rfl
 
+lemma exists_path_composition₂_above_of_fibration
+    (p : X ⟶ Y) [Fibration p] (x₀₂ x₁₂ : Δ[1] ⟶ X)
+    (h : stdSimplex.δ 0 ≫ x₀₂ = stdSimplex.δ 0 ≫ x₁₂)
+    (s : Δ[2] ⟶ Y)
+    (hs₀₂ : stdSimplex.δ 1 ≫ s = x₀₂ ≫ p)
+    (hs₁₂ : stdSimplex.δ 0 ≫ s = x₁₂ ≫ p) :
+    ∃ (x₀₁ : Δ[1] ⟶ X),
+      stdSimplex.δ 1 ≫ x₀₁ =
+        stdSimplex.δ 1 ≫ x₀₂ ∧
+      stdSimplex.δ 0 ≫ x₀₁ =
+        stdSimplex.δ 1 ≫ x₁₂ ∧
+        x₀₁ ≫ p = stdSimplex.δ 2 ≫ s := by
+  obtain ⟨t, ht₁, ht₂⟩ := horn₂₂.isPushout.exists_desc x₀₂ x₁₂ h
+  have sq : CommSq t (horn 2 2).ι p s := ⟨by
+    apply horn₂₂.isPushout.hom_ext
+    · simp [reassoc_of% ht₁, ← hs₀₂]
+    · simp [reassoc_of% ht₂, ← hs₁₂]⟩
+  refine ⟨stdSimplex.δ 2 ≫ sq.lift, ?_, ?_, ?_⟩
+  · rw [← ht₁]
+    conv_rhs => rw [← sq.fac_left]
+    rw [horn.ι_ι_assoc]
+    symm
+    apply stdSimplex.δ_comp_δ_self_assoc (n := 0) (i := 1)
+  · rw [← ht₂]
+    conv_rhs => rw [← sq.fac_left]
+    rw [horn.ι_ι_assoc]
+    apply stdSimplex.δ_comp_δ_assoc (n := 0) (i := 0) (j := 1) (by simp)
+  · rw [Category.assoc, sq.fac_right]
+
+lemma exists_path_composition₂_above_of_fibration'
+    (p : X ⟶ Y) [Fibration p] (x₀₂ x₁₂ : Δ[1] ⟶ X)
+    (h : stdSimplex.δ 0 ≫ x₀₂ = stdSimplex.δ 0 ≫ x₁₂)
+    (hx : x₀₂ ≫ p = x₁₂ ≫ p) :
+    ∃ (x₀₁ : Δ[1] ⟶ X) (b : Y _⦋0⦌),
+      stdSimplex.δ 1 ≫ x₀₁ = stdSimplex.δ 1 ≫ x₀₂ ∧
+      stdSimplex.δ 0 ≫ x₀₁ = stdSimplex.δ 1 ≫ x₁₂ ∧
+        x₀₁ ≫ p = const b := by
+  obtain ⟨x₀₁, eq₁, eq₂, eq₃⟩ := exists_path_composition₂_above_of_fibration p x₀₂ x₁₂ h
+    (stdSimplex.σ 0 ≫ x₀₂ ≫ p) (stdSimplex.{u}.δ_comp_σ_succ_assoc (n := 1) (i := 0) _) (by
+      rw [← hx]
+      apply stdSimplex.δ_comp_σ_self_assoc (n := 1) (i := 0))
+  refine ⟨x₀₁, yonedaEquiv (stdSimplex.δ 1 ≫ x₀₂ ≫ p), eq₁, eq₂, ?_⟩
+  have := stdSimplex.{u}.δ_comp_σ_of_gt (n := 0) (i := 1) (j := 0) (by simp)
+  dsimp at this
+  rw [eq₃, reassoc_of% this]
+  have : stdSimplex.{u}.σ (0 : Fin 1) = const (yonedaEquiv (𝟙 _)) := by
+    apply yonedaEquiv.injective
+    ext i
+    fin_cases i <;> rfl
+  simp [this]
+  rfl
+
 lemma homotopy_extension_property₁ {E K L : SSet.{u}} (i : K ⟶ L) (p : E ⟶ B) [Fibration p]
     [Mono i]
     (hE : K ⊗ Δ[1] ⟶ E) (f : L ⟶ E) (h₁ : i ≫ f = ι₁ ≫ hE)
