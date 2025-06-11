@@ -170,37 +170,41 @@ lemma surjective_app_of_minimalFibration (n : SimplexCategoryᵒᵖ) :
         apply yonedaEquiv.injective
         rw [yonedaEquiv_symm_comp, Equiv.apply_symm_apply, hs,
           stdSimplex.δ_comp_yonedaEquiv_symm, Equiv.apply_symm_apply]
-  let i : pushout ∂Δ[n].ι ι₀ ⟶ Δ[n] ⊗ Δ[1] :=
-    pushout.desc (ι₀.{u}) (∂Δ[n].ι ▷ Δ[1]) (by simp)
-  have sq : CommSq (pushout.desc (yonedaEquiv.symm x) (y ▷ _ ≫ hu.h) (by aesop)) i
-      p (fst _ _ ≫ yonedaEquiv.symm x ≫ p) := ⟨by
-    ext : 1
-    · simp [i]
-    · simp only [colimit.ι_desc_assoc, span_right,
-        Subcomplex.RelativeMorphism.botEquiv_symm_apply_map, PushoutCocone.mk_pt,
-        PushoutCocone.mk_ι_app, Category.assoc, fac, whiskerRight_fst_assoc,
-        yonedaEquiv_symm_comp, i]
-      conv_lhs => rw [← hu.fac₀, reassoc_of% hy, yonedaEquiv_symm_comp]⟩
-  have := anodyneExtensions.pushout_desc_ι₀_whiskerRight_mono ∂Δ[n].ι p Fibration.mem
-  refine ⟨yonedaEquiv (ι₁ ≫ sq.lift), ?_⟩
+  obtain ⟨Φ, hΦ₁, hΦ₂, hΦ₃⟩ :
+      ∃ (Φ : Δ[n] ⊗ Δ[1] ⟶ E), ι₀ ≫ Φ = yonedaEquiv.symm x ∧
+        ∂Δ[n].ι ▷ _ ≫ Φ = y ▷ _ ≫ hu.h ∧ Φ ≫ p = fst _ _ ≫ yonedaEquiv.symm x ≫ p := by
+    let i : pushout ∂Δ[n].ι ι₀ ⟶ Δ[n] ⊗ Δ[1] :=
+      pushout.desc (ι₀.{u}) (∂Δ[n].ι ▷ Δ[1]) (by simp)
+    have sq : CommSq (pushout.desc (yonedaEquiv.symm x) (y ▷ _ ≫ hu.h) (by aesop)) i
+        p (fst _ _ ≫ yonedaEquiv.symm x ≫ p) := ⟨by
+      ext : 1
+      · simp [i]
+      · simp only [colimit.ι_desc_assoc, span_right,
+          Subcomplex.RelativeMorphism.botEquiv_symm_apply_map, PushoutCocone.mk_pt,
+          PushoutCocone.mk_ι_app, Category.assoc, fac, whiskerRight_fst_assoc,
+          yonedaEquiv_symm_comp, i]
+        conv_lhs => rw [← hu.fac₀, reassoc_of% hy, yonedaEquiv_symm_comp]⟩
+    have := anodyneExtensions.pushout_desc_ι₀_whiskerRight_mono ∂Δ[n].ι p Fibration.mem
+    refine ⟨sq.lift, ?_, ?_, by simp⟩
+    · have := pushout.inl _ _ ≫= sq.fac_left
+      dsimp [i] at this
+      rwa [pushout.inl_desc_assoc, pushout.inl_desc] at this
+    · have := pushout.inr _ _ ≫= sq.fac_left
+      dsimp [i] at this
+      rwa [pushout.inr_desc_assoc, pushout.inr_desc] at this
+  obtain ⟨z, hz⟩ := yonedaEquiv.symm.surjective (ι₁ ≫ Φ)
+  refine ⟨z, ?_⟩
+  have := MinimalFibration.congr_ι₀_comp p Φ
+    (yonedaEquiv.symm z ▷ _ ≫ hu.h) (p.app _ x) (by aesop) (by
+    simp only [Category.assoc, fac, whiskerRight_fst_assoc, yonedaEquiv_symm_comp]
+    congr 1
+    simp only [← yonedaEquiv_symm_comp, hz, Category.assoc, hΦ₃, ι₁_fst_assoc]) (by
+    rw [hz, hΦ₂]
+    rw [← comp_whiskerRight_assoc]
+    rw [← ι₁_comp_assoc, hΦ₂, ι₁_comp_assoc, hu.h₁,
+      Subcomplex.RelativeMorphism.botEquiv_symm_apply_map, Category.comp_id]) (by simp [hz])
   apply yonedaEquiv.symm.injective
-  rw [← yonedaEquiv_symm_comp, Equiv.symm_apply_apply, Category.assoc]
-  -- ???
-  have := MinimalFibration.congr_ι₁_comp p (sq.lift ≫ u)
-    (yonedaEquiv.symm x ▷ _ ≫ hu.h) (p.app _ x) (by
-    rw [Category.assoc, hu.fac₀, sq.fac_right, yonedaEquiv_symm_comp]) (by simp) (by
-    have := pushout.inr _ _ ≫= sq.fac_left
-    simp only [i] at this
-    rw [pushout.inr_desc, pushout.inr_desc_assoc] at this
-    rw [reassoc_of% this, ← comp_whiskerRight_assoc, ← hy]
-    simp
-    sorry) (by
-    have := pushout.inl _ _ ≫= sq.fac_left
-    simp only [i, pushout.inl_desc, pushout.inl_desc_assoc] at this
-    rw [reassoc_of% this, ι₀_comp_assoc, hu.h₀,
-      Subcomplex.RelativeMorphism.botEquiv_symm_apply_map])
-  rw [this]
-  simp
+  simp [← hΦ₁, this]
 
 lemma isIso_of_minimalFibration : IsIso u := by
   rw [NatTrans.isIso_iff_isIso_app]
