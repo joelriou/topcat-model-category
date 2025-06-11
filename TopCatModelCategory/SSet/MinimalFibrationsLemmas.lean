@@ -8,6 +8,41 @@ open CategoryTheory MonoidalCategory Simplicial HomotopicalAlgebra
 
 namespace SSet
 
+namespace stdSimplex
+
+open anodyneExtensions.retractArrowHornCastSuccι in
+noncomputable def deformationRetract :
+    ∀ (n : ℕ), DeformationRetract Δ[0] Δ[n]
+  | 0 =>
+    { toRetract := .refl _
+      h := fst _ _ }
+  | n + 1 =>
+    { i := SSet.const (obj₀Equiv.symm 0)
+      r := SSet.const (obj₀Equiv.symm 0)
+      retract := isTerminalObj₀.hom_ext _ _
+      h := r (n := n) (0)
+      hi := by
+        rw [← cancel_epi (stdSimplex.leftUnitor _).inv]
+        apply yonedaEquiv.injective
+        ext i : 1
+        fin_cases i <;> rfl }
+
+@[simp]
+lemma deformationRetract_i (n : ℕ) :
+    (deformationRetract.{u} n).i = SSet.const (obj₀Equiv.symm 0) := by
+  obtain _ | n := n
+  · apply isTerminalObj₀.hom_ext
+  · rfl
+
+@[simp]
+lemma deformationRetract_r (n : ℕ) :
+    (deformationRetract.{u} n).r = SSet.const (obj₀Equiv.symm 0) := by
+  obtain _ | n := n
+  · apply isTerminalObj₀.hom_ext
+  · rfl
+
+end stdSimplex
+
 namespace MinimalFibration
 
 variable {E B : SSet.{u}} (p : E ⟶ B) [MinimalFibration p]

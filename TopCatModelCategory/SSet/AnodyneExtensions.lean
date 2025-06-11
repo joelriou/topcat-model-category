@@ -547,6 +547,14 @@ lemma range_union_singleton_le
 lemma ι₁_r : ι₁ ≫ r k = 𝟙 _ :=
   yonedaEquiv.injective rfl
 
+variable (n) in
+@[reassoc (attr := simp)]
+lemma ι₀_r_zero : ι₀ ≫ r (0 : Fin (n + 1)) = const (stdSimplex.obj₀Equiv.symm 0) :=
+  yonedaEquiv.injective (by
+    ext i : 1
+    change ρ (0 : Fin (n + 1)) ⟨i, 0⟩ = 0
+    simp [ρ])
+
 lemma preimage_ι_comp_r_eq_top :
     Λ[n + 1, k.castSucc].preimage ((Λ[n + 1, k.castSucc].unionProd Λ[1, 0]).ι ≫ r k) = ⊤ := by
   rw [Subcomplex.preimage_ι_comp_eq_top_iff]
