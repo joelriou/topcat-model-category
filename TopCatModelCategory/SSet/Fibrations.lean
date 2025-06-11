@@ -362,6 +362,21 @@ lemma pullback_snd_app_ihomToPullbackTgt₀Mk :
   apply yonedaEquiv.symm.injective
   simp [← yonedaEquiv_symm_comp, ihomToPullbackTgt₀Mk]
 
+lemma ihomToPullbackTgt₀Mk_surjective (x : pullback ((ihom A).map p) ((pre i).app Y) _⦋0⦌) :
+    ∃ (t : A ⟶ X) (b : B ⟶ Y) (sq : CommSq t i p b),
+      ihomToPullbackTgt₀Mk sq = x := by
+  refine ⟨ihom₀Equiv ((pullback.fst ((ihom A).map p) ((pre i).app Y)).app _ x),
+    ihom₀Equiv ((pullback.snd ((ihom A).map p) ((pre i).app Y)).app _ x), ⟨?_⟩, ?_⟩
+  · apply ihom₀Equiv.symm.injective
+    rw [ihom₀Equiv_symm_comp', Equiv.symm_apply_apply,
+      ihom₀Equiv_symm_comp, Equiv.symm_apply_apply]
+    exact congr_fun (congr_app (pullback.condition
+      (f := (ihom A).map p) (g := (pre i).app Y)) (op ⦋0⦌)) x
+  · simp only [ihomToPullbackTgt₀Mk, Equiv.symm_apply_apply]
+    apply yonedaEquiv.symm.injective
+    simp only [Equiv.symm_apply_apply]
+    ext : 1 <;> simp
+
 noncomputable abbrev ihomToPullbackFiber : ((ihom B).obj X).Subcomplex :=
   Subcomplex.fiber (ihomToPullback i p)
     (ihomToPullbackTgt₀Mk sq)
@@ -505,6 +520,60 @@ lemma exists_path_composition_above_of_fibration'
   have := stdSimplex.{u}.δ_comp_σ_succ (n := 1) (i := 0)
   dsimp at this
   rw [eq₃, reassoc_of% this]
+
+lemma exists_path_composition₀_above_of_fibration
+    (p : X ⟶ Y) [Fibration p] (x₀₁ x₀₂ : Δ[1] ⟶ X)
+    (h : stdSimplex.δ 1 ≫ x₀₁ = stdSimplex.δ 1 ≫ x₀₂)
+    (s : Δ[2] ⟶ Y)
+    (hs₀₁ : stdSimplex.δ 2 ≫ s = x₀₁ ≫ p)
+    (hs₀₂ : stdSimplex.δ 1 ≫ s = x₀₂ ≫ p) :
+    ∃ (x₁₂ : Δ[1] ⟶ X),
+      stdSimplex.δ 1 ≫ x₁₂ =
+        stdSimplex.δ 0 ≫ x₀₁ ∧
+      stdSimplex.δ 0 ≫ x₁₂ =
+        stdSimplex.δ 0 ≫ x₀₂ ∧
+        x₁₂ ≫ p = stdSimplex.δ 0 ≫ s := by
+  obtain ⟨t, ht₁, ht₂⟩ := horn₂₀.isPushout.exists_desc x₀₁ x₀₂ h
+  have sq : CommSq t (horn 2 0).ι p s := ⟨by
+    apply horn₂₀.isPushout.hom_ext
+    · simp [reassoc_of% ht₁, ← hs₀₁]
+    · simp [reassoc_of% ht₂, ← hs₀₂]⟩
+  refine ⟨stdSimplex.δ 0 ≫ sq.lift, ?_, ?_, ?_⟩
+  · rw [← ht₁]
+    conv_rhs => rw [← sq.fac_left]
+    rw [horn.ι_ι_assoc]
+    symm
+    apply stdSimplex.δ_comp_δ_assoc (n := 0) (i := 0) (j := 1) (by simp)
+  · rw [← ht₂]
+    conv_rhs => rw [← sq.fac_left]
+    rw [horn.ι_ι_assoc]
+    symm
+    apply stdSimplex.δ_comp_δ_self_assoc (n := 0) (i := 0)
+  · rw [Category.assoc, sq.fac_right]
+
+lemma exists_path_composition₀_above_of_fibration'
+    (p : X ⟶ Y) [Fibration p] (x₀₁ x₀₂ : Δ[1] ⟶ X)
+    (h : stdSimplex.δ 1 ≫ x₀₁ = stdSimplex.δ 1 ≫ x₀₂)
+    (hx : x₀₁ ≫ p = x₀₂ ≫ p) :
+    ∃ (x₁₂ : Δ[1] ⟶ X) (b : Y _⦋0⦌),
+      stdSimplex.δ 1 ≫ x₁₂ = stdSimplex.δ 0 ≫ x₀₁ ∧
+      stdSimplex.δ 0 ≫ x₁₂ = stdSimplex.δ 0 ≫ x₀₂ ∧
+        x₁₂ ≫ p = const b := by
+  obtain ⟨x₁₂, eq₁, eq₂, eq₃⟩ :=
+    exists_path_composition₀_above_of_fibration p x₀₁ x₀₂ h
+      (stdSimplex.σ 1 ≫ x₀₁ ≫ p) (stdSimplex.δ_comp_σ_succ_assoc (n := 1) (i := 1) _) (by
+        rw [hx]
+        exact stdSimplex.δ_comp_σ_self_assoc (n := 1) (i := 1) _)
+  refine ⟨x₁₂, yonedaEquiv (stdSimplex.δ 0 ≫ x₀₁ ≫ p), eq₁, eq₂, ?_⟩
+  have := stdSimplex.{u}.δ_comp_σ_of_le (n := 0) (i := 0) (j := 0) (by simp)
+  dsimp at this
+  rw [eq₃, reassoc_of% this]
+  have : stdSimplex.{u}.σ (0 : Fin 1) = const (yonedaEquiv (𝟙 _)) := by
+    apply yonedaEquiv.injective
+    ext i
+    fin_cases i <;> rfl
+  simp [this]
+  rfl
 
 lemma homotopy_extension_property₁ {E K L : SSet.{u}} (i : K ⟶ L) (p : E ⟶ B) [Fibration p]
     [Mono i]
