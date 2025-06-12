@@ -109,5 +109,6 @@ import TopCatModelCategory.TopCat.ToTopFibration
 import TopCatModelCategory.TopCat.W
 import TopCatModelCategory.TopCatIsColimit
 import TopCatModelCategory.TopPackage
+import TopCatModelCategory.TrivialBundle
 import TopCatModelCategory.ULift
 import TopCatModelCategory.WellOrderContinuous

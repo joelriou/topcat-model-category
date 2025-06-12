@@ -1,5 +1,6 @@
 import TopCatModelCategory.SSet.MinimalFibrations
 import TopCatModelCategory.SSet.FiberwiseHomotopy
+import TopCatModelCategory.TrivialBundle
 
 universe u
 
@@ -261,6 +262,29 @@ lemma isIso_of_fiberwiseHomotopyEquiv {E E' B : SSet.{u}} (p : E ⟶ B) (p' : E'
   have := mono_of_mono u v
   have := epi_of_epi v u
   exact isIso_of_mono_of_epi u
+
+lemma congr_pullback_of_homotopy
+    {E A B E₀ E₁ : SSet.{u}} (p : E ⟶ B) [MinimalFibration p]
+    {f₀ f₁ : A ⟶ B} (h : Homotopy f₀ f₁)
+    {p₀ : E₀ ⟶ A} {g₀ : E₀ ⟶ E} (sq₀ : IsPullback g₀ p₀ p f₀)
+    {p₁ : E₁ ⟶ A} {g₁ : E₁ ⟶ E} (sq₁ : IsPullback g₁ p₁ p f₁) :
+    ∃ (e : E₀ ≅ E₁), e.hom ≫ p₁ = p₀ := sorry
+
+open MorphismProperty in
+lemma isTrivialBundle_of_stdSimplex
+    {E : SSet.{u}} {n : ℕ} (p : E ⟶ Δ[n]) [MinimalFibration p] :
+    trivialBundles p := by
+  let f := (stdSimplex.deformationRetract.{u} n).r ≫
+    (stdSimplex.deformationRetract n).i
+  have fac : stdSimplex.isTerminalObj₀.from _ ≫
+      SSet.const (stdSimplex.obj₀Equiv.symm 0) = f := by
+    simp [f]
+  obtain ⟨e, he⟩ := congr_pullback_of_homotopy p
+    (stdSimplex.deformationRetract n).homotopy
+    (IsPullback.of_hasPullback p f) (IsPullback.id_horiz p)
+  exact (MorphismProperty.arrow_mk_iso_iff _ (Arrow.isoMk e (Iso.refl _))).1
+    (trivialBundles.of_isPullback_of_fac (IsPullback.of_hasPullback p f)
+      stdSimplex.isTerminalObj₀ _ _ fac)
 
 end MinimalFibration
 

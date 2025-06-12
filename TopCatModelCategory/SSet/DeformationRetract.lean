@@ -1,4 +1,5 @@
 import TopCatModelCategory.SSet.Monoidal
+import TopCatModelCategory.SSet.Homotopy
 import Mathlib.CategoryTheory.Retract
 
 universe u
@@ -25,6 +26,10 @@ variable {X Y} (d : DeformationRetract X Y)
 @[reassoc (attr := simp)]
 lemma i_ι₀ : d.i ≫ ι₀ ≫ d.h = d.i := by
   simpa only [ι₀_comp_assoc, lift_fst_assoc, id_comp] using ι₀ ≫= d.hi
+
+@[simps]
+def homotopy : Homotopy (d.r ≫ d.i) (𝟙 Y) where
+  h := d.h
 
 end DeformationRetract
 

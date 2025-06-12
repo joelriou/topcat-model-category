@@ -179,4 +179,11 @@ lemma map_coproducts_le (W : MorphismProperty C) (F : C ⥤ D)
   intro _ _ _ hf
   exact W.map_coproducts hf F
 
+instance {ι : Type*} (W : ι → MorphismProperty C) [∀ i, (W i).IsStableUnderBaseChange] :
+    (⨆ i, W i).IsStableUnderBaseChange where
+  of_isPullback sq h := by
+    simp only [iSup_iff] at h ⊢
+    obtain ⟨_, h⟩ := h
+    exact ⟨_, of_isPullback sq h⟩
+
 end CategoryTheory.MorphismProperty
