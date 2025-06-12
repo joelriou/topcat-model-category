@@ -298,14 +298,11 @@ lemma isIso_of_fiberwiseHomotopyEquiv {E E' B : SSet.{u}} (p : E ⟶ B) (p' : E'
   have := epi_of_epi v u
   exact isIso_of_mono_of_epi u
 
-lemma constant_of_prod_stdSimplex {E' B : SSet.{u}} (p' : E' ⟶ B ⊗ Δ[1])
-    [MinimalFibration p'] :
-    ∃ (E : SSet.{u}) (p : E ⟶ B) (e : E ⊗ Δ[1] ≅ E'), e.hom ≫ p' = p ▷ Δ[1] := by
-  let E := pullback p' ι₀
-  let p : E ⟶ B := pullback.snd _ _
-  have hp : MinimalFibration (p ▷ Δ[1]) := sorry
-  let u : E ⊗ Δ[1] ⟶ E' := sorry
-  let v : E' ⟶ E ⊗ Δ[1] := sorry
+lemma congr_pullback_stdSimplex {E B : SSet.{u}} (p : E ⟶ B ⊗ Δ[1])
+    [MinimalFibration p]
+    {E₀ : SSet.{u}} {i₀ : E₀ ⟶ E} {p₀ : E₀ ⟶ B} (sq₀ : IsPullback i₀ p₀ p ι₀)
+    {E₁ : SSet.{u}} {i₁ : E₁ ⟶ E} {p₁ : E₁ ⟶ B} (sq₁ : IsPullback i₁ p₁ p ι₁) :
+    ∃ (e : E₀ ≅ E₁), e.hom ≫ p₁ = p₀ := by
   sorry
 
 lemma congr_pullback_of_homotopy
@@ -314,23 +311,11 @@ lemma congr_pullback_of_homotopy
     {p₀ : E₀ ⟶ A} {g₀ : E₀ ⟶ E} (sq₀ : IsPullback g₀ p₀ p f₀)
     {p₁ : E₁ ⟶ A} {g₁ : E₁ ⟶ E} (sq₁ : IsPullback g₁ p₁ p f₁) :
     ∃ (e : E₀ ≅ E₁), e.hom ≫ p₁ = p₀ := by
-  let E' := pullback p h.h
-  obtain ⟨F, π, e, fac⟩ := constant_of_prod_stdSimplex (pullback.snd p h.h)
-  have sq' : IsPullback (e.hom ≫ pullback.fst _ _) (π ▷ Δ[1]) p h.h :=
-    IsPullback.of_iso (IsPullback.of_hasPullback p h.h) e.symm
-      (Iso.refl _) (Iso.refl _) (Iso.refl _)
-      (by simp) (by simp [← fac]) (by simp) (by simp)
-  have sq₀' : IsPullback (ι₀ ≫ e.hom ≫ pullback.fst _ _) π p f₀ := by
-    simpa using IsPullback.paste_horiz (stdSimplex.isPullback_ι₀_whiskerRight π) sq'
-  have sq₁' : IsPullback (ι₁ ≫ e.hom ≫ pullback.fst _ _) π p f₁ := by
-    simpa using IsPullback.paste_horiz (stdSimplex.isPullback_ι₁_whiskerRight π) sq'
-  obtain ⟨e₀, fac₀⟩ : ∃ (e₀ : F ≅ E₀), e₀.hom ≫ p₀ = π :=
-    ⟨_, IsLimit.conePointUniqueUpToIso_hom_comp sq₀'.isLimit sq₀.isLimit .right⟩
-  obtain ⟨e₁, fac₁⟩ : ∃ (e₁ : F ≅ E₁), e₁.hom ≫ p₁ = π :=
-    ⟨_, IsLimit.conePointUniqueUpToIso_hom_comp sq₁'.isLimit sq₁.isLimit .right⟩
-  refine ⟨e₀.symm ≪≫ e₁, ?_⟩
-  dsimp
-  rw [Category.assoc, fac₁, ← fac₀, e₀.inv_hom_id_assoc]
+  refine congr_pullback_stdSimplex (p := pullback.snd p h.h)
+    (i₀ := pullback.lift g₀ (p₀ ≫ ι₀) (by simp [sq₀.w])) ?_
+    (i₁ := pullback.lift g₁ (p₁ ≫ ι₁) (by simp [sq₁.w])) ?_
+  all_goals
+  · exact IsPullback.of_right (by simpa) (by simp) (IsPullback.of_hasPullback p h.h)
 
 open MorphismProperty in
 lemma isTrivialBundle_of_stdSimplex
