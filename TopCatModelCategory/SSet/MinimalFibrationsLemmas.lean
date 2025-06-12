@@ -11,6 +11,41 @@ namespace SSet
 
 namespace stdSimplex
 
+lemma isPullback_whiskerLeft_snd (X : SSet.{u}) {A B : SSet.{u}} (i : A ⟶ B) :
+    IsPullback (X ◁ i) (snd _ _) (snd _ _) i where
+  w := by simp
+  isLimit' :=
+    ⟨PullbackCone.IsLimit.mk _
+      (fun s ↦ lift (s.fst ≫ fst _ _) s.snd)
+      (fun s ↦ by ext : 1 <;> simp [s.condition])
+      (fun s ↦ by simp)
+      (fun s m hm₁ hm₂ ↦ by
+        ext : 1
+        · simp [← hm₁]
+        · simp [← hm₂])⟩
+
+lemma isPullback_ι₀ (X : SSet.{u}) :
+    IsPullback ι₀ (isTerminalObj₀.from X) (snd X Δ[1]) (stdSimplex.δ 1) :=
+  (isPullback_whiskerLeft_snd X (stdSimplex.δ (1 : Fin 2))).of_iso
+    (rightUnitor _) (Iso.refl _) (Iso.refl _) (Iso.refl _) (by simp)
+      (isTerminalObj₀.hom_ext _ _) (by simp) (by simp)
+
+lemma isPullback_ι₁ (X : SSet.{u}) :
+    IsPullback ι₁ (isTerminalObj₀.from X) (snd X Δ[1]) (stdSimplex.δ 0) :=
+  (isPullback_whiskerLeft_snd X (stdSimplex.δ (0 : Fin 2))).of_iso
+    (rightUnitor _) (Iso.refl _) (Iso.refl _) (Iso.refl _) (by simp)
+      (isTerminalObj₀.hom_ext _ _) (by simp) (by simp)
+
+lemma isPullback_ι₀_whiskerRight {X Y : SSet.{u}} (p : X ⟶ Y) :
+    IsPullback ι₀ p (p ▷ Δ[1]) ι₀ :=
+  IsPullback.of_bot  (by simpa using isPullback_ι₀ X)
+    (by simp) (isPullback_ι₀ Y)
+
+lemma isPullback_ι₁_whiskerRight {X Y : SSet.{u}} (p : X ⟶ Y) :
+    IsPullback ι₁ p (p ▷ Δ[1]) ι₁ :=
+  IsPullback.of_bot  (by simpa using isPullback_ι₁ X)
+    (by simp) (isPullback_ι₁ Y)
+
 open anodyneExtensions.retractArrowHornCastSuccι in
 noncomputable def deformationRetract :
     ∀ (n : ℕ), DeformationRetract Δ[0] Δ[n]
@@ -263,12 +298,39 @@ lemma isIso_of_fiberwiseHomotopyEquiv {E E' B : SSet.{u}} (p : E ⟶ B) (p' : E'
   have := epi_of_epi v u
   exact isIso_of_mono_of_epi u
 
+lemma constant_of_prod_stdSimplex {E' B : SSet.{u}} (p' : E' ⟶ B ⊗ Δ[1])
+    [MinimalFibration p'] :
+    ∃ (E : SSet.{u}) (p : E ⟶ B) (e : E ⊗ Δ[1] ≅ E'), e.hom ≫ p' = p ▷ Δ[1] := by
+  let E := pullback p' ι₀
+  let p : E ⟶ B := pullback.snd _ _
+  have hp : MinimalFibration (p ▷ Δ[1]) := sorry
+  let u : E ⊗ Δ[1] ⟶ E' := sorry
+  let v : E' ⟶ E ⊗ Δ[1] := sorry
+  sorry
+
 lemma congr_pullback_of_homotopy
     {E A B E₀ E₁ : SSet.{u}} (p : E ⟶ B) [MinimalFibration p]
     {f₀ f₁ : A ⟶ B} (h : Homotopy f₀ f₁)
     {p₀ : E₀ ⟶ A} {g₀ : E₀ ⟶ E} (sq₀ : IsPullback g₀ p₀ p f₀)
     {p₁ : E₁ ⟶ A} {g₁ : E₁ ⟶ E} (sq₁ : IsPullback g₁ p₁ p f₁) :
-    ∃ (e : E₀ ≅ E₁), e.hom ≫ p₁ = p₀ := sorry
+    ∃ (e : E₀ ≅ E₁), e.hom ≫ p₁ = p₀ := by
+  let E' := pullback p h.h
+  obtain ⟨F, π, e, fac⟩ := constant_of_prod_stdSimplex (pullback.snd p h.h)
+  have sq' : IsPullback (e.hom ≫ pullback.fst _ _) (π ▷ Δ[1]) p h.h :=
+    IsPullback.of_iso (IsPullback.of_hasPullback p h.h) e.symm
+      (Iso.refl _) (Iso.refl _) (Iso.refl _)
+      (by simp) (by simp [← fac]) (by simp) (by simp)
+  have sq₀' : IsPullback (ι₀ ≫ e.hom ≫ pullback.fst _ _) π p f₀ := by
+    simpa using IsPullback.paste_horiz (stdSimplex.isPullback_ι₀_whiskerRight π) sq'
+  have sq₁' : IsPullback (ι₁ ≫ e.hom ≫ pullback.fst _ _) π p f₁ := by
+    simpa using IsPullback.paste_horiz (stdSimplex.isPullback_ι₁_whiskerRight π) sq'
+  obtain ⟨e₀, fac₀⟩ : ∃ (e₀ : F ≅ E₀), e₀.hom ≫ p₀ = π :=
+    ⟨_, IsLimit.conePointUniqueUpToIso_hom_comp sq₀'.isLimit sq₀.isLimit .right⟩
+  obtain ⟨e₁, fac₁⟩ : ∃ (e₁ : F ≅ E₁), e₁.hom ≫ p₁ = π :=
+    ⟨_, IsLimit.conePointUniqueUpToIso_hom_comp sq₁'.isLimit sq₁.isLimit .right⟩
+  refine ⟨e₀.symm ≪≫ e₁, ?_⟩
+  dsimp
+  rw [Category.assoc, fac₁, ← fac₀, e₀.inv_hom_id_assoc]
 
 open MorphismProperty in
 lemma isTrivialBundle_of_stdSimplex

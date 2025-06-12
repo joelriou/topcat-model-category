@@ -291,6 +291,16 @@ instance : minimalFibrations.{u}.IsStableUnderBaseChange where
     · apply yonedaEquiv.symm.injective
       simp [← yonedaEquiv_symm_comp, hxy.hπ']
 
+instance {E B A : SSet.{u}} (p : E ⟶ B) [hp : MinimalFibration p] (f : A ⟶ B) :
+    MinimalFibration (pullback.snd p f) := by
+  rw [← minimalFibrations_iff] at hp ⊢
+  exact MorphismProperty.of_isPullback (IsPullback.of_hasPullback p f) hp
+
+instance {E B A : SSet.{u}} (p : E ⟶ B) [hp : MinimalFibration p] (f : A ⟶ B) :
+    MinimalFibration (pullback.fst f p) := by
+  rw [← minimalFibrations_iff] at hp ⊢
+  exact MorphismProperty.of_isPullback (IsPullback.of_hasPullback f p).flip hp
+
 namespace MinimalFibration
 
 structure Selection where
