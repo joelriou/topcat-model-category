@@ -118,6 +118,16 @@ lemma deformationRetract_r (n : ℕ) :
   · apply isTerminalObj₀.hom_ext
   · rfl
 
+noncomputable def homotopyIdConstLast (n : ℕ) :
+    Homotopy.{u} (𝟙 Δ[n]) (SSet.const (obj₀Equiv.symm (Fin.last _))) := sorry
+
+@[reassoc (attr := simp)]
+lemma yonedaEquiv_symm_whiskerRight_comp_homotopyIdConstLast_h (n : ℕ) :
+    yonedaEquiv.symm (obj₀Equiv.symm (Fin.last n)) ▷ _ ≫
+      (homotopyIdConstLast.{u} n).h =
+      (SSet.const (obj₀Equiv.symm (Fin.last _))) := by
+  sorry
+
 end stdSimplex
 
 namespace MinimalFibration
