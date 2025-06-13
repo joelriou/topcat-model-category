@@ -39,4 +39,15 @@ noncomputable def isColimitBinaryCofan (sq : IsPushout f g inl inr) (hZ : IsInit
 
 end IsPushout
 
+namespace IsPullback
+
+variable {P X Y Z : C} {t : P ⟶ X} {l : P ⟶ Y} {r : X ⟶ Z} {b : Y ⟶ Z}
+
+lemma exists_lift (sq : IsPullback t l r b)
+    {W : C} (h : W ⟶ X) (k : W ⟶ Y) (w : h ≫ r = k ≫ b) :
+    ∃ (d : W ⟶ P), d ≫ t = h ∧ d ≫ l = k :=
+  ⟨sq.lift h k w, by simp, by simp⟩
+
+end IsPullback
+
 end CategoryTheory

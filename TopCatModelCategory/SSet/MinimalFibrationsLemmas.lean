@@ -1,6 +1,7 @@
 import TopCatModelCategory.SSet.MinimalFibrations
 import TopCatModelCategory.SSet.FiberwiseHomotopy
 import TopCatModelCategory.TrivialBundle
+import TopCatModelCategory.CommSq
 
 universe u
 
@@ -8,6 +9,46 @@ open CategoryTheory MonoidalCategory Simplicial HomotopicalAlgebra
   SSet.modelCategoryQuillen ChosenFiniteProducts Limits MonoidalClosed
 
 namespace SSet
+
+lemma exists_retraction_of_homotopy_of_fibration {E A B : SSet.{u}} (p : E ⟶ B)
+    [Fibration p] (j : A ⟶ B) (r : B ⟶ A) (retract : j ≫ r = 𝟙 A)
+    (h : Homotopy (𝟙 B) (r ≫ j)) (hj : j ▷ _ ≫ h.h = fst _ _ ≫ j)
+    {E' : SSet.{u}} {i : E' ⟶ E} {p' : E' ⟶ A} (sq : IsPullback i p' p j) :
+    ∃ (r' : E ⟶ E') (_ : i ≫ r' = 𝟙 E') (h' : Homotopy (𝟙 E) (r' ≫ i)),
+      h'.h ≫ p = p ▷ _ ≫ h.h ∧ i ▷ _ ≫ h'.h = fst _ _ ≫ i := by
+  have : Mono i :=
+    MorphismProperty.of_isPullback (P := .monomorphisms _) sq.flip
+      (mono_of_mono_fac retract)
+  obtain ⟨φ, hφ₁, hφ₂, hφ₃⟩ :=
+    homotopy_extension_property₀ i p (fst _ _ ≫ i) (𝟙 E) (by simp)
+      (p ▷ _ ≫ h.h) (by simp) (by
+        rw [← comp_whiskerRight_assoc, sq.w, comp_whiskerRight_assoc, hj,
+          whiskerRight_fst_assoc, Category.assoc, sq.w])
+  obtain ⟨l, hl₁, hl₂⟩ := sq.exists_desc (ι₁ ≫ φ) (p ≫ r) (by
+    rw [Category.assoc, hφ₃, ι₁_comp_assoc, h.h₁, Category.assoc])
+  refine ⟨l, ?_, { h := φ }, hφ₃, by simpa⟩
+  · rw [← cancel_mono i, Category.assoc, hl₁, ← ι₁_comp_assoc, hφ₂,
+      ι₁_fst_assoc, Category.id_comp]
+
+lemma exists_retraction_of_homotopy_of_fibration' {E A B : SSet.{u}} (p : E ⟶ B)
+    [Fibration p] (j : A ⟶ B) (r : B ⟶ A) (retract : j ≫ r = 𝟙 A)
+    (h : Homotopy (r ≫ j) (𝟙 B)) (hj : j ▷ _ ≫ h.h = fst _ _ ≫ j)
+    {E' : SSet.{u}} {i : E' ⟶ E} {p' : E' ⟶ A} (sq : IsPullback i p' p j) :
+    ∃ (r' : E ⟶ E') (_ : i ≫ r' = 𝟙 E') (h' : Homotopy (r' ≫ i) (𝟙 E)),
+      h'.h ≫ p = p ▷ _ ≫ h.h ∧ i ▷ _ ≫ h'.h = fst _ _ ≫ i := by
+  have : Mono i :=
+    MorphismProperty.of_isPullback (P := .monomorphisms _) sq.flip
+      (mono_of_mono_fac retract)
+  obtain ⟨φ, hφ₁, hφ₂, hφ₃⟩ :=
+    homotopy_extension_property₁ i p (fst _ _ ≫ i) (𝟙 E) (by simp)
+      (p ▷ _ ≫ h.h) (by simp) (by
+        rw [← comp_whiskerRight_assoc, sq.w, comp_whiskerRight_assoc, hj,
+          whiskerRight_fst_assoc, Category.assoc, sq.w])
+  obtain ⟨l, hl₁, hl₂⟩ := sq.exists_desc (ι₀ ≫ φ) (p ≫ r) (by
+    rw [Category.assoc, hφ₃, ι₀_comp_assoc, h.h₀, Category.assoc])
+  refine ⟨l, ?_, { h := φ }, hφ₃, by simpa⟩
+  · rw [← cancel_mono i, Category.assoc, hl₁, ← ι₀_comp_assoc, hφ₂,
+      ι₀_fst_assoc, Category.id_comp]
 
 namespace stdSimplex
 
