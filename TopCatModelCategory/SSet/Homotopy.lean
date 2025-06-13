@@ -142,7 +142,11 @@ def Homotopy (f g : X ⟶ Y) := (Subcomplex.RelativeMorphism.botEquiv.symm f).Ho
 
 namespace Homotopy
 
-variable {f g : X ⟶ Y} (h : Homotopy f g)
+variable {f g : X ⟶ Y}
+
+section
+
+variable (h : Homotopy f g)
 
 @[reassoc (attr := simp)]
 lemma h₀ : ι₀ ≫ h.h = f :=
@@ -152,12 +156,31 @@ lemma h₀ : ι₀ ≫ h.h = f :=
 lemma h₁ : ι₁ ≫ h.h = g :=
   Subcomplex.RelativeMorphism.Homotopy.h₁ h
 
-@[simps]
+end
+
+@[simps h]
 def mk (h : X ⊗ Δ[1] ⟶ Y) (h₀ : ι₀ ≫ h = f) (h₁ : ι₁ ≫ h = g) : Homotopy f g where
   h := h
   rel := by
     ext _ ⟨⟨_, hx⟩, _⟩
     simp at hx
+
+@[simps! h]
+def congr (h : Homotopy f g) {f' g' : X ⟶ Y} (hf : f = f') (hg : g = g') :
+    Homotopy f' g' :=
+  mk h.h (by aesop) (by aesop)
+
+@[simps! h]
+noncomputable def whiskerRight (h : Homotopy f g) (Z : SSet.{u}) :
+    Homotopy (f ▷ Z) (g ▷ Z) :=
+  mk ((α_ _ _ _).hom ≫ X ◁ (β_ _ _).hom ≫ (α_ _ _ _).inv ≫ h.h ▷ Z)
+    (by simp only [← h.h₀]; rfl) (by simp only [← h.h₁]; rfl)
+
+@[simps! h]
+noncomputable def whiskerLeft (h : Homotopy f g) (Z : SSet.{u}) :
+    Homotopy (Z ◁ f) (Z ◁ g) :=
+  mk ((α_ _ _ _).hom ≫ Z ◁ h.h)
+    (by simp only [← h.h₀]; rfl) (by simp only [← h.h₁]; rfl)
 
 end Homotopy
 

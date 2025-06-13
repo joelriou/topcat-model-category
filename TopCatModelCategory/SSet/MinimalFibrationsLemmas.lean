@@ -121,11 +121,9 @@ lemma deformationRetract_r (n : ℕ) :
 noncomputable def homotopyIdConstLast (n : ℕ) :
     Homotopy.{u} (𝟙 Δ[n]) (SSet.const (obj₀Equiv.symm (Fin.last _))) := sorry
 
-@[reassoc (attr := simp)]
-lemma yonedaEquiv_symm_whiskerRight_comp_homotopyIdConstLast_h (n : ℕ) :
-    yonedaEquiv.symm (obj₀Equiv.symm (Fin.last n)) ▷ _ ≫
-      (homotopyIdConstLast.{u} n).h =
-      (SSet.const (obj₀Equiv.symm (Fin.last _))) := by
+@[reassoc]
+lemma δ_one_whiskerRight_homotopyIdConstLast_h :
+    stdSimplex.δ 1 ▷ _ ≫ (homotopyIdConstLast.{u} 1).h = SSet.const (obj₀Equiv.symm 1) := by
   sorry
 
 end stdSimplex
@@ -349,12 +347,52 @@ lemma isIso_of_fiberwiseHomotopyEquiv {E E' B : SSet.{u}} (p : E ⟶ B) (p' : E'
   have := epi_of_epi v u
   exact isIso_of_mono_of_epi u
 
-lemma congr_pullback_stdSimplex {E B : SSet.{u}} (p : E ⟶ B ⊗ Δ[1])
+lemma congr_pullback_stdSimplex_one {E B : SSet.{u}} (p : E ⟶ B ⊗ Δ[1])
     [MinimalFibration p]
-    {E₀ : SSet.{u}} {i₀ : E₀ ⟶ E} {p₀ : E₀ ⟶ B} (sq₀ : IsPullback i₀ p₀ p ι₀)
-    {E₁ : SSet.{u}} {i₁ : E₁ ⟶ E} {p₁ : E₁ ⟶ B} (sq₁ : IsPullback i₁ p₁ p ι₁) :
+    {E₀ : SSet.{u}} {j₀ : E₀ ⟶ E} {p₀ : E₀ ⟶ B} (sq₀ : IsPullback j₀ p₀ p ι₀)
+    {E₁ : SSet.{u}} {j₁ : E₁ ⟶ E} {p₁ : E₁ ⟶ B} (sq₁ : IsPullback j₁ p₁ p ι₁) :
     ∃ (e : E₀ ≅ E₁), e.hom ≫ p₁ = p₀ := by
-  sorry
+  have : MinimalFibration p₀ :=
+    MorphismProperty.of_isPullback (P := minimalFibrations) sq₀ (by assumption)
+  have : MinimalFibration p₁ :=
+    MorphismProperty.of_isPullback (P := minimalFibrations) sq₁ (by assumption)
+  obtain ⟨r₀, hr₀, k₀, h₁, h₂⟩ :=
+    exists_retraction_of_homotopy_of_fibration' p ι₀ (fst _ _) (by simp)
+      ((stdSimplex.deformationRetract 1).homotopy.whiskerLeft B) (by
+        dsimp
+        sorry) sq₀
+  obtain ⟨r₁, hr₁, k₁, h₃, h₄⟩ :=
+    exists_retraction_of_homotopy_of_fibration p ι₁ (fst _ _) (by simp)
+      ((stdSimplex.homotopyIdConstLast.{u} 1).whiskerLeft B) sorry sq₁
+  have : IsIso (j₀ ≫ r₁) :=
+    isIso_of_fiberwiseHomotopyEquiv p₀ p₁ (j₀ ≫ r₁) (j₁ ≫ r₀)
+      (FiberwiseHomotopy.symm
+        { h := j₀ ▷ _ ≫ k₁.h ≫ r₀
+          fac := by
+            dsimp
+            rw [← cancel_mono ι₀, Category.assoc, Category.assoc, Category.assoc,
+              Category.assoc]
+            rw [← sq₀.w]
+            sorry
+          }) (by
+      sorry)
+  refine ⟨asIso (j₀ ≫ r₁), ?_⟩
+  dsimp
+  rw [← cancel_mono ι₁, Category.assoc, Category.assoc, ← sq₁.w, ← reassoc_of% k₁.h₁,
+    h₃, ι₁_comp_assoc, sq₀.w_assoc]
+  dsimp
+  congr 1
+  rw [← cancel_epi (stdSimplex.rightUnitor _).hom,
+    stdSimplex.rightUnitor_hom_ι₀_assoc, stdSimplex.rightUnitor_hom_ι₁,
+    ← ι₁_comp_assoc, associator_naturality_middle_assoc,
+    ← MonoidalCategory.whiskerLeft_comp,
+    stdSimplex.δ_one_whiskerRight_homotopyIdConstLast_h]
+  change B ◁ (SSet.const (stdSimplex.obj₀Equiv.symm (1 : Fin 2))) = _
+  congr 1
+  apply yonedaEquiv.injective
+  ext i : 1
+  fin_cases i
+  rfl
 
 lemma congr_pullback_of_homotopy
     {E A B E₀ E₁ : SSet.{u}} (p : E ⟶ B) [MinimalFibration p]
@@ -362,9 +400,9 @@ lemma congr_pullback_of_homotopy
     {p₀ : E₀ ⟶ A} {g₀ : E₀ ⟶ E} (sq₀ : IsPullback g₀ p₀ p f₀)
     {p₁ : E₁ ⟶ A} {g₁ : E₁ ⟶ E} (sq₁ : IsPullback g₁ p₁ p f₁) :
     ∃ (e : E₀ ≅ E₁), e.hom ≫ p₁ = p₀ := by
-  refine congr_pullback_stdSimplex (p := pullback.snd p h.h)
-    (i₀ := pullback.lift g₀ (p₀ ≫ ι₀) (by simp [sq₀.w])) ?_
-    (i₁ := pullback.lift g₁ (p₁ ≫ ι₁) (by simp [sq₁.w])) ?_
+  refine congr_pullback_stdSimplex_one (p := pullback.snd p h.h)
+    (j₀ := pullback.lift g₀ (p₀ ≫ ι₀) (by simp [sq₀.w])) ?_
+    (j₁ := pullback.lift g₁ (p₁ ≫ ι₁) (by simp [sq₁.w])) ?_
   all_goals
   · exact IsPullback.of_right (by simpa) (by simp) (IsPullback.of_hasPullback p h.h)
 

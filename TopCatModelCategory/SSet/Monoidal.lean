@@ -57,6 +57,12 @@ lemma ι₁_comp {X Y : SSet.{u}} (f : X ⟶ Y) :
 @[simp]
 lemma ι₁_app_fst {X : SSet.{u}} {m} (x : X.obj m) : (ι₁.app _ x).1 = x := rfl
 
+instance {X : SSet.{u}} : IsSplitMono (ι₀ : X ⟶ _) :=
+  ⟨⟨{ retraction := fst _ _ }⟩⟩
+
+instance {X : SSet.{u}} : IsSplitMono (ι₁ : X ⟶ _) :=
+  ⟨⟨{ retraction := fst _ _ }⟩⟩
+
 end
 
 namespace stdSimplex
