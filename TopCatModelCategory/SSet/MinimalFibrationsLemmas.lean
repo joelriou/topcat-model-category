@@ -15,7 +15,7 @@ lemma exists_retraction_of_homotopy_of_fibration {E A B : SSet.{u}} (p : E ⟶ B
     (h : Homotopy (𝟙 B) (r ≫ j)) (hj : j ▷ _ ≫ h.h = fst _ _ ≫ j)
     {E' : SSet.{u}} {i : E' ⟶ E} {p' : E' ⟶ A} (sq : IsPullback i p' p j) :
     ∃ (r' : E ⟶ E') (_ : i ≫ r' = 𝟙 E') (h' : Homotopy (𝟙 E) (r' ≫ i)),
-      h'.h ≫ p = p ▷ _ ≫ h.h ∧ i ▷ _ ≫ h'.h = fst _ _ ≫ i := by
+      h'.h ≫ p = p ▷ _ ≫ h.h ∧ i ▷ _ ≫ h'.h = fst _ _ ≫ i ∧ r' ≫ p' = p ≫ r := by
   have : Mono i :=
     MorphismProperty.of_isPullback (P := .monomorphisms _) sq.flip
       (mono_of_mono_fac retract)
@@ -26,7 +26,7 @@ lemma exists_retraction_of_homotopy_of_fibration {E A B : SSet.{u}} (p : E ⟶ B
           whiskerRight_fst_assoc, Category.assoc, sq.w])
   obtain ⟨l, hl₁, hl₂⟩ := sq.exists_lift (ι₁ ≫ φ) (p ≫ r) (by
     rw [Category.assoc, hφ₃, ι₁_comp_assoc, h.h₁, Category.assoc])
-  refine ⟨l, ?_, { h := φ }, hφ₃, by simpa⟩
+  refine ⟨l, ?_, { h := φ }, hφ₃, by simpa, hl₂⟩
   · rw [← cancel_mono i, Category.assoc, hl₁, ← ι₁_comp_assoc, hφ₂,
       ι₁_fst_assoc, Category.id_comp]
 
@@ -35,7 +35,7 @@ lemma exists_retraction_of_homotopy_of_fibration' {E A B : SSet.{u}} (p : E ⟶ 
     (h : Homotopy (r ≫ j) (𝟙 B)) (hj : j ▷ _ ≫ h.h = fst _ _ ≫ j)
     {E' : SSet.{u}} {i : E' ⟶ E} {p' : E' ⟶ A} (sq : IsPullback i p' p j) :
     ∃ (r' : E ⟶ E') (_ : i ≫ r' = 𝟙 E') (h' : Homotopy (r' ≫ i) (𝟙 E)),
-      h'.h ≫ p = p ▷ _ ≫ h.h ∧ i ▷ _ ≫ h'.h = fst _ _ ≫ i := by
+      h'.h ≫ p = p ▷ _ ≫ h.h ∧ i ▷ _ ≫ h'.h = fst _ _ ≫ i ∧ r' ≫ p' = p ≫ r := by
   have : Mono i :=
     MorphismProperty.of_isPullback (P := .monomorphisms _) sq.flip
       (mono_of_mono_fac retract)
@@ -46,7 +46,7 @@ lemma exists_retraction_of_homotopy_of_fibration' {E A B : SSet.{u}} (p : E ⟶ 
           whiskerRight_fst_assoc, Category.assoc, sq.w])
   obtain ⟨l, hl₁, hl₂⟩ := sq.exists_lift (ι₀ ≫ φ) (p ≫ r) (by
     rw [Category.assoc, hφ₃, ι₀_comp_assoc, h.h₀, Category.assoc])
-  refine ⟨l, ?_, { h := φ }, hφ₃, by simpa⟩
+  refine ⟨l, ?_, { h := φ }, hφ₃, by simpa, hl₂⟩
   · rw [← cancel_mono i, Category.assoc, hl₁, ← ι₀_comp_assoc, hφ₂,
       ι₀_fst_assoc, Category.id_comp]
 
@@ -118,13 +118,27 @@ lemma deformationRetract_r (n : ℕ) :
   · apply isTerminalObj₀.hom_ext
   · rfl
 
-noncomputable def homotopyIdConstLast (n : ℕ) :
-    Homotopy.{u} (𝟙 Δ[n]) (SSet.const (obj₀Equiv.symm (Fin.last _))) := sorry
+@[reassoc]
+lemma ι₀_β_hom_deformationRetract_h :
+    ι₀ ≫ (β_ _ _).hom ≫ (stdSimplex.deformationRetract.{u} 1).h =
+      SSet.const (obj₀Equiv.symm 0) :=
+  yonedaEquiv.injective (by
+    ext i : 1
+    fin_cases i <;> rfl)
+
+open anodyneExtensions.retractArrowHornSuccι in
+noncomputable def homotopyIdConstLast :
+    ∀ (n : ℕ), Homotopy.{u} (𝟙 Δ[n]) (SSet.const (obj₀Equiv.symm (Fin.last n)))
+  | 0 => { h := fst _ _ }
+  | n + 1 => { h := r (Fin.last n) }
 
 @[reassoc]
-lemma δ_one_whiskerRight_homotopyIdConstLast_h :
-    stdSimplex.δ 1 ▷ _ ≫ (homotopyIdConstLast.{u} 1).h = SSet.const (obj₀Equiv.symm 1) := by
-  sorry
+lemma ι₁_β_hom_homotopyIdConstLast_h :
+    ι₁ ≫ (β_ _ _).hom ≫ (stdSimplex.homotopyIdConstLast.{u} 1).h =
+      SSet.const (obj₀Equiv.symm 1) :=
+  yonedaEquiv.injective (by
+    ext i : 1
+    fin_cases i <;> rfl)
 
 end stdSimplex
 
@@ -356,42 +370,40 @@ lemma congr_pullback_stdSimplex_one {E B : SSet.{u}} (p : E ⟶ B ⊗ Δ[1])
     MorphismProperty.of_isPullback (P := minimalFibrations) sq₀ (by assumption)
   have : MinimalFibration p₁ :=
     MorphismProperty.of_isPullback (P := minimalFibrations) sq₁ (by assumption)
-  obtain ⟨r₀, hr₀, k₀, h₁, h₂⟩ :=
+  obtain ⟨r₀, hr₀, k₀, h₁, h₂, h₃⟩ :=
     exists_retraction_of_homotopy_of_fibration' p ι₀ (fst _ _) (by simp)
       ((stdSimplex.deformationRetract 1).homotopy.whiskerLeft B) (by
-        dsimp
-        sorry) sq₀
-  obtain ⟨r₁, hr₁, k₁, h₃, h₄⟩ :=
+        change B ◁ (ι₀ ≫ (β_ _ _).hom ≫ (stdSimplex.deformationRetract.{u} 1).h) = _
+        rw [stdSimplex.ι₀_β_hom_deformationRetract_h]
+        rfl) sq₀
+  obtain ⟨r₁, hr₁, k₁, h₄, h₅, h₆⟩ :=
     exists_retraction_of_homotopy_of_fibration p ι₁ (fst _ _) (by simp)
-      ((stdSimplex.homotopyIdConstLast.{u} 1).whiskerLeft B) sorry sq₁
+      ((stdSimplex.homotopyIdConstLast.{u} 1).whiskerLeft B) (by
+      change B ◁ (ι₁ ≫ (β_ _ _).hom ≫ (stdSimplex.homotopyIdConstLast.{u} 1).h) = _
+      rw [stdSimplex.ι₁_β_hom_homotopyIdConstLast_h]
+      rfl) sq₁
+  dsimp at h₁ h₄
   have : IsIso (j₀ ≫ r₁) :=
     isIso_of_fiberwiseHomotopyEquiv p₀ p₁ (j₀ ≫ r₁) (j₁ ≫ r₀)
       (FiberwiseHomotopy.symm
         { h := j₀ ▷ _ ≫ k₁.h ≫ r₀
           fac := by
-            dsimp
-            rw [← cancel_mono ι₀, Category.assoc, Category.assoc, Category.assoc,
-              Category.assoc]
-            rw [← sq₀.w]
-            sorry
-          }) (by
-      sorry)
+            rw [Category.assoc, Category.assoc, h₃, reassoc_of% h₄,
+              whiskerLeft_fst, associator_hom_fst, whiskerRight_fst_assoc,
+              whiskerRight_fst_assoc, ← reassoc_of% h₂, reassoc_of% h₁,
+              whiskerLeft_fst, associator_hom_fst, whiskerRight_fst_assoc,
+              whiskerRight_fst_assoc, sq₀.w_assoc, ι₀_fst, Category.comp_id] })
+      { h := j₁ ▷ _ ≫ k₀.h ≫ r₁
+        fac := by
+          rw [Category.assoc, Category.assoc, h₆, reassoc_of% h₁,
+            whiskerLeft_fst, associator_hom_fst, whiskerRight_fst_assoc,
+            whiskerRight_fst_assoc, ← reassoc_of% h₅, reassoc_of% h₄,
+            whiskerLeft_fst, associator_hom_fst, whiskerRight_fst_assoc,
+            whiskerRight_fst_assoc, sq₁.w_assoc, ι₁_fst, Category.comp_id] }
   refine ⟨asIso (j₀ ≫ r₁), ?_⟩
   dsimp
   rw [← cancel_mono ι₁, Category.assoc, Category.assoc, ← sq₁.w, ← reassoc_of% k₁.h₁,
-    h₃, ι₁_comp_assoc, sq₀.w_assoc]
-  dsimp
-  congr 1
-  rw [← cancel_epi (stdSimplex.rightUnitor _).hom,
-    stdSimplex.rightUnitor_hom_ι₀_assoc, stdSimplex.rightUnitor_hom_ι₁,
-    ← ι₁_comp_assoc, associator_naturality_middle_assoc,
-    ← MonoidalCategory.whiskerLeft_comp,
-    stdSimplex.δ_one_whiskerRight_homotopyIdConstLast_h]
-  change B ◁ (SSet.const (stdSimplex.obj₀Equiv.symm (1 : Fin 2))) = _
-  congr 1
-  apply yonedaEquiv.injective
-  ext i : 1
-  fin_cases i
+    h₄, ι₁_comp_assoc, sq₀.w_assoc]
   rfl
 
 lemma congr_pullback_of_homotopy
