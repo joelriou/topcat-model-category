@@ -24,7 +24,7 @@ lemma exists_retraction_of_homotopy_of_fibration {E A B : SSet.{u}} (p : E ⟶ B
       (p ▷ _ ≫ h.h) (by simp) (by
         rw [← comp_whiskerRight_assoc, sq.w, comp_whiskerRight_assoc, hj,
           whiskerRight_fst_assoc, Category.assoc, sq.w])
-  obtain ⟨l, hl₁, hl₂⟩ := sq.exists_desc (ι₁ ≫ φ) (p ≫ r) (by
+  obtain ⟨l, hl₁, hl₂⟩ := sq.exists_lift (ι₁ ≫ φ) (p ≫ r) (by
     rw [Category.assoc, hφ₃, ι₁_comp_assoc, h.h₁, Category.assoc])
   refine ⟨l, ?_, { h := φ }, hφ₃, by simpa⟩
   · rw [← cancel_mono i, Category.assoc, hl₁, ← ι₁_comp_assoc, hφ₂,
@@ -44,7 +44,7 @@ lemma exists_retraction_of_homotopy_of_fibration' {E A B : SSet.{u}} (p : E ⟶ 
       (p ▷ _ ≫ h.h) (by simp) (by
         rw [← comp_whiskerRight_assoc, sq.w, comp_whiskerRight_assoc, hj,
           whiskerRight_fst_assoc, Category.assoc, sq.w])
-  obtain ⟨l, hl₁, hl₂⟩ := sq.exists_desc (ι₀ ≫ φ) (p ≫ r) (by
+  obtain ⟨l, hl₁, hl₂⟩ := sq.exists_lift (ι₀ ≫ φ) (p ≫ r) (by
     rw [Category.assoc, hφ₃, ι₀_comp_assoc, h.h₀, Category.assoc])
   refine ⟨l, ?_, { h := φ }, hφ₃, by simpa⟩
   · rw [← cancel_mono i, Category.assoc, hl₁, ← ι₀_comp_assoc, hφ₂,
