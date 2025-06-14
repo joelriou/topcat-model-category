@@ -1,5 +1,7 @@
 import TopCatModelCategory.SSet.MinimalFibrations
 import TopCatModelCategory.SSet.FiberwiseHomotopy
+import TopCatModelCategory.SSet.PiZero
+--import TopCatModelCategory.SSet.Monoidal
 import TopCatModelCategory.TrivialBundle
 import TopCatModelCategory.CommSq
 
@@ -9,6 +11,20 @@ open CategoryTheory MonoidalCategory Simplicial HomotopicalAlgebra
   SSet.modelCategoryQuillen ChosenFiniteProducts Limits MonoidalClosed
 
 namespace SSet
+
+lemma stdSimplex.δ_one_eq_const :
+    stdSimplex.{u}.δ (1 : Fin 2) = SSet.const (obj₀Equiv.symm 0) := by
+  apply yonedaEquiv.injective
+  ext i
+  fin_cases i
+  rfl
+
+lemma stdSimplex.δ_zero_eq_const :
+    stdSimplex.{u}.δ (0 : Fin 2) = SSet.const (obj₀Equiv.symm 1) := by
+  apply yonedaEquiv.injective
+  ext i
+  fin_cases i
+  rfl
 
 lemma exists_retraction_of_homotopy_of_fibration {E A B : SSet.{u}} (p : E ⟶ B)
     [Fibration p] (j : A ⟶ B) (r : B ⟶ A) (retract : j ≫ r = 𝟙 A)
@@ -433,6 +449,61 @@ lemma isTrivialBundle_of_stdSimplex
   exact (MorphismProperty.arrow_mk_iso_iff _ (Arrow.isoMk e (Iso.refl _))).1
     (trivialBundles.of_isPullback_of_fac (IsPullback.of_hasPullback p f)
       stdSimplex.isTerminalObj₀ _ _ fac)
+
+open MorphismProperty in
+lemma nonempty_iso_fiber {E B : SSet.{u}} (p : E ⟶ B) [MinimalFibration p]
+    {x y : B _⦋0⦌} (h : π₀.mk x = π₀.mk y) :
+    Nonempty ((Subcomplex.fiber p x : SSet) ≅ Subcomplex.fiber p y) := by
+  rw [π₀.mk_eq_mk_iff] at h
+  induction h with
+  | refl => exact ⟨Iso.refl _⟩
+  | symm _ _ _ h => exact ⟨h.some.symm⟩
+  | trans _ _  _ _ _ h₁ h₂ => exact ⟨h₁.some.trans h₂.some⟩
+  | rel x₀ x₁ h =>
+    obtain ⟨b, h₀, h₁⟩ := h
+    let E' := pullback p (yonedaEquiv.symm b)
+    let p' : E' ⟶ Δ[1] := pullback.snd _ _
+    have hp' := isTrivialBundle_of_stdSimplex p'
+    simp only [trivialBundles, iSup_iff] at hp'
+    obtain ⟨F, ⟨hp'⟩⟩ := hp'
+    let i₀ : (Subcomplex.fiber p x₀ : SSet) ⟶ E' :=
+      pullback.lift (Subcomplex.ι _) (SSet.const (stdSimplex.obj₀Equiv.symm 0)) (by
+        simp only [Subcomplex.fiber_ι_comp, ← h₀, const_comp]
+        congr 1
+        erw [yonedaEquiv_symm_app_apply]
+        apply congr_fun
+        apply B.congr_map
+        apply Quiver.Hom.unop_inj
+        ext i
+        fin_cases i
+        rfl)
+    have sq₀ : IsPullback i₀ (stdSimplex.isTerminalObj₀.from _) p' (stdSimplex.δ 1) := by
+      apply IsPullback.of_right _ _ (.of_hasPullback p (yonedaEquiv.symm b))
+      · convert Subcomplex.fiber_isPullback p x₀
+        · dsimp [i₀]
+          rw [pullback.lift_fst]
+        · rw [stdSimplex.δ_comp_yonedaEquiv_symm, h₀]
+      · simp [i₀, stdSimplex.δ_one_eq_const]
+    let i₁ : (Subcomplex.fiber p x₁ : SSet) ⟶ E' :=
+      pullback.lift (Subcomplex.ι _) (SSet.const (stdSimplex.obj₀Equiv.symm 1)) (by
+        simp only [Subcomplex.fiber_ι_comp, ← h₁, const_comp]
+        congr 1
+        erw [yonedaEquiv_symm_app_apply]
+        apply congr_fun
+        apply B.congr_map
+        apply Quiver.Hom.unop_inj
+        ext i
+        fin_cases i
+        rfl)
+    have sq₁ : IsPullback i₁ (stdSimplex.isTerminalObj₀.from _) p' (stdSimplex.δ 0) := by
+      apply IsPullback.of_right _ _ (.of_hasPullback p (yonedaEquiv.symm b))
+      · convert Subcomplex.fiber_isPullback p x₁
+        · dsimp [i₁]
+          rw [pullback.lift_fst]
+        · rw [stdSimplex.δ_comp_yonedaEquiv_symm, h₁]
+      · simp [i₁, stdSimplex.δ_zero_eq_const]
+    exact ⟨((hp'.pullback sq₀).isoOfIsTerminal stdSimplex.isTerminalObj₀).trans
+      ((hp'.pullback sq₁).isoOfIsTerminal stdSimplex.isTerminalObj₀).symm⟩
 
 end MinimalFibration
 

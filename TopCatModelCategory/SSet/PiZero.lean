@@ -25,6 +25,10 @@ lemma π₀.sound {x₀ x₁ : X _⦋0⦌} (e : X _⦋1⦌) (h₀ : X.δ 1 e = x
     π₀.mk x₀ = π₀.mk x₁ :=
   Quot.sound ⟨e, h₀, h₁⟩
 
+lemma π₀.mk_eq_mk_iff (x₀ x₁ : X _⦋0⦌) :
+    π₀.mk x₀ = π₀.mk x₁ ↔ Relation.EqvGen π₀Rel x₀ x₁ :=
+  Quot.eq
+
 def mapπ₀ (f : X ⟶ Y) : π₀ X → π₀ Y :=
   Quot.lift (fun x ↦ π₀.mk (f.app _ x)) (by
     rintro _ _ ⟨e, rfl, rfl⟩

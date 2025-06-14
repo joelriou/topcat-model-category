@@ -37,13 +37,25 @@ noncomputable def pullback {E' B' : C} {p' : E' ⟶ B'} {f : B' ⟶ B} {f' : E' 
             exact (BinaryFan.IsLimit.lift' h.isLimit (s.fst ≫ f) s.snd).2.2.symm
         · simp [hm₁])
 
-variable (p)
+variable (p) in
 def ofIsTerminal (hB : IsTerminal B) : TrivialBundleWithFiber E p where
   r := 𝟙 E
   isLimit :=
     BinaryFan.isLimitMk (fun s ↦ s.snd) (fun s ↦ hB.hom_ext _ _)
       (fun s ↦ by simp)
       (fun s m _ hm ↦ by simpa using hm)
+
+@[simps hom]
+def isoOfIsTerminal (h : TrivialBundleWithFiber F p) (hB : IsTerminal B) : E ≅ F where
+  hom := h.r
+  inv := (BinaryFan.IsLimit.lift' h.isLimit (hB.from _) (𝟙 _)).1
+  hom_inv_id := by
+    apply BinaryFan.IsLimit.hom_ext h.isLimit
+    · apply hB.hom_ext
+    · have := (BinaryFan.IsLimit.lift' h.isLimit (hB.from _) (𝟙 _)).2.2
+      dsimp at this ⊢
+      simp [this]
+  inv_hom_id := (BinaryFan.IsLimit.lift' h.isLimit (hB.from _) (𝟙 _)).2.2
 
 end TrivialBundleWithFiber
 
