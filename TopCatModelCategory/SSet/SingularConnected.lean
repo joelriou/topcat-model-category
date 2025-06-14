@@ -97,6 +97,11 @@ lemma surjective_mapπ₀_sSetTopAdj_unit_app :
 
 lemma bijective_mapπ₀_sSetTopAdj_unit_app :
     Function.Bijective (mapπ₀ (sSetTopAdj.unit.app X)) := by
+  have (Y : SSet.{0}) (hY : Subsingleton (π₀ Y)) :
+      Function.Bijective (mapπ₀ (sSetTopAdj.unit.app Y)) :=
+    ⟨Function.injective_of_subsingleton (α := π₀ Y) _,
+      surjective_mapπ₀_sSetTopAdj_unit_app Y⟩
+  simp only [← isIso_iff_bijective] at this ⊢
   sorry
 
 end SSet
