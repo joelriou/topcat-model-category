@@ -1,7 +1,7 @@
 import TopCatModelCategory.SSet.MinimalFibrations
 import TopCatModelCategory.SSet.FiberwiseHomotopy
+import TopCatModelCategory.SSet.KanComplexWHomotopy
 import TopCatModelCategory.SSet.PiZero
---import TopCatModelCategory.SSet.Monoidal
 import TopCatModelCategory.TrivialBundle
 import TopCatModelCategory.CommSq
 
@@ -506,5 +506,17 @@ lemma nonempty_iso_fiber {E B : SSet.{u}} (p : E ⟶ B) [MinimalFibration p]
       ((hp'.pullback sq₁).isoOfIsTerminal stdSimplex.isTerminalObj₀).symm⟩
 
 end MinimalFibration
+
+lemma nonempty_homotopyEquiv_fiber {E B : SSet.{u}} (p : E ⟶ B) [Fibration p]
+    {x y : B _⦋0⦌} (hxy : π₀.mk x = π₀.mk y) :
+    Nonempty (HomotopyEquiv (Subcomplex.fiber p x) (Subcomplex.fiber p y)) := by
+  obtain ⟨E', p', _, ⟨h⟩⟩ :
+      ∃ (E' : SSet) (p' : E' ⟶ B) (_ : MinimalFibration p'),
+        Nonempty (FiberwiseHomotopyEquiv p' p) := by
+    obtain ⟨A, h, _⟩ := MinimalFibration.existence p
+    exact ⟨_, A.ι ≫ p, inferInstance, ⟨h.fiberwiserHomotopyEquiv⟩⟩
+  obtain ⟨e⟩ := MinimalFibration.nonempty_iso_fiber p' hxy
+  exact ⟨(h.homotopyEquivFiber x).symm.trans ((HomotopyEquiv.ofIso e).trans
+    (h.homotopyEquivFiber y))⟩
 
 end SSet

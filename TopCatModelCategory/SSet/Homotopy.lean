@@ -182,6 +182,45 @@ noncomputable def whiskerLeft (h : Homotopy f g) (Z : SSet.{u}) :
   mk ((α_ _ _ _).hom ≫ Z ◁ h.h)
     (by simp only [← h.h₀]; rfl) (by simp only [← h.h₁]; rfl)
 
+@[simps! h]
+noncomputable def postcomp (h : Homotopy f g) {Z : SSet.{u}} (φ : Y ⟶ Z) :
+    Homotopy (f ≫ φ) (g ≫ φ) :=
+  mk (h.h ≫ φ) (by simp) (by simp)
+
+@[simps! h]
+noncomputable def precomp (h : Homotopy f g) {Z : SSet.{u}} (φ : Z ⟶ X) :
+    Homotopy (φ ≫ f) (φ ≫ g) :=
+  mk (φ ▷ _ ≫ h.h) (by simp) (by simp)
+
+open KanComplex.FundamentalGroupoid MonoidalClosed
+
+noncomputable def equiv : Homotopy f g ≃
+    Edge (.mk (ihom₀Equiv.symm f)) (.mk (ihom₀Equiv.symm g)) where
+  toFun h := Edge.mk (curry (h.h)) (by
+    dsimp
+    apply uncurry_injective
+    rw [← curry_natural_left, uncurry_curry,
+      ← cancel_epi (stdSimplex.rightUnitor _).inv,
+      stdSimplex.rightUnitor_inv_map_δ_one_assoc,
+      h.h₀]
+    rfl) (by
+    dsimp
+    apply uncurry_injective
+    rw [← curry_natural_left, uncurry_curry,
+      ← cancel_epi (stdSimplex.rightUnitor _).inv,
+      stdSimplex.rightUnitor_inv_map_δ_zero_assoc,
+      h.h₁]
+    rfl)
+  invFun e := mk (uncurry e.map) (by
+    rw [← stdSimplex.rightUnitor_inv_map_δ_one_assoc]
+    rw [← uncurry_natural_left, e.comm₀]
+    rfl) (by
+    rw [← stdSimplex.rightUnitor_inv_map_δ_zero_assoc]
+    rw [← uncurry_natural_left, e.comm₁]
+    rfl)
+  left_inv _ := by aesop
+  right_inv _ := by aesop
+
 end Homotopy
 
 end SSet

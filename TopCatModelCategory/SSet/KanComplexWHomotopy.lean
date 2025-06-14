@@ -9,6 +9,10 @@ open CategoryTheory HomotopicalAlgebra Simplicial SSet.modelCategoryQuillen
 
 namespace SSet
 
+noncomputable def Homotopy.trans {X Y : SSet.{u}} {f₀ f₁ f₂ : X ⟶ Y} [IsFibrant Y]
+    (h : Homotopy f₀ f₁) (h' : Homotopy f₁ f₂) : Homotopy f₀ f₂ :=
+  Homotopy.equiv.symm ((equiv h).comp (equiv h'))
+
 namespace stdSimplex
 
 @[reassoc (attr := simp)]
@@ -96,6 +100,23 @@ noncomputable def HomotopyEquiv.ofDeformationRetract (h : DeformationRetract X Y
   inv := h.r
   homInvId := .ofEq (by simp)
   invHomId := { h := h.h }
+
+@[simps]
+noncomputable def HomotopyEquiv.ofIso (e : X ≅ Y) : HomotopyEquiv X Y where
+  hom := e.hom
+  inv := e.inv
+  homInvId := .ofEq (by simp)
+  invHomId := .ofEq (by simp)
+
+noncomputable def HomotopyEquiv.trans {Z : SSet.{u}} [IsFibrant X] [IsFibrant Z]
+    (e : HomotopyEquiv X Y) (e' : HomotopyEquiv Y Z) :
+    HomotopyEquiv X Z where
+  hom := e.hom ≫ e'.hom
+  inv := e'.inv ≫ e.inv
+  homInvId := (((e'.homInvId.postcomp e.inv).precomp e.hom).congr
+    (by simp) (by simp)).trans e.homInvId
+  invHomId := (((e.invHomId.postcomp e'.hom).precomp e'.inv).congr (by simp)
+    (by simp)).trans e'.invHomId
 
 namespace KanComplex
 

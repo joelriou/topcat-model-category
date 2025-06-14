@@ -1,4 +1,6 @@
 import TopCatModelCategory.SSet.Homotopy
+import TopCatModelCategory.SSet.DeformationRetract
+import TopCatModelCategory.SSet.KanComplexWHomotopy
 
 universe u
 
@@ -181,5 +183,41 @@ noncomputable def trans [Fibration p'] (h₀₁ : FiberwiseHomotopy p p' f₀ f�
     ((equiv h₀₁.fac₀ h₀₁.fac₁ h₀₁).comp (equiv h₁₂.fac₀ h₁₂.fac₁ h₁₂))
 
 end FiberwiseHomotopy
+
+variable {E E' B : SSet.{u}} (p : E ⟶ B) (p' : E' ⟶ B)
+
+structure FiberwiseHomotopyEquiv where
+  hom : E ⟶ E'
+  inv : E' ⟶ E
+  hom_comp : hom ≫ p' = p := by aesop_cat
+  inv_comp : inv ≫ p = p' := by aesop_cat
+  homInvId : FiberwiseHomotopy p p (hom ≫ inv) (𝟙 E)
+  invHomId : FiberwiseHomotopy p' p' (inv ≫ hom) (𝟙 E')
+
+noncomputable def FiberwiseDeformationRetract.fiberwiserHomotopyEquiv
+    (h : FiberwiseDeformationRetract p p') :
+    FiberwiseHomotopyEquiv p p' where
+  hom := h.i
+  inv := h.r
+  homInvId := by simpa using .refl p p (by simp)
+  invHomId := .mk h.homotopy (by simp)
+
+namespace FiberwiseHomotopyEquiv
+
+attribute [reassoc (attr := simp)] hom_comp inv_comp
+
+variable {p p'}
+
+noncomputable def homotopyEquivFiber (e : FiberwiseHomotopyEquiv p p')
+    (b : B _⦋0⦌) :
+    HomotopyEquiv (Subcomplex.fiber p b) (Subcomplex.fiber p' b) where
+  hom := Subcomplex.lift (Subcomplex.ι _ ≫ e.hom) (by simp)
+  inv := Subcomplex.lift (Subcomplex.ι _ ≫ e.inv) (by simp)
+  homInvId := Homotopy.mk (Subcomplex.lift (Subcomplex.ι _ ▷ _ ≫ e.homInvId.h) (by simp))
+    (by aesop) (by aesop)
+  invHomId := Homotopy.mk (Subcomplex.lift (Subcomplex.ι _ ▷ _ ≫ e.invHomId.h) (by simp))
+    (by aesop) (by aesop)
+
+end FiberwiseHomotopyEquiv
 
 end SSet
