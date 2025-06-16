@@ -3,7 +3,6 @@ import TopCatModelCategory.SSet.SingularConnected
 import TopCatModelCategory.SSet.FibrationSequenceAdj
 import TopCatModelCategory.SSet.KanComplexWUnit
 import TopCatModelCategory.SSet.KanComplexKeyLemma
---import TopCatModelCategory.ModelCategoryTopCat
 
 open CategoryTheory HomotopicalAlgebra Simplicial Opposite Limits
 
