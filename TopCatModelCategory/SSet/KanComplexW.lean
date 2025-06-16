@@ -105,6 +105,12 @@ lemma W.of_precomp (hf : W f) (hfg : W (f ≫ g)) : W g := by
     exact W.bijective_of_iso
       (e := (mapFundamentalGroupoid f).objObjPreimageIso _) (hg _)
 
+lemma W.postcomp_iff (hg : W g) : W (f ≫ g) ↔ W f :=
+  ⟨fun hfg ↦ W.of_postcomp _ _ hg hfg, fun hf ↦ W.comp _ _ hf hg⟩
+
+lemma W.precomp_iff (hf : W f) : W (f ≫ g) ↔ W g :=
+  ⟨fun hfg ↦ W.of_precomp _ _ hf hfg, fun hg ↦ W.comp _ _ hf hg⟩
+
 instance : W.{u}.HasTwoOutOfThreeProperty where
   comp_mem f g hf hg := W.comp f g hf hg
   of_postcomp f g hg hfg := W.of_postcomp f g hg hfg

@@ -103,6 +103,14 @@ instance : HasFunctorialFactorization (trivialCofibrations SSet) (fibrations SSe
     · rintro _ _ f ⟨_, hf⟩
       exact hf
 
+instance {X Y : SSet.{0}} (p : X ⟶ Y) [IsIso p] : WeakEquivalence p := by
+  rw [weakEquivalence_iff]
+  infer_instance
+
+instance {X Y : SSet.{0}} (p : X ⟶ Y) [hp : WeakEquivalence p] :
+    WeakEquivalence (toTop.map p) := by
+  rwa [HomotopicalAlgebra.weakEquivalence_iff] at hp ⊢
+
 end modelCategoryQuillen
 
 end SSet

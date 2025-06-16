@@ -3,10 +3,26 @@ import TopCatModelCategory.SSet.SingularConnected
 import TopCatModelCategory.SSet.FibrationSequenceAdj
 import TopCatModelCategory.SSet.KanComplexWUnit
 import TopCatModelCategory.SSet.KanComplexKeyLemma
+--import TopCatModelCategory.ModelCategoryTopCat
 
 open CategoryTheory HomotopicalAlgebra Simplicial Opposite Limits
 
-namespace SSet.modelCategoryQuillen
+namespace SSet
+
+open modelCategoryQuillen
+
+namespace KanComplex
+
+lemma W_iff_weakEquivalence {X Y : SSet.{0}} [IsFibrant X] [IsFibrant Y] (f : X ⟶ Y) :
+    W f ↔ WeakEquivalence f := by
+  rw [weakEquivalence_iff, TopCat.modelCategory.weakEquivalence_iff,
+    ← W.postcomp_iff _ _ (W.sSetTopAdj_unit_app Y),
+    ← sSetTopAdj.unit_naturality f,
+    W.precomp_iff _ _ (W.sSetTopAdj_unit_app X)]
+
+end KanComplex
+
+namespace modelCategoryQuillen
 
 namespace rlp_I
 
@@ -115,9 +131,85 @@ lemma weakEquivalence : WeakEquivalence p := by
 
 end rlp_I
 
+open MorphismProperty
+
+open TopCat.modelCategory in
+lemma weakEquivalence_of_fibration_of_isPullback {E' E B' B : SSet.{0}}
+    {t : E' ⟶ E} {l : E' ⟶ B'} {r : E ⟶ B} {b : B' ⟶ B}
+    [WeakEquivalence r] [Fibration r]
+    (sq : IsPullback t l r b) : WeakEquivalence l := by
+  have ⟨hl, _⟩ : trivialFibrations _ (toTop.map l) := by
+    apply MorphismProperty.of_isPullback (sq.map toTop)
+    rw [mem_trivialFibrations_iff]
+    constructor <;> infer_instance
+  rw [weakEquivalence_iff]
+  rwa [HomotopicalAlgebra.weakEquivalence_iff]
+
 lemma weakEquivalence_iff_of_fibration
     {E B : SSet.{0}} (p : E ⟶ B) [Fibration p] :
     I.rlp p ↔ WeakEquivalence p :=
-  ⟨rlp_I.weakEquivalence, sorry⟩
+  ⟨rlp_I.weakEquivalence, by
+    wlog _ : MinimalFibration p generalizing E with H
+    · intro hp
+      obtain ⟨E', r, p', rfl, _, hr⟩ := MinimalFibration.factorization p
+      have : Fibration r := by
+        rw [fibration_iff]
+        exact rlp_I_le_rlp_J _ hr
+      have := rlp_I.weakEquivalence hr
+      exact comp_mem _ _ _ hr
+        (H p' inferInstance (weakEquivalence_of_precomp r _))
+    rintro _ _ _ _ ⟨n⟩
+    clear X Y
+    constructor
+    intro u v sq
+    wlog h : ∃ (hB : Δ[n] = B), v = eqToHom hB
+    · have sq' : CommSq (pullback.lift _ _ sq.w) ∂Δ[n].ι (pullback.snd _ _) (𝟙 _) :=
+        ⟨by simp⟩
+      have H : WeakEquivalence (pullback.snd p v) :=
+        weakEquivalence_of_fibration_of_isPullback (IsPullback.of_hasPullback p v)
+      have : sq'.HasLift := by
+        exact this (pullback.snd p v) inferInstance H n sq' ⟨rfl, rfl⟩
+      exact ⟨⟨{
+        l := sq'.lift ≫ pullback.fst _ _
+        fac_left := by simp
+        fac_right := by simp [pullback.condition]
+      }⟩⟩
+    · obtain ⟨rfl, h⟩ := h
+      obtain rfl : v = 𝟙 _ := h
+      have hp := MinimalFibration.isTrivialBundle_of_stdSimplex p
+      simp only [trivialBundles, iSup_iff] at hp
+      obtain ⟨F, ⟨h⟩⟩ := hp
+      let a : F ⟶ Δ[0] := stdSimplex.isTerminalObj₀.from _
+      have ha : I.rlp a := by
+        let F' := Subcomplex.fiber p (stdSimplex.obj₀Equiv.symm 0)
+        let a' : (F' : SSet) ⟶ Δ[0] := stdSimplex.isTerminalObj₀.from F'
+        have : WeakEquivalence a' := weakEquivalence_of_fibration_of_isPullback
+          ((Subcomplex.fiber_isPullback p (stdSimplex.obj₀Equiv.symm 0)))
+        have e : (F' : SSet) ≅ F := (h.pullback (Subcomplex.fiber_isPullback p
+          (stdSimplex.obj₀Equiv.symm 0))).isoOfIsTerminal stdSimplex.isTerminalObj₀
+        have : Fibration a' := by
+          rw [HomotopicalAlgebra.fibration_iff]
+          apply MorphismProperty.of_isPullback (P := fibrations _)
+            (Subcomplex.fiber_isPullback p (stdSimplex.obj₀Equiv.symm 0))
+          rwa [← HomotopicalAlgebra.fibration_iff]
+        have ha' : I.rlp a' := by
+          rwa [KanComplex.weakEquivalence_iff_of_fibration a',
+            KanComplex.W_iff_weakEquivalence]
+        exact (MorphismProperty.arrow_mk_iso_iff _ (Arrow.isoMk e (Iso.refl _))).1 ha'
+      have sq' : CommSq (u ≫ h.r) ∂Δ[n].ι a (stdSimplex.isTerminalObj₀.from _) := ⟨by aesop⟩
+      have : HasLiftingProperty ∂Δ[n].ι a := ha _ ⟨n⟩
+      obtain ⟨φ, hφ₁, hφ₂⟩ := BinaryFan.IsLimit.lift' h.isLimit (𝟙 _) sq'.lift
+      dsimp at φ hφ₁ hφ₂
+      exact ⟨⟨{
+        l := φ
+        fac_left := by
+          apply BinaryFan.IsLimit.hom_ext h.isLimit
+          · simp [hφ₁, sq.w]
+          · simp [hφ₂]
+        fac_right := hφ₁
+      }⟩⟩
+    ⟩
 
-end SSet.modelCategoryQuillen
+end modelCategoryQuillen
+
+end SSet
