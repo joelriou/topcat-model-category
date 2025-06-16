@@ -1,6 +1,6 @@
 import TopCatModelCategory.SSet.FibrationSequence
 import TopCatModelCategory.ModelCategoryTopCat
-import TopCatModelCategory.TopCat.ToTopFibration
+import TopCatModelCategory.SSet.ToTopFibration
 import TopCatModelCategory.TopCat.ToTopExact
 
 open CategoryTheory HomotopicalAlgebra SSet.modelCategoryQuillen

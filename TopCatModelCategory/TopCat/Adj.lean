@@ -67,6 +67,14 @@ lemma toTopHomeo_symm_naturality_apply {n m : SimplexCategory} (f : n ⟶ m)
 
 end SimplexCategory
 
+noncomputable instance : Unique (SSet.toTop.obj Δ[0]) := ⦋0⦌.toTopHomeo.unique
+
+noncomputable def SSet.isTerminalToTopObjStdSimplex₀ : IsTerminal (SSet.toTop.obj Δ[0]) :=
+  IsTerminal.ofUniqueHom (fun _ ↦
+    (TopCat.ofHom ⟨fun _ ↦ default, by continuity⟩)) (fun _ _ ↦ by
+      ext
+      apply Subsingleton.elim)
+
 namespace TopCat
 
 instance : toSSet.IsRightAdjoint := sSetTopAdj.isRightAdjoint

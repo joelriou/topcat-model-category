@@ -66,6 +66,17 @@ lemma rlp_I_le_rlp_J : I.{u}.rlp ≤ J.{u}.rlp := by
     transfiniteCompositions_pushouts_coproducts]
   exact J_le_monomorphisms.trans (le_retracts _)
 
+lemma llp_rlp_I : I.rlp.llp = monomorphisms SSet.{u} := by
+  apply le_antisymm
+  · rw [llp_rlp_of_isCardinalForSmallObjectArgument _ .aleph0]
+    simpa using I_le_monomorphisms
+  · rw [I_rlp_eq_monomorphisms_rlp]
+    apply le_llp_rlp
+
+instance : HasFunctorialFactorization (monomorphisms (SSet.{u})) I.rlp where
+  nonempty_functorialFactorizationData := ⟨
+    (functorialFactorizationData I.{u}.rlp.llp I.rlp).ofLE (by rw [llp_rlp_I]) (by rfl)⟩
+
 end modelCategoryQuillen
 
 end SSet

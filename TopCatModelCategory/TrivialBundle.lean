@@ -57,6 +57,19 @@ def isoOfIsTerminal (h : TrivialBundleWithFiber F p) (hB : IsTerminal B) : E ≅
       simp [this]
   inv_hom_id := (BinaryFan.IsLimit.lift' h.isLimit (hB.from _) (𝟙 _)).2.2
 
+lemma isPullback_of_isTerminal {T : C} (hT : IsTerminal T) :
+    IsPullback h.r p (hT.from _) (hT.from _) where
+  w := by simp
+  isLimit' := ⟨
+    PullbackCone.IsLimit.mk _
+      (fun s ↦ (BinaryFan.IsLimit.lift' h.isLimit s.snd s.fst).1)
+      (fun s ↦ (BinaryFan.IsLimit.lift' h.isLimit s.snd s.fst).2.2)
+      (fun s ↦ (BinaryFan.IsLimit.lift' h.isLimit s.snd s.fst).2.1)
+      (fun s m hm₁ hm₂ ↦ by
+        apply BinaryFan.IsLimit.hom_ext h.isLimit
+        · exact hm₂.trans (BinaryFan.IsLimit.lift' h.isLimit s.snd s.fst).2.1.symm
+        · exact hm₁.trans (BinaryFan.IsLimit.lift' h.isLimit s.snd s.fst).2.2.symm)⟩
+
 end TrivialBundleWithFiber
 
 def trivialBundlesWithFiber (F : C) : MorphismProperty C :=

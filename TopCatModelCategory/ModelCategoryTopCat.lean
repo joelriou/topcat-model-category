@@ -184,6 +184,17 @@ lemma trivialCofibrations_eq_llp_rlp :
       (⨆ n, ofHoms (fun i ↦ SSet.toTop.map (SSet.horn.{0} (n + 1) i).ι)).rlp.llp :=
   packageTopCat.trivialCofibrations_eq_llp_rlp_J
 
+open Simplicial
+
+instance (X : TopCat.{0}) : IsFibrant X := by
+  have := SSet.isTerminalToTopObjStdSimplex₀
+  rw [isFibrant_iff_of_isTerminal (isTerminalToTopObjStdSimplex₀.from X)
+    isTerminalToTopObjStdSimplex₀,
+    ← fibration_toSSet_map_iff]
+  rw [← isFibrant_iff_of_isTerminal _
+    (IsTerminal.isTerminalObj _ _ isTerminalToTopObjStdSimplex₀)]
+  infer_instance
+
 end modelCategory
 
 open modelCategory
