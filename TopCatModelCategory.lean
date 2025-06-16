@@ -69,6 +69,7 @@ import TopCatModelCategory.SSet.KanComplexWUnit
 import TopCatModelCategory.SSet.KeyLemma
 import TopCatModelCategory.SSet.Loop
 import TopCatModelCategory.SSet.MinimalFibrations
+import TopCatModelCategory.SSet.MinimalFibrationsFactorization
 import TopCatModelCategory.SSet.MinimalFibrationsLemmas
 import TopCatModelCategory.SSet.MonoCoprod
 import TopCatModelCategory.SSet.Monoidal
