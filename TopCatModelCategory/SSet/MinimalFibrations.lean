@@ -21,11 +21,11 @@ variable {E B : SSet.{u}} (p : E ⟶ B)
 
 structure SimplexOverRelStruct {n : ℕ} (x y : E _⦋n⦌) where
   h : Δ[n] ⊗ Δ[1] ⟶ E
-  h₀ : ι₀ ≫ h = yonedaEquiv.symm x
-  h₁ : ι₁ ≫ h = yonedaEquiv.symm y
+  h₀ : ι₀ ≫ h = yonedaEquiv.symm x := by aesop_cat
+  h₁ : ι₁ ≫ h = yonedaEquiv.symm y := by aesop_cat
   π : Δ[n] ⟶ B
   d : (∂Δ[n] : SSet) ⟶ E
-  hπ : h ≫ p = fst _ _ ≫ π
+  hπ : h ≫ p = fst _ _ ≫ π := by aesop_cat
   hd : (boundary.{u} n).ι ▷ Δ[1] ≫ h = fst _ _ ≫ d
 
 namespace SimplexOverRelStruct
@@ -66,7 +66,7 @@ lemma ext {n : ℕ} {x y : E _⦋n⦌}
     rfl
   simp [π_eq₁, d_eq₁]
 
-noncomputable def refl (x : E _⦋n⦌) : SimplexOverRelStruct p x x where
+noncomputable def refl {n : ℕ} (x : E _⦋n⦌) : SimplexOverRelStruct p x x where
   h := fst _ _ ≫ yonedaEquiv.symm x
   h₀ := rfl
   h₁ := rfl
