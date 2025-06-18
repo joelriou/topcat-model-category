@@ -33,13 +33,13 @@ instance : HasFunctorialFactorization (cofibrations SSet) (trivialFibrations SSe
   apply retracts_le
 
 instance {A B X Y : SSet.{0}} (i : A ⟶ B) (p : X ⟶ Y)
-    [Cofibration i] [Fibration p] [hp : WeakEquivalence p] :
+    [Mono i] [Fibration p] [hp : WeakEquivalence p] :
     HasLiftingProperty i p := by
   have : I.rlp p := by
     rw [rlp_I_eq_trivialFibrations]
     exact mem_trivialFibrations p
   rw [I_rlp_eq_monomorphisms_rlp] at this
-  exact this _ (mono_of_cofibration _)
+  exact this _ (.infer_property _)
 
 end modelCategoryQuillen
 
