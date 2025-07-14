@@ -10,6 +10,7 @@ import TopCatModelCategory.Factorization
 import TopCatModelCategory.Fin
 import TopCatModelCategory.FunctorCategoryColimits
 import TopCatModelCategory.Homotopy.Basic
+import TopCatModelCategory.II
 import TopCatModelCategory.IsFibrant
 import TopCatModelCategory.Iso
 import TopCatModelCategory.JoyalTrickDual
