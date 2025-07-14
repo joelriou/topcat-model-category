@@ -156,10 +156,41 @@ lemma map'_succAboveOrderEmb {n : ℕ} (i : Fin (n + 2)) (x : Fin (n + 3)):
         rwa [Fin.succAbove_of_le_castSucc _ _ h, Fin.succ_lt_succ_iff]
   · simp
 
-/-@[simp]
-lemma map'_prevAbove {n : ℕ} (i : Fin (n + 1)) (x : Fin (n + 2)) :
+@[simp]
+lemma map'_predAbove {n : ℕ} (i : Fin (n + 1)) (x : Fin (n + 2)) :
     map' { toFun := i.predAbove, monotone' := Fin.predAbove_right_monotone i } x =
-      i.succ.castSucc.succAbove x := sorry-/
+      i.succ.castSucc.succAbove x := by
+  obtain ⟨x, rfl⟩ | rfl := x.eq_castSucc_or_eq_last
+  · by_cases hi : i.succ ≤ x.castSucc
+    · rw [Fin.succAbove_of_le_castSucc _ _ (by simpa), Fin.succ_castSucc, map'_eq_castSucc_iff]
+      simp only [OrderHom.coe_mk, Fin.castSucc_le_castSucc_iff, Fin.castSucc_lt_castSucc_iff]
+      constructor
+      · rw [Fin.succ_le_castSucc_iff] at hi
+        rw [Fin.predAbove_of_castSucc_lt _ _
+          (by simpa only [Fin.castSucc_lt_succ_iff] using hi.le), Fin.pred_succ]
+      · intro j hj
+        by_cases h : i.castSucc < j
+        · rwa [Fin.predAbove_of_castSucc_lt _ _ h, ← Fin.succ_lt_succ_iff,
+            Fin.succ_pred]
+        · simp only [not_lt] at h
+          rw [Fin.predAbove_of_le_castSucc _ _ h, ← Fin.castSucc_lt_castSucc_iff,
+            Fin.castSucc_castPred]
+          exact lt_of_le_of_lt h hi
+    · simp only [Fin.succ_le_castSucc_iff, not_lt] at hi
+      rw [Fin.succAbove_of_castSucc_lt _ _ (by simpa), map'_eq_castSucc_iff]
+      simp only [OrderHom.coe_mk, Fin.castSucc_le_castSucc_iff, Fin.castSucc_lt_castSucc_iff]
+      constructor
+      · simp only [i.predAbove_of_le_castSucc x.castSucc (by simpa),
+          Fin.castPred_castSucc, le_refl]
+      · intro j hj
+        by_cases h : i.castSucc < j
+        · rw [Fin.predAbove_of_castSucc_lt _ _ h, ← Fin.succ_lt_succ_iff, Fin.succ_pred]
+          exact hj.trans x.castSucc_lt_succ
+        · simp only [not_lt] at h
+          rwa [Fin.predAbove_of_le_castSucc _ _ h, ← Fin.castSucc_lt_castSucc_iff,
+            Fin.castSucc_castPred]
+  · rw [map'_last, Fin.succAbove_of_lt_succ, Fin.succ_last]
+    apply Fin.castSucc_lt_last
 
 @[simps]
 def map (f : Fin (n + 1) →o Fin (m + 1)) : Fin (m + 2) →o Fin (n + 2) where
@@ -178,13 +209,9 @@ def II : CosimplicialObject SimplexCategoryᵒᵖ where
   obj n := op ⦋n.len + 1⦌
   map f := op (Hom.mk (II.map f.toOrderHom))
   map_id n := Quiver.Hom.unop_inj (by
-    induction' n using SimplexCategory.rec with n
     ext x : 3
     exact II.map'_id x)
   map_comp {m n p} f g := Quiver.Hom.unop_inj (by
-    induction' m using SimplexCategory.rec with m
-    induction' n using SimplexCategory.rec with n
-    induction' p using SimplexCategory.rec with p
     ext x : 3
     exact (II.map'_map' _ _ _).symm)
 
@@ -193,9 +220,9 @@ lemma II'_δ {n : ℕ} (i : Fin (n + 2)) :
     II.δ i = (σ i).op :=
   Quiver.Hom.unop_inj (by ext : 3; apply II.map'_succAboveOrderEmb)
 
-/-@[simp]
+@[simp]
 lemma II'_σ {n : ℕ} (i : Fin (n + 1)) :
     II.σ i = (δ i.succ.castSucc).op :=
-  Quiver.Hom.unop_inj (by ext x : 3; apply II.map'_prevAbove)-/
+  Quiver.Hom.unop_inj (by ext x : 3; apply II.map'_predAbove)
 
 end SimplexCategory
