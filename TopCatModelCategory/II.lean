@@ -1,4 +1,28 @@
+/-
+Copyright (c) 2025 Joël Riou. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Joël Riou
+-/
 import Mathlib.AlgebraicTopology.SimplicialObject.Basic
+
+/-!
+# A construction by Gabriel and Zisman
+
+In this file, we construct a cosimplicial object `SimplexCategory.II`
+in `SimplexCategoryᵒᵖ`, i.e. a functor `SimplexCategory ⥤ SimplexCategoryᵒᵖ`.
+If we identify `SimplexCategory` with the category of finite nonempty
+linearly ordered types, this functor could be interpreted as the
+contravariant functor which sends a finite nonempty linearly ordered type `T`
+to `T →o Fin 2`; in particular, it sends `Fin (n + 1)` to a linearly
+ordered type which is isomorphic to `Fin (n + 2)`. As a result, we define
+`SimplexCategory.II` as a functor which sends `⦋n⦌` to `⦋n + 1⦌`: on morphisms,
+it sends faces to degeneracies and vice versa.
+
+## References
+
+* [P. Gabriel, M. Zisman, *Calculus of fractions and homotopy theory*][gabriel-zisman-1967]
+
+-/
 
 open CategoryTheory Simplicial Opposite
 
@@ -11,6 +35,9 @@ namespace II
 
 variable {n m : ℕ}
 
+/-- Auxiliary definition for `map'`. Given `f : Fin (n + 1) →o Fin (m + 1)` and
+`x : Fin (m + 2)`, `map' f x` shall we the smallest element in
+this `finset f x : Finset (Fin (n + 2))`. -/
 def finset (f : Fin (n + 1) →o Fin (m + 1)) (x : Fin (m + 2)) : Finset (Fin (n + 2)) :=
   Finset.univ.filter (fun i ↦ i = Fin.last _ ∨
     ∃ (h : i ≠ Fin.last _), x ≤ (f (i.castPred h)).castSucc)
@@ -37,6 +64,8 @@ lemma nonempty_finset (f : Fin (n + 1) →o Fin (m + 1)) (x : Fin (m + 2)) :
     (finset f x).Nonempty :=
   ⟨Fin.last _, by simp [mem_finset_iff]⟩
 
+/-- Auxiliary definition for the definition of the action of the
+functor `SimplexCategory.II` on morphisms. -/
 def map' (f : Fin (n + 1) →o Fin (m + 1)) (x : Fin (m + 2)) : Fin (n + 2) :=
   (finset f x).min' (nonempty_finset f x)
 
@@ -84,6 +113,13 @@ lemma map'_last (f : Fin (n + 1) →o Fin (m + 1)) :
   rw [map'_eq_last_iff]
   intro i
   apply Fin.castSucc_lt_last
+
+@[simp]
+lemma map'_zero (f : Fin (n + 1) →o Fin (m + 1)) :
+    map' f 0 = 0 := by
+  change _ = Fin.castSucc 0
+  simp only [map'_eq_castSucc_iff, Fin.zero_le, Fin.not_lt_zero,
+    imp_self, implies_true, and_self]
 
 @[simp]
 lemma map'_id (x : Fin (n + 2)) : map' OrderHom.id x = x := by
@@ -192,6 +228,7 @@ lemma map'_predAbove {n : ℕ} (i : Fin (n + 1)) (x : Fin (n + 2)) :
   · rw [map'_last, Fin.succAbove_of_lt_succ, Fin.succ_last]
     apply Fin.castSucc_lt_last
 
+/-- The action of the functor `SimplexCategory.II` on morphisms. -/
 @[simps]
 def map (f : Fin (n + 1) →o Fin (m + 1)) : Fin (m + 2) →o Fin (n + 2) where
   toFun := map' f
@@ -204,6 +241,10 @@ def map (f : Fin (n + 1) →o Fin (m + 1)) : Fin (m + 2) →o Fin (n + 2) where
 
 end II
 
+/-- The functor `SimplexCategory ⥤ SimplexCategoryᵒᵖ` (i.e. a cosimplicial
+object in `SimplexCategoryᵒᵖ`) which sends `⦋n⦌` to the object in `SimplexCategoryᵒᵖ`
+that is associated to the linearly ordered type `⦋n + 1⦌` (identified as the ordered
+type `⦋n⦌ →o ⦋1⦌`). -/
 @[simps obj]
 def II : CosimplicialObject SimplexCategoryᵒᵖ where
   obj n := op ⦋n.len + 1⦌
