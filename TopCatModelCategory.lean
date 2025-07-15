@@ -100,6 +100,7 @@ import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
 import TopCatModelCategory.TopCat.ClosedEmbeddings
 import TopCatModelCategory.TopCat.Colimits
 import TopCatModelCategory.TopCat.CompactOpen
+import TopCatModelCategory.TopCat.Cosimp
 import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
 import TopCatModelCategory.TopCat.DeformationRetract
 import TopCatModelCategory.TopCat.Glueing
@@ -108,6 +109,7 @@ import TopCatModelCategory.TopCat.IsQuotientMap
 import TopCatModelCategory.TopCat.Monoidal
 import TopCatModelCategory.TopCat.T1Inclusion
 import TopCatModelCategory.TopCat.ToTopExact
+import TopCatModelCategory.TopCat.TopologyOrderHom
 import TopCatModelCategory.TopCat.W
 import TopCatModelCategory.TopCatIsColimit
 import TopCatModelCategory.TopPackage
