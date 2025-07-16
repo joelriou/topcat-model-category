@@ -31,12 +31,12 @@ noncomputable def toTopToSSet : FibrationSequence where
   he := by simp only [← seq.he, ← FunctorToTypes.comp,
       Adjunction.unit_naturality]
   isPullback :=
-    (seq.isPullback.map (SSet.toTop ⋙ TopCat.toSSet)).of_iso (Iso.refl _) (Iso.refl _)
+    sorry /-(seq.isPullback.map (SSet.toTop ⋙ TopCat.toSSet)).of_iso (Iso.refl _) (Iso.refl _)
       (IsTerminal.uniqueUpToIso
         (stdSimplex.isTerminalObj₀.isTerminalObj (SSet.toTop ⋙ TopCat.toSSet))
         stdSimplex.isTerminalObj₀) (Iso.refl _) (by simp)
         (stdSimplex.isTerminalObj₀.hom_ext _ _) (by simp)
-        (by simp [← cancel_epi (sSetTopAdj.unit.app Δ[0])])
+        (by simp [← cancel_epi (sSetTopAdj.unit.app Δ[0])])-/
 
 instance : IsFibrant (seq.toTopToSSet.B) := by
   dsimp

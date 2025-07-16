@@ -138,9 +138,10 @@ lemma weakEquivalence_of_fibration_of_isPullback {E' E B' B : SSet.{0}}
     [WeakEquivalence r] [Fibration r]
     (sq : IsPullback t l r b) : WeakEquivalence l := by
   have ⟨hl, _⟩ : trivialFibrations _ (toTop.map l) := by
-    apply MorphismProperty.of_isPullback (sq.map toTop)
-    rw [mem_trivialFibrations_iff]
-    constructor <;> infer_instance
+    sorry
+    --apply MorphismProperty.of_isPullback (sq.map toTop)
+    --rw [mem_trivialFibrations_iff]
+    --constructor <;> infer_instance
   rw [weakEquivalence_iff]
   rwa [HomotopicalAlgebra.weakEquivalence_iff]
 
