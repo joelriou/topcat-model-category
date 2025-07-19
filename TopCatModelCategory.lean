@@ -75,6 +75,7 @@ import TopCatModelCategory.SSet.MinimalFibrationsLemmas
 import TopCatModelCategory.SSet.MonoCoprod
 import TopCatModelCategory.SSet.Monoidal
 import TopCatModelCategory.SSet.Monomorphisms
+import TopCatModelCategory.SSet.NonDegeneratePartialOrder
 import TopCatModelCategory.SSet.NonDegenerateProdSimplex
 import TopCatModelCategory.SSet.Paths
 import TopCatModelCategory.SSet.PiZero
