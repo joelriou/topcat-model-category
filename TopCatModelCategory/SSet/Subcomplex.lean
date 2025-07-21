@@ -656,6 +656,13 @@ def toOfSimplex : Δ[n] ⟶ ofSimplex x :=
 lemma toOfSimplex_ι :
     toOfSimplex x ≫ (ofSimplex x).ι = yonedaEquiv.symm x := rfl
 
+@[simp]
+lemma yonedaEquiv_toOfSimplex :
+    yonedaEquiv (toOfSimplex x) = ⟨x, mem_ofSimplex_obj x⟩ := by
+  apply yonedaEquiv.symm.injective
+  rw [Equiv.symm_apply_apply]
+  rfl
+
 instance : Epi (toOfSimplex x) := by
   rw [← range_eq_top_iff]
   ext m ⟨_, u, rfl⟩
