@@ -177,9 +177,9 @@ noncomputable def desc : X ⟶ s.pt where
     exact descApp _
   naturality := by
     rintro ⟨n⟩ ⟨m⟩ f
+    obtain ⟨f, rfl⟩ := Quiver.Hom.op_surjective f
     induction' n using SimplexCategory.rec with n
     induction' m using SimplexCategory.rec with m
-    obtain ⟨f, rfl⟩ := Quiver.Hom.op_surjective f
     dsimp [SimplexCategory.rec]
     ext x
     dsimp [descApp]
@@ -188,9 +188,8 @@ noncomputable def desc : X ⟶ s.pt where
         Subcomplex.mem_ofSimplex_obj_iff]
       exact ⟨f, rfl⟩
     apply yonedaEquiv.symm.injective
-    rw [Equiv.symm_apply_apply]
-    erw [SSet.yonedaEquiv_symm_map]
-    rw [Equiv.symm_apply_apply, ← s.w (homOfLE h)]
+    rw [Equiv.symm_apply_apply, SSet.yonedaEquiv_symm_map,
+      Equiv.symm_apply_apply, ← s.w (homOfLE h)]
     dsimp
     simp only [← Category.assoc]; congr 1; simp only [Category.assoc]
     rw [← cancel_mono (Subcomplex.ι _)]
