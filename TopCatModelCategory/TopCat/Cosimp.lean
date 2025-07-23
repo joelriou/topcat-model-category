@@ -80,6 +80,8 @@ def cosimp : CosimplicialObject TopCat.{u} where
 
 end
 
+namespace cosimp
+
 section
 
 variable {I₁ I₂ I₃ : Type u}
@@ -88,42 +90,41 @@ variable {I₁ I₂ I₃ : Type u}
   [Preorder I₃] [TopologicalSpace I₃] [OrderBot I₃] [OrderTop I₃]
   (f : I₁ →o I₂) (hf : Continuous f) (hf₀ : f ⊥ = ⊥) (hf₁ : f ⊤ = ⊤)
 
-def cosimp.action (n : SimplexCategory) :
+def actionMap (n : SimplexCategory) :
     cosimp.obj I₁ n → cosimp.obj I₂ n :=
   fun x ↦ ⟨f.comp x.1, by simp [x.2.1, hf₀], by simp [x.2.2, hf₁]⟩
 
 include hf in
-lemma cosimp.continuous_action (n : SimplexCategory) :
-    Continuous (cosimp.action f hf₀ hf₁ n) := by
+lemma continuous_actionMap (n : SimplexCategory) :
+    Continuous (cosimp.actionMap f hf₀ hf₁ n) := by
   rw [(Topology.IsInducing.subtype _).continuous_iff,
     OrderHom.continuous_iff]
   continuity
 
 @[simps]
-def cosimpAction : cosimp I₁ ⟶ cosimp I₂ where
-  app n := ConcreteCategory.ofHom ⟨cosimp.action f hf₀ hf₁ n,
-    cosimp.continuous_action f hf hf₀ hf₁ n⟩
+def action : cosimp I₁ ⟶ cosimp I₂ where
+  app n := ConcreteCategory.ofHom ⟨cosimp.actionMap f hf₀ hf₁ n,
+    cosimp.continuous_actionMap f hf hf₀ hf₁ n⟩
 
 @[reassoc]
-lemma cosimpAction_comp (g : I₂ →o I₃) (hg : Continuous g) (hg₀ : g ⊥ = ⊥) (hg₁ : g ⊤ = ⊤) :
-      cosimpAction f hf hf₀ hf₁ ≫ cosimpAction g hg hg₀ hg₁ =
-    cosimpAction (g.comp f) (hg.comp hf) (by simp [hf₀, hg₀]) (by simp [hf₁, hg₁]) :=
+lemma action_comp
+    (g : I₂ →o I₃) (hg : Continuous g) (hg₀ : g ⊥ = ⊥) (hg₁ : g ⊤ = ⊤) :
+    action f hf hf₀ hf₁ ≫ action g hg hg₀ hg₁ =
+    action (g.comp f) (hg.comp hf) (by simp [hf₀, hg₀]) (by simp [hf₁, hg₁]) :=
   rfl
 
 variable (I₁) in
-lemma cosimpAction_id :
-    cosimpAction (OrderHom.id : I₁ →o I₁) (by continuity) rfl rfl = 𝟙 _ :=
+lemma action_id :
+    cosimp.action (OrderHom.id : I₁ →o I₁) (by continuity) rfl rfl = 𝟙 _ :=
   rfl
 
-lemma cosimpAction_injective
+lemma action_injective
     (g : I₁ →o I₂) (hg : Continuous g) (hg₀ : g ⊥ = ⊥) (hg₁ : g ⊤ = ⊤)
-    (H : cosimpAction f hf hf₀ hf₁ = cosimpAction g hg hg₀ hg₁) : f = g := by
+    (H : cosimp.action f hf hf₀ hf₁ = cosimp.action g hg hg₀ hg₁) : f = g := by
   ext x
   exact congr_arg cosimp.obj₁OrderIso.symm
     (congr_fun ((forget _).congr_map (NatTrans.congr_app H ⦋1⦌))
     (cosimp.obj₁OrderIso x))
-
-namespace cosimp
 
 def φ {n : ℕ} (i : Fin (n + 2)) :
     ⦋n⦌ ⟶ ⦋1⦌ :=
@@ -155,9 +156,7 @@ lemma hφ {n : ℕ} (i : Fin (n + 1)) (x : obj I₁ ⦋n⦌) :
     · simp
     · simpa
 
-end cosimp
-
-lemma cosimp_comp_forget_hom_ext
+lemma comp_forget_hom_ext
     {f g : cosimp I₁ ⋙ forget _ ⟶ cosimp I₂ ⋙ forget _}
     (h : f.app ⦋1⦌ = g.app ⦋1⦌) : f = g := by
   ext n x
@@ -178,11 +177,11 @@ lemma cosimp_comp_forget_hom_ext
     simp only [this, h]
   · exact (f.app ⦋n⦌ x).2.2.trans ((g.app ⦋n⦌ x).2.2).symm
 
-lemma cosimp_hom_ext
+lemma hom_ext
     {f g : cosimp I₁ ⟶ cosimp I₂}
     (h : f.app ⦋1⦌ = g.app ⦋1⦌) : f = g := by
   have : whiskerRight f (forget _) = whiskerRight g (forget _) :=
-    cosimp_comp_forget_hom_ext ((forget _).congr_map h)
+    comp_forget_hom_ext ((forget _).congr_map h)
   ext n x
   exact congr_fun (NatTrans.congr_app this n) x
 
@@ -193,7 +192,7 @@ variable {I₁ I₂ I₃ : Type u}
   [PartialOrder I₂] [TopologicalSpace I₂] [OrderBot I₂] [OrderTop I₂]
   [PartialOrder I₃] [TopologicalSpace I₃] [OrderBot I₃] [OrderTop I₃]
 
-namespace cosimpAction_surjective
+namespace orderIso
 
 section
 
@@ -232,31 +231,72 @@ lemma f_f (φ : cosimp I₁ ⟶ cosimp I₂) (ψ : cosimp I₂ ⟶ cosimp I₃) 
     f ψ (f φ x) = f (φ ≫ ψ) x := by
   simp [f]
 
-variable (φ : cosimp I₁ ≅ cosimp I₂)
+end orderIso
 
 @[simps]
-def orderIso : I₁ ≃o I₂ where
-  toFun := f φ.hom
-  invFun := f φ.inv
+def orderIso (φ : cosimp I₁ ≅ cosimp I₂) : I₁ ≃o I₂ where
+  toFun := orderIso.f φ.hom
+  invFun := orderIso.f φ.inv
   left_inv _ := by simp
   right_inv _ := by simp
-  map_rel_iff' := ⟨fun h ↦ by simpa using monotone_f φ.inv h, fun h ↦ monotone_f φ.hom h⟩
+  map_rel_iff' := ⟨fun h ↦ by simpa using orderIso.monotone_f φ.inv h,
+    fun h ↦ orderIso.monotone_f φ.hom h⟩
 
-end cosimpAction_surjective
+@[simp]
+lemma action_orderIso [OrderTopology I₁] [OrderTopology I₂] (φ : cosimp I₁ ≅ cosimp I₂) :
+    action (orderIso φ).toOrderEmbedding.toOrderHom (orderIso φ).continuous
+      (by simp) (by simp) = φ.hom := by
+  apply ((whiskeringRight SimplexCategory _ _).obj (forget TopCat)).map_injective
+  apply comp_forget_hom_ext
+  ext x : 1
+  apply cosimp.obj₁OrderIso.symm.injective
+  change cosimp.obj₁OrderIso.symm (φ.hom.app _
+    (cosimp.obj₁OrderIso (cosimp.obj₁OrderIso.symm x))) =
+      cosimp.obj₁OrderIso.symm (φ.hom.app _ x)
+  rw [OrderIso.apply_symm_apply]
 
-open cosimpAction_surjective in
-lemma cosimpAction_surjective [OrderTopology I₁] [OrderTopology I₂]
+open orderIso in
+lemma action_surjective [OrderTopology I₁] [OrderTopology I₂]
     (φ : cosimp I₁ ≅ cosimp I₂) :
     ∃ (f : I₁ →o I₂) (hf : Continuous f) (hf₀ : f ⊥ = ⊥) (hf₁ : f ⊤ = ⊤),
-    cosimpAction f hf hf₀ hf₁ = φ.hom := by
-  refine ⟨(orderIso φ).toOrderEmbedding.toOrderHom, (orderIso φ).continuous, by simp, by simp, ?_⟩
-  · apply ((whiskeringRight SimplexCategory _ _).obj (forget TopCat)).map_injective
-    apply cosimp_comp_forget_hom_ext
-    ext x : 1
-    apply cosimp.obj₁OrderIso.symm.injective
-    change cosimp.obj₁OrderIso.symm (φ.hom.app _
-      (cosimp.obj₁OrderIso (cosimp.obj₁OrderIso.symm x))) =
-        cosimp.obj₁OrderIso.symm (φ.hom.app _ x)
-    rw [OrderIso.apply_symm_apply]
+    action f hf hf₀ hf₁ = φ.hom :=
+  ⟨(orderIso φ).toOrderEmbedding.toOrderHom,
+    (orderIso φ).continuous, by simp, by simp, by simp⟩
+
+variable (I₁)
+
+protected def Aut : Type u := I₁ ≃o I₁
+
+namespace Aut
+
+instance : Group (cosimp.Aut I₁) where
+  mul f g := g.trans f
+  inv f := f.symm
+  one := .refl _
+  mul_assoc _ _ _ := rfl
+  one_mul _ := rfl
+  mul_one _ := rfl
+  inv_mul_cancel g := OrderIso.ext (by funext; apply g.left_inv)
+
+end Aut
+
+def autAction [OrderTopology I₁] : cosimp.Aut I₁ ≃* Aut (cosimp I₁) where
+  toFun g :=
+    { hom := cosimp.action g.toOrderEmbedding.toOrderHom g.continuous (by simp) (by simp)
+      inv := cosimp.action g.symm.toOrderEmbedding.toOrderHom g.symm.continuous (by simp) (by simp)
+      hom_inv_id := by
+        rw [action_comp]
+        convert action_id I₁
+        aesop
+      inv_hom_id := by
+        rw [action_comp]
+        convert action_id I₁
+        aesop }
+  invFun e := orderIso e
+  left_inv _ := rfl
+  right_inv g := by aesop
+  map_mul' _ _ := rfl
+
+end cosimp
 
 end TopCat
