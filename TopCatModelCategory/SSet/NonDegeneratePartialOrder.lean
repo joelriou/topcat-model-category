@@ -114,9 +114,23 @@ noncomputable def toNπ : ⦋n⦌ ⟶ ⦋(X.toN x).1⦌ :=
 instance : Epi (X.toNπ x) :=
   (X.exists_nonDegenerate x).choose_spec.choose_spec.choose
 
+instance : IsSplitEpi (X.toNπ x) := isSplitEpi_of_epi _
+
 @[simp]
 lemma map_toNπ_op_toN : X.map (X.toNπ x).op (X.toN x).2.1 = x :=
   (X.exists_nonDegenerate x).choose_spec.choose_spec.choose_spec.choose_spec.symm
+
+@[simp]
+lemma map_splitEpiSection_eq_toN_snd (h : SplitEpi (X.toNπ x)) :
+    X.map h.section_.op x = (X.toN x).2 := by
+  nth_rw 6 [← X.map_toNπ_op_toN x]
+  rw [← FunctorToTypes.map_comp_apply, ← op_comp, h.id,
+    op_id, FunctorToTypes.map_id_apply]
+
+@[simp]
+lemma map_section_eq_toN_snd :
+    X.map (section_ (X.toNπ x)).op x = (X.toN x).2 :=
+  map_splitEpiSection_eq_toN_snd _ _ (IsSplitEpi.exists_splitEpi (f := X.toNπ x)).some
 
 @[simp]
 lemma ofSimplex_toN : Subcomplex.ofSimplex (X.toN x).2.1 = Subcomplex.ofSimplex x := by
@@ -125,13 +139,26 @@ lemma ofSimplex_toN : Subcomplex.ofSimplex (X.toN x).2.1 = Subcomplex.ofSimplex 
     have : IsSplitEpi (X.toNπ x) := isSplitEpi_of_epi _
     have h : Mono (X.map (X.toNπ x).op) := inferInstance
     rw [mono_iff_injective] at h
-    refine ⟨section_ (X.toNπ x), ?_⟩
-    nth_rw 6 [← X.map_toNπ_op_toN x]
-    apply h
-    rw [← FunctorToTypes.map_comp_apply, ← FunctorToTypes.map_comp_apply, ← op_comp,
-      ← op_comp, Category.assoc, IsSplitEpi.id, Category.comp_id]
+    exact ⟨section_ (X.toNπ x), by simp⟩
   · simp only [Subpresheaf.ofSection_le_iff, Subcomplex.mem_ofSimplex_obj_iff]
     exact ⟨X.toNπ x, by simp⟩
+
+variable {X} in
+lemma N.ext {n : ℕ} (x : X _⦋n⦌) (y₁ y₂ : X.N) (f₁ : ⦋n⦌ ⟶ ⦋y₁.1⦌)
+    (f₂ : ⦋n⦌ ⟶ ⦋y₂.1⦌) [Epi f₁] [Epi f₂]
+    (hf₁ : X.map f₁.op y₁.2.1 = x) (hf₂ : X.map f₂.op y₂.2.1 = x) : y₁ = y₂ := by
+  obtain ⟨n₁, y₁⟩ := y₁
+  obtain ⟨n₂, y₂⟩ := y₂
+  obtain rfl := X.unique_nonDegenerate₁ x _ _ hf₁.symm _ _ hf₂.symm
+  obtain rfl := X.unique_nonDegenerate₂ x _ _ hf₁.symm _ _ hf₂.symm
+  rfl
+
+lemma toN_eq {n : ℕ} (x : X _⦋n⦌) (y : X.N) (f : ⦋n⦌ ⟶ ⦋y.1⦌) [Epi f]
+    (h : X.map f.op y.2.1 = x) : X.toN x = y :=
+  N.ext x _ _ (X.toNπ x) f (by simp) h
+
+lemma toN_surjective (s : X.N) : ∃ (n : ℕ) (x : X.nonDegenerate n), s = X.toN x.1 :=
+  ⟨s.1, s.2, (X.toN_eq _ _ (𝟙 _) (by simp)).symm⟩
 
 end
 
@@ -216,5 +243,43 @@ noncomputable def isColimitCoconeN : IsColimit X.coconeN where
   desc := isColimitCoconeN.desc
   fac := isColimitCoconeN.fac
   uniq s m hm := isColimitCoconeN.hom_ext (by aesop)
+
+variable {X} {Y : SSet.{u}} (f : X ⟶ Y)
+
+@[simps -isSimp coe]
+noncomputable def mapN : X.N →o Y.N where
+  toFun x := Y.toN (f.app _ x.2.1)
+  monotone' x x' h := by
+    simp only [N.le_iff, ofSimplex_toN, Subpresheaf.ofSection_le_iff,
+      mem_ofSimplex_obj_iff] at h ⊢
+    obtain ⟨g, hf⟩ := h
+    exact ⟨g, by simp only [← hf, FunctorToTypes.naturality]⟩
+
+@[simp]
+lemma mapN_toN {n : ℕ} (x : X _⦋n⦌) :
+    mapN f (X.toN x) = Y.toN (f.app _ x) := by
+  have : IsSplitEpi (X.toNπ x) := isSplitEpi_of_epi _
+  simp only [mapN_coe]
+  apply le_antisymm
+  · simp only [N.le_iff, ofSimplex_toN, Subpresheaf.ofSection_le_iff,
+      mem_ofSimplex_obj_iff]
+    exact ⟨section_ (X.toNπ x), by rw [← FunctorToTypes.naturality, map_section_eq_toN_snd]⟩
+  · simp only [N.le_iff, ofSimplex_toN, Subpresheaf.ofSection_le_iff,
+      mem_ofSimplex_obj_iff]
+    exact ⟨X.toNπ x, by rw [← FunctorToTypes.naturality, map_toNπ_op_toN]⟩
+
+@[simp]
+lemma id_app {n : SimplexCategoryᵒᵖ} (x : X.obj n) : NatTrans.app (𝟙 X) n x = x := rfl
+
+@[simp]
+lemma mapN_id : mapN (𝟙 X) = OrderHom.id := by
+  ext x
+  obtain ⟨n, x, rfl⟩ := X.toN_surjective x
+  simp
+
+lemma mapN_mapN {Z : SSet.{u}} (g : Y ⟶ Z) (x : X.N) :
+    mapN g (mapN f x) = mapN (f ≫ g) x := by
+  obtain ⟨n, x, rfl⟩ := X.toN_surjective x
+  simp
 
 end SSet

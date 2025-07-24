@@ -102,6 +102,7 @@ import TopCatModelCategory.TopCat.ClosedEmbeddings
 import TopCatModelCategory.TopCat.Colimits
 import TopCatModelCategory.TopCat.CompactOpen
 import TopCatModelCategory.TopCat.Cosimp
+import TopCatModelCategory.TopCat.CosimpIso
 import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
 import TopCatModelCategory.TopCat.DeformationRetract
 import TopCatModelCategory.TopCat.Glueing
