@@ -123,7 +123,7 @@ noncomputable def toTopIso : SimplexCategory.toTop ≅ cosimp unitInterval :=
     ext j
     simp only [Finset.disjiUnion_eq_biUnion, Finset.mem_biUnion, Finset.mem_filter, Finset.mem_univ,
       true_and, exists_eq_right']
-    sorry)
+    exact (SimplexCategory.II.castSucc_lt_map_apply g i j).symm)
 
 end cosimp
 

@@ -266,4 +266,23 @@ lemma II'_σ {n : ℕ} (i : Fin (n + 1)) :
     II.σ i = (δ i.succ.castSucc).op :=
   Quiver.Hom.unop_inj (by ext x : 3; apply II.map'_predAbove)
 
+lemma II.castSucc_lt_map_apply {n m : SimplexCategory} (f : n ⟶ m)
+    (i : Fin (m.len + 2)) (j : Fin (n.len + 1)) :
+    j.castSucc < (II.map f).unop i ↔ (f j).castSucc < i := by
+  generalize h : (II.map f).unop i = k
+  change II.map' _ _ = _ at h
+  obtain ⟨k, rfl⟩ | rfl := k.eq_castSucc_or_eq_last
+  · simp only [II_obj, len_mk, map'_eq_castSucc_iff] at h
+    constructor
+    · intro hj
+      exact h.2 _ (by simpa using hj)
+    · intro hj
+      by_contra!
+      simp only [not_lt, Fin.castSucc_le_castSucc_iff] at this
+      refine hj.not_le (h.1.trans ?_)
+      simpa only [Fin.castSucc_le_castSucc_iff] using f.toOrderHom.monotone this
+  · refine ⟨fun _ ↦ ?_, fun _ ↦ j.castSucc_lt_last⟩
+    simp only [II_obj, len_mk, map'_eq_last_iff] at h
+    apply h
+
 end SimplexCategory
