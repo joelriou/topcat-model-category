@@ -1,10 +1,12 @@
+import TopCatModelCategory.NNReal
+import TopCatModelCategory.TopCat.Adj
 import TopCatModelCategory.TopCat.Cosimp
 import TopCatModelCategory.TopCat.Monoidal
 import Mathlib.AlgebraicTopology.TopologicalSimplex
 
 universe u
 
-open BigOperators NNReal
+open NNReal CategoryTheory
 
 namespace TopCat
 
@@ -24,10 +26,8 @@ lemma objOfToTopObj_zero : objOfToTopObj s 0 = 0 := by simp [objOfToTopObj]
 lemma objOfToTopObj_last : objOfToTopObj s (Fin.last _) = 1 := by
   obtain ⟨s, hs⟩ := s
   simp only [SimplexCategory.toTopObj, Set.mem_setOf_eq] at hs
-  let coeℝ : ℝ≥0 →+ ℝ := AddMonoidHom.mk' (fun (x : ℝ≥0) ↦ x.1) (by aesop)
-  have := map_sum coeℝ s Finset.univ
-  simp only [hs, val_eq_coe, AddMonoidHom.mk'_apply, coe_one, coeℝ] at this
-  simp only [this, objOfToTopObj]
+  rw [Subtype.ext_iff, NNReal.coe_sum, val_eq_coe, coe_one] at hs
+  rw [← hs, objOfToTopObj]
   congr
   ext i
   simpa using i.castSucc_lt_last
@@ -57,15 +57,13 @@ lemma objOfToTopObj_mem_unitInterval (i : Fin (n.len + 2)) :
 
 end
 
-def objUnitIntervalHomeomorph (n : SimplexCategory) :
-     SimplexCategory.toTopObj n ≃ₜ obj unitInterval n where
-  toFun s := ⟨⟨fun i ↦ ⟨objOfToTopObj s i, objOfToTopObj_mem_unitInterval s i⟩,
-    monotone_objOfToTopObj s⟩, by aesop⟩
-  invFun := sorry
-  left_inv := sorry
-  right_inv := sorry
-  continuous_toFun := by
-    apply Continuous.subtype_mk
+lemma isHomeomorph_objUnitInterval (n : SimplexCategory) :
+  IsHomeomorph (X := SimplexCategory.toTopObj n) (Y := obj unitInterval n)
+    (fun s ↦ ⟨⟨fun i ↦ ⟨objOfToTopObj s i, objOfToTopObj_mem_unitInterval s i⟩,
+      monotone_objOfToTopObj s⟩, by aesop⟩) := by
+  rw [isHomeomorph_iff_continuous_bijective]
+  constructor
+  · apply Continuous.subtype_mk
     rw [OrderHom.continuous_iff]
     intro i
     apply Continuous.subtype_mk
@@ -74,7 +72,58 @@ def objUnitIntervalHomeomorph (n : SimplexCategory) :
     apply Continuous.comp
     · exact continuous_coe
     · exact (_root_.continuous_apply _).comp continuous_subtype_val
-  continuous_invFun := sorry
+  · constructor
+    · intro s t h
+      simp only [Subtype.ext_iff, OrderHom.mk.injEq, funext_iff] at h
+      ext i
+      simpa only [← h, objOfToTopObj_succ s i, add_right_inj] using objOfToTopObj_succ t i
+    · intro f
+      let s (i : Fin (n.len + 1)) : ℝ := (f.1 i.succ).1 - (f.1 i.castSucc).1
+      have hs₀ (i) : 0 ≤ s i := sub_nonneg_of_le (f.1.monotone i.castSucc_le_succ)
+      have hs₁ (i : Fin (n.len + 2)) :
+          (Finset.univ.filter (fun (j : Fin _) ↦ j.castSucc < i)).sum (fun j ↦ s j) = f.1 i := by
+        induction i using Fin.induction with
+        | zero => simp [f.2.1]
+        | succ l hi =>
+          rw [Finset.sum_eq_add_sum_diff_singleton (i := l) (by simp), ← eq_sub_iff_add_eq']
+          convert hi using 2
+          · ext j
+            simp only [Fin.castSucc_lt_succ_iff, Finset.mem_sdiff, Finset.mem_filter,
+              Finset.mem_univ, true_and, Finset.mem_singleton, Fin.castSucc_lt_castSucc_iff]
+            omega
+          · simp [s]
+      refine ⟨⟨(fun i ↦ ⟨s i, hs₀ i⟩), ?_⟩, by ext; apply hs₁⟩
+      have := hs₁ (Fin.last _)
+      simp only [f.2.2] at this
+      simp only [SimplexCategory.toTopObj, Set.mem_setOf_eq]
+      rw [Subtype.ext_iff, NNReal.coe_sum]
+      convert this using 1
+      congr
+      ext i
+      simpa using i.castSucc_lt_last
+
+noncomputable def objUnitIntervalHomeomorph (n : SimplexCategory) :
+     SimplexCategory.toTopObj n ≃ₜ obj unitInterval n :=
+  (isHomeomorph_objUnitInterval n).homeomorph
+
+noncomputable def toTopIso : SimplexCategory.toTop ≅ cosimp unitInterval :=
+  NatIso.ofComponents (fun n ↦ TopCat.isoOfHomeo (objUnitIntervalHomeomorph _)) (fun {n m} g ↦ by
+    ext f
+    dsimp [objUnitIntervalHomeomorph] at f ⊢
+    ext i
+    dsimp [objOfToTopObj]
+    simp only [toReal_sum, val_eq_coe]
+    rw [← Finset.sum_disjiUnion]; swap
+    · intro a ha b hb h i hia hib x hx
+      have h₁ := hia hx
+      have h₂ := hib hx
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and] at h₁ h₂
+      exact (h (by rw [← h₁, h₂])).elim
+    congr
+    ext j
+    simp only [Finset.disjiUnion_eq_biUnion, Finset.mem_biUnion, Finset.mem_filter, Finset.mem_univ,
+      true_and, exists_eq_right']
+    sorry)
 
 end cosimp
 

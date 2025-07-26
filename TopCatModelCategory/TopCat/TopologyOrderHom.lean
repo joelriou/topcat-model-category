@@ -23,4 +23,8 @@ lemma continuous_iff {X : Type*} [TopologicalSpace X] (f : X → (A →o B)) :
   rw [(isInducing A B).continuous_iff, continuous_pi_iff]
   rfl
 
+instance [T2Space B] : T2Space (A →o B) :=
+  T2Space.of_injective_continuous (f := OrderHom.toFun)
+    (fun _ _ h ↦ by ext; apply congr_fun h) (by continuity)
+
 end OrderHom

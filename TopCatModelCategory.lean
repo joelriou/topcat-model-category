@@ -23,6 +23,7 @@ import TopCatModelCategory.MonoCoprod
 import TopCatModelCategory.MonoidalClosed
 import TopCatModelCategory.MorphismProperty
 import TopCatModelCategory.Multiequalizer
+import TopCatModelCategory.NNReal
 import TopCatModelCategory.PseudoFunctor.LaxNatTrans
 import TopCatModelCategory.PseudoFunctor.MorphismProperty
 import TopCatModelCategory.PseudoFunctor.Pseudofunctor
