@@ -36,8 +36,8 @@ lemma objOfToTopObj_last : objOfToTopObj s (Fin.last _) = 1 := by
 @[simp]
 lemma objOfToTopObj_succ (i : Fin (n.len + 1)) :
     objOfToTopObj s i.succ = objOfToTopObj s i.castSucc + (s.1 i).1 := by
-  simp only [objOfToTopObj]
-  simp only [Fin.castSucc_lt_succ_iff, Fin.castSucc_lt_castSucc_iff, val_eq_coe]
+  simp only [objOfToTopObj, Fin.castSucc_lt_succ_iff,
+    Fin.castSucc_lt_castSucc_iff, val_eq_coe]
   rw [Finset.sum_eq_add_sum_diff_singleton (i := i) (by simp), add_comm]
   congr
   ext j
