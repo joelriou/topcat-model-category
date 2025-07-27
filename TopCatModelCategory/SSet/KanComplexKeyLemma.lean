@@ -198,7 +198,6 @@ include hp
 
 lemma W.hasLiftingPropertyFixedTop_const (n : ℕ) (e : E _⦋0⦌) :
     HasLiftingPropertyFixedTop (boundary n).ι p (const e) := by
-  have := hp
   intro b sq
   obtain ⟨b, rfl⟩ : ∃ (b' : B.PtSimplex n (p.app _ e)), b'.map = b := ⟨{
     map := b

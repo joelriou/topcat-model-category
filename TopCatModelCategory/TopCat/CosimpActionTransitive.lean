@@ -11,6 +11,32 @@ variable (x₀ x₁ y₀ y₁ : ℝ)
 noncomputable def affineMap : ℝ → ℝ :=
   fun t ↦ y₀ + (t - x₀) / (x₁ - x₀) * (y₁ - y₀)
 
+lemma affineMap_exists :
+    ∃ (a b : ℝ), ∀ (x : ℝ), affineMap x₀ x₁ y₀ y₁ x = a + x * b := by
+  generalize h : (y₁ - y₀) / (x₁ - x₀) = b
+  refine ⟨y₀ - x₀ * b, b, fun x ↦ ?_⟩
+  simp only [affineMap, mul_comm_div, h]
+  ring
+
+lemma affineMap_unique (a b a' b' : ℝ) (x₀ x₁ : ℝ) (hx : x₀ ≠ x₁)
+    (hx₀ : a + x₀ * b = a' + x₀ * b')
+    (hx₁ : a + x₁ * b = a' + x₁ * b') :
+    a = a' ∧ b = b' := by
+  have hx₀₁ : x₀ - x₁ ≠ 0 := fun h ↦ hx (by rwa [sub_eq_zero] at h)
+  obtain rfl : b = b' := by
+    rw [← sub_eq_zero, ← mul_eq_zero_iff_left hx₀₁]
+    linarith
+  obtain rfl : a = a' := by simpa using hx₀
+  simp
+
+lemma affineMap_comp_affineMap_exists (x₀' x₁' y₀' y₁' : ℝ) :
+    ∃ (a b : ℝ), ∀ (x : ℝ), affineMap x₀' x₁' y₀' y₁' (affineMap x₀ x₁ y₀ y₁ x) = a + x * b := by
+  obtain ⟨a, b, h⟩ := affineMap_exists x₀ x₁ y₀ y₁
+  obtain ⟨a', b', h'⟩ := affineMap_exists x₀' x₁' y₀' y₁'
+  refine ⟨a * b' + a', b * b', fun x ↦ ?_⟩
+  simp only [h, h']
+  ring
+
 @[simp]
 lemma affineMap_apply₀ : affineMap x₀ x₁ y₀ y₁ x₀ = y₀ := by
   simp [affineMap]
@@ -49,6 +75,18 @@ lemma strictMono_affineMap : StrictMono (affineMap x₀ x₁ y₀ y₁) := by
 lemma affineMap_lt (x : ℝ) (hx : x < x₁) : affineMap x₀ x₁ y₀ y₁ x < y₁ := by
   conv_rhs => rw [← affineMap_apply₁ x₀ x₁ y₀ y₁ hx₀₁.ne]
   exact strictMono_affineMap _ _ _ _ hx₀₁ hy₀₁ hx
+
+lemma affineMap_surjective_on (y : ℝ) (hy₀ : y₀ ≤ y) (hy₁ : y ≤ y₁) :
+    ∃ (x : ℝ),x₀ ≤ x ∧ x ≤ x₁ ∧ affineMap x₀ x₁ y₀ y₁ x = y :=
+  ⟨affineMap y₀ y₁ x₀ x₁ y, le_affineMap y₀ y₁ x₀ x₁ hy₀₁ hx₀₁ y hy₀,
+    affineMap_le y₀ y₁ x₀ x₁ hy₀₁ hx₀₁ y hy₁, by
+      obtain ⟨a, b, h⟩ := affineMap_comp_affineMap_exists y₀ y₁ x₀ x₁ x₀ x₁ y₀ y₁
+      have h₀ := h y₀
+      have h₁ := h y₁
+      rw [affineMap_apply₀, affineMap_apply₀] at h₀
+      rw [affineMap_apply₁ _ _ _ _ hy₀₁.ne, affineMap_apply₁ _ _ _ _ hx₀₁.ne] at h₁
+      obtain ⟨rfl, rfl⟩ := affineMap_unique 0 1 a b y₀ y₁ hy₀₁.ne (by simpa) (by simpa)
+      simp [h]⟩
 
 end Real
 
@@ -144,6 +182,13 @@ lemma le_α (i : Fin (n + 1)) (x : unitInterval) (hx : f.1 i.castSucc ≤ x) :
     g.1 i.castSucc ≤ α f g i x :=
   Real.le_affineMap _ _ _ _ (hf (i.castSucc_lt_succ)) (hg (i.castSucc_lt_succ)) x hx
 
+include hf hg in
+lemma α_surjective_on (i : Fin (n + 1)) (y : ℝ) (hy₀ : g.1 i.castSucc ≤ y) (hy₁ : y ≤ g.1 i.succ) :
+    ∃ (x : unitInterval), f.1 i.castSucc ≤ x ∧ x ≤ f.1 i.succ ∧ α f g i x = y := by
+  obtain ⟨x, hx₀, hx₁, h⟩ := Real.affineMap_surjective_on _ _ _ _
+    (hf (i.castSucc_lt_succ)) (hg (i.castSucc_lt_succ)) y hy₀ hy₁
+  exact ⟨⟨x, (f.1 i.castSucc).2.1.trans hx₀, hx₁.trans (f.1 i.succ).2.2⟩, hx₀, hx₁, h⟩
+
 noncomputable def φ (x : unitInterval) : ℝ :=
   α f g  (index f x) x
 
@@ -205,7 +250,36 @@ lemma strictMono_ψ : StrictMono (ψ f g hf hg) :=
   fun _ _ h ↦ strictMono_φ f g hf hg h
 
 lemma surjective_ψ : Function.Surjective (ψ f g hf hg) := by
-  sorry
+  intro y
+  generalize hi : index g y = i
+  obtain ⟨x, hx₀, hx₁, h⟩ := α_surjective_on f g hf hg i y.1
+    (by rw [← hi, Subtype.coe_le_coe, ← le_index_iff]) (by
+      rw [Subtype.coe_le_coe]
+      obtain ⟨i, rfl⟩ | rfl := i.eq_castSucc_or_eq_last
+      · apply le_of_lt
+        rw [Fin.succ_castSucc, ← index_le_castSucc_iff, hi]
+      · have := g.2.2
+        dsimp at this
+        simpa only [Fin.succ_last, SimplexCategory.len_mk, Nat.succ_eq_add_one, this] using y.2.2)
+  have hi' : index f x = i := by
+    apply le_antisymm
+    · obtain ⟨i, rfl⟩ | rfl := i.eq_castSucc_or_eq_last
+      · rw [index_le_castSucc_iff]
+        obtain hx₁ | rfl := hx₁.lt_or_eq
+        · exact hx₁
+        · exfalso
+          dsimp [α] at h
+          rw [Real.affineMap_apply₁, ← Subtype.ext_iff, Fin.succ_castSucc] at h; swap
+          · intro h
+            rw [← Subtype.ext_iff] at h
+            exact (hf (Fin.castSucc_lt_succ i.castSucc)).ne h
+          subst h
+          have := index_apply_castSucc g hg i.succ
+          dsimp at this
+          simp [this, Fin.ext_iff] at hi
+      · apply Fin.le_last
+    · rwa [le_index_iff]
+  exact ⟨x, by simpa [Subtype.ext_iff, ψ, φ, hi']⟩
 
 noncomputable def orderIso : unitInterval ≃o unitInterval :=
   StrictMono.orderIsoOfSurjective _ (strictMono_ψ f g hf hg)
