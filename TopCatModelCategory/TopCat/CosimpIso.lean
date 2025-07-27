@@ -1,4 +1,4 @@
-import TopCatModelCategory.NNReal
+import Mathlib.Data.NNReal.Basic
 import TopCatModelCategory.TopCat.Adj
 import TopCatModelCategory.TopCat.Cosimp
 import TopCatModelCategory.TopCat.Monoidal
@@ -26,7 +26,8 @@ lemma objOfToTopObj_zero : objOfToTopObj s 0 = 0 := by simp [objOfToTopObj]
 lemma objOfToTopObj_last : objOfToTopObj s (Fin.last _) = 1 := by
   obtain ⟨s, hs⟩ := s
   simp only [SimplexCategory.toTopObj, Set.mem_setOf_eq] at hs
-  rw [Subtype.ext_iff, NNReal.coe_sum, val_eq_coe, coe_one] at hs
+  rw [Subtype.ext_iff] at hs
+  simp only [val_eq_coe, coe_sum, coe_one] at hs
   rw [← hs, objOfToTopObj]
   congr
   ext i
@@ -96,7 +97,8 @@ lemma isHomeomorph_objUnitInterval (n : SimplexCategory) :
       have := hs₁ (Fin.last _)
       simp only [f.2.2] at this
       simp only [SimplexCategory.toTopObj, Set.mem_setOf_eq]
-      rw [Subtype.ext_iff, NNReal.coe_sum]
+      rw [Subtype.ext_iff]
+      simp only [val_eq_coe, coe_sum, coe_mk, coe_one, s]
       convert this using 1
       congr
       ext i
@@ -112,7 +114,7 @@ noncomputable def toTopIso : SimplexCategory.toTop ≅ cosimp unitInterval :=
     dsimp [objUnitIntervalHomeomorph] at f ⊢
     ext i
     dsimp [objOfToTopObj]
-    simp only [toReal_sum, val_eq_coe]
+    simp only [coe_sum]
     rw [← Finset.sum_disjiUnion]; swap
     · intro a ha b hb h i hia hib x hx
       have h₁ := hia hx
