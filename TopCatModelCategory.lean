@@ -103,6 +103,7 @@ import TopCatModelCategory.TopCat.Colimits
 import TopCatModelCategory.TopCat.CompactOpen
 import TopCatModelCategory.TopCat.Cosimp
 import TopCatModelCategory.TopCat.CosimpActionTransitive
+import TopCatModelCategory.TopCat.CosimpInterior
 import TopCatModelCategory.TopCat.CosimpIso
 import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
 import TopCatModelCategory.TopCat.DeformationRetract

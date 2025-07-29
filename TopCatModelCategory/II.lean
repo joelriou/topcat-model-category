@@ -78,6 +78,17 @@ lemma map'_eq_iff (f : Fin (n + 1) →o Fin (m + 1)) (x : Fin (m + 2)) (y : Fin 
   · rintro ⟨h₁, h₂⟩
     exact le_antisymm (Finset.min'_le _ _ h₁) (by rwa [Finset.le_min'_iff])
 
+lemma map'_le_castSucc_iff (f : Fin (n + 1) →o Fin (m + 1))
+    (x : Fin (m + 2)) (i : Fin (n + 1)) :
+    map' f x ≤ i.castSucc ↔ x ≤ (f i).castSucc := by
+  refine ⟨fun h ↦ ?_, fun h ↦ Finset.min'_le _ _ (by simpa)⟩
+  have : map' f x ∈ _ := Finset.min'_mem _ (nonempty_finset f x)
+  simp only [mem_finset_iff] at this
+  obtain h' | ⟨_, h'⟩ := this
+  · simp only [h', Fin.last_le_iff] at h
+    exact (Fin.castSucc_ne_last _ h).elim
+  · refine h'.trans (Fin.castSucc_le_castSucc_iff.2 (f.2 (by simpa)))
+
 lemma map'_eq_last_iff (f : Fin (n + 1) →o Fin (m + 1)) (x : Fin (m + 2)) :
     map' f x = Fin.last _ ↔ ∀ (i : Fin (n + 1)), (f i).castSucc < x := by
   simp only [map'_eq_iff, last_mem_finset, Fin.last_le_iff, true_and]
@@ -237,6 +248,34 @@ lemma monotone_map' (f : Fin (n + 1) →o Fin (m + 1)) :
       exact hxy.trans hz
     · simp)
 
+lemma strictMono_map' (f : Fin (n + 1) →o Fin (m + 1)) (hf : Function.Surjective f) :
+    StrictMono (map' f) := by
+  intro x y hxy
+  obtain h | h := (monotone_map' f hxy.le).lt_or_eq
+  · exact h
+  · exfalso
+    generalize hj : map' f y = j
+    rw [hj] at h
+    obtain ⟨x, rfl⟩ := Fin.eq_castSucc_of_ne_last (Fin.ne_last_of_lt hxy)
+    obtain ⟨i, rfl⟩ := hf x
+    obtain ⟨j, rfl⟩ | rfl := j.eq_castSucc_or_eq_last
+    · rw [map'_eq_castSucc_iff] at h hj
+      by_cases hij : i < j
+      · exact (lt_self_iff_false _).1 (h.2 _ hij)
+      · simp only [not_lt] at hij
+        exact (lt_self_iff_false y).1 (lt_of_le_of_lt
+          (hj.1.trans (Fin.castSucc_le_castSucc_iff.2 (f.2 hij))) hxy)
+    · rw [map'_eq_last_iff] at h
+      exact (lt_self_iff_false _).1 (h i)
+
+def injective_map' {f g : Fin (n + 1) →o Fin (m + 1)}
+     (h : map' f = map' g) : f = g := by
+  ext i : 2
+  wlog h' : g i ≤ f i generalizing f g
+  · rw [this h.symm (not_le.1 h').le]
+  refine le_antisymm ?_ h'
+  rw [← Fin.castSucc_le_castSucc_iff, ← map'_le_castSucc_iff, ← h, map'_le_castSucc_iff]
+
 end II
 
 /-- The functor `SimplexCategory ⥤ SimplexCategoryᵒᵖ` (i.e. a cosimplicial
@@ -284,5 +323,16 @@ lemma II.castSucc_lt_map_apply {n m : SimplexCategory} (f : n ⟶ m)
   · refine ⟨fun _ ↦ ?_, fun _ ↦ j.castSucc_lt_last⟩
     simp only [II_obj, len_mk, map'_eq_last_iff] at h
     apply h
+
+lemma II.strictMono_map_unop {n m : SimplexCategory} (f : n ⟶ m) [Epi f] :
+    StrictMono (II.map f).unop :=
+  fun _ _ h ↦ strictMono_map' _ (by rwa [← SimplexCategory.epi_iff_surjective]) h
+
+instance II.faithful : SimplexCategory.II.Faithful where
+  map_injective h := by
+    ext : 1
+    apply II.injective_map'
+    ext i : 1
+    exact DFunLike.congr_fun (congr_arg Hom.toOrderHom (congr_arg Quiver.Hom.unop h)) i
 
 end SimplexCategory
