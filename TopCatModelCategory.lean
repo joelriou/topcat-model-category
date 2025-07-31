@@ -77,6 +77,7 @@ import TopCatModelCategory.SSet.Monoidal
 import TopCatModelCategory.SSet.Monomorphisms
 import TopCatModelCategory.SSet.NonDegeneratePartialOrder
 import TopCatModelCategory.SSet.NonDegenerateProdSimplex
+import TopCatModelCategory.SSet.Pairing
 import TopCatModelCategory.SSet.Paths
 import TopCatModelCategory.SSet.PiZero
 import TopCatModelCategory.SSet.Presentable
