@@ -20,6 +20,12 @@ lemma nerve_σ_obj {n : ℕ} (i : Fin (n + 1)) (x : (nerve X) _⦋n⦌) (j : Fin
 
 end CategoryTheory
 
+@[ext]
+lemma Preorder.nerveExt {X : Type u} [Preorder X]
+    {n : SimplexCategoryᵒᵖ} {s t : (nerve X).obj n} (h : s.obj = t.obj) :
+    s = t :=
+  ComposableArrows.ext (by simp [h]) (fun _ _ ↦ rfl)
+
 namespace PartialOrder
 
 section
@@ -60,11 +66,6 @@ noncomputable def orderHomMax : NonemptyFiniteChains X →o X where
 end NonemptyFiniteChains
 
 variable {X}
-
-@[ext]
-lemma nerveExt {n : SimplexCategoryᵒᵖ} {s t : (nerve X).obj n}
-    (h : s.obj = t.obj) : s = t :=
-  ComposableArrows.ext (by simp [h]) (fun _ _ ↦ rfl)
 
 lemma mem_degenerate_iff {n : ℕ} (s : (nerve X) _⦋n⦌) :
     s ∈ (nerve X).nonDegenerate n ↔ StrictMono s.obj := by
@@ -124,6 +125,8 @@ def complSingleton : NonemptyFiniteChains X :=
 def horn : (nerve (NonemptyFiniteChains X)).Subcomplex where
   obj n := setOf (fun s ↦ ∀ (i : ToType n.unop), s.obj i ≠ ⊤ ∧ s.obj i ≠ complSingleton x₀)
   map _ _ hs _ := hs _
+
+-- TODO: `(horn x₀).ι` is a strong anodyne extension
 
 end NonemptyFiniteChains
 
