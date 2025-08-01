@@ -1,5 +1,6 @@
 import TopCatModelCategory.SSet.NonDegeneratePartialOrder
 import Mathlib.SetTheory.Ordinal.Rank
+import Mathlib.Order.OrderIsoNat
 import Mathlib.Order.ConditionallyCompleteLattice.Finset
 
 -- Sean Moss, Another approach to the Kan-Quillen model structure
@@ -29,7 +30,7 @@ namespace SSet
 variable {X : SSet.{u}}
 
 def IsFace {n m : ℕ} (x : X _⦋n⦌) (y : X _⦋m⦌) : Prop :=
-  ∃ (f : ⦋n⦌ ⟶ ⦋m⦌), Mono f ∧ X.map f.op y = x
+  ∃ (f : ⦋n⦌ ⟶ ⦋m⦌), Mono f ∧ n ≠ m ∧ X.map f.op y = x
 
 namespace IsFace
 
@@ -39,8 +40,13 @@ noncomputable def f : ⦋n⦌ ⟶ ⦋m⦌ := hxy.choose
 
 instance : Mono hxy.f := hxy.choose_spec.1
 
+include hxy in
+lemma lt : n < m :=
+  Nat.lt_of_le_of_ne (SimplexCategory.len_le_of_mono (f := hxy.f) inferInstance)
+    hxy.choose_spec.2.1
+
 @[simp]
-lemma eq : X.map hxy.f.op y = x := hxy.choose_spec.2
+lemma eq : X.map hxy.f.op y = x := hxy.choose_spec.2.2
 
 include hxy in
 lemma mem_ofSimplex : x ∈ (Subcomplex.ofSimplex y).obj _ :=
@@ -59,7 +65,9 @@ include hxy
 
 lemma dim_eq : m = n + 1 := hxy.1
 
-lemma isFace : IsFace x y := hxy.2.exists
+lemma isFace : IsFace x y := by
+  obtain ⟨f, _, hf⟩ := hxy.2.exists
+  exact ⟨f, inferInstance, by simp [hxy.dim_eq], hf⟩
 
 end IsUniquelyCodimOneFace
 
@@ -100,6 +108,21 @@ lemma isUniquelyCodimOneFace [P.IsProper] (x : P.II) :
 def AncestralRel (x y : P.II) : Prop :=
   x ≠ y ∧ IsFace x.1.1.2.1 (P.p y).1.1.2.1
 
+namespace AncestralRel
+
+variable {P} {x y : P.II} (hxy : P.AncestralRel x y)
+
+include hxy
+
+lemma ne : x ≠ y := hxy.1
+
+lemma isFace : IsFace x.1.1.2.1 (P.p y).1.1.2.1 := hxy.2
+
+lemma le [P.IsProper] : x.1.1.1 ≤ y.1.1.1 := by
+  simpa only [(P.isUniquelyCodimOneFace y).dim_eq, Nat.lt_succ_iff] using hxy.isFace.lt
+
+end AncestralRel
+
 def ancestersSet (y : P.II) : Set P.II := { x : P.II | P.AncestralRel x y }
 
 lemma finite_ancesters (y : P.II) :
@@ -126,6 +149,8 @@ instance (y : P.II) : Finite (P.ancestersSet y) := P.finite_ancesters y
 
 class IsRegular extends P.IsProper where
   wf : WellFounded P.AncestralRel
+
+section
 
 variable [P.IsRegular]
 
@@ -165,6 +190,29 @@ lemma coe_rank' (x : P.II) : (P.rank' x : ℕ) = P.rank x :=
 lemma rank'_lt {x y : P.II} (h : P.AncestralRel x y) :
     P.rank' x < P.rank' y := by
   simpa only [← coe_rank', Nat.cast_lt] using P.rank_lt h
+
+end
+
+lemma isRegular_iff [P.IsProper] :
+    P.IsRegular ↔
+      ∃ (φ : P.II → ℕ),
+        ∀ (x y : P.II) (_ : x.1.1.1 = y.1.1.1), P.AncestralRel x y → φ x < φ y :=
+  ⟨fun _ ↦ ⟨P.rank', fun x y _ h ↦ P.rank'_lt h⟩, fun ⟨φ, hφ⟩ ↦
+    { wf := by
+        rw [WellFounded.wellFounded_iff_no_descending_seq]
+        refine ⟨fun ⟨f, hf⟩ ↦ ?_⟩
+        let d (n : ℕ) := (f n).1.1.1
+        obtain ⟨n₀, hn₀⟩ := (wellFoundedGT_iff_monotone_chain_condition (α := ℕᵒᵈ)).1
+          inferInstance ⟨d, monotone_nat_of_le_succ (fun n ↦ (hf n).le)⟩
+        dsimp at hn₀
+        refine not_strictAnti_of_wellFoundedLT (fun n ↦ φ (f (n₀ + n)))
+          (strictAnti_nat_of_succ_lt (fun n ↦ ?_))
+        rw [← add_assoc]
+        exact hφ _ _ ((hn₀ _ (by omega)).symm.trans (hn₀ _ (by omega))) (hf _) }⟩
+
+section
+
+variable [P.IsRegular]
 
 def filtration (n : ℕ) : X.Subcomplex :=
   A ⊔ ⨆ (x : { y : P.II // P.rank' y < n }), Subcomplex.ofSimplex (P.p x.1).1.1.2.1
@@ -208,6 +256,8 @@ lemma iSup_filtration :
         exact ⟨P.rank' y + 1, by rwa [← hy] at this⟩
       · have := P.mem_filtration_I y
         exact ⟨P.rank' y + 1, by rwa [← hy] at this⟩)
+
+end
 
 end Pairing
 
