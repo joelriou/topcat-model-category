@@ -7,6 +7,20 @@ import Mathlib.Order.ConditionallyCompleteLattice.Finset
 
 open CategoryTheory Simplicial
 
+lemma SimplexCategory.δ_injective {n : ℕ} :
+    Function.Injective (δ (n := n)) := by
+  intro i j hij
+  wlog h : i < j
+  · simp only [not_lt] at h
+    obtain h | rfl := h.lt_or_eq
+    · exact (this hij.symm h).symm
+    · rfl
+  obtain ⟨i, rfl⟩ := Fin.eq_castSucc_of_ne_last (Fin.ne_last_of_lt h)
+  have : i.castSucc.succAbove i = j.succAbove i := by
+    change δ i.castSucc i = δ j i
+    rw [hij]
+  simp [Fin.succAbove_of_castSucc_lt _ _ h, Fin.ext_iff] at this
+
 universe u
 
 namespace Order
@@ -68,6 +82,33 @@ lemma dim_eq : m = n + 1 := hxy.1
 lemma isFace : IsFace x y := by
   obtain ⟨f, _, hf⟩ := hxy.2.exists
   exact ⟨f, inferInstance, by simp [hxy.dim_eq], hf⟩
+
+def cast : X _⦋n + 1⦌ := by
+  obtain rfl := hxy.dim_eq
+  exact y
+
+@[simp]
+lemma ofSimplex_cast :
+    Subcomplex.ofSimplex hxy.cast = Subcomplex.ofSimplex y := by
+  obtain rfl := hxy.dim_eq
+  rfl
+
+lemma existsUnique_index : ∃! (i : Fin (n + 2)), X.δ i hxy.cast = x := by
+  obtain rfl := hxy.dim_eq
+  dsimp only [cast]
+  apply existsUnique_of_exists_of_unique
+  · obtain ⟨φ, _, hφ⟩ := hxy.2.exists
+    obtain ⟨i, rfl⟩ := SimplexCategory.eq_δ_of_mono φ
+    exact ⟨i, hφ⟩
+  · intro i j hi hj
+    exact SimplexCategory.δ_injective
+      (hxy.2.unique ⟨inferInstance, hi⟩ ⟨inferInstance, hj⟩)
+
+noncomputable def index : Fin (n + 2) := hxy.existsUnique_index.exists.choose
+
+@[simp]
+lemma δ_index : X.δ hxy.index hxy.cast = x :=
+  hxy.existsUnique_index.exists.choose_spec
 
 end IsUniquelyCodimOneFace
 
@@ -237,6 +278,12 @@ lemma mem_filtration_I (x : P.II) :
   simp only [Subpresheaf.iSup_obj, Set.mem_union, Set.mem_iUnion]
   exact Or.inr ⟨⟨x, by simp⟩, mem_ofSimplex_obj _⟩
 
+lemma mem_filtration_I_cast (x : P.II) :
+    (P.isUniquelyCodimOneFace x).cast ∈ (P.filtration (P.rank' x + 1)).obj _ := by
+  rw [← Subcomplex.ofSimplex_le_iff, IsUniquelyCodimOneFace.ofSimplex_cast,
+    Subcomplex.ofSimplex_le_iff]
+  exact P.mem_filtration_I x
+
 lemma mem_filtration_II (x : P.II) :
     x.1.1.2.1 ∈ (P.filtration (P.rank' x + 1)).obj _ := by
   have := P.mem_filtration_I x
@@ -256,6 +303,27 @@ lemma iSup_filtration :
         exact ⟨P.rank' y + 1, by rwa [← hy] at this⟩
       · have := P.mem_filtration_I y
         exact ⟨P.rank' y + 1, by rwa [← hy] at this⟩)
+
+def map' (x : P.II) : Δ[x.1.1.1 + 1] ⟶ X :=
+  yonedaEquiv.symm (P.isUniquelyCodimOneFace x).cast
+
+noncomputable abbrev index (x : P.II) : Fin (x.1.1.1 + 2) :=
+  (P.isUniquelyCodimOneFace x).index
+
+def Cells (n : ℕ) : Type u := { y : P.II // P.rank' y = n }
+
+def map {n : ℕ} (x : P.Cells n) :
+    Δ[x.1.1.1.1 + 1] ⟶ P.filtration (n + 1) :=
+  Subcomplex.lift (P.map' x.1) (by
+    simp only [preimage_eq_top_iff]
+    dsimp only [range]
+    rw [Subcomplex.range_eq_ofSimplex, Subpresheaf.ofSection_le_iff, map',
+      Equiv.apply_symm_apply]
+    simpa only [← x.2] using P.mem_filtration_I_cast x.1)
+
+/-lemma filtration_preimage_map' {n : ℕ} (x : P.Cells n) :
+    (P.filtration n).preimage (P.map' x.1) = SSet.horn _ (P.index x.1) := by
+  sorry-/
 
 end
 
