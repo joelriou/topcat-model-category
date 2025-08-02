@@ -123,7 +123,7 @@ instance [Nonempty X] : OrderTop (NonemptyFiniteChains X) where
   le_top _ := by simp
 
 @[simp]
-lemma coe_top [Nonempty X] : (⊤ : NonemptyFiniteChains X).1 = ⊤ := rfl
+lemma coe_top [Nonempty X] : (⊤ : NonemptyFiniteChains X).1 = Finset.univ := rfl
 
 variable (x₀ : X) [Nontrivial X]
 
@@ -131,6 +131,49 @@ variable (x₀ : X) [Nontrivial X]
 def complSingleton : NonemptyFiniteChains X :=
   ⟨{x₀}ᶜ, ⟨(exists_ne x₀).choose, by simpa using (exists_ne x₀).choose_spec⟩,
     le_total⟩
+
+lemma complSingleton_le_iff {s : NonemptyFiniteChains X} :
+    complSingleton x₀ ≤ s ↔ s = ⊤ ∨ s = complSingleton x₀ := by
+  constructor
+  · intro h
+    obtain h | rfl := h.lt_or_eq
+    · refine Or.inl ?_
+      apply le_antisymm
+      · exact le_top
+      · intro x _
+        by_cases hx : x = x₀
+        · subst hx
+          by_contra!
+          apply h.not_le
+          aesop
+        · exact h.le (by simpa)
+    · exact Or.inr rfl
+  · rintro (rfl | rfl)
+    · exact le_top
+    · rfl
+
+lemma eq_complSingleton_iff (s : NonemptyFiniteChains X) :
+    s = complSingleton x₀ ↔ s < ⊤ ∧ s.1 ∪ {x₀} = ⊤ := by
+  constructor
+  · rintro rfl
+    simp only [complSingleton_coe, Finset.top_eq_univ]
+    constructor
+    · by_contra h
+      replace h : (complSingleton x₀).1 = Finset.univ := by
+        simp only [not_lt_top_iff] at h
+        simp [h]
+      have := Finset.mem_univ x₀
+      simp [← h] at this
+    · ext
+      simp
+      tauto
+  · rintro ⟨h₁, h₂⟩
+    have : complSingleton x₀ ≤ s := fun x hx ↦ by
+      have := h₂.symm.le (Finset.mem_univ x)
+      simp only [Finset.mem_union, Finset.mem_singleton] at this
+      aesop
+    rw [complSingleton_le_iff] at this
+    aesop
 
 def horn : (nerve (NonemptyFiniteChains X)).Subcomplex where
   obj n := setOf (fun s ↦ ∀ (i : ToType n.unop), s.obj i ≠ ⊤ ∧ s.obj i ≠ complSingleton x₀)
@@ -146,6 +189,23 @@ lemma not_mem_horn_iff {n : ℕ} (s : (nerve (NonemptyFiniteChains X)) _⦋n⦌)
       ∃ (i : Fin (n + 1)), s.obj i = ⊤ ∨ s.obj i = complSingleton x₀ := by
   simp only [mem_horn_iff, not_forall,
     Classical.not_and_iff_or_not_not, not_not]
+
+lemma not_mem_horn_iff' {n : ℕ} (s : (nerve (NonemptyFiniteChains X)) _⦋n⦌) :
+    s ∉ (horn x₀).obj _ ↔
+        s.obj (Fin.last _) = ⊤ ∨ s.obj (Fin.last _) = complSingleton x₀ := by
+  rw [not_mem_horn_iff]
+  refine ⟨fun ⟨i, h⟩ ↦ ?_, fun h ↦ ⟨_, h⟩⟩
+  rw [← complSingleton_le_iff]
+  refine le_trans ?_ (s.monotone i.le_last)
+  obtain h | h := h
+  · rw [h]
+    exact le_top
+  · rw [h]
+
+lemma not_mem_horn_iff'' {n : ℕ} (s : (nerve (NonemptyFiniteChains X)) _⦋n⦌) :
+    s ∉ (horn x₀).obj _ ↔
+        complSingleton x₀ ≤ s.obj (Fin.last _) := by
+  rw [not_mem_horn_iff', complSingleton_le_iff]
 
 end NonemptyFiniteChains
 
