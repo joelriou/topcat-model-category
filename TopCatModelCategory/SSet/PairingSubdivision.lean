@@ -172,21 +172,40 @@ noncomputable def p : II (x₀ := x₀) ≃ I (x₀ := x₀) :=
 lemma p_symm (s : I (x₀ := x₀)) :
     p.symm s = q s := rfl
 
+@[simp]
+lemma q_p (s : II (x₀ := x₀)) : q (p s) = s :=
+  p.symm_apply_apply s
+
+@[simp]
+lemma p_q (s : I (x₀ := x₀)) : p (q s) = s :=
+  p.apply_symm_apply s
+
+lemma isUniquelyCodimOneFace (s : I (x₀ := x₀)) :
+    SSet.IsUniquelyCodimOneFace (q s).1.1.2.1 s.1.1.2.1 :=
+  sorry
+
 end pairing
 
-open pairing in
+open pairing
+
+@[simps]
 noncomputable def pairing : (horn x₀).Pairing where
   I := I
   II := II
-  inter := by simp [I, II]
-  union := by simp [I, II]
+  inter := by simp [II]
+  union := by simp [II]
   p := p
 
 instance : (pairing x₀).IsProper where
-  isUniquelyCodimOneFace := sorry
+  isUniquelyCodimOneFace y := by
+    obtain ⟨s, rfl⟩ := (pairing x₀).p.symm.surjective y
+    dsimp
+    rw [p_q]
+    exact isUniquelyCodimOneFace s
 
-instance : (pairing x₀).IsRegular where
-  wf := sorry
+instance : (pairing x₀).IsRegular := by
+  rw [SSet.Subcomplex.Pairing.isRegular_iff]
+  sorry
 
 end horn
 
