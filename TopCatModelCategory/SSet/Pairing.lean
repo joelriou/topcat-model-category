@@ -140,11 +140,11 @@ lemma exists_or (x : A.N) :
   · exact ⟨⟨_, h⟩, Or.inl rfl⟩
 
 class IsProper where
-  h (x : P.II) : IsUniquelyCodimOneFace x.1.1.2.1 (P.p x).1.1.2.1
+  isUniquelyCodimOneFace (x : P.II) : IsUniquelyCodimOneFace x.1.1.2.1 (P.p x).1.1.2.1
 
 lemma isUniquelyCodimOneFace [P.IsProper] (x : P.II) :
     IsUniquelyCodimOneFace x.1.1.2.1 (P.p x).1.1.2.1 :=
-  IsProper.h x
+  IsProper.isUniquelyCodimOneFace x
 
 def AncestralRel (x y : P.II) : Prop :=
   x ≠ y ∧ IsFace x.1.1.2.1 (P.p y).1.1.2.1

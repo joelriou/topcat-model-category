@@ -67,7 +67,7 @@ end NonemptyFiniteChains
 
 variable {X}
 
-lemma mem_degenerate_iff {n : ℕ} (s : (nerve X) _⦋n⦌) :
+lemma mem_nonDegenerate_iff {n : ℕ} (s : (nerve X) _⦋n⦌) :
     s ∈ (nerve X).nonDegenerate n ↔ StrictMono s.obj := by
   obtain _ | n := n
   · simp only [nerve_obj, SimplexCategory.len_mk, SSet.nondegenerate_zero, Set.top_eq_univ,
@@ -106,6 +106,12 @@ lemma mem_degenerate_iff {n : ℕ} (s : (nerve X) _⦋n⦌) :
       rintro i x rfl
       exact (hs i.castSucc_lt_succ).ne (by simp [nerve_σ_obj])
 
+lemma mem_nonDegenerate_δ {n : ℕ} (s : (nerve X) _⦋n + 1⦌) (i : Fin (n + 2))
+    (hs : s ∈ (nerve X).nonDegenerate (n + 1)) :
+    (nerve X).δ i s ∈ (nerve X).nonDegenerate n := by
+  rw [mem_nonDegenerate_iff] at hs ⊢
+  exact hs.comp (Fin.succAboveOrderEmb i).strictMono
+
 end
 
 namespace NonemptyFiniteChains
@@ -116,8 +122,12 @@ instance [Nonempty X] : OrderTop (NonemptyFiniteChains X) where
   top := ⟨.univ, ⟨Classical.arbitrary _, by simp⟩, le_total⟩
   le_top _ := by simp
 
+@[simp]
+lemma coe_top [Nonempty X] : (⊤ : NonemptyFiniteChains X).1 = ⊤ := rfl
+
 variable (x₀ : X) [Nontrivial X]
 
+@[simps]
 def complSingleton : NonemptyFiniteChains X :=
   ⟨{x₀}ᶜ, ⟨(exists_ne x₀).choose, by simpa using (exists_ne x₀).choose_spec⟩,
     le_total⟩
@@ -126,7 +136,16 @@ def horn : (nerve (NonemptyFiniteChains X)).Subcomplex where
   obj n := setOf (fun s ↦ ∀ (i : ToType n.unop), s.obj i ≠ ⊤ ∧ s.obj i ≠ complSingleton x₀)
   map _ _ hs _ := hs _
 
--- TODO: `(horn x₀).ι` is a strong anodyne extension
+lemma mem_horn_iff {n : ℕ} (s : (nerve (NonemptyFiniteChains X)) _⦋n⦌) :
+    s ∈ (horn x₀).obj _ ↔
+      ∀ (i : Fin (n + 1)), s.obj i ≠ ⊤ ∧ s.obj i ≠ complSingleton x₀ := by
+  rfl
+
+lemma not_mem_horn_iff {n : ℕ} (s : (nerve (NonemptyFiniteChains X)) _⦋n⦌) :
+    s ∉ (horn x₀).obj _ ↔
+      ∃ (i : Fin (n + 1)), s.obj i = ⊤ ∨ s.obj i = complSingleton x₀ := by
+  simp only [mem_horn_iff, not_forall,
+    Classical.not_and_iff_or_not_not, not_not]
 
 end NonemptyFiniteChains
 
