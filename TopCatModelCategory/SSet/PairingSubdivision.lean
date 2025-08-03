@@ -320,6 +320,11 @@ lemma mem_finset_iff {n : ℕ} (s : nerve (NonemptyFiniteChains X) _⦋n⦌)
     i ∈ finset x₀ s ↔ x₀ ∉ (s.obj i).1 := by
   simp [finset]
 
+lemma not_mem_finset_iff {n : ℕ} (s : nerve (NonemptyFiniteChains X) _⦋n⦌)
+    (i : Fin (n + 1)) :
+    i ∉ finset x₀ s ↔ x₀ ∈ (s.obj i).1 := by
+  simp [mem_finset_iff]
+
 lemma mem_finset_of_le {n : ℕ} {s : nerve (NonemptyFiniteChains X) _⦋n⦌}
     {i : Fin (n + 1)} (hi : i ∈ finset x₀ s) {j : Fin (n + 1)}
     (hij : j ≤ i) : j ∈ finset x₀ s := by
@@ -390,7 +395,106 @@ lemma injective_q : Function.Injective (q (x₀ := x₀)) := by
 lemma surjective_q : Function.Surjective (q (x₀ := x₀)) := by
   rintro ⟨⟨⟨d, x, h₁⟩, h₂⟩, h₃⟩
   obtain ⟨i, hi⟩ := finset_eq_emptyset_or x₀ x
-  sorry
+  obtain rfl | ⟨i, rfl⟩ := Fin.eq_zero_or_eq_succ i
+  · simp only [Fin.not_lt_zero, Finset.filter_False] at hi
+    obtain ⟨φ, hφ₀, hφ⟩ : ∃ (φ : Fin (d + 2) → NonemptyFiniteChains X),
+        (φ 0).1 = {x₀} ∧ ∀ (i : Fin (d + 1)), φ i.succ = x.obj i :=
+      ⟨Fin.cons ⟨{x₀}, by simp, by simp⟩ x.obj, rfl, fun _ ↦ rfl⟩
+    have hφ' : StrictMono φ := by
+      rw [mem_nonDegenerate_iff] at h₁
+      rw [Fin.strictMono_iff_lt_succ]
+      intro i
+      obtain rfl | ⟨i, rfl⟩ := i.eq_zero_or_eq_succ
+      · have hφ₁ := hφ 0
+        rw [Fin.succ_zero_eq_one] at hφ₁
+        simp only [Fin.castSucc_zero, Fin.succ_zero_eq_one, hφ₁,
+          SimplexCategory.len_mk, lt_iff, hφ₀]
+        have h₀ : 0 ∉ finset x₀ x := by simp [hi]
+        rw [mem_finset_iff, Decidable.not_not] at h₀
+        rw [Finset.ssubset_iff_subset_ne]
+        refine ⟨by simp [h₀], fun h₀' ↦ ?_⟩
+        simp only [II, nerve_obj, SimplexCategory.len_mk,
+          Set.mem_compl_iff] at h₃
+        exact h₃ ⟨0, by simpa using h₀'.symm⟩
+      · rw [← Fin.succ_castSucc, hφ, hφ]
+        exact h₁ i.castSucc_lt_succ
+    let ψ : I (x₀ := x₀) := ⟨⟨⟨d + 1, ⟨hφ'.monotone.functor,
+        by rwa [mem_nonDegenerate_iff]⟩⟩, by
+          have := hφ (Fin.last _)
+          dsimp at this
+          rw [not_mem_horn_iff'] at h₂ ⊢
+          simpa [this]⟩, ⟨0, by simp [hφ₀]⟩⟩
+    have hψ : index ψ rfl = 0 := index_eq_of_isIndex
+      (by simp [cast_obj, ψ, hφ₀])
+    refine ⟨ψ, ?_⟩
+    rw [q_eq _ rfl, Subtype.ext_iff, Subtype.ext_iff, Sigma.ext_iff]
+    simp only [nerve_obj, SimplexCategory.len_mk, toII, heq_eq_eq,
+      Subtype.mk.injEq, true_and, ψ]
+    apply Preorder.nerveExt
+    ext j
+    simpa [toII.simplex, hψ, nerve_δ_obj, cast_obj, ψ] using hφ j
+  · simp only [Fin.castSucc_lt_succ_iff] at hi
+    let s : NonemptyFiniteChains X :=
+      ⟨(x.obj i).1 ∪ {x₀}, by simp, fun _ _ ↦ le_total _ _⟩
+    obtain ⟨φ, hφ₁, hφ₂, hφ₃⟩ :
+        ∃ (φ : Fin (d + 2) → NonemptyFiniteChains X),
+          (∀ (j : Fin (d + 1)), j ≤ i → φ j.castSucc = x.obj j) ∧
+          φ i.succ = s ∧ ∀ (j : Fin (d + 1)), i < j → φ j.succ = x.obj j := by
+      refine ⟨fun j ↦
+        if hj : j.1 ≤ i.1 then x.obj ⟨j.1, lt_of_le_of_lt hj (by dsimp; omega)⟩
+        else
+          if hj : i.1 + 1 < j.1 then x.obj (j.pred (by rintro rfl; simp at hj))
+          else s, fun _ _ ↦ dif_pos (by simpa), by simp, ?_⟩
+      · intro j hj
+        dsimp
+        rw [dif_neg (by simp only [not_le]; omega), dif_pos (by simpa)]
+        simp
+    have hφ' : StrictMono φ := by
+      rw [mem_nonDegenerate_iff] at h₁
+      rw [Fin.strictMono_iff_lt_succ]
+      intro j
+      obtain hj | rfl | hj := lt_trichotomy j i
+      · obtain ⟨j, rfl⟩ := Fin.eq_castSucc_of_ne_last (Fin.ne_last_of_lt hj)
+        rw [Fin.succ_castSucc, hφ₁ j.castSucc (by omega), hφ₁ j.succ hj]
+        exact h₁ (Fin.castSucc_lt_succ j)
+      · simp [hφ₁ j (by rfl), hφ₂, lt_iff, Finset.ssubset_iff_subset_ne, s,
+          ← not_mem_finset_iff, hi]
+      · obtain ⟨j, rfl⟩ := Fin.eq_succ_of_ne_zero (Fin.ne_zero_of_lt hj)
+        rw [← Fin.le_castSucc_iff] at hj
+        rw [hφ₃ j.succ (by rwa [← Fin.le_castSucc_iff]), ← Fin.succ_castSucc]
+        obtain hj | rfl := hj.lt_or_eq
+        · rw [hφ₃ j.castSucc hj]
+          exact h₁ j.castSucc_lt_succ
+        · simp only [hφ₂, SimplexCategory.len_mk, lt_iff,
+            Finset.ssubset_iff_subset_ne, ne_eq, s]
+          refine ⟨Finset.union_subset (x.monotone (j.castSucc_le_succ)) ?_, ?_⟩
+          · simp [Finset.singleton_subset_iff, ← not_mem_finset_iff, hi]
+          · intro h
+            simp [II] at h₃
+            exact h₃ ⟨j.succ, by simpa using h.symm⟩
+    let ψ : I (x₀ := x₀) := ⟨⟨⟨d + 1, ⟨hφ'.monotone.functor,
+        by rwa [mem_nonDegenerate_iff]⟩⟩, by
+        rw [not_mem_horn_iff', ← complSingleton_le_iff] at h₂ ⊢
+        apply h₂.trans
+        obtain ⟨i, rfl⟩ | rfl := i.eq_castSucc_or_eq_last
+        · exact ((hφ₃ (Fin.last _) i.castSucc_lt_last).symm).le
+        · dsimp at hφ₂
+          simp [hφ₂, s]⟩, ⟨i.succ, by simp [hφ₂, hφ₁ i (by rfl), s]⟩⟩
+    have hψ : index ψ rfl = i.succ := index_eq_of_isIndex (by
+      change (φ i.succ).1 = (φ i.castSucc).1 ∪ {x₀}
+      rw [hφ₂, hφ₁ _ (by rfl)])
+    refine ⟨ψ, ?_⟩
+    rw [q_eq _ rfl, Subtype.ext_iff, Subtype.ext_iff, Sigma.ext_iff]
+    simp only [nerve_obj, SimplexCategory.len_mk, toII, heq_eq_eq,
+      Subtype.mk.injEq, true_and]
+    apply Preorder.nerveExt
+    ext (j : Fin (d + 1))
+    simp only [SimplexCategory.len_mk, toII.simplex, nerve_obj, hψ, Monotone.functor_obj, id_eq,
+      eq_mpr_eq_cast, cast_coe_coe_fst, nerve_δ_obj, cast_obj, Fin.eta, ψ]
+    by_cases hj : j ≤ i
+    · rw [Fin.succAbove_of_castSucc_lt _ _ (by simpa), hφ₁ _ hj]
+    · simp only [not_le] at hj
+      rw [Fin.succAbove_of_le_castSucc _ _ (by simpa), hφ₃ _ hj]
 
 variable (x₀) in
 lemma bijective_q : Function.Bijective (q (x₀ := x₀)) :=

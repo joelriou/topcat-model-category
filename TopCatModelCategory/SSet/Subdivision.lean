@@ -46,6 +46,9 @@ instance : PartialOrder (NonemptyFiniteChains X) := Subtype.partialOrder _
 @[simp]
 lemma le_iff (A B : NonemptyFiniteChains X) : A ≤ B ↔ A.1 ⊆ B.1 := Iff.rfl
 
+@[simp]
+lemma lt_iff (A B : NonemptyFiniteChains X) : A < B ↔ A.1 ⊂ B.1 := Iff.rfl
+
 noncomputable instance [DecidableLE X] : LinearOrder A.1 where
   le_total := A.2.2
   decidableLE a b := by infer_instance
@@ -189,7 +192,10 @@ lemma eq_complSingleton_iff (s : NonemptyFiniteChains X) :
       simp only [Finset.mem_union, Finset.mem_singleton] at this
       aesop
     rw [complSingleton_le_iff] at this
-    aesop
+    obtain h | h := this
+    · subst h
+      simp at h₁
+    · exact h
 
 def horn : (nerve (NonemptyFiniteChains X)).Subcomplex where
   obj n := setOf (fun s ↦ ∀ (i : ToType n.unop), s.obj i ≠ ⊤ ∧ s.obj i ≠ complSingleton x₀)
