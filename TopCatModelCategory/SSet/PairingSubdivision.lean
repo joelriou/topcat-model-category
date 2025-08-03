@@ -306,16 +306,42 @@ lemma q_eq (s : I (x₀ := x₀)) {d : ℕ} (hd : s.1.1.1 = d + 1) :
   have := Nat.succ_pred_eq_of_ne_zero (dim_ne_zero s)
   omega
 
+section
+
+omit [Fintype X] [Nontrivial X]
+
 variable (x₀) in
 def finset {n : ℕ} (s : nerve (NonemptyFiniteChains X) _⦋n⦌) :
     Finset (Fin (n + 1)) :=
   { i : _ | x₀ ∉ (s.obj i).1 }
 
-omit [Fintype X] [Nontrivial X] in
 lemma mem_finset_iff {n : ℕ} (s : nerve (NonemptyFiniteChains X) _⦋n⦌)
     (i : Fin (n + 1)) :
     i ∈ finset x₀ s ↔ x₀ ∉ (s.obj i).1 := by
   simp [finset]
+
+lemma mem_finset_of_le {n : ℕ} {s : nerve (NonemptyFiniteChains X) _⦋n⦌}
+    {i : Fin (n + 1)} (hi : i ∈ finset x₀ s) {j : Fin (n + 1)}
+    (hij : j ≤ i) : j ∈ finset x₀ s := by
+  simp only [mem_finset_iff] at hi ⊢
+  intro hj
+  exact hi (s.monotone hij hj)
+
+variable (x₀) in
+lemma finset_eq_emptyset_or
+    {n : ℕ} (s : nerve (NonemptyFiniteChains X) _⦋n⦌) :
+    ∃ (i : Fin (n + 2)),
+      finset x₀ s = Finset.univ.filter (fun j ↦ j.castSucc < i) := by
+  by_cases h : (finset x₀ s).Nonempty
+  · refine ⟨((finset x₀ s).max' h).succ, ?_⟩
+    ext j
+    simp only [Fin.castSucc_lt_succ_iff, Finset.mem_filter,
+      Finset.mem_univ, true_and]
+    exact ⟨fun hj ↦ (finset x₀ s).le_max' j hj,
+      fun hj ↦ mem_finset_of_le ((finset x₀ s).max'_mem h) hj⟩
+  · exact ⟨0, by simpa [← Finset.not_nonempty_iff_eq_empty]⟩
+
+end
 
 lemma toII.index_eq_card
     (s : I (x₀ := x₀)) {d : ℕ} (hd : s.1.1.1 = d + 1) :
@@ -362,6 +388,8 @@ lemma injective_q : Function.Injective (q (x₀ := x₀)) := by
     apply h
 
 lemma surjective_q : Function.Surjective (q (x₀ := x₀)) := by
+  rintro ⟨⟨⟨d, x, h₁⟩, h₂⟩, h₃⟩
+  obtain ⟨i, hi⟩ := finset_eq_emptyset_or x₀ x
   sorry
 
 variable (x₀) in
