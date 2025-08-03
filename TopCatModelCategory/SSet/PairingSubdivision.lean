@@ -34,6 +34,15 @@ lemma finsetCard_univ_filter_le {n : ℕ} (i : Fin n) :
     · simp [Fin.le_castSucc_iff]
     · simp [Fin.le_last]
 
+@[simp]
+lemma finsetCard_univ_filter_castSucc_lt {n : ℕ} (i : Fin (n + 1)) :
+    (Finset.univ.filter (fun j ↦ Fin.castSucc j < i)).card = i.1 :=
+  Finset.card_eq_of_bijective
+    (fun a _ ↦ ⟨a, by omega⟩)
+    (fun a ha ↦ ⟨a, by simpa using ha, rfl⟩)
+    (fun _ _ ↦ by simpa)
+    (fun _ _ _ _ h ↦ by rwa [Fin.ext_iff] at h)
+
 end Fin
 
 namespace PartialOrder
@@ -141,7 +150,7 @@ lemma isIndex' :
   exact isIndex _ rfl
 
 variable {s hd} in
-lemma mem_cast_obj_iff_of_isIndex {l : Fin (d + 2)}
+lemma not_mem_cast_obj_iff_of_isIndex {l : Fin (d + 2)}
     (hl' : IsIndexI (cast s hd).1 l) (i : Fin (d + 2)) :
     x₀ ∉ ((cast s hd).1.1.2.1.obj i).1 ↔ i < l := by
   obtain rfl | ⟨l, rfl⟩ := l.eq_zero_or_eq_succ
@@ -162,16 +171,16 @@ lemma mem_cast_obj_iff_of_isIndex {l : Fin (d + 2)}
       rw [not_le, Fin.castSucc_lt_iff_succ_le] at hi
       exact (cast s hd).1.1.2.1.monotone hi (by simp [hl'])
 
-lemma mem_cast_obj_iff (i : Fin (d + 2)) :
+lemma not_mem_cast_obj_iff (i : Fin (d + 2)) :
     x₀ ∉ ((cast s hd).1.1.2.1.obj i).1 ↔ i < index s hd :=
-  mem_cast_obj_iff_of_isIndex (isIndex' s hd) i
+  not_mem_cast_obj_iff_of_isIndex (isIndex' s hd) i
 
 variable {s hd} in
 lemma index_eq_of_isIndex {i : Fin (d + 2)}
     (h : IsIndexI (cast s hd).1 i) :
     index s hd = i := by
-  have := mem_cast_obj_iff_of_isIndex h
-  simp only [mem_cast_obj_iff] at this
+  have := not_mem_cast_obj_iff_of_isIndex h
+  simp only [not_mem_cast_obj_iff] at this
   obtain h | rfl | h := lt_trichotomy (index s hd) i
   · replace this := (this _).2 h
     simp at this
@@ -225,6 +234,12 @@ lemma simplex_not_mem_horn : simplex s hd ∉ (horn x₀).obj _ := by
   · simp only [h, Fin.succAbove_last]
     rwa [eq_complSingleton_of_index_eq_last]
 
+lemma not_mem_simplex_obj_iff (i : Fin (d + 1)) :
+    x₀ ∉ ((simplex s hd).1.obj i).1 ↔ i.castSucc < index s hd := by
+  generalize hl : index s hd = l
+  simp [simplex, hl, nerve_δ_obj, not_mem_cast_obj_iff,
+    Fin.succAbove_lt_iff_castSucc_lt]
+
 end toII
 
 open toII in
@@ -251,7 +266,7 @@ noncomputable def toII : II (x₀ := x₀) :=
         · rw [Fin.succAbove_of_castSucc_lt _ _ (by simp),
             Fin.castSucc_zero] at h
           have : 0 < index s hd := by simp [hl]
-          rw [← mem_cast_obj_iff] at this
+          rw [← not_mem_cast_obj_iff] at this
           exact this (by simp [h])
       · simp only [simplex, nerve_obj, SimplexCategory.len_mk,
           cast_coe_coe_fst, isIndexI_succ, hl, nerve_δ_obj] at h
@@ -292,7 +307,66 @@ lemma q_eq (s : I (x₀ := x₀)) {d : ℕ} (hd : s.1.1.1 = d + 1) :
   omega
 
 variable (x₀) in
-lemma bijective_q : Function.Bijective (q (x₀ := x₀)) := sorry
+def finset {n : ℕ} (s : nerve (NonemptyFiniteChains X) _⦋n⦌) :
+    Finset (Fin (n + 1)) :=
+  { i : _ | x₀ ∉ (s.obj i).1 }
+
+omit [Fintype X] [Nontrivial X] in
+lemma mem_finset_iff {n : ℕ} (s : nerve (NonemptyFiniteChains X) _⦋n⦌)
+    (i : Fin (n + 1)) :
+    i ∈ finset x₀ s ↔ x₀ ∉ (s.obj i).1 := by
+  simp [finset]
+
+lemma toII.index_eq_card
+    (s : I (x₀ := x₀)) {d : ℕ} (hd : s.1.1.1 = d + 1) :
+      (index s hd).1 = (finset x₀ (toII.simplex s hd)).card := by
+  have : finset x₀ (toII.simplex s hd) =
+      Finset.univ.filter (fun i ↦ i.castSucc < index s hd) := by
+    ext i
+    simp [mem_finset_iff, not_mem_simplex_obj_iff]
+  simp [this]
+
+lemma injective_q : Function.Injective (q (x₀ := x₀)) := by
+  intro s s' h
+  obtain ⟨d, hd⟩ := Nat.exists_eq_add_one_of_ne_zero (dim_ne_zero s)
+  obtain ⟨d', hd'⟩ := Nat.exists_eq_add_one_of_ne_zero (dim_ne_zero s')
+  rw [q_eq s hd, q_eq s' hd', Subtype.ext_iff, Subtype.ext_iff] at h
+  obtain rfl : d = d' := congr_arg Sigma.fst h
+  rw [Sigma.ext_iff] at h
+  simp only [nerve_obj, SimplexCategory.len_mk, toII, heq_eq_eq, Subtype.mk.injEq, true_and] at h
+  have : index s hd = index s' hd' := by
+    rw [Fin.ext_iff, toII.index_eq_card, toII.index_eq_card, h]
+  generalize hl : index s hd = l
+  rw [← cast_eq_self s hd, ← cast_eq_self s' hd',
+    Subtype.ext_iff, Subtype.ext_iff, Sigma.ext_iff]
+  simp only [nerve_obj, SimplexCategory.len_mk, cast_coe_coe_fst,
+    heq_eq_eq, true_and, Subtype.ext_iff]
+  refine ComposableArrows.ext (fun i ↦ ?_) (fun _ _ ↦ rfl)
+  simp only [toII.simplex, hl, nerve_obj, ← this] at h
+  replace h := Functor.congr_obj h
+  simp only [SimplexCategory.len_mk, nerve_δ_obj] at h
+  by_cases hi : l = i
+  · subst hi
+    rw [Subtype.ext_iff]
+    have h₁ := isIndex' s hd
+    have h₂ := isIndex' s' hd'
+    simp only [hl, ← this] at h₁ h₂
+    obtain rfl | ⟨l, rfl⟩ := l.eq_zero_or_eq_succ
+    · rw [isIndexI_zero] at h₁ h₂
+      rw [h₁, h₂]
+    · rw [isIndexI_succ] at h₁ h₂
+      have := h l
+      simp only [Fin.succAbove_succ_self] at this
+      rw [h₁, h₂, this]
+  · obtain ⟨i, rfl⟩ := Fin.exists_succAbove_eq (Ne.symm hi)
+    apply h
+
+lemma surjective_q : Function.Surjective (q (x₀ := x₀)) := by
+  sorry
+
+variable (x₀) in
+lemma bijective_q : Function.Bijective (q (x₀ := x₀)) :=
+  ⟨injective_q, surjective_q⟩
 
 noncomputable def p : II (x₀ := x₀) ≃ I (x₀ := x₀) :=
   (Equiv.ofBijective _ (bijective_q x₀)).symm
@@ -316,17 +390,6 @@ lemma isUniquelyCodimOneFace (s : I (x₀ := x₀)) :
   exact .mk (existsUnique_of_exists_of_unique ⟨_, rfl⟩ (fun i j hi hj ↦
     δ_injective_of_mem_nonDegenerate _
     ((cast s hd).1.1.2.2) (hi.trans hj.symm)))
-
-variable (x₀) in
-def finset {n : ℕ} (s : nerve (NonemptyFiniteChains X) _⦋n⦌) :
-    Finset (Fin (n + 1)) :=
-  { i : _ | x₀ ∉ (s.obj i).1 }
-
-omit [Fintype X] [Nontrivial X] in
-lemma mem_finset_iff {n : ℕ} (s : nerve (NonemptyFiniteChains X) _⦋n⦌)
-    (i : Fin (n + 1)) :
-    i ∈ finset x₀ s ↔ x₀ ∉ (s.obj i).1 := by
-  simp [finset]
 
 def φ (s : II (x₀ := x₀)) : ℕ :=
   (finset x₀ s.1.1.2.1).card
@@ -431,7 +494,7 @@ instance : (pairing x₀).IsRegular := by
         ext i
         simp only [mem_finset_iff, SimplexCategory.len_mk, nerve_δ_obj, Finset.mem_filter,
           Finset.mem_univ, true_and, A]
-        rw [mem_cast_obj_iff, hl]
+        rw [not_mem_cast_obj_iff, hl]
         constructor
         · intro h
           by_contra!
@@ -445,7 +508,7 @@ instance : (pairing x₀).IsRegular := by
         ext i
         simp only [mem_finset_iff, SimplexCategory.len_mk, nerve_δ_obj, Finset.mem_filter,
           Finset.mem_univ, true_and, B, A]
-        rw [mem_cast_obj_iff, hl]
+        rw [not_mem_cast_obj_iff, hl]
         constructor
         · intro h
           by_contra!
