@@ -73,6 +73,14 @@ def IsUniquelyCodimOneFace {n m : ℕ} (x : X _⦋n⦌) (y : X _⦋m⦌) : Prop 
 
 namespace IsUniquelyCodimOneFace
 
+lemma mk {n : ℕ} {x : X _⦋n⦌} {y : X _⦋n + 1⦌}
+    (h : ∃! (i : Fin (n + 2)), X.δ i y = x) :
+    IsUniquelyCodimOneFace x y := by
+  obtain ⟨i, h₁, h₂⟩ := h
+  refine ⟨rfl, SimplexCategory.δ i, ⟨inferInstance, h₁⟩, fun f ⟨h₃, h₄⟩ ↦ ?_⟩
+  obtain ⟨j, rfl⟩ := SimplexCategory.eq_δ_of_mono f
+  rw [h₂ j h₄]
+
 variable {n m : ℕ} {x : X _⦋n⦌} {y : X _⦋m⦌} (hxy : IsUniquelyCodimOneFace x y)
 
 include hxy

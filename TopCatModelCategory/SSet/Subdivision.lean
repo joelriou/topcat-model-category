@@ -112,6 +112,22 @@ lemma mem_nonDegenerate_δ {n : ℕ} (s : (nerve X) _⦋n + 1⦌) (i : Fin (n + 
   rw [mem_nonDegenerate_iff] at hs ⊢
   exact hs.comp (Fin.succAboveOrderEmb i).strictMono
 
+lemma δ_injective_of_mem_nonDegenerate
+    {n : ℕ} (s : (nerve X) _⦋n + 1⦌) (hs : s ∈ (nerve X).nonDegenerate _)
+    {i j : Fin (n + 2)} (hij : (nerve X).δ i s = (nerve X).δ j s) :
+    i = j := by
+  wlog h : i < j generalizing i j hij
+  · simp only [not_lt] at h
+    obtain h | rfl := h.lt_or_eq
+    · exact (this hij.symm h).symm
+    · rfl
+  obtain ⟨j, rfl⟩ := Fin.eq_succ_of_ne_zero (Fin.ne_zero_of_lt h)
+  replace hij : ((nerve X).δ i s).obj j = ((nerve X).δ j.succ s).obj j := by rw [hij]
+  simp only [nerve_δ_obj] at hij
+  rw [mem_nonDegenerate_iff] at hs
+  replace hij := hs.injective hij
+  simp [Fin.succAbove_of_lt_succ _ _ h, Fin.ext_iff] at hij
+
 end
 
 namespace NonemptyFiniteChains

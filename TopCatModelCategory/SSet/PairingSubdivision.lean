@@ -5,6 +5,28 @@ universe u
 
 open CategoryTheory Simplicial
 
+namespace Fin
+
+@[simp]
+lemma finsetCard_univ_filter_lt {n : ℕ} (i : Fin n) :
+    (Finset.univ.filter (fun j ↦ j < i)).card = i.1 :=
+  Finset.card_eq_of_bijective
+    (fun a _ ↦ ⟨a, by omega⟩)
+    (fun a ha ↦ ⟨a, by simpa using ha, rfl⟩)
+    (fun _ _ ↦ by simpa)
+    (fun _ _ _ _ h ↦ by rwa [Fin.ext_iff] at h)
+
+@[simp]
+lemma finsetCard_univ_filter_le {n : ℕ} (i : Fin n) :
+    (Finset.univ.filter (fun j ↦ j ≤ i)).card = i.1 + 1 := by
+  obtain _ | n := n
+  · fin_cases i
+  · obtain ⟨i, rfl⟩ | rfl := i.eq_castSucc_or_eq_last
+    · simp [Fin.le_castSucc_iff]
+    · simp [Fin.le_last]
+
+end Fin
+
 namespace PartialOrder
 
 namespace NonemptyFiniteChains
@@ -22,6 +44,15 @@ def IsIndexI (s : (horn x₀).N) (i : Fin (s.1.1 + 1)) : Prop :=
   | ⟨0, _⟩ => (s.1.2.1.obj 0).1 = {x₀}
   | ⟨k + 1, hk⟩ => (s.1.2.1.obj ⟨k + 1, hk⟩).1 =
       (s.1.2.1.obj ⟨k, (lt_add_one k).trans hk⟩).1 ∪ {x₀}
+
+@[simp]
+lemma isIndexI_zero (s : (horn x₀).N) :
+    IsIndexI s 0 ↔ (s.1.2.1.obj 0).1 = {x₀} := Iff.rfl
+
+@[simp]
+lemma isIndexI_succ (s : (horn x₀).N) (i : Fin s.1.1):
+    IsIndexI s i.succ ↔
+      (s.1.2.1.obj i.succ).1 = (s.1.2.1.obj i.castSucc).1 ∪ {x₀} := Iff.rfl
 
 def I : Set (horn x₀).N := setOf (fun s ↦ ∃ (i : Fin (s.1.1 + 1)), IsIndexI s i)
 
@@ -71,12 +102,57 @@ lemma cast_obj (i : Fin (d + 2)) :
   obtain rfl : n = _ := hd
   rfl
 
+lemma isUniquelyCodimOneFace_cast_iff {n : ℕ}
+    (x : (nerve (NonemptyFiniteChains X)) _⦋n⦌) :
+    SSet.IsUniquelyCodimOneFace x (cast s hd).1.1.2.1 ↔
+      SSet.IsUniquelyCodimOneFace x s.1.1.2.1 := by
+  obtain ⟨⟨⟨n, _⟩, _⟩, _⟩ := s
+  obtain rfl : n = _ := hd
+  rfl
+
+lemma isFace_cast_iff {n : ℕ}
+    (x : (nerve (NonemptyFiniteChains X)) _⦋n⦌) :
+    SSet.IsFace x (cast s hd).1.1.2.1 ↔
+    SSet.IsFace x s.1.1.2.1 := by
+  obtain ⟨⟨⟨n, _⟩, _⟩, _⟩ := s
+  obtain rfl : n = _ := hd
+  rfl
+
 noncomputable def index : Fin (d + 2) :=
   ⟨s.2.choose.1, lt_of_lt_of_le s.2.choose.2 (by omega)⟩
 
 lemma isIndex :
     IsIndexI s.1 ⟨(index s hd).1, lt_of_lt_of_le (index s hd).2 (by omega)⟩ :=
   s.2.choose_spec
+
+lemma isIndex' :
+    IsIndexI (cast s hd).1 (index s hd) := by
+  obtain ⟨⟨⟨n, _⟩, _⟩, _⟩ := s
+  obtain rfl : n = _ := hd
+  exact isIndex _ rfl
+
+lemma mem_cast_obj_iff (i : Fin (d + 2)) :
+    x₀ ∉ ((cast s hd).1.1.2.1.obj i).1 ↔ i < index s hd := by
+  generalize hl : index s hd = l
+  have hl' := isIndex' s hd
+  rw [hl] at hl'
+  obtain rfl | ⟨l, rfl⟩ := l.eq_zero_or_eq_succ
+  · rw [isIndexI_zero] at hl'
+    simp only [nerve_obj, SimplexCategory.len_mk, cast_coe_coe_fst, Fin.not_lt_zero, iff_false,
+      Decidable.not_not]
+    exact (cast s hd).1.1.2.1.monotone i.zero_le (by simp [hl'])
+  · rw [isIndexI_succ] at hl'
+    have : x₀ ∉ ((cast s hd).1.1.2.1.obj l.castSucc).1 := fun h ↦ by
+      apply ((mem_nonDegenerate_iff _).1 (cast s hd).1.1.2.2 l.castSucc_lt_succ).ne
+      rw [Subtype.ext_iff]
+      simpa [hl']
+    rw [← not_iff_not, Decidable.not_not, ← Fin.le_castSucc_iff]
+    constructor
+    · intro h hi
+      exact this ((cast s hd).1.1.2.1.monotone hi h)
+    · intro hi
+      rw [not_le, Fin.castSucc_lt_iff_succ_le] at hi
+      exact (cast s hd).1.1.2.1.monotone hi (by simp [hl'])
 
 namespace toII
 
@@ -181,8 +257,26 @@ lemma p_q (s : I (x₀ := x₀)) : p (q s) = s :=
   p.apply_symm_apply s
 
 lemma isUniquelyCodimOneFace (s : I (x₀ := x₀)) :
-    SSet.IsUniquelyCodimOneFace (q s).1.1.2.1 s.1.1.2.1 :=
-  sorry
+    SSet.IsUniquelyCodimOneFace (q s).1.1.2.1 s.1.1.2.1 := by
+  obtain ⟨d, hd⟩ := Nat.exists_eq_add_one_of_ne_zero (dim_ne_zero s)
+  rw [← isUniquelyCodimOneFace_cast_iff _ hd, q_eq s hd]
+  exact .mk (existsUnique_of_exists_of_unique ⟨_, rfl⟩ (fun i j hi hj ↦
+    δ_injective_of_mem_nonDegenerate _
+    ((cast s hd).1.1.2.2) (hi.trans hj.symm)))
+
+variable (x₀) in
+def finset {n : ℕ} (s : nerve (NonemptyFiniteChains X) _⦋n⦌) :
+    Finset (Fin (n + 1)) :=
+  { i : _ | x₀ ∉ (s.obj i).1 }
+
+omit [Fintype X] [Nontrivial X] in
+lemma mem_finset_iff {n : ℕ} (s : nerve (NonemptyFiniteChains X) _⦋n⦌)
+    (i : Fin (n + 1)) :
+    i ∈ finset x₀ s ↔ x₀ ∉ (s.obj i).1 := by
+  simp [finset]
+
+def φ (s : II (x₀ := x₀)) : ℕ :=
+  (finset x₀ s.1.1.2.1).card
 
 end pairing
 
@@ -205,7 +299,108 @@ instance : (pairing x₀).IsProper where
 
 instance : (pairing x₀).IsRegular := by
   rw [SSet.Subcomplex.Pairing.isRegular_iff]
-  sorry
+  refine ⟨φ, fun x y h₁ ⟨h₂, h₃⟩ ↦ ?_⟩
+  dsimp [SSet.Subcomplex.Pairing.AncestralRel] at h₃
+  obtain ⟨s, hs⟩ := (pairing x₀).p.symm.surjective y
+  dsimp at hs
+  rw [← hs, p_q s] at h₃
+  obtain ⟨d, hd⟩ := Nat.exists_eq_add_one_of_ne_zero (dim_ne_zero s)
+  rw [q_eq _ hd] at hs
+  rw [← isFace_cast_iff _ hd] at h₃
+  obtain ⟨⟨⟨dx, x, hx₁⟩, hx₂⟩, hx₃⟩ := x
+  obtain ⟨⟨⟨dy, y, _⟩, _⟩, _⟩ := y
+  obtain rfl : d = dy := by
+    rw [Subtype.ext_iff, Subtype.ext_iff] at hs
+    exact congr_arg Sigma.fst hs
+  obtain rfl : d = dx := h₁.symm
+  obtain rfl : toII.simplex s hd = y := by
+    rw [Subtype.ext_iff, Subtype.ext_iff, Sigma.ext_iff] at hs
+    simpa [toII] using hs
+  dsimp at hx₁ hx₂ hx₃ h₂ h₃
+  obtain ⟨ι, _, _, eq⟩ := h₃
+  obtain ⟨i, rfl⟩ := SimplexCategory.eq_δ_of_mono ι
+  obtain rfl : (nerve _).δ i _ = x := eq
+  let σ := (cast s hd).1.1.2.1
+  replace h₂ : (nerve _).δ i σ ≠ (nerve _).δ (index s hd) σ := fun h ↦ h₂ (by
+    rw [Subtype.ext_iff, Subtype.ext_iff, Sigma.ext_iff]
+    simpa)
+  generalize hl : index s hd = l
+  obtain rfl | ⟨l, rfl⟩ := l.eq_zero_or_eq_succ
+  · have hi : i = 0 := by
+      by_contra!
+      obtain ⟨i, rfl⟩ := Fin.eq_succ_of_ne_zero this
+      have := isIndex s hd
+      rw [hl] at this
+      change (s.1.1.2.1.obj 0).1 = {x₀} at this
+      simp only [II, Set.mem_compl_iff] at hx₃
+      apply hx₃
+      simp only [I, nerve_obj, SimplexCategory.len_mk, Set.mem_setOf_eq]
+      refine ⟨0, ?_⟩
+      rw [isIndexI_zero]
+      dsimp [nerve_δ_obj]
+      rwa [cast_obj, Fin.succAbove_of_castSucc_lt _ _ (by simp)]
+    simp [hi, hl] at h₂
+  · have := isIndex' s hd
+    rw [hl, isIndexI_succ] at this
+    simp only [II, Set.mem_compl_iff] at hx₃
+    have hi₁ : l.castSucc ≤ i := by
+      rw [← Fin.not_lt]
+      intro hi₁
+      obtain ⟨l, rfl⟩ := Fin.eq_succ_of_ne_zero (i := l) (by
+        rintro rfl
+        simp at hi₁)
+      refine hx₃ ⟨l.succ, ?_⟩
+      rw [isIndexI_succ]
+      dsimp [nerve_δ_obj]
+      rw [Fin.succAbove_of_le_castSucc _ _ hi₁.le,
+        Fin.succAbove_of_le_castSucc, this, Fin.succ_castSucc]
+      rwa [Fin.le_castSucc_iff, Fin.succ_castSucc]
+    have hi₂ : i ≤ l.succ := by
+      rw [← Fin.not_lt]
+      intro hi₁
+      apply hx₃
+      refine ⟨?_, sorry⟩
+      dsimp
+      sorry
+    obtain hi₂ | rfl := hi₂.lt_or_eq
+    · obtain rfl : l.castSucc = i := by
+        apply le_antisymm
+        · exact hi₁
+        · rwa [Fin.le_castSucc_iff]
+      dsimp [toII.simplex]
+      simp only [hl]
+      let A := finset x₀ ((nerve _).δ l.castSucc σ)
+      let B := finset x₀ ((nerve _).δ l.succ σ)
+      change A.card < B.card
+      have hA : A = Finset.univ.filter (fun i ↦ i < l) := by
+        ext i
+        simp only [mem_finset_iff, SimplexCategory.len_mk, nerve_δ_obj, Finset.mem_filter,
+          Finset.mem_univ, true_and, A]
+        rw [mem_cast_obj_iff, hl]
+        constructor
+        · intro h
+          by_contra!
+          rw [Fin.succAbove_of_le_castSucc _ _ (by simpa),
+            Fin.succ_lt_succ_iff] at h
+          exact h.not_le this
+        · intro h
+          rw [Fin.succAbove_of_castSucc_lt _ _ (by simpa)]
+          exact (Fin.castSucc_lt_castSucc_iff.2 h).trans (by simp)
+      have hB : B = Finset.univ.filter (fun i ↦ i ≤ l) := by
+        ext i
+        simp only [mem_finset_iff, SimplexCategory.len_mk, nerve_δ_obj, Finset.mem_filter,
+          Finset.mem_univ, true_and, B, A]
+        rw [mem_cast_obj_iff, hl]
+        constructor
+        · intro h
+          by_contra!
+          rw [Fin.succAbove_of_le_castSucc _ _ (by simpa),
+            Fin.succ_lt_succ_iff] at h
+          omega
+        · intro h
+          simpa [Fin.succAbove_of_castSucc_lt l.succ i (by simpa)]
+      simp [hA, hB]
+    · exact (h₂ (by rw [hl])).elim
 
 end horn
 
