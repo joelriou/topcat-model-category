@@ -5,6 +5,15 @@ universe u
 
 open CategoryTheory Simplicial
 
+lemma Finset.false_of_lt_of_lt_union_singleton
+    {X : Type u} [DecidableEq X] {s t : Finset X} {x₀ : X}
+    (h₁ : s < t) (h₂ : t < s ∪ {x₀}) : False := by
+  replace h₁ := Finset.card_lt_card h₁
+  replace h₂ := lt_of_lt_of_le (Finset.card_lt_card h₂)
+    (Finset.card_union_le s {x₀})
+  rw [card_singleton] at h₂
+  omega
+
 namespace Fin
 
 @[simp]
@@ -131,11 +140,10 @@ lemma isIndex' :
   obtain rfl : n = _ := hd
   exact isIndex _ rfl
 
-lemma mem_cast_obj_iff (i : Fin (d + 2)) :
-    x₀ ∉ ((cast s hd).1.1.2.1.obj i).1 ↔ i < index s hd := by
-  generalize hl : index s hd = l
-  have hl' := isIndex' s hd
-  rw [hl] at hl'
+variable {s hd} in
+lemma mem_cast_obj_iff_of_isIndex {l : Fin (d + 2)}
+    (hl' : IsIndexI (cast s hd).1 l) (i : Fin (d + 2)) :
+    x₀ ∉ ((cast s hd).1.1.2.1.obj i).1 ↔ i < l := by
   obtain rfl | ⟨l, rfl⟩ := l.eq_zero_or_eq_succ
   · rw [isIndexI_zero] at hl'
     simp only [nerve_obj, SimplexCategory.len_mk, cast_coe_coe_fst, Fin.not_lt_zero, iff_false,
@@ -153,6 +161,23 @@ lemma mem_cast_obj_iff (i : Fin (d + 2)) :
     · intro hi
       rw [not_le, Fin.castSucc_lt_iff_succ_le] at hi
       exact (cast s hd).1.1.2.1.monotone hi (by simp [hl'])
+
+lemma mem_cast_obj_iff (i : Fin (d + 2)) :
+    x₀ ∉ ((cast s hd).1.1.2.1.obj i).1 ↔ i < index s hd :=
+  mem_cast_obj_iff_of_isIndex (isIndex' s hd) i
+
+variable {s hd} in
+lemma index_eq_of_isIndex {i : Fin (d + 2)}
+    (h : IsIndexI (cast s hd).1 i) :
+    index s hd = i := by
+  have := mem_cast_obj_iff_of_isIndex h
+  simp only [mem_cast_obj_iff] at this
+  obtain h | rfl | h := lt_trichotomy (index s hd) i
+  · replace this := (this _).2 h
+    simp at this
+  · rfl
+  · replace this := (this _).1 h
+    simp at this
 
 namespace toII
 
@@ -208,23 +233,51 @@ noncomputable def toII : II (x₀ := x₀) :=
     simplex_not_mem_horn s hd⟩, by
       simp only [II, I, nerve_obj, SimplexCategory.len_mk, Set.mem_compl_iff,
         Set.mem_setOf_eq, not_exists]
-      rintro ⟨(_ | i), hi⟩ h <;>
-        simp only [IsIndexI, nerve_obj, SimplexCategory.len_mk, simplex, cast_coe_coe_fst,
-          nerve_δ_obj] at h
-      · by_cases h' : index s hd = 0
-        · rw [h', Fin.succAbove_of_le_castSucc _ _ (by simp),
+      generalize hl : index s hd = l
+      intro i h
+      obtain rfl | ⟨i, rfl⟩ := i.eq_zero_or_eq_succ
+      · simp only [simplex, nerve_obj, SimplexCategory.len_mk,
+          cast_coe_coe_fst, isIndexI_zero, hl, nerve_δ_obj] at h
+        obtain rfl | ⟨l, rfl⟩ := l.eq_zero_or_eq_succ
+        · rw [Fin.succAbove_of_le_castSucc _ _ (by simp),
             Fin.succ_zero_eq_one] at h
           have := (mem_nonDegenerate_iff _ ).1 (cast s hd).1.1.2.2
             Fin.zero_lt_one
           rw [← Subtype.coe_lt_coe, h] at this
-          simp only [nerve_obj, SimplexCategory.len_mk, cast_coe_coe_fst, Finset.lt_eq_subset,
-            Finset.ssubset_singleton_iff] at this
+          simp only [nerve_obj, SimplexCategory.len_mk, cast_coe_coe_fst,
+            Finset.lt_eq_subset, Finset.ssubset_singleton_iff] at this
           obtain ⟨x, hx⟩ := ((cast s hd).1.1.2.1.obj 0).2.1
           simp [this] at hx
-        · rw [Fin.succAbove_of_castSucc_lt, Fin.castSucc_zero] at h
-          sorry
-          sorry
-      · sorry⟩
+        · rw [Fin.succAbove_of_castSucc_lt _ _ (by simp),
+            Fin.castSucc_zero] at h
+          have : 0 < index s hd := by simp [hl]
+          rw [← mem_cast_obj_iff] at this
+          exact this (by simp [h])
+      · simp only [simplex, nerve_obj, SimplexCategory.len_mk,
+          cast_coe_coe_fst, isIndexI_succ, hl, nerve_δ_obj] at h
+        apply l.succAbove_ne i.succ
+        by_cases hl' : l ≤ i.succ.castSucc
+        · rw [Fin.succAbove_of_le_castSucc _ _ hl'] at h
+          rw [← Fin.succ_castSucc] at hl'
+          obtain hl' | rfl := hl'.lt_or_eq
+          · rw [Fin.succAbove_of_lt_succ _ _ hl', Fin.succ_castSucc,
+              ← isIndexI_succ] at h
+            rwa [Fin.succAbove_of_le_castSucc _ _ hl'.le,
+              ← index_eq_of_isIndex h]
+          · exfalso
+            simp only [Fin.succAbove_succ_self] at h
+            have := (mem_nonDegenerate_iff _).1 (cast s hd).1.1.2.2
+            exact Finset.false_of_lt_of_lt_union_singleton (x₀ := x₀)
+              (this i.castSucc.castSucc_lt_succ) (by
+                have := this i.succ.castSucc_lt_succ
+                rw [← Subtype.coe_lt_coe] at this
+                exact lt_of_lt_of_le this h.le)
+        · simp only [not_le] at hl'
+          rw [Fin.succAbove_of_castSucc_lt _ _ hl',
+            Fin.succAbove_of_castSucc_lt _ _ (lt_trans (by simp) hl'),
+            ← Fin.succ_castSucc, ← isIndexI_succ] at h
+          rwa [Fin.succAbove_of_castSucc_lt _ _ hl', ← Fin.succ_castSucc,
+            ← index_eq_of_isIndex h]⟩
 
 end
 
