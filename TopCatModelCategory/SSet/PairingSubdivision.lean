@@ -358,10 +358,12 @@ instance : (pairing x₀).IsRegular := by
     have hi₂ : i ≤ l.succ := by
       rw [← Fin.not_lt]
       intro hi₁
-      apply hx₃
-      refine ⟨?_, sorry⟩
-      dsimp
-      sorry
+      obtain ⟨l, rfl⟩ := Fin.eq_castSucc_of_ne_last (x := l)
+        (fun h ↦ not_le.2 hi₁ (by simpa [h] using i.le_last))
+      refine hx₃ ⟨l.succ, ?_⟩
+      simp only [isIndexI_succ, nerve_obj, SimplexCategory.len_mk, nerve_δ_obj]
+      rwa [Fin.succAbove_of_castSucc_lt _ _ hi₁,
+        Fin.succAbove_of_castSucc_lt _ _ (lt_trans (by simp) hi₁)]
     obtain hi₂ | rfl := hi₂.lt_or_eq
     · obtain rfl : l.castSucc = i := by
         apply le_antisymm
