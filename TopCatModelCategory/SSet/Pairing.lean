@@ -3,6 +3,7 @@ import TopCatModelCategory.SSet.AnodyneExtensionsDefs
 import TopCatModelCategory.SSet.Evaluation
 import TopCatModelCategory.SSet.Monomorphisms
 import TopCatModelCategory.SSet.Skeleton
+import TopCatModelCategory.SSet.Horn
 import TopCatModelCategory.ColimitsType
 import Mathlib.AlgebraicTopology.RelativeCellComplex.Basic
 import Mathlib.CategoryTheory.Limits.Lattice
@@ -32,6 +33,22 @@ lemma S.eq_iff {n : ℕ} (x y : X _⦋n⦌) :
     S.mk x = S.mk y ↔ x = y := by
   rw [Sigma.ext_iff]
   simp
+
+lemma S.mk_map_eq_iff_of_mono {n m : ℕ} (x : X _⦋n⦌)
+    (f : ⦋m⦌ ⟶ ⦋n⦌) [Mono f] :
+    S.mk (X.map f.op x) = S.mk x ↔ IsIso f := by
+  constructor
+  · intro h
+    obtain rfl := S.dim_eq_of_mk_eq h
+    obtain rfl := SimplexCategory.eq_id_of_mono f
+    infer_instance
+  · intro hf
+    obtain rfl : n = m :=
+      le_antisymm
+        (SimplexCategory.len_le_of_epi (f := f) inferInstance)
+        (SimplexCategory.len_le_of_mono (f := f) inferInstance)
+    obtain rfl := SimplexCategory.eq_id_of_isIso f
+    simp
 
 end SSet
 
@@ -165,6 +182,10 @@ def cast : X _⦋n + 1⦌ := by
   obtain rfl := hxy.dim_eq
   exact y
 
+lemma sMk_cast : S.mk hxy.cast = S.mk y := by
+  obtain rfl := hxy.dim_eq
+  rfl
+
 @[simp]
 lemma ofSimplex_cast :
     Subcomplex.ofSimplex hxy.cast = Subcomplex.ofSimplex y := by
@@ -187,6 +208,11 @@ noncomputable def index : Fin (n + 2) := hxy.existsUnique_index.exists.choose
 @[simp]
 lemma δ_index : X.δ hxy.index hxy.cast = x :=
   hxy.existsUnique_index.exists.choose_spec
+
+lemma index_unique {i : Fin (n + 2)} (hi : X.δ i hxy.cast = x) :
+    i = hxy.index :=
+  hxy.existsUnique_index.unique hi hxy.δ_index
+
 
 end IsUniquelyCodimOneFace
 
@@ -485,9 +511,21 @@ lemma filtration_preimage_map' {n : ℕ} (x : P.Cells n) :
       have : Mono f := mono_of_nonDegenerate _ _ hy
       obtain ⟨t, ht⟩ := P.exists_or y
       have htx : P.AncestralRel t x := by
-        -- is this true?
-        constructor
-        · sorry
+        obtain rfl | rfl := ht
+        · refine ⟨?_, ?_⟩
+          · rintro rfl
+            obtain ⟨i, rfl⟩ := SimplexCategory.eq_δ_of_mono f
+            exact (objEquiv_symm_δ_mem_horn_iff _ _).1 hz
+              ((P.isUniquelyCodimOneFace t).index_unique hz')
+          · rw [isFace_iff_neq_and_mem_ofSimplex t.1.1.2.2,
+              ← (P.isUniquelyCodimOneFace x).ofSimplex_cast,
+              ← (P.isUniquelyCodimOneFace x).sMk_cast,
+              ← hz']
+            refine ⟨?_, ⟨f.op, rfl⟩⟩
+            change _ ≠ S.mk σ
+            intro h
+            rw [S.mk_map_eq_iff_of_mono] at h
+            exact SSet.objEquiv_symm_notMem_horn_of_isIso _ f hz
         · sorry
       replace htx := P.rank'_lt htx
       rw [hx] at htx

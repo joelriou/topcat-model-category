@@ -97,6 +97,28 @@ lemma stdSimplex.subcomplex_le_horn_iff
         rintro rfl
         exact h hx
 
+lemma objEquiv_symm_δ_mem_horn_iff {n : ℕ} (i j : Fin (n + 2)) :
+    stdSimplex.objEquiv.symm (SimplexCategory.δ i) ∈ (horn _ j).obj _ ↔
+      i ≠ j := by
+  dsimp
+  erw [← Subcomplex.ofSimplex_le_iff,
+    ← stdSimplex.face_singleton_compl]
+  refine ⟨?_, face_le_horn _ _⟩
+  rintro h rfl
+  simp [stdSimplex.subcomplex_le_horn_iff] at h
+
+lemma objEquiv_symm_notMem_horn_of_isIso {n : ℕ} (i : Fin (n + 1))
+    {d : SimplexCategory} (f : d ⟶ ⦋n⦌) [IsIso f] :
+    stdSimplex.objEquiv.symm f ∉ (horn n i).obj (op d) := by
+  induction' d using SimplexCategory.rec with d
+  obtain rfl : n = d :=
+    le_antisymm
+      (SimplexCategory.len_le_of_epi (f := f) inferInstance)
+      (SimplexCategory.len_le_of_mono (f := f) inferInstance)
+  obtain rfl := SimplexCategory.eq_id_of_isIso f
+  rw [horn_eq_iSup]
+  aesop
+
 namespace horn
 
 def faceι (i : Fin (n + 1)) (j : Fin (n + 1)) (hij : j ≠ i) :
