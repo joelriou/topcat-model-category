@@ -111,7 +111,6 @@ lemma trans {p : ℕ} (z : X _⦋p⦌) (hxy : IsFace x y) (hyz : IsFace y z) :
   have ⟨g, _, hmp, hg⟩ := hyz
   exact ⟨f ≫ g, inferInstance, (hxy.lt.trans hyz.lt).ne, by aesop⟩
 
-variable {n m : ℕ} {x : X _⦋n⦌} {y : X _⦋m⦌} (hxy : IsFace x y)
 end IsFace
 
 lemma eq_map_mono_of_mem_ofSimplex_of_mem_nonDegenerate
@@ -601,15 +600,24 @@ lemma isPullback (n : ℕ) :
       · rw [← FunctorToTypes.comp, ι_m, comp_app, types_comp_apply,
           Subpresheaf.ι_app])⟩
 
-lemma range_homOfLE_sup_range_b (n : ℕ) :
-    Subcomplex.range (Subcomplex.homOfLE (P.filtration_monotone (Nat.le_add_right n 1))) ⊔
-      Subcomplex.range (P.b n) = ⊤ := by
-  sorry
-
 lemma range_homOfLE_app_union_range_b_app (n : ℕ) (d : SimplexCategoryᵒᵖ) :
     Set.range ((Subcomplex.homOfLE (P.filtration_monotone (Nat.le_add_right n 1))).app d) ∪
-      Set.range ((P.b n).app d) = Set.univ :=
-  congr_fun (congr_arg Subpresheaf.obj (P.range_homOfLE_sup_range_b n)) d
+      Set.range ((P.b n).app d) = Set.univ := by
+  ext ⟨x, hx⟩
+  simp only [filtration, Subpresheaf.max_obj, Subpresheaf.iSup_obj, Set.mem_union, Set.mem_iUnion,
+    Subtype.exists, exists_prop, Subpresheaf.toPresheaf_obj, Set.mem_range, Set.mem_univ,
+    iff_true] at hx ⊢
+  obtain hx | ⟨y, h₁, h₂, h₃⟩ := hx
+  · exact Or.inl ⟨x, Or.inl hx, rfl⟩
+  · rw [Nat.lt_succ] at h₂
+    obtain h₂ | h₂ := h₂.lt_or_eq
+    · exact Or.inl ⟨x, Or.inr ⟨y, h₁, h₂, h₃⟩, rfl⟩
+    · rw [← (P.isUniquelyCodimOneFace ⟨y, h₁⟩).ofSimplex_cast] at h₃
+      obtain ⟨f, hf⟩ := h₃
+      obtain ⟨f, rfl⟩ := Quiver.Hom.op_surjective f
+      refine Or.inr ⟨(P.ιSigmaStdSimplex ⟨_, h₂⟩).app _ (stdSimplex.objEquiv.symm f), ?_⟩
+      dsimp
+      rwa [← FunctorToTypes.comp, ι_b, Subtype.ext_iff]
 
 lemma isPushout (n : ℕ) :
     IsPushout (P.t n) (P.m n) (homOfLE (P.filtration_monotone (by simp))) (P.b n) where
@@ -627,7 +635,7 @@ include P
 
 noncomputable def relativeCellComplex :
   RelativeCellComplex.{u}
-    (basicCell := fun (n : ℕ) (x : Sigma (fun (d : ℕ) ↦ Fin (d + 2))) ↦ (SSet.horn.{u} _ x.2).ι) A.ι where
+    (basicCell := fun (_ : ℕ) (x : Sigma (fun (d : ℕ) ↦ Fin (d + 2))) ↦ (SSet.horn.{u} _ x.2).ι) A.ι where
   F := P.filtration_monotone.functor ⋙ toPresheafFunctor
   isoBot := Subcomplex.isoOfEq (by simp)
   incl :=
@@ -645,9 +653,7 @@ noncomputable def relativeCellComplex :
       hm := P.ι_m
       g₁ := P.t n
       g₂ := P.b n
-      isPushout := by
-        dsimp
-        sorry }
+      isPushout := P.isPushout n }
 
 lemma anodyneExtensions : SSet.anodyneExtensions A.ι :=
   SSet.anodyneExtensions.transfiniteCompositionsOfShape_le _ _
