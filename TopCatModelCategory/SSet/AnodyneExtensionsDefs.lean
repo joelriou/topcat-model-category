@@ -7,11 +7,12 @@ import TopCatModelCategory.IsFibrant
 import Mathlib.CategoryTheory.MorphismProperty.Limits
 import Mathlib.CategoryTheory.MorphismProperty.Retract
 import Mathlib.CategoryTheory.MorphismProperty.TransfiniteComposition
+import Mathlib.CategoryTheory.SmallObject.TransfiniteCompositionLifting
 
 open HomotopicalAlgebra CategoryTheory Limits SSet.modelCategoryQuillen MonoidalCategory
   Simplicial Opposite
 
-universe u
+universe v u
 
 namespace SSet
 
@@ -29,6 +30,15 @@ instance : anodyneExtensions.{u}.RespectsIso := by
 instance : anodyneExtensions.{u}.IsStableUnderCobaseChange := by
   dsimp [anodyneExtensions]
   infer_instance
+
+instance : MorphismProperty.IsStableUnderTransfiniteComposition.{v} anodyneExtensions.{u} := by
+  dsimp [anodyneExtensions]
+  constructor
+  infer_instance
+
+instance : MorphismProperty.IsStableUnderCoproducts.{u} anodyneExtensions.{u} where
+  isStableUnderCoproductsOfShape :=
+    MorphismProperty.llp_isStableUnderCoproductsOfShape _
 
 namespace anodyneExtensions
 

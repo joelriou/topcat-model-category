@@ -30,6 +30,12 @@ namespace N
 
 variable {X}
 
+lemma induction
+    {motive : ∀ {n : ℕ} (x : X _⦋n⦌) (_ : x ∈ X.nonDegenerate _), Prop}
+    (h₁ : ∀ (x : X.N), motive x.2.1 x.2.2)
+    {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenerate _) : motive x hx :=
+  h₁ ⟨n, x, hx⟩
+
 instance : LE X.N where
   le x y := Subcomplex.ofSimplex x.2.1 ≤ Subcomplex.ofSimplex y.2.1
 
