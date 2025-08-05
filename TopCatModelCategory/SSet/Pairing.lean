@@ -15,11 +15,20 @@ import Mathlib.Order.ConditionallyCompleteLattice.Finset
 
 open HomotopicalAlgebra CategoryTheory Simplicial Limits Opposite
 
+lemma SimplexCategory.isIso_iff_len_eq_of_mono
+    {n m : SimplexCategory} (f : n ⟶ m) [Mono f] :
+    IsIso f ↔ n.len = m.len := by
+  have hf := SimplexCategory.len_le_of_mono (f:= f) inferInstance
+  refine ⟨fun _ ↦ le_antisymm hf
+    (SimplexCategory.len_le_of_epi (f:= f) inferInstance), fun h ↦ ?_⟩
+  obtain rfl : n = m := by aesop
+  have h := (mono_iff_injective (f := f)).1 inferInstance
+  exact isIso_of_bijective ⟨h, by rwa [← Finite.injective_iff_surjective]⟩
+
 namespace SSet
 
-variable (X : SSet.{u})
+variable {X : SSet.{u}}
 
-variable {X} in
 @[simp]
 lemma Subcomplex.ofSimplex_map {n m : ℕ} (f : ⦋n⦌ ⟶ ⦋m⦌) [Epi f]
     (x : X _⦋m⦌) :
@@ -33,9 +42,9 @@ lemma Subcomplex.ofSimplex_map {n m : ℕ} (f : ⦋n⦌ ⟶ ⦋m⦌) [Epi f]
       rw [← FunctorToTypes.map_comp_apply, ← op_comp,
         IsSplitEpi.id, op_id, FunctorToTypes.map_id_apply]⟩
 
+variable (X) in
 protected def S : Type u := Sigma (fun n ↦ X _⦋n⦌)
 
-variable {X}
 abbrev S.mk {n : ℕ} (x : X _⦋n⦌) : X.S := ⟨_, x⟩
 
 def S.map {Y : SSet.{u}} (f : X ⟶ Y) (x : X.S) : Y.S :=
@@ -585,7 +594,24 @@ lemma filtration_preimage_map' {n : ℕ} (x : P.Cells n) :
             intro h
             rw [S.mk_map_eq_iff_of_mono] at h
             exact SSet.objEquiv_symm_notMem_horn_of_isIso _ f hz
-        · sorry
+        · refine ⟨?_, ?_⟩
+          · rintro rfl
+            have : IsIso f := by
+              rw [SimplexCategory.isIso_iff_len_eq_of_mono]
+              exact (P.isUniquelyCodimOneFace t).dim_eq
+            exact SSet.objEquiv_symm_notMem_horn_of_isIso _ f hz
+          · rw [isFace_iff_neq_and_mem_ofSimplex t.1.1.2.2,
+              ← (P.isUniquelyCodimOneFace x).ofSimplex_cast,
+              ← (P.isUniquelyCodimOneFace x).sMk_cast]
+            refine ⟨fun h ↦ ?_, ?_⟩
+            · simpa [← S.dim_eq_of_mk_eq h, (P.isUniquelyCodimOneFace t).dim_eq] using
+                SimplexCategory.len_le_of_mono (f := f) inferInstance
+            · rw [← (P.isUniquelyCodimOneFace t).δ_index]
+              apply Subcomplex.map_mem_obj
+              rw [← ofSimplex_le_iff,
+                (P.isUniquelyCodimOneFace t).ofSimplex_cast,
+                ofSimplex_le_iff, ← hz']
+              exact ⟨_, rfl⟩
       replace htx := P.rank'_lt htx
       rw [hx] at htx
       replace htx := P.mem_filtration_I_cast_of_rank'_lt _ htx

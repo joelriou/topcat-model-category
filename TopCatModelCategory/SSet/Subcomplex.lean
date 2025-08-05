@@ -158,6 +158,12 @@ variable (S : X.Subcomplex) (T : Y.Subcomplex)
 --instance : CoeOut X.Subcomplex SSet.{u} where
 --  coe := fun S ↦ S.toPresheaf
 
+variable {S} in
+lemma map_mem_obj {n m : SimplexCategoryᵒᵖ} (x : X.obj n) (f : n ⟶ m)
+    (hx : x ∈ S.obj _) :
+    X.map f x ∈ S.obj _ :=
+  S.map f hx
+
 variable (X)
 
 @[simps! inv_app_coe]
