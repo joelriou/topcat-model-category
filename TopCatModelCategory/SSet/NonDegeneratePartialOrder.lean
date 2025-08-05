@@ -30,6 +30,9 @@ namespace N
 
 variable {X}
 
+abbrev mk {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenerate n) : X.N :=
+    ⟨n, x, hx⟩
+
 lemma induction
     {motive : ∀ {n : ℕ} (x : X _⦋n⦌) (_ : x ∈ X.nonDegenerate _), Prop}
     (h₁ : ∀ (x : X.N), motive x.2.1 x.2.2)
@@ -82,6 +85,12 @@ instance : PartialOrder X.N where
   le_trans _ _ _ h h' := by
     simp only [le_iff] at h h' ⊢
     exact h.trans h'
+
+lemma eq_iff {x y : X.N} : x = y ↔ Subcomplex.ofSimplex x.2.1 = Subcomplex.ofSimplex y.2.1 :=
+  ⟨by rintro rfl; rfl, fun h ↦ by
+    apply le_antisymm
+    all_goals
+    · rw [le_iff, h]⟩
 
 end N
 
