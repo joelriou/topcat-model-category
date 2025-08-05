@@ -15,10 +15,10 @@ import Mathlib.Order.ConditionallyCompleteLattice.Finset
 
 open HomotopicalAlgebra CategoryTheory Simplicial Limits Opposite
 
-lemma SimplexCategory.isIso_iff_len_eq_of_mono
+lemma SimplexCategory.isIso_iff_of_mono
     {n m : SimplexCategory} (f : n ⟶ m) [Mono f] :
     IsIso f ↔ n.len = m.len := by
-  have hf := SimplexCategory.len_le_of_mono (f:= f) inferInstance
+  have hf := SimplexCategory.len_le_of_mono (f := f) inferInstance
   refine ⟨fun _ ↦ le_antisymm hf
     (SimplexCategory.len_le_of_epi (f:= f) inferInstance), fun h ↦ ?_⟩
   obtain rfl : n = m := by aesop
@@ -597,7 +597,7 @@ lemma filtration_preimage_map' {n : ℕ} (x : P.Cells n) :
         · refine ⟨?_, ?_⟩
           · rintro rfl
             have : IsIso f := by
-              rw [SimplexCategory.isIso_iff_len_eq_of_mono]
+              rw [SimplexCategory.isIso_iff_of_mono]
               exact (P.isUniquelyCodimOneFace t).dim_eq
             exact SSet.objEquiv_symm_notMem_horn_of_isIso _ f hz
           · rw [isFace_iff_neq_and_mem_ofSimplex t.1.1.2.2,
