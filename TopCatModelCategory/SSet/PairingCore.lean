@@ -14,18 +14,17 @@ structure PairingCore where
   ι : Type v
   d (s : ι) : ℕ
   type₁ (s : ι) : X _⦋d s + 1⦌
-  type₂ (s : ι) : X _⦋d s⦌
+  index (s : ι) : Fin (d s + 2)
   nonDegenerate₁ (s : ι) : type₁ s ∈ X.nonDegenerate _
-  nonDegenerate₂ (s : ι) : type₂ s ∈ X.nonDegenerate _
+  nonDegenerate₂ (s : ι) : X.δ (index s) (type₁ s) ∈ X.nonDegenerate _
   notMem₁ (s : ι) : type₁ s ∉ A.obj _
-  notMem₂ (s : ι) : type₂ s ∉ A.obj _
-  index (s : ι) : Fin (d s)
-  δ_type₁ (s : ι) : X.δ (index s) (type₁ s) = type₂ s
+  notMem₂ (s : ι) : X.δ (index s) (type₁ s) ∉ A.obj _
   injective_type₁ {s t : ι} (h : S.mk (type₁ s) = S.mk (type₁ t)) : s = t
-  injective_type₂ {s t : ι} (h : S.mk (type₂ s) = S.mk (type₂ t)) : s = t
-  type₁_neq_type₂ (s t : ι) : S.mk (type₁ s) ≠ S.mk (type₂ t)
+  injective_type₂ {s t : ι}
+    (h : S.mk (X.δ (index s) (type₁ s)) = S.mk (X.δ (index t) (type₁ t))) : s = t
+  type₁_neq_type₂ (s t : ι) : S.mk (type₁ s) ≠ S.mk (X.δ (index t) (type₁ t))
   surjective' (x : A.N) :
-    ∃ (s : ι), x.toS = S.mk (type₁ s) ∨ x.toS = S.mk (type₂ s)
+    ∃ (s : ι), x.toS = S.mk (type₁ s) ∨ x.toS = S.mk (X.δ (index s) (type₁ s))
 
 namespace PairingCore
 
@@ -37,13 +36,14 @@ def type₁N (s : h.ι) : A.N :=
 
 @[simps!]
 def type₂N (s : h.ι) : A.N :=
-  Subcomplex.N.mk (h.type₂ s) (h.nonDegenerate₂ s) (h.notMem₂ s)
+  Subcomplex.N.mk (X.δ (h.index s) (h.type₁ s)) (h.nonDegenerate₂ s)
+    (h.notMem₂ s)
 
 lemma injective_type₁N : Function.Injective h.type₁N :=
   fun _ _ hst ↦ h.injective_type₁ (by rwa [Subcomplex.N.ext_iff, SSet.N.ext_iff] at hst)
 
 lemma injective_type₂N : Function.Injective h.type₂N :=
-  fun _ _ hst ↦ h.injective_type₂ (by rwa [Subcomplex.N.ext_iff, SSet.N.ext_iff] at hst)
+  fun s t hst ↦ h.injective_type₂ (by rwa [Subcomplex.N.ext_iff, SSet.N.ext_iff] at hst)
 
 lemma surjective (x : A.N) :
     ∃ (s : h.ι), x = h.type₁N s ∨ x = h.type₂N s := by
@@ -94,5 +94,43 @@ lemma pairing_p_symm_type₁N (x : h.ι) :
 end PairingCore
 
 end Subcomplex
+
+namespace horn
+
+variable {n : ℕ} (i : Fin (n + 2))
+
+@[simps]
+def pairingCore : (horn (n + 1) i).PairingCore where
+  ι := Unit
+  d := n
+  type₁ _ := yonedaEquiv (𝟙 _)
+  index _ := i
+  nonDegenerate₁ _ := stdSimplex.id_nonDegenerate (n + 1)
+  nonDegenerate₂ _ := by
+    rw [stdSimplex.mem_nonDegenerate_iff_mono]
+    exact inferInstanceAs (Mono (SimplexCategory.δ i))
+  notMem₁ _ := SSet.objEquiv_symm_notMem_horn_of_isIso _ _
+  notMem₂ _ := (objEquiv_symm_δ_notMem_horn_iff _ _).2 rfl
+  injective_type₁ := by aesop
+  injective_type₂ := by aesop
+  type₁_neq_type₂ _ _ := by simp
+  surjective' s := by
+    obtain ⟨d, x, h₁, h₂, rfl⟩ := s.mk_surjective
+    obtain ⟨f, rfl⟩ := stdSimplex.objEquiv.symm.surjective x
+    rw [stdSimplex.mem_nonDegenerate_iff_mono, Equiv.apply_symm_apply] at h₁
+    dsimp at f
+    obtain hd | rfl := (SimplexCategory.le_of_mono (f := f) inferInstance).lt_or_eq
+    · rw [Nat.lt_succ] at hd
+      obtain hd | rfl := hd.lt_or_eq
+      · exact (h₂ (by simp [horn_obj_eq_top i (m := d) (by omega)])).elim
+      · obtain ⟨j, rfl⟩ := SimplexCategory.eq_δ_of_mono f
+        obtain rfl := (objEquiv_symm_δ_notMem_horn_iff _ _).1 h₂
+        exact ⟨⟨⟩, Or.inr rfl⟩
+    · obtain rfl := SimplexCategory.eq_id_of_mono f
+      exact ⟨⟨⟩, Or.inl rfl⟩
+
+noncomputable def pairing := (pairingCore i).pairing
+
+end horn
 
 end SSet
