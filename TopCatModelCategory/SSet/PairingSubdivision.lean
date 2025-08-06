@@ -364,14 +364,14 @@ lemma injective_q : Function.Injective (q (x₀ := x₀)) := by
   rw [q_eq s hd, q_eq s' hd', Subtype.ext_iff,
     SSet.Subcomplex.N.ext_iff, SSet.N.ext_iff] at h
   obtain rfl := SSet.S.dim_eq_of_eq h
-  rw [SSet.S.eq_iff'] at h
+  rw [SSet.S.ext_iff'] at h
   simp only [toII_coe_dim, SSet.S.cast_dim, nerve_obj, SimplexCategory.len_mk,
     SSet.S.cast_simplex_rfl, toII_coe_simplex, exists_const] at h
   have : index s hd = index s' hd' := by
     rw [Fin.ext_iff, toII.index_eq_card, toII.index_eq_card, h]
   generalize hl : index s hd = l
   rw [← cast_eq_self s hd, ← cast_eq_self s' hd',
-    Subtype.ext_iff, SSet.Subcomplex.N.ext_iff, SSet.N.ext_iff, SSet.S.eq_iff']
+    Subtype.ext_iff, SSet.Subcomplex.N.ext_iff, SSet.N.ext_iff, SSet.S.ext_iff']
   simp only [toII_coe_dim, cast_coe_dim, SSet.S.cast_dim, nerve_obj, SimplexCategory.len_mk,
     SSet.S.cast_simplex_rfl, exists_const]
   refine ComposableArrows.ext (fun i ↦ ?_) (fun _ _ ↦ rfl)
@@ -434,7 +434,7 @@ lemma surjective_q : Function.Surjective (q (x₀ := x₀)) := by
       (by simp [cast_obj, ψ, hφ₀])
     refine ⟨ψ, ?_⟩
     rw [q_eq _ rfl, Subtype.ext_iff, SSet.Subcomplex.N.ext_iff,
-      SSet.N.ext_iff, SSet.S.eq_iff']
+      SSet.N.ext_iff, SSet.S.ext_iff']
     dsimp [ψ]
     simp only [exists_const]
     apply Preorder.nerveExt
@@ -494,7 +494,7 @@ lemma surjective_q : Function.Surjective (q (x₀ := x₀)) := by
       change (φ i.succ).1 = (φ i.castSucc).1 ∪ {x₀}
       rw [hφ₂, hφ₁ _ (by rfl)])
     refine ⟨ψ, ?_⟩
-    rw [q_eq _ rfl, Subtype.ext_iff, SSet.Subcomplex.N.ext_iff, SSet.N.ext_iff, SSet.S.eq_iff']
+    rw [q_eq _ rfl, Subtype.ext_iff, SSet.Subcomplex.N.ext_iff, SSet.N.ext_iff, SSet.S.ext_iff']
     simp only [toII, SSet.Subcomplex.N.mk_dim, SSet.S.cast_dim, nerve_obj, SimplexCategory.len_mk,
       SSet.S.cast_simplex_rfl, SSet.Subcomplex.N.mk_simplex, exists_const, s]
     apply Preorder.nerveExt
@@ -573,7 +573,7 @@ instance : (pairing x₀).IsRegular := by
   dsimp at hs
   obtain rfl : d = dy := SSet.S.dim_eq_of_eq hs
   obtain rfl : d = dx := h₁.symm
-  obtain rfl : toII.simplex s hd = y := by simpa [toII, SSet.S.eq_iff'] using hs
+  obtain rfl : toII.simplex s hd = y := by simpa [toII, SSet.S.ext_iff'] using hs
   dsimp at hx₁ hx₂ hx₃ h₂ h₃
   obtain ⟨ι, _, _, eq⟩ := h₃
   obtain ⟨i, rfl⟩ := SimplexCategory.eq_δ_of_mono ι
@@ -581,7 +581,7 @@ instance : (pairing x₀).IsRegular := by
   let σ := (cast s hd).1.simplex
   replace h₂ : (nerve _).δ i σ ≠ (nerve _).δ (index s hd) σ := fun h ↦ h₂ (by
     ext
-    simpa [SSet.S.eq_iff'])
+    simpa [SSet.S.ext_iff'])
   generalize hl : index s hd = l
   obtain rfl | ⟨l, rfl⟩ := l.eq_zero_or_eq_succ
   · have hi : i = 0 := by

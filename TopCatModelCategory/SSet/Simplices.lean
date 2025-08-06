@@ -89,17 +89,16 @@ lemma cast_simplex_rfl : (s.cast rfl).simplex = s.simplex := rfl
 
 end
 
-lemma eq_iff' (s t : X.S) :
+lemma ext_iff' (s t : X.S) :
     s = t ↔ ∃ (h : s.dim = t.dim), (s.cast h).2 = t.2 :=
   ⟨by rintro rfl; exact ⟨rfl, rfl⟩, fun ⟨h₁, h₂⟩ ↦ by
     obtain ⟨_, _, rfl⟩ := s.mk_surjective
     obtain ⟨_, _, rfl⟩ := t.mk_surjective
     aesop⟩
 
-@[simp]
-lemma eq_iff {n : ℕ} (x y : X _⦋n⦌) :
+lemma ext_iff {n : ℕ} (x y : X _⦋n⦌) :
     S.mk x = S.mk y ↔ x = y := by
-  simp [eq_iff']
+  simp [ext_iff']
 
 instance : Preorder X.S where
   le x y := Subcomplex.ofSimplex x.2 ≤ Subcomplex.ofSimplex y.2

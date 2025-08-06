@@ -796,7 +796,7 @@ noncomputable def type₂ : (Subcomplex.range (P.m n)).N where
 lemma mapN_type₁ :
     P.mapN n (P.type₁ x) = S.mk (P.p x.1).1.1.1.2 := by
   dsimp [mapN, type₁]
-  rw [← (P.isUniquelyCodimOneFace x.1).sMk_cast, S.eq_iff,
+  rw [← (P.isUniquelyCodimOneFace x.1).sMk_cast, S.ext_iff,
     ← FunctorToTypes.comp, ι_b]
   dsimp [mapToSucc]
   rw [map'_app_objEquiv_symm]
@@ -806,7 +806,7 @@ lemma mapN_type₁ :
 lemma mapN_type₂ :
     P.mapN n (P.type₂ x) = S.mk x.1.1.1.1.2 := by
   dsimp [mapN, type₂]
-  rw [S.eq_iff, ← FunctorToTypes.comp, ι_b]
+  rw [S.ext_iff, ← FunctorToTypes.comp, ι_b]
   dsimp [mapToSucc]
   rw [map'_objEquiv_symm_δ_index]
 
