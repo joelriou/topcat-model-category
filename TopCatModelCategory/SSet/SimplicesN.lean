@@ -1,16 +1,16 @@
+import TopCatModelCategory.SSet.Simplices
 import Mathlib.AlgebraicTopology.SimplicialSet.Degenerate
-import TopCatModelCategory.SSet.StandardSimplex
 
 universe u
 
 open CategoryTheory Simplicial Limits Opposite
 
+lemma Quiver.Hom.op_surjective {C : Type*} [Quiver C] {X Y : Cᵒᵖ} (f : X ⟶ Y) :
+    ∃ (g : Y.unop ⟶ X.unop), f = g.op := ⟨f.unop, rfl⟩
+
 instance {C : Type*} [Category C] {X Y : C} (f : X ⟶ Y) [IsSplitEpi f] :
     IsSplitMono f.op where
   exists_splitMono := ⟨⟨(section_ f).op, Quiver.Hom.unop_inj (by simp)⟩⟩
-
-lemma Quiver.Hom.op_surjective {C : Type*} [Quiver C] {X Y : Cᵒᵖ} (f : X ⟶ Y) :
-    ∃ (g : Y.unop ⟶ X.unop), f = g.op := ⟨f.unop, rfl⟩
 
 lemma SimplexCategory.isIso_iff_len_eq_of_epi {n m : SimplexCategory} (f : n ⟶ m) [Epi f] :
     IsIso f ↔ n.len = m.len := by

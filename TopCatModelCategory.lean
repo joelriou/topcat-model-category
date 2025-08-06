@@ -75,7 +75,6 @@ import TopCatModelCategory.SSet.MinimalFibrationsLemmas
 import TopCatModelCategory.SSet.MonoCoprod
 import TopCatModelCategory.SSet.Monoidal
 import TopCatModelCategory.SSet.Monomorphisms
-import TopCatModelCategory.SSet.NonDegeneratePartialOrder
 import TopCatModelCategory.SSet.NonDegenerateProdSimplex
 import TopCatModelCategory.SSet.Pairing
 import TopCatModelCategory.SSet.PairingSubdivision
@@ -88,6 +87,8 @@ import TopCatModelCategory.SSet.Pseudofunctor
 import TopCatModelCategory.SSet.PtSimplex
 import TopCatModelCategory.SSet.Quotient
 import TopCatModelCategory.SSet.SimplexCategory
+import TopCatModelCategory.SSet.Simplices
+import TopCatModelCategory.SSet.SimplicesN
 import TopCatModelCategory.SSet.SingularConnected
 import TopCatModelCategory.SSet.Skeleton
 import TopCatModelCategory.SSet.SmallObject
