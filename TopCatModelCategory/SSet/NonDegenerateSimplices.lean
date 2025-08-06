@@ -24,18 +24,31 @@ namespace SSet
 
 variable (X : SSet.{u})
 
-def N : Type u := { x : X.S // x.2 ∈ X.nonDegenerate _ }
+structure N extends X.S where mk'' ::
+  nonDegenerate : simplex ∈ X.nonDegenerate _
 
 namespace N
 
 variable {X}
 
-abbrev mk {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenerate n) : X.N :=
-  ⟨S.mk x, hx⟩
+@[simps toS]
+def mk' (s : X.S) (hs : s.2 ∈ X.nonDegenerate _) : X.N where
+  toS := s
+  nonDegenerate := hs
 
-lemma exists_nonDegenerate (x : X.N) :
+lemma mk'_surjective (s : X.N) :
+    ∃ (t : X.S) (ht : t.2 ∈ X.nonDegenerate _), s = mk' t ht :=
+  ⟨s.toS, s.nonDegenerate, rfl⟩
+
+@[simps]
+def mk {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenerate n) : X.N where
+  nonDegenerate := hx
+
+lemma mk_surjective (x : X.N) :
     ∃ (n : ℕ) (y : X.nonDegenerate n), x = N.mk _ y.2 :=
-  ⟨x.1.1, ⟨_, x.2⟩, rfl⟩
+  ⟨x.1.1, ⟨_, x.nonDegenerate⟩, rfl⟩
+
+@[deprecated (since := "2025-08-06")] alias exists_nonDegenerate := mk_surjective
 
 lemma induction
     {motive : ∀ {n : ℕ} (x : X _⦋n⦌) (_ : x ∈ X.nonDegenerate _), Prop}
@@ -43,7 +56,7 @@ lemma induction
     {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenerate _) : motive x hx :=
   h₁ (mk x hx)
 
-instance : Preorder X.N := inferInstanceAs (Preorder (Subtype _))
+instance : Preorder X.N := Preorder.lift toS
 
 lemma le_iff {x y : X.N} : x ≤ y ↔ Subcomplex.ofSimplex x.1.2 ≤ Subcomplex.ofSimplex y.1.2 :=
   Iff.rfl
@@ -77,8 +90,9 @@ lemma le_of_le {x y : X.N} (h : x ≤ y) : x.1.1 ≤ y.1.1 := by
   exact SimplexCategory.len_le_of_mono hf
 
 instance : PartialOrder X.N where
-  le_antisymm := by
-    rintro ⟨⟨n₁, x₁⟩, hx₁⟩ ⟨⟨n₂, x₂⟩, hx₂⟩ h h'
+  le_antisymm x₁ x₂ h h' := by
+    obtain ⟨n₁, ⟨x₁, hx₁⟩, rfl⟩ := x₁.mk_surjective
+    obtain ⟨n₂, ⟨x₂, hx₂⟩, rfl⟩ := x₂.mk_surjective
     obtain rfl : n₁ = n₂ := le_antisymm (le_of_le h) (le_of_le h')
     rw [le_iff_exists] at h
     obtain ⟨f, hf, h⟩ := h
@@ -90,6 +104,23 @@ lemma eq_iff {x y : X.N} : x = y ↔ Subcomplex.ofSimplex x.1.2 = Subcomplex.ofS
     apply le_antisymm
     all_goals
     · rw [le_iff, h]⟩
+
+section
+
+variable (s : X.N) {d : ℕ} (hd : s.dim = d)
+
+@[simps! toS dim]
+def cast : X.N where
+  toS := s.toS.cast hd
+  nonDegenerate := by
+    subst hd
+    exact s.nonDegenerate
+
+lemma cast_eq_self : s.cast hd = s := by
+  subst hd
+  rfl
+
+end
 
 end N
 
@@ -158,18 +189,18 @@ lemma ofSimplex_toN : Subcomplex.ofSimplex (X.toN x).1.2 = Subcomplex.ofSimplex 
     exact ⟨X.toNπ x, by simp⟩
 
 variable {X} in
-lemma N.ext {n : ℕ} (x : X _⦋n⦌) (y₁ y₂ : X.N) (f₁ : ⦋n⦌ ⟶ ⦋y₁.1.1⦌)
+lemma N.ext' {n : ℕ} (x : X _⦋n⦌) (y₁ y₂ : X.N) (f₁ : ⦋n⦌ ⟶ ⦋y₁.1.1⦌)
     (f₂ : ⦋n⦌ ⟶ ⦋y₂.1.1⦌) [Epi f₁] [Epi f₂]
     (hf₁ : X.map f₁.op y₁.1.2 = x) (hf₂ : X.map f₂.op y₂.1.2 = x) : y₁ = y₂ := by
-  obtain ⟨n₁, y₁, rfl⟩ := y₁.exists_nonDegenerate
-  obtain ⟨n₂, y₂, rfl⟩ := y₂.exists_nonDegenerate
+  obtain ⟨n₁, y₁, rfl⟩ := y₁.mk_surjective
+  obtain ⟨n₂, y₂, rfl⟩ := y₂.mk_surjective
   obtain rfl := X.unique_nonDegenerate₁ x _ _ hf₁.symm _ _ hf₂.symm
   obtain rfl := X.unique_nonDegenerate₂ x _ _ hf₁.symm _ _ hf₂.symm
   rfl
 
 lemma toN_eq {n : ℕ} (x : X _⦋n⦌) (y : X.N) (f : ⦋n⦌ ⟶ ⦋y.1.1⦌) [Epi f]
     (h : X.map f.op y.1.2 = x) : X.toN x = y :=
-  N.ext x _ _ (X.toNπ x) f (by simp) h
+  N.ext' x _ _ (X.toNπ x) f (by simp) h
 
 lemma toN_surjective (s : X.N) : ∃ (n : ℕ) (x : X.nonDegenerate n), s = X.toN x.1 :=
   ⟨s.1.1, ⟨_, s.2⟩, (X.toN_eq _ _ (𝟙 _) (by simp)).symm⟩
@@ -199,7 +230,7 @@ lemma descApp_apply {n : ℕ} (x : X _⦋n⦌) (y : X.N) (f : ⦋n⦌ ⟶ ⦋y.1
     (hf : X.map f.op y.1.2 = x) :
     descApp s x = yonedaEquiv (stdSimplex.map f ≫ Subcomplex.toOfSimplex _ ≫ s.ι.app y) := by
   obtain rfl : y = X.toN x := by
-    obtain ⟨m, y, rfl⟩ := y.exists_nonDegenerate
+    obtain ⟨m, y, rfl⟩ := y.mk_surjective
     obtain rfl := X.unique_nonDegenerate₁ x _ _ hf.symm _ _ ((X.map_toNπ_op_toN x).symm)
     obtain rfl := X.unique_nonDegenerate₂ x _ _ hf.symm _ _ ((X.map_toNπ_op_toN x).symm)
     rfl
@@ -295,5 +326,22 @@ lemma mapN_mapN {Z : SSet.{u}} (g : Y ⟶ Z) (x : X.N) :
     mapN g (mapN f x) = mapN (f ≫ g) x := by
   obtain ⟨n, x, rfl⟩ := X.toN_surjective x
   simp
+
+lemma N.ext_iff (x y : X.N) :
+    x = y ↔ x.toS = y.toS := by
+  obtain ⟨x, hx, rfl⟩ := x.mk'_surjective
+  obtain ⟨y, hy, rfl⟩ := y.mk'_surjective
+  simp [mk']
+
+@[ext]
+lemma N.ext {x y : X.N} (h : x.toS = y.toS) :
+    x = y := by
+  rwa [ext_iff]
+
+lemma N.mk_eq_iff_sMk_eq {n m : ℕ} (x : X _⦋n⦌) (y : X _⦋m⦌)
+    (hx : x ∈ X.nonDegenerate _) (hy : y ∈ X.nonDegenerate _) :
+    N.mk x hx = N.mk y hy ↔ S.mk x = S.mk y := by
+  rw [ext_iff]
+  rfl
 
 end SSet

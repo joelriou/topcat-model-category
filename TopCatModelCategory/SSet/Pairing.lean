@@ -29,15 +29,12 @@ namespace SSet
 
 variable {X : SSet.{u}}
 
-lemma N.mk_eq_iff_sMk_eq {n m : ℕ} (x : X _⦋n⦌) (y : X _⦋m⦌)
-    (hx : x ∈ X.nonDegenerate _) (hy : y ∈ X.nonDegenerate _) :
-    N.mk x hx = N.mk y hy ↔ S.mk x = S.mk y := by
-  rw [Subtype.ext_iff]
-
 lemma S.eq_iff_of_ofSimplex_eq {n m : ℕ} (x : X _⦋n⦌) (y : X _⦋m⦌)
     (hx : x ∈ X.nonDegenerate _) (hy : y ∈ X.nonDegenerate _) :
     S.mk x = S.mk y ↔ Subcomplex.ofSimplex x = Subcomplex.ofSimplex y := by
   rw [← N.mk_eq_iff_sMk_eq _ _ hx hy, N.eq_iff]
+  dsimp
+  rfl
 
 end SSet
 
@@ -210,7 +207,8 @@ namespace Subcomplex
 variable (A : X.Subcomplex)
 
 /-- The type of nondegenerate simplices of `X` which do not belong to `A`. -/
-def N : Type u := { x : X.N // x.1.2 ∉ A.obj _ }
+structure N extends X.N where mk' ::
+  notMem : simplex ∉ A.obj _
 
 lemma N.induction
     {motive : ∀ {n : ℕ} (x : X _⦋n⦌) (_ : x ∈ X.nonDegenerate _), Prop}
@@ -229,10 +227,58 @@ lemma existsN {n : ℕ} (s : X _⦋n⦌) (hs : s ∉ A.obj _) :
     fun h ↦ hs (by simpa only [← ofSimplex_le_iff, ofSimplex_toN] using h)⟩,
     X.toNπ s, inferInstance, by simp⟩
 
-lemma N.eq_iff_sMk_eq (x y : A.N) :
+namespace N
+
+variable {A}
+
+lemma mk'_surjective (s : A.N) :
+    ∃ (t : X.N) (ht : t.simplex ∉ A.obj _), s = mk' t ht :=
+  ⟨s.toN, s.notMem, rfl⟩
+
+@[simps!]
+def mk {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenerate n)
+    (hx' : x ∉ A.obj _) : A.N where
+  simplex := x
+  nonDegenerate := hx
+  notMem := hx'
+
+lemma mk_surjective (s : A.N) :
+    ∃ (n : ℕ) (x : X _⦋n⦌) (hx : x ∈ X.nonDegenerate n)
+      (hx' : x ∉ A.obj _), s = mk x hx hx' :=
+  ⟨s.dim, s.simplex, s.nonDegenerate, s.notMem, rfl⟩
+
+lemma ext_iff (x y : A.N) :
+    x = y ↔ x.toN = y.toN := by
+  cases x
+  cases y
+  aesop
+
+@[ext]
+lemma ext {x y : A.N} (h : x.toN = y.toN) : x = y := by
+  rwa [ext_iff]
+
+lemma eq_iff_sMk_eq (x y : A.N) :
     x = y ↔ S.mk x.1.1.2 = S.mk y.1.1.2 := by
-  rw [Subtype.ext_iff, Subtype.ext_iff]
+  rw [N.ext_iff, SSet.N.ext_iff]
+
+section
+
+variable (s : A.N) {d : ℕ} (hd : s.dim = d)
+
+@[simps! toN dim]
+def cast : A.N where
+  toN := s.toN.cast hd
+  notMem := by
+    subst hd
+    exact s.notMem
+
+lemma cast_eq_self : s.cast hd = s := by
+  subst hd
   rfl
+
+end
+
+end N
 
 structure Pairing where
   I : Set A.N
@@ -263,14 +309,16 @@ lemma neq (x : P.I) (y : P.II) :
   simp [P.inter] at this
 
 lemma mk_neq (x : P.I) (y : P.II) :
-    S.mk x.1.1.1.2 ≠ S.mk y.1.1.1.2 := by
-  obtain ⟨⟨⟨⟨n, x⟩, h₁⟩, h₂⟩, hx⟩ := x
-  obtain ⟨⟨⟨⟨m, y⟩, _⟩, _⟩, hy⟩ := y
+    S.mk x.1.simplex ≠ S.mk y.1.simplex := by
+  obtain ⟨x, hx⟩ := x
+  obtain ⟨y, hx⟩ := y
+  obtain ⟨n, x, h₁, h₂, rfl⟩ := x.mk_surjective
+  obtain ⟨m, y, _, _, rfl⟩ := y.mk_surjective
   intro h
   obtain rfl := S.dim_eq_of_mk_eq h
   simp at h
   subst h
-  have : ⟨⟨⟨n, x⟩, h₁⟩, h₂⟩ ∈ P.I ∩ P.II := by aesop
+  have : N.mk x h₁ h₂ ∈ P.I ∩ P.II := by aesop
   simp [P.inter] at this
 
 class IsProper where
@@ -302,22 +350,23 @@ def ancestersSet (y : P.II) : Set P.II := { x : P.II | P.AncestralRel x y }
 
 lemma finite_ancesters (y : P.II) :
     Set.Finite (P.ancestersSet y) := by
-  let φ : { x : P.II | P.AncestralRel x y } →
+  let φ : { x : P.II // P.AncestralRel x y } →
       Σ (i : Fin ((P.p y).1.1.1.1 + 1)), ⦋i⦌ ⟶ ⦋(P.p y).1.1.1.1⦌ :=
     fun ⟨x, hxy⟩ ↦ ⟨⟨x.1.1.1.1, by
       simp only [Nat.lt_succ]
       exact SimplexCategory.len_le_of_mono (f := hxy.2.f) inferInstance⟩, hxy.2.f⟩
   apply Finite.of_injective φ
-  rintro ⟨⟨⟨⟨⟨n₁, x₁⟩, h₁⟩, h₁'⟩, h₁''⟩, hx₁⟩ ⟨⟨⟨⟨⟨n₂, x₂⟩, h₂⟩, h₂'⟩, h₂''⟩, hx₂⟩ h
-  dsimp [φ] at h
+  rintro ⟨⟨x₁, h₁''⟩, hx₁⟩ ⟨⟨x₂, h₂''⟩, hx₂⟩ h
+  obtain ⟨n₁, x₁, h₁, h₁', rfl⟩ := x₁.mk_surjective
+  obtain ⟨n₂, x₂, h₂, h₂', rfl⟩ := x₂.mk_surjective
   simp only [Sigma.mk.injEq, Fin.mk.injEq, φ] at h
   obtain rfl := h.1
-  simp only [heq_eq_eq, true_and, φ] at h
+  simp only [N.mk_dim, N.mk_simplex, heq_eq_eq, true_and, φ] at h
   obtain rfl : x₁ = x₂ := by
     have eq₁ := hx₁.2.eq
     have eq₂ := hx₂.2.eq
     dsimp at eq₁ eq₂
-    rw [← eq₁, ← eq₂, h]
+    rw [← eq₁, ← eq₂, ← h]
   rfl
 
 instance (y : P.II) : Finite (P.ancestersSet y) := P.finite_ancesters y
@@ -452,7 +501,7 @@ lemma iSup_filtration :
     simp only [Subpresheaf.iSup_obj, Set.mem_iUnion]
     by_cases h : x ∈ A.obj _
     · exact ⟨0, P.le_filtration _ _ h⟩
-    · obtain ⟨y, hy | hy⟩ := P.exists_or ⟨N.mk _ hx, h⟩
+    · obtain ⟨y, hy | hy⟩ := P.exists_or ⟨SSet.N.mk _ hx, h⟩
       · have := P.mem_filtration_II y
         exact ⟨P.rank' y + 1, by rwa [← hy] at this⟩
       · have := P.mem_filtration_I y
@@ -707,12 +756,14 @@ section
 
 variable {n : ℕ} (x : P.Cells n)
 
-noncomputable def type₁ : (Subcomplex.range (P.m n)).N :=
-  ⟨N.mk ((P.ιSigmaStdSimplex x).app _ (stdSimplex.objEquiv.symm (𝟙 _))) (by
-    dsimp
+@[simps]
+noncomputable def type₁ : (Subcomplex.range (P.m n)).N where
+  simplex := (P.ιSigmaStdSimplex x).app _ (stdSimplex.objEquiv.symm (𝟙 _))
+  nonDegenerate := by
     rw [nonDegenerate_iff_of_mono, stdSimplex.mem_nonDegenerate_iff_mono,
       Equiv.apply_symm_apply]
-    infer_instance), by
+    infer_instance
+  notMem := by
     rintro ⟨y, hy⟩
     obtain ⟨x', ⟨y, hy'⟩, rfl⟩ := P.ιSigmaHorn_jointly_surjective y
     dsimp at hy
@@ -720,15 +771,17 @@ noncomputable def type₁ : (Subcomplex.range (P.m n)).N :=
     dsimp at hy
     rw [ιSigmaStdSimplex_eq_iff] at hy
     obtain ⟨rfl, rfl⟩ := hy
-    exact SSet.objEquiv_symm_notMem_horn_of_isIso _ _ hy'⟩
+    exact SSet.objEquiv_symm_notMem_horn_of_isIso _ _ hy'
 
-noncomputable def type₂ : (Subcomplex.range (P.m n)).N :=
-  ⟨N.mk ((P.ιSigmaStdSimplex x).app _
-    (stdSimplex.objEquiv.symm (SimplexCategory.δ (P.index x.1)))) (by
-    dsimp
+@[simps]
+noncomputable def type₂ : (Subcomplex.range (P.m n)).N where
+  simplex := (P.ιSigmaStdSimplex x).app _
+    (stdSimplex.objEquiv.symm (SimplexCategory.δ (P.index x.1)))
+  nonDegenerate := by
     rw [nonDegenerate_iff_of_mono, stdSimplex.mem_nonDegenerate_iff_mono,
       Equiv.apply_symm_apply]
-    infer_instance), by
+    infer_instance
+  notMem := by
     rintro ⟨y, hy⟩
     obtain ⟨x', ⟨y, hy'⟩, rfl⟩ := P.ιSigmaHorn_jointly_surjective y
     dsimp at hy
@@ -736,7 +789,8 @@ noncomputable def type₂ : (Subcomplex.range (P.m n)).N :=
     dsimp at hy
     rw [ιSigmaStdSimplex_eq_iff] at hy
     obtain ⟨rfl, rfl⟩ := hy
-    simpa using (objEquiv_symm_δ_mem_horn_iff _ _).1 hy'⟩
+    simpa using (objEquiv_symm_δ_mem_horn_iff _ _).1 hy'
+
 
 @[simp]
 lemma mapN_type₁ :
@@ -761,7 +815,8 @@ end
 lemma exists_or_of_range_m_N {n : ℕ}
     (s : (Subcomplex.range (P.m n)).N) :
     ∃ (x : P.Cells n), s = P.type₁ x ∨ s = P.type₂ x := by
-  obtain ⟨⟨⟨d, s⟩, hs⟩, hs'⟩ := s
+  obtain ⟨s, hs'⟩ := s
+  obtain ⟨d, ⟨s, hs⟩, rfl⟩ := s.mk_surjective
   obtain ⟨x, s, rfl⟩ := P.ιSigmaStdSimplex_jointly_surjective s
   replace hs' : s ∉ (horn _ (P.index x.1)).obj _ :=
     fun h ↦ hs' ⟨(P.ιSigmaHorn x).app _ ⟨_, h⟩, by rw [← FunctorToTypes.comp, ι_m]; rfl⟩
