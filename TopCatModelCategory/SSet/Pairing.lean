@@ -1,10 +1,9 @@
-import TopCatModelCategory.SSet.SimplicesN
+import TopCatModelCategory.SSet.NonDegenerateSimplices
 import TopCatModelCategory.SSet.AnodyneExtensionsDefs
 import TopCatModelCategory.SSet.Evaluation
 import TopCatModelCategory.SSet.Monomorphisms
 import TopCatModelCategory.SSet.Skeleton
 import TopCatModelCategory.SSet.Horn
-import TopCatModelCategory.SSet.Simplices
 import TopCatModelCategory.ColimitsType
 import Mathlib.AlgebraicTopology.RelativeCellComplex.Basic
 import Mathlib.CategoryTheory.Limits.Lattice
