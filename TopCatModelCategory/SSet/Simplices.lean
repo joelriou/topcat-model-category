@@ -125,12 +125,6 @@ lemma mk_map_eq_iff_of_mono {n m : ℕ} (x : X _⦋n⦌)
     obtain rfl := SimplexCategory.eq_id_of_isIso f
     simp
 
-attribute [-simp] SSet.S.mk.injEq
-
 end S
 
-attribute [-simp] SSet.S.mk.injEq
-
 end SSet
-
-attribute [-simp] SSet.S.mk.injEq
