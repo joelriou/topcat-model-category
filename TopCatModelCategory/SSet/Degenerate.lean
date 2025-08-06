@@ -321,6 +321,18 @@ def nonDegenerateEquivOfIso (e : X ≅ Y) (n : ℕ) :
 
 end
 
+variable {X} in
+lemma degenerate_iff_of_mono {Y : SSet.{u}} (f : X ⟶ Y) [Mono f] (x : X _⦋n⦌) :
+    f.app _ x ∈ Y.degenerate n ↔ x ∈ X.degenerate n := by
+  rw [← degenerate_iff_of_isIso (toRangeSubcomplex f) x,
+    Subcomplex.mem_degenerate_iff]
+  simp
+
+variable {X} in
+lemma nonDegenerate_iff_of_mono {Y : SSet.{u}} (f : X ⟶ Y) [Mono f] (x : X _⦋n⦌) :
+    f.app _ x ∈ Y.nonDegenerate n ↔ x ∈ X.nonDegenerate n := by
+  simp only [mem_nonDegenerate_iff_not_mem_degenerate, degenerate_iff_of_mono]
+
 /-lemma _root_.Fin.eq_castSucc_of_ne_last {n : ℕ} {i : Fin (n + 1)} (hi : i ≠ Fin.last n) :
     ∃ (j : Fin n), i = j.castSucc := by
   obtain ⟨j, rfl⟩ | rfl := i.eq_castSucc_or_eq_last

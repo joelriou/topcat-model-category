@@ -654,6 +654,24 @@ lemma ιSigmaStdSimplex_jointly_surjective {n d : ℕ} (a : (P.sigmaStdSimplex n
     (isColimitCofanMkObjOfIsColimit ((CategoryTheory.evaluation _ _).obj _) _ _
     (coproductIsCoproduct _)) a
 
+lemma ιSigmaStdSimplex_eq_iff {n d : ℕ}
+    (x : P.Cells n) (s : (Δ[x.1.1.1.1 + 1] : SSet.{u}) _⦋d⦌)
+    (y : P.Cells n) (t : (Δ[y.1.1.1.1 + 1] : SSet.{u}) _⦋d⦌):
+    (P.ιSigmaStdSimplex x).app (op ⦋d⦌) s = (P.ιSigmaStdSimplex y).app (op ⦋d⦌) t ↔
+      ∃ (h : x = y), t = cast (by rw [h]) s :=
+  Types.cofanInj_apply_eq_iff_of_isColimit
+    (isColimitCofanMkObjOfIsColimit ((CategoryTheory.evaluation _ _).obj _) _ _
+      (coproductIsCoproduct (fun (x : P.Cells n) ↦ Δ[x.1.1.1.1 + 1]))) _ _
+
+instance {n : ℕ} (x : P.Cells n) :
+    Mono (P.ιSigmaStdSimplex x) := by
+  rw [NatTrans.mono_iff_mono_app]
+  rintro ⟨d⟩
+  induction' d using SimplexCategory.rec with d
+  rw [mono_iff_injective]
+  intro _ _ h
+  simpa [ιSigmaStdSimplex_eq_iff] using h.symm
+
 noncomputable def m (n : ℕ) :
     P.sigmaHorn n ⟶ P.sigmaStdSimplex n :=
   Limits.Sigma.map (fun _ ↦ Subcomplex.ι _)
@@ -752,17 +770,31 @@ variable {n : ℕ} (x : P.Cells n)
 noncomputable def type₁ : (Subcomplex.range (P.m n)).N :=
   ⟨⟨_, (P.ιSigmaStdSimplex x).app _ (stdSimplex.objEquiv.symm (𝟙 _)), by
     dsimp
-    sorry⟩, by
-    dsimp
-    sorry⟩
+    rw [nonDegenerate_iff_of_mono, stdSimplex.mem_nonDegenerate_iff_mono,
+      Equiv.apply_symm_apply]
+    infer_instance⟩, by
+    rintro ⟨y, hy⟩
+    obtain ⟨x', ⟨y, hy'⟩, rfl⟩ := P.ιSigmaHorn_jointly_surjective y
+    rw [← FunctorToTypes.comp, ι_m] at hy
+    dsimp at hy
+    rw [ιSigmaStdSimplex_eq_iff] at hy
+    obtain ⟨rfl, rfl⟩ := hy
+    exact SSet.objEquiv_symm_notMem_horn_of_isIso _ _ hy'⟩
 
 noncomputable def type₂ : (Subcomplex.range (P.m n)).N :=
   ⟨⟨x.1.1.1.1, (P.ιSigmaStdSimplex x).app _
     (stdSimplex.objEquiv.symm (SimplexCategory.δ (P.index x.1))), by
     dsimp
-    sorry⟩, by
-    dsimp
-    sorry⟩
+    rw [nonDegenerate_iff_of_mono, stdSimplex.mem_nonDegenerate_iff_mono,
+      Equiv.apply_symm_apply]
+    infer_instance⟩, by
+    rintro ⟨y, hy⟩
+    obtain ⟨x', ⟨y, hy'⟩, rfl⟩ := P.ιSigmaHorn_jointly_surjective y
+    rw [← FunctorToTypes.comp, ι_m] at hy
+    dsimp at hy
+    rw [ιSigmaStdSimplex_eq_iff] at hy
+    obtain ⟨rfl, rfl⟩ := hy
+    simpa using (objEquiv_symm_δ_mem_horn_iff _ _).1 hy'⟩
 
 @[simp]
 lemma mapN_type₁ :
@@ -786,7 +818,27 @@ end
 
 lemma exists_or_of_range_m_N {n : ℕ}
     (s : (Subcomplex.range (P.m n)).N) :
-    ∃ (x : P.Cells n), s = P.type₁ x ∨ s = P.type₂ x := sorry
+    ∃ (x : P.Cells n), s = P.type₁ x ∨ s = P.type₂ x := by
+  obtain ⟨⟨d, s, hs⟩, hs'⟩ := s
+  obtain ⟨x, s, rfl⟩ := P.ιSigmaStdSimplex_jointly_surjective s
+  replace hs' : s ∉ (horn _ (P.index x.1)).obj _ :=
+    fun h ↦ hs' ⟨(P.ιSigmaHorn x).app _ ⟨_, h⟩, by rw [← FunctorToTypes.comp, ι_m]; rfl⟩
+  obtain ⟨f, rfl⟩ := stdSimplex.objEquiv.symm.surjective s
+  rw [nonDegenerate_iff_of_mono, stdSimplex.mem_nonDegenerate_iff_mono,
+      Equiv.apply_symm_apply] at hs
+  dsimp at f
+  obtain hd | rfl := (SimplexCategory.le_of_mono (f := f) inferInstance).lt_or_eq
+  · rw [Nat.lt_succ_iff] at hd
+    obtain hd | rfl := hd.lt_or_eq
+    · exfalso
+      apply hs'
+      rw [horn_obj_eq_top _ _ (by omega)]
+      simp
+    · obtain ⟨i, rfl⟩ := SimplexCategory.eq_δ_of_mono f
+      obtain rfl := (objEquiv_symm_δ_notMem_horn_iff _ _).1 hs'
+      exact ⟨x, Or.inr rfl⟩
+  · obtain rfl := SimplexCategory.eq_id_of_mono f
+    exact ⟨x, Or.inl rfl⟩
 
 lemma isPushout_aux₁ {n : ℕ}
     (s : (Subcomplex.range (P.m n)).N) :

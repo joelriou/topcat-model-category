@@ -107,6 +107,12 @@ lemma objEquiv_symm_δ_mem_horn_iff {n : ℕ} (i j : Fin (n + 2)) :
   rintro h rfl
   simp [stdSimplex.subcomplex_le_horn_iff] at h
 
+lemma objEquiv_symm_δ_notMem_horn_iff {n : ℕ} (i j : Fin (n + 2)) :
+    stdSimplex.objEquiv.symm (SimplexCategory.δ i) ∉ (horn _ j).obj _ ↔
+      i = j := by
+  rw [objEquiv_symm_δ_mem_horn_iff]
+  simp
+
 lemma objEquiv_symm_notMem_horn_of_isIso {n : ℕ} (i : Fin (n + 1))
     {d : SimplexCategory} (f : d ⟶ ⦋n⦌) [IsIso f] :
     stdSimplex.objEquiv.symm f ∉ (horn n i).obj (op d) := by
