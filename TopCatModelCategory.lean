@@ -78,6 +78,7 @@ import TopCatModelCategory.SSet.Monomorphisms
 import TopCatModelCategory.SSet.NonDegenerateProdSimplex
 import TopCatModelCategory.SSet.NonDegenerateSimplices
 import TopCatModelCategory.SSet.Pairing
+import TopCatModelCategory.SSet.PairingCore
 import TopCatModelCategory.SSet.PairingSubdivision
 import TopCatModelCategory.SSet.Paths
 import TopCatModelCategory.SSet.PiZero
