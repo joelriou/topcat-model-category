@@ -1,8 +1,9 @@
 /-
-Copyright (c) 2024 Joël Riou. All rights reserved.
+Copyright (c) 2025 Joël Riou. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joël Riou
 -/
+import Mathlib.CategoryTheory.Elements
 import TopCatModelCategory.SSet.StandardSimplex
 
 /-!
@@ -15,7 +16,7 @@ We endow this type with a preorder defined by
 
 ## TODO (@joelriou)
 
-* Extend the `S` structure to as do define the type of nondegenerate
+* Extend the `S` structure to define the type of nondegenerate
 simplices of a simplicial set `X`, and also the type of nondegenerate
 simplices of a simplicial set `X` which do not belong to a given subcomplex.
 
@@ -98,7 +99,7 @@ lemma ext_iff' (s t : X.S) :
 
 lemma ext_iff {n : ℕ} (x y : X _⦋n⦌) :
     S.mk x = S.mk y ↔ x = y := by
-  simp [ext_iff']
+  simp
 
 instance : Preorder X.S where
   le x y := Subcomplex.ofSimplex x.2 ≤ Subcomplex.ofSimplex y.2
@@ -107,6 +108,11 @@ instance : Preorder X.S where
 
 lemma le_iff {x y : X.S} : x ≤ y ↔ Subcomplex.ofSimplex x.2 ≤ Subcomplex.ofSimplex y.2 :=
   Iff.rfl
+
+lemma mk_map_le {n m : ℕ} (x : X _⦋n⦌) (f : ⦋m⦌ ⟶ ⦋n⦌) :
+    S.mk (X.map f.op x) ≤ S.mk x := by
+  rw [le_iff, Subcomplex.ofSimplex_le_iff]
+  exact ⟨f.op, rfl⟩
 
 lemma mk_map_eq_iff_of_mono {n m : ℕ} (x : X _⦋n⦌)
     (f : ⦋m⦌ ⟶ ⦋n⦌) [Mono f] :
@@ -123,6 +129,18 @@ lemma mk_map_eq_iff_of_mono {n m : ℕ} (x : X _⦋n⦌)
         (SimplexCategory.len_le_of_mono (f := f) inferInstance)
     obtain rfl := SimplexCategory.eq_id_of_isIso f
     simp
+
+/-- The type of simplices of `X : SSet.{u}` identifies to the type
+of elements of `X` considered as a functor `SimplexCategoryᵒᵖ ⥤ Type u`. -/
+@[simps!]
+def equivElements : X.S ≃ X.Elements where
+  toFun s := X.elementsMk _ s.2
+  invFun := by
+    rintro ⟨⟨n⟩, x⟩
+    induction n using SimplexCategory.rec
+    exact S.mk x
+  left_inv _ := rfl
+  right_inv _ := rfl
 
 end S
 
