@@ -2,7 +2,7 @@ import TopCatModelCategory.SSet.PairingCore
 import TopCatModelCategory.SSet.StandardSimplex
 import TopCatModelCategory.SSet.NonDegenerateProdSimplex
 
-open CategoryTheory Simplicial MonoidalCategory
+open CategoryTheory Simplicial MonoidalCategory Opposite
 
 universe u
 
@@ -37,12 +37,13 @@ lemma isUniquelyCodimOneFace {m n d : ℕ} {x : (Δ[m] ⊗ Δ[n] : SSet.{u}) _�
     ext k : 3
     exact hx (DFunLike.congr_fun (congr_arg objEquiv.toFun hij) k))⟩)
 
-variable {m n : ℕ} {d : ℕ} (hd : m + n = d) (k : Fin (m + 1))
+variable {m : ℕ} (k : Fin (m + 1)) (n : ℕ)
 
 namespace pairingCore
 
 @[ext]
-structure ι (hd : m + n = d) (k : Fin (m + 1)) where
+structure ι where
+  d : ℕ
   simplex : (Δ[m + 1] ⊗ Δ[n] : SSet.{u}).nonDegenerate (d + 1)
   notMem₁ : simplex.1 ∉ ((horn (m + 1) k.castSucc).unionProd (boundary n)).obj _
   l : Fin (d + 1)
@@ -52,9 +53,9 @@ structure ι (hd : m + n = d) (k : Fin (m + 1)) where
 
 namespace ι
 
-variable {hd k} (s : ι hd k)
+variable {k n} (s : ι.{u} k n)
 
-abbrev type₁ : (Δ[m + 1] ⊗ Δ[n] : SSet.{u}) _⦋d + 1⦌ := s.simplex.1
+abbrev type₁ : (Δ[m + 1] ⊗ Δ[n] : SSet.{u}) _⦋s.d + 1⦌ := s.simplex.1
 
 @[simp]
 lemma type₁_left_castSucc : s.type₁.1 s.l.castSucc = k.castSucc := s.hl₀
@@ -65,9 +66,9 @@ lemma type₁_left_succ : s.type₁.1 s.l.succ = k.succ := s.hl₁
 @[simp]
 lemma type₁_right_succ : s.type₁.2 s.l.succ = s.type₁.2 s.l.castSucc := s.hl₂
 
-abbrev index : Fin (d + 2) := s.l.castSucc
+abbrev index : Fin (s.d + 2) := s.l.castSucc
 
-noncomputable abbrev type₂ : (Δ[m + 1] ⊗ Δ[n] : SSet.{u}) _⦋d⦌ :=
+noncomputable abbrev type₂ : (Δ[m + 1] ⊗ Δ[n] : SSet.{u}) _⦋s.d⦌ :=
   (Δ[m + 1] ⊗ Δ[n] : SSet.{u}).δ s.index s.type₁
 
 lemma nonDegenerate₁ : s.type₁ ∈ SSet.nonDegenerate _ _ := s.simplex.2
@@ -96,7 +97,7 @@ lemma mem_range_right (j : Fin (n + 1)) : j ∈ Set.range s.type₁.2 := by
   simp [mem_boundary_iff_notMem_range] at this
   tauto
 
-lemma type₁_left_le_iff (i : Fin (d + 2)) :
+lemma type₁_left_le_iff (i : Fin (s.d + 2)) :
     s.type₁.1 i ≤ k.castSucc ↔ i ≤ s.l.castSucc := by
   refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
   · by_contra!
@@ -107,27 +108,20 @@ lemma type₁_left_le_iff (i : Fin (d + 2)) :
   · rw [← s.type₁_left_castSucc]
     exact stdSimplex.monotone_apply s.type₁.1 h
 
-lemma type₁_injective : Function.Injective (fun (s : ι.{u} hd k) ↦ s.type₁) := by
-  suffices ∀ {s t : ι.{u} hd k} (h : s.type₁ = t.type₁), s.l ≤ t.l by
-    intro s t h
-    ext
-    · assumption
-    · exact le_antisymm (this h) (this h.symm)
-  intro s t hst
-  rw [← Fin.castSucc_le_castSucc_iff,
-    ← type₁_left_le_iff, ← hst, type₁_left_le_iff]
+lemma type₁_injective : Function.Injective (fun (s : ι.{u} k n) ↦ S.mk s.type₁) := by
+  sorry
 
 @[simp]
-lemma objEquiv_type₂_apply (i : Fin (d + 1)) :
+lemma objEquiv_type₂_apply (i : Fin (s.d + 1)) :
     objEquiv s.type₂ i = objEquiv s.type₁ (s.index.succAbove i) := rfl
 
-lemma type₂_left_apply (i : Fin (d + 1)) :
+lemma type₂_left_apply (i : Fin (s.d + 1)) :
     s.type₂.1 i = s.type₁.1 (s.index.succAbove i) := rfl
 
-lemma type₂_right_apply (i : Fin (d + 1)) :
+lemma type₂_right_apply (i : Fin (s.d + 1)) :
     s.type₂.2 i = s.type₁.2 (s.index.succAbove i) := rfl
 
-lemma type₂_left_le_iff (i : Fin (d + 1)) :
+lemma type₂_left_le_iff (i : Fin (s.d + 1)) :
     s.type₂.1 i ≤ k.castSucc ↔ i < s.l := by
   rw [type₂_left_apply, type₁_left_le_iff]
   by_cases hi : i < s.l
@@ -139,36 +133,12 @@ lemma type₂_left_le_iff (i : Fin (d + 1)) :
     rw [Fin.succAbove_of_le_castSucc _ _ (by simpa),
       Fin.succ_le_castSucc_iff]
 
-lemma le_type₂_left_le_iff (i : Fin (d + 1)) :
+lemma le_type₂_left_le_iff (i : Fin (s.d + 1)) :
     k.succ ≤ s.type₂.1 i ↔ s.l ≤ i := by
   rw [← not_lt, ← Fin.le_castSucc_iff, type₂_left_le_iff, not_lt]
 
-lemma l_eq_of_type₂_eq_type₂ {s t : ι.{u} hd k} (hst : s.type₂ = t.type₂) :
-    s.l = t.l :=
-  le_antisymm
-    (by rw [← le_type₂_left_le_iff, hst, le_type₂_left_le_iff])
-    (by rw [← le_type₂_left_le_iff, ← hst, le_type₂_left_le_iff])
-
-lemma type₂_injective : Function.Injective (fun (s : ι hd k) ↦ s.type₂) := by
-  intro s t h
-  have hl := l_eq_of_type₂_eq_type₂ h
-  have hl' : s.index = t.index := by simp [hl]
-  refine type₁_injective (objEquiv.injective ?_)
-  ext i : 2
-  dsimp at h
-  wlog hi : i ≠ s.index generalizing i
-  · simp only [ne_eq, Decidable.not_not] at hi
-    subst hi
-    ext : 1
-    · dsimp
-      rw [type₁_left_castSucc, hl', type₁_left_castSucc]
-    · dsimp
-      conv_rhs => rw [hl']
-      rw [← type₁_right_succ, ← type₁_right_succ, ← hl]
-      exact congr_arg Prod.snd (this s.l.succ s.l.castSucc_lt_succ.ne.symm)
-  obtain rfl | ⟨i, rfl⟩ := Fin.eq_self_or_eq_succAbove s.index i
-  · simp at hi
-  · rw [← objEquiv_type₂_apply, hl', ← objEquiv_type₂_apply, h]
+lemma type₂_injective : Function.Injective (fun (s : ι.{u} k n) ↦ S.mk s.type₂) := by
+  sorry
 
 lemma notMem₂ :
     s.type₂ ∉ ((horn.{u} (m + 1) k.castSucc).unionProd (boundary n)).obj _:= by
@@ -189,6 +159,36 @@ lemma notMem₂ :
 
 end ι
 
+namespace surjective
+
+variable {n} {d : ℕ}
+  (x : (Δ[m + 1] ⊗ Δ[n] : SSet.{u}) _⦋d⦌)
+  (hx : x ∈ SSet.nonDegenerate _ _)
+  (hx' : x ∉ ((Λ[m + 1, k.castSucc]).unionProd ∂Δ[n]).obj _)
+
+def IsIndexI (l : Fin d) : Prop :=
+    x.1 l.castSucc = k.castSucc ∧ x.1 l.succ = k.succ ∧
+      x.2 l.succ = x.2 l.castSucc
+
+def finset : Finset (Fin (d + 1)) := { l : _ | x.1 l = k.succ }
+
+@[simp]
+lemma mem_finset_iff (l : Fin (d + 1)) :
+    l ∈ finset k x ↔ x.1 l = k.succ := by
+  simp [finset]
+
+include hx' in
+lemma nonempty_finset : Nonempty (finset k x) := by
+  have hx' : x.1 ∉ (horn _ k.castSucc).obj _ := by
+    simp [Subcomplex.unionProd, Set.prod] at hx'
+    exact hx'.2
+  simp only [mem_horn_iff_notMem_range, Set.mem_range, not_exists, ne_eq, exists_prop, not_and,
+    not_forall, Decidable.not_not] at hx'
+  obtain ⟨i, hi⟩ := hx' k.succ (fun h ↦ by simp [Fin.ext_iff] at h)
+  exact ⟨i, by simpa⟩
+
+end surjective
+
 end pairingCore
 
 open pairingCore
@@ -196,26 +196,37 @@ open pairingCore
 @[simps]
 noncomputable def pairingCore :
     ((horn.{u} (m + 1) k.castSucc).unionProd (boundary n)).PairingCore where
-  ι := ι hd k
-  d _ := d
+  ι := ι k n
+  d s := s.d
   type₁ s := s.type₁
   index s := s.index
   nonDegenerate₁ s := s.nonDegenerate₁
   nonDegenerate₂ s := s.nonDegenerate₂
   notMem₁ s := s.notMem₁
   notMem₂ s := s.notMem₂
-  injective_type₁ hst := ι.type₁_injective (by rwa [S.ext_iff] at hst)
-  injective_type₂ hst := ι.type₂_injective (by rwa [S.ext_iff] at hst)
-  type₁_neq_type₂ _ _ hst := by
-    have := S.dim_eq_of_mk_eq hst
-    simp at this
-  surjective' := sorry
+  injective_type₁ h := ι.type₁_injective h
+  injective_type₂ h := ι.type₂_injective h
+  type₁_neq_type₂ _ _ hst := by sorry
+  surjective' x := by
+    obtain ⟨d', x, hx, hx', rfl⟩ := x.mk_surjective
+    by_cases h : ∃ i, surjective.IsIndexI k x i
+    · obtain ⟨l, hl⟩ := h
+      obtain ⟨d, rfl⟩ := Nat.exists_eq_add_one.2 l.pos
+      exact ⟨{
+        d := d
+        simplex := ⟨x, hx⟩
+        notMem₁ := hx'
+        l := l
+        hl₀ := hl.1
+        hl₁ := hl.2.1
+        hl₂ := hl.2.2}, Or.inl rfl⟩
+    · sorry
 
-instance : (pairingCore hd k).IsProper where
+instance : (pairingCore k n).IsProper where
   isUniquelyCodimOneFace s := isUniquelyCodimOneFace s.nonDegenerate₁ _
 
 lemma isInner_pairingCore (k : Fin m) :
-    (pairingCore hd k.succ).IsInner := by
+    (pairingCore k.succ n).IsInner := by
   intro s
   refine ⟨fun hs ↦ ?_, s.l.castSucc_lt_last.ne⟩
   · dsimp at s hs
