@@ -108,9 +108,6 @@ lemma type₁_left_le_iff (i : Fin (s.d + 2)) :
   · rw [← s.type₁_left_castSucc]
     exact stdSimplex.monotone_apply s.type₁.1 h
 
-lemma type₁_injective : Function.Injective (fun (s : ι.{u} k n) ↦ S.mk s.type₁) := by
-  sorry
-
 @[simp]
 lemma objEquiv_type₂_apply (i : Fin (s.d + 1)) :
     objEquiv s.type₂ i = objEquiv s.type₁ (s.index.succAbove i) := rfl
@@ -137,9 +134,6 @@ lemma le_type₂_left_le_iff (i : Fin (s.d + 1)) :
     k.succ ≤ s.type₂.1 i ↔ s.l ≤ i := by
   rw [← not_lt, ← Fin.le_castSucc_iff, type₂_left_le_iff, not_lt]
 
-lemma type₂_injective : Function.Injective (fun (s : ι.{u} k n) ↦ S.mk s.type₂) := by
-  sorry
-
 lemma notMem₂ :
     s.type₂ ∉ ((horn.{u} (m + 1) k.castSucc).unionProd (boundary n)).obj _:= by
   intro h
@@ -157,7 +151,45 @@ lemma notMem₂ :
       rw [← hi, type₂_right_apply, Fin.succAbove_castSucc_self, type₁_right_succ]
     · exact h ⟨i, by rwa [type₂_right_apply]⟩
 
+noncomputable abbrev nonDeg : (Δ[m + 1] ⊗ Δ[n]).N := N.mk s.simplex.1 s.simplex.2
+
+variable {d : ℕ} (hd : s.d = d)
+
+@[simps d simplex_coe]
+noncomputable def cast : ι k n where
+  d := d
+  simplex := ⟨_, (s.nonDeg.cast (by simp [hd])).2⟩
+  l := Fin.cast (by omega) s.l
+  notMem₁ := by
+    subst hd
+    exact s.notMem₁
+  hl₀ := by
+    subst hd
+    exact s.hl₀
+  hl₁ := by
+    subst hd
+    exact s.hl₁
+  hl₂ := by
+    subst hd
+    exact s.hl₂
+
+lemma cast_eq_self : s.cast hd = s := by
+  subst hd
+  rfl
+
 end ι
+
+namespace surjective'
+
+variable {n} (x : ((Λ[m + 1, k.castSucc] : Subcomplex.{u} _).unionProd ∂Δ[n]).N)
+  {d : ℕ} (hd : x.dim = d)
+
+def IsIndexI (l : Fin d) : Prop :=
+  (x.cast hd).simplex.1 l.castSucc = k.castSucc ∧
+  (x.cast hd).simplex.1 l.succ = k.succ ∧
+  (x.cast hd).simplex.2 l.succ = (x.cast hd).simplex.2 l.castSucc
+
+end surjective'
 
 namespace surjective
 
@@ -189,6 +221,22 @@ lemma nonempty_finset : Nonempty (finset k x) := by
 
 end surjective
 
+variable {k n}
+
+lemma type₁_injective : Function.Injective (fun (s : ι.{u} k n) ↦ S.mk s.type₁) := by
+  intro s t h
+  dsimp at h
+  generalize hds : s.d = d
+  have hdt : t.d = d := by
+    have := S.dim_eq_of_eq h
+    dsimp at this
+    omega
+  sorry
+
+lemma type₂_injective : Function.Injective (fun (s : ι.{u} k n) ↦ S.mk s.type₂) := by
+  sorry
+
+
 end pairingCore
 
 open pairingCore
@@ -204,8 +252,8 @@ noncomputable def pairingCore :
   nonDegenerate₂ s := s.nonDegenerate₂
   notMem₁ s := s.notMem₁
   notMem₂ s := s.notMem₂
-  injective_type₁ h := ι.type₁_injective h
-  injective_type₂ h := ι.type₂_injective h
+  injective_type₁ h := type₁_injective h
+  injective_type₂ h := type₂_injective h
   type₁_neq_type₂ _ _ hst := by sorry
   surjective' x := by
     obtain ⟨d', x, hx, hx', rfl⟩ := x.mk_surjective
