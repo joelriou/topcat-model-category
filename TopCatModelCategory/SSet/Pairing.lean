@@ -199,6 +199,15 @@ lemma index_unique {i : Fin (n + 2)} (hi : X.δ i hxy.cast = x) :
     i = hxy.index :=
   hxy.existsUnique_index.unique hi hxy.δ_index
 
+lemma congr_index {n' m' : ℕ} {x' : X _⦋n'⦌} {y' : X _⦋m'⦌}
+    (hxy' : IsUniquelyCodimOneFace x' y')
+    (hx : S.mk x = S.mk x') (hy : S.mk y = S.mk y') :
+    (hxy.index : ℕ) = hxy'.index := by
+  obtain rfl := S.dim_eq_of_eq hx
+  obtain rfl := S.dim_eq_of_eq hy
+  obtain rfl : x = x' := by simpa using hx
+  obtain rfl : y = y' := by simpa using hy
+  rfl
 
 end IsUniquelyCodimOneFace
 
@@ -327,6 +336,11 @@ class IsProper where
 lemma isUniquelyCodimOneFace [P.IsProper] (x : P.II) :
     IsUniquelyCodimOneFace x.1.1.1.2 (P.p x).1.1.1.2 :=
   IsProper.isUniquelyCodimOneFace x
+
+def IsInner [P.IsProper] : Prop :=
+  ∀ (x : P.II),
+    (P.isUniquelyCodimOneFace x).index ≠ 0 ∧
+      (P.isUniquelyCodimOneFace x).index ≠ Fin.last _
 
 def AncestralRel (x y : P.II) : Prop :=
   x ≠ y ∧ IsFace x.1.1.1.2 (P.p y).1.1.1.2

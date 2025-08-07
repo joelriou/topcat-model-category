@@ -707,4 +707,17 @@ lemma mem_ofSimplex_obj_iff' {X : SSet.{u}} {n m : ℕ} (x : X _⦋n⦌)
   · rintro ⟨x, rfl⟩
     exact ⟨(stdSimplex.objEquiv x).op, rfl⟩
 
+namespace stdSimplex
+
+variable {n d : ℕ}
+
+lemma δ_apply (x : Δ[n] _⦋d + 1⦌) (i : Fin (d + 2)) (j : Fin (d + 1)):
+    Δ[n].δ i x j =
+      x (i.succAbove j) := rfl
+
+lemma σ_apply (x : Δ[n] _⦋d⦌) (i : Fin (d + 1)) (j : Fin (d + 2)):
+    Δ[n].σ i x j = x (i.predAbove j) := rfl
+
+end stdSimplex
+
 end SSet

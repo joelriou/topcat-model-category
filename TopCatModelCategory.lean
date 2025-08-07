@@ -80,6 +80,7 @@ import TopCatModelCategory.SSet.NonDegenerateSimplices
 import TopCatModelCategory.SSet.Pairing
 import TopCatModelCategory.SSet.PairingCore
 import TopCatModelCategory.SSet.PairingSubdivision
+import TopCatModelCategory.SSet.PairingUnionProd
 import TopCatModelCategory.SSet.Paths
 import TopCatModelCategory.SSet.PiZero
 import TopCatModelCategory.SSet.Presentable
@@ -89,6 +90,7 @@ import TopCatModelCategory.SSet.Pseudofunctor
 import TopCatModelCategory.SSet.PtSimplex
 import TopCatModelCategory.SSet.Quotient
 import TopCatModelCategory.SSet.Rev
+import TopCatModelCategory.SSet.RevStdSimplex
 import TopCatModelCategory.SSet.SimplexCategory
 import TopCatModelCategory.SSet.Simplices
 import TopCatModelCategory.SSet.SingularConnected

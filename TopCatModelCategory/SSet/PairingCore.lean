@@ -101,12 +101,21 @@ class IsProper where
   isUniquelyCodimOneFace (s : h.ι) :
     IsUniquelyCodimOneFace (X.δ (h.index s) (h.type₁ s)) (h.type₁ s)
 
+lemma isUniquelyCodimOneFace [h.IsProper] (s : h.ι) :
+    IsUniquelyCodimOneFace (X.δ (h.index s) (h.type₁ s)) (h.type₁ s) :=
+  IsProper.isUniquelyCodimOneFace _
+
 instance [h.IsProper] : h.pairing.IsProper where
   isUniquelyCodimOneFace := by
     rintro ⟨_, s, rfl⟩
     dsimp
     rw [pairing_p_type₁N']
-    apply IsProper.isUniquelyCodimOneFace
+    exact h.isUniquelyCodimOneFace _
+
+lemma isUniquelyCodimOneFace_index [h.IsProper] (s : h.ι) :
+    (h.isUniquelyCodimOneFace s).index = h.index s :=
+  ((h.isUniquelyCodimOneFace s).index_unique rfl).symm
+
 
 lemma isProper_pairing_iff : h.pairing.IsProper ↔ h.IsProper := by
   refine ⟨fun _ ↦ ⟨fun s ↦ ?_⟩, fun _ ↦ inferInstance⟩
@@ -114,6 +123,28 @@ lemma isProper_pairing_iff : h.pairing.IsProper ↔ h.IsProper := by
   dsimp at this ⊢
   erw [pairing_p_type₁N'] at this
   exact this
+
+def IsInner : Prop :=
+  ∀ (s : h.ι), h.index s ≠ 0 ∧ h.index s ≠ Fin.last _
+
+@[simp]
+lemma pairing_index [h.IsProper] (s : h.ι) :
+    (h.pairing.isUniquelyCodimOneFace (h.equivII s)).index =
+      h.index s := by
+  ext
+  rw [← isUniquelyCodimOneFace_index]
+  apply IsUniquelyCodimOneFace.congr_index
+  · simp
+  · dsimp
+    erw [h.pairing_p_type₁N']
+    rfl
+
+variable {h} in
+lemma IsInner.pairing [h.IsProper] (H : h.IsInner) :
+    (h.pairing).IsInner := by
+  intro x
+  obtain ⟨s, rfl⟩ := h.equivII.surjective x
+  simpa using H s
 
 def AncestralRel (s t : h.ι) : Prop :=
   s ≠ t ∧ IsFace (X.δ (h.index s) (h.type₁ s)) (h.type₁ t)
