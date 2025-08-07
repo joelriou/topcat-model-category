@@ -91,6 +91,76 @@ lemma pairing_p_symm_type₁N (x : h.ι) :
       h.pairing.p.symm (h.equivI x) = h.equivII x := by
   simp [pairing]
 
+@[simp]
+lemma pairing_p_type₁N' (x : h.ι) :
+    DFunLike.coe (α := h.II) (β := fun _ ↦ h.I)
+      (h.pairing.p) ⟨h.type₂N x, ⟨x, rfl⟩⟩ = h.equivI x :=
+  h.pairing_p_type₁N x
+
+class IsProper where
+  isUniquelyCodimOneFace (s : h.ι) :
+    IsUniquelyCodimOneFace (X.δ (h.index s) (h.type₁ s)) (h.type₁ s)
+
+instance [h.IsProper] : h.pairing.IsProper where
+  isUniquelyCodimOneFace := by
+    rintro ⟨_, s, rfl⟩
+    dsimp
+    rw [pairing_p_type₁N']
+    apply IsProper.isUniquelyCodimOneFace
+
+lemma isProper_pairing_iff : h.pairing.IsProper ↔ h.IsProper := by
+  refine ⟨fun _ ↦ ⟨fun s ↦ ?_⟩, fun _ ↦ inferInstance⟩
+  have := h.pairing.isUniquelyCodimOneFace (h.equivII s)
+  dsimp at this ⊢
+  erw [pairing_p_type₁N'] at this
+  exact this
+
+def AncestralRel (s t : h.ι) : Prop :=
+  s ≠ t ∧ IsFace (X.δ (h.index s) (h.type₁ s)) (h.type₁ t)
+
+lemma ancestralRel_iff (s t : h.ι) :
+    h.AncestralRel s t ↔ h.pairing.AncestralRel (h.equivII s) (h.equivII t) := by
+  dsimp [AncestralRel, Pairing.AncestralRel]
+  rw [pairing_p_type₁N]
+  simp
+
+class IsRegular extends h.IsProper where
+  wf : WellFounded h.AncestralRel
+
+instance [h.IsRegular] : h.pairing.IsRegular where
+  wf := by
+    have := IsRegular.wf (h := h)
+    rw [WellFounded.wellFounded_iff_no_descending_seq, isEmpty_iff] at this ⊢
+    rintro ⟨f, hf⟩
+    exact this ⟨fun n ↦ h.equivII.symm (f n), fun n ↦ by simpa [ancestralRel_iff] using hf n⟩
+
+lemma isRegular_pairing_iff : h.pairing.IsRegular ↔ h.IsRegular := by
+  refine ⟨fun _ ↦ ?_, fun _ ↦ inferInstance⟩
+  have : h.IsProper := by
+    rw [← isProper_pairing_iff]
+    infer_instance
+  constructor
+  have := h.pairing.wf
+  rw [WellFounded.wellFounded_iff_no_descending_seq, isEmpty_iff] at this ⊢
+  rintro ⟨f, hf⟩
+  exact this ⟨fun n ↦ h.equivII (f n), fun n ↦ by simpa [ancestralRel_iff] using hf n⟩
+
+lemma isRegular_iff [h.IsProper] :
+    h.IsRegular ↔
+      ∃ (φ : h.ι → ℕ),
+        ∀ (x y : h.ι) (_ : h.d x = h.d y), h.AncestralRel x y → φ x < φ y := by
+  rw [← isRegular_pairing_iff, Pairing.isRegular_iff]
+  constructor
+  · rintro ⟨φ, hφ⟩
+    exact ⟨fun s ↦ φ (h.equivII s), fun s t h₁ h₂ ↦
+      hφ (h.equivII s) (h.equivII t) h₁ (by simpa only [← ancestralRel_iff])⟩
+  · rintro ⟨φ, hφ⟩
+    refine ⟨fun x ↦ φ (h.equivII.symm x), fun x y h₁ h₂ ↦ ?_⟩
+    obtain ⟨s, rfl⟩ := h.equivII.surjective x
+    obtain ⟨t, rfl⟩ := h.equivII.surjective y
+    rw [← ancestralRel_iff] at h₂
+    simpa using hφ _ _ h₁ h₂
+
 end PairingCore
 
 end Subcomplex
@@ -129,7 +199,15 @@ def pairingCore : (horn (n + 1) i).PairingCore where
     · obtain rfl := SimplexCategory.eq_id_of_mono f
       exact ⟨⟨⟩, Or.inl rfl⟩
 
-noncomputable def pairing := (pairingCore i).pairing
+instance : (pairingCore i).IsProper where
+  isUniquelyCodimOneFace _ := .mk (⟨i, rfl, fun _ hj ↦ SimplexCategory.δ_injective (
+    stdSimplex.objEquiv.symm.injective hj)⟩)
+
+instance : (pairingCore i).IsRegular := by
+  rw [Subcomplex.PairingCore.isRegular_iff]
+  exact ⟨fun _ ↦ 0, fun _ _ _ h ↦ (h.1 rfl).elim⟩
+
+noncomputable abbrev pairing := (pairingCore i).pairing
 
 end horn
 
