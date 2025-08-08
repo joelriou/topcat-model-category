@@ -123,6 +123,24 @@ lemma min_left :
   rw [← mem_finset_iff]
   apply Finset.min'_mem
 
+lemma left_le_castSucc_iff (i : Fin (d + 1)) :
+    letI t : (Δ[m + 1] ⊗ Δ[n] : SSet.{u}) _⦋d⦌ := (x.cast hd).simplex
+    t.1 i ≤ k.castSucc ↔ i < min k hd := by
+  rw [← not_lt]
+  conv_rhs => rw [← not_le]
+  refine ⟨fun h ↦ (fun hi ↦ h ?_), fun h h' ↦ h ?_⟩
+  · rw [Fin.castSucc_lt_iff_succ_le, ← min_left k hd]
+    exact stdSimplex.monotone_apply _ hi
+  · rw [Fin.castSucc_lt_iff_succ_le] at h'
+    obtain h' | h' := h'.lt_or_eq
+    · exfalso
+      simp only [not_le] at h
+      have := stdSimplex.monotone_apply (x.cast hd).simplex.1 h.le
+      dsimp at this
+      rw [min_left, ← not_lt] at this
+      tauto
+    · exact Finset.min'_le _ _ (by simpa using h'.symm)
+
 namespace IsIndex
 
 variable {k hd} {l : Fin d} (hl : IsIndex k hd l.succ)
@@ -259,14 +277,28 @@ lemma strictMono_φ : StrictMono (φ k hd l) := by
       rw [h₁, h₂]
       exact hx' i.castSucc_lt_succ
     · rw [Fin.succ_castSucc, φ_castSucc, h₁]
-      have h₂ := hx' i.castSucc_lt_succ
-      rw [Prod.lt_iff] at h₂
-      dsimp at h₂
-      obtain ⟨h₂, h₂⟩ | ⟨h₂, h₃⟩ := h₂
-      · simp [Prod.lt_iff]
-        sorry
-      · simp [Prod.lt_iff]
-        sorry
+      have h₂ := min_left k hd
+      rw [hl] at h₂
+      have h₃ := hx' i.castSucc_lt_succ
+      rw [Prod.lt_iff] at h₃
+      dsimp at h₃
+      rw [h₂, ← Fin.le_castSucc_iff] at h₃
+      have h₄ := left_le_castSucc_iff k hd
+      dsimp at h₄
+      have := hx d hd i.succ
+      rw [isIndex_succ] at this
+      sorry
+      --obtain ⟨h₄, h₅⟩ | ⟨h₄, h₅⟩ := h₃
+      --· obtain h₅ | h₅ := h₅.lt_or_eq
+      --  · exact Prod.lt_of_le_of_lt h₄ h₅
+      --  · dsimp
+      --    have ipf := this (by
+      --      refine ⟨?_, sorry⟩
+      --      sorry)
+      --    exfalso
+      --    sorry
+      --· simp [Prod.lt_iff]
+      --  sorry
   · rw [φ_castSucc]
     apply Prod.lt_of_lt_of_le
     · rw [φ_succ_left hl]
