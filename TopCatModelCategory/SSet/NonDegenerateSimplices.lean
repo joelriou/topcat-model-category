@@ -109,8 +109,7 @@ section
 
 variable (s : X.N) {d : ℕ} (hd : s.dim = d)
 
-@[simps! toS dim]
-def cast : X.N where
+abbrev cast : X.N where
   toS := s.toS.cast hd
   nonDegenerate := by
     subst hd

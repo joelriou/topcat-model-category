@@ -274,8 +274,7 @@ section
 
 variable (s : A.N) {d : ℕ} (hd : s.dim = d)
 
-@[simps! toN dim]
-def cast : A.N where
+abbrev cast : A.N where
   toN := s.toN.cast hd
   notMem := by
     subst hd
@@ -809,7 +808,7 @@ noncomputable def type₂ : (Subcomplex.range (P.m n)).N where
 @[simp]
 lemma mapN_type₁ :
     P.mapN n (P.type₁ x) = S.mk (P.p x.1).1.1.1.2 := by
-  dsimp [mapN, type₁]
+  dsimp only [type₁, mapN]
   rw [← (P.isUniquelyCodimOneFace x.1).sMk_cast, S.ext_iff,
     ← FunctorToTypes.comp, ι_b]
   dsimp [mapToSucc]

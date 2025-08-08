@@ -53,7 +53,10 @@ structure S where
 
 namespace S
 
-lemma mk_surjective {s : X.S} :
+@[simp]
+lemma mk_simplex (s : X.S) : S.mk s.simplex = s := rfl
+
+lemma mk_surjective (s : X.S) :
     ∃ (n : ℕ) (x : X _⦋n⦌), s = mk x :=
   ⟨s.1, s.2, rfl⟩
 

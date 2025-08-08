@@ -194,6 +194,10 @@ lemma objEquiv_map_apply {n m : ℕ}
       objEquiv ((Δ[p] ⊗ Δ[q]).map f.op x) i =  objEquiv x (f.toOrderHom i) :=
   rfl
 
+lemma objEquiv_δ_apply {n : ℕ} (x : (Δ[p] ⊗ Δ[q] : SSet.{u}) _⦋n + 1⦌) (i : Fin (n + 2))
+    (j : Fin (n + 1)) :
+    objEquiv ((Δ[p] ⊗ Δ[q]).δ i x) j = objEquiv x (i.succAbove j) := rfl
+
 def obj₀Equiv : (Δ[p] ⊗ Δ[q] : SSet.{u}) _⦋0⦌ ≃ Fin (p + 1) × Fin (q + 1) :=
   objEquiv.trans Fin.oneOrderHomEquiv
 
@@ -290,7 +294,7 @@ lemma objEquiv_nonDegenerate_iff {n : ℕ} (z : (Δ[p] ⊗ Δ[q] : SSet.{u}) _�
       · simpa [h₂] using h₁.symm
       · rw [Fin.succAbove_predAbove h₂]
 
-lemma nonDegenerate_iff' (z : (Δ[p] ⊗ Δ[q] : SSet.{u}) _⦋n⦌) :
+lemma nonDegenerate_iff' {n : ℕ} (z : (Δ[p] ⊗ Δ[q] : SSet.{u}) _⦋n⦌) :
     z ∈ (Δ[p] ⊗ Δ[q]).nonDegenerate n ↔
       Function.Injective ((SSet.yonedaEquiv.symm z).app (op ⦋0⦌)) := by
   have this : (yonedaEquiv.symm z).app (op ⦋0⦌) =
@@ -305,6 +309,12 @@ lemma strictMono_of_nonDegenerate {n : ℕ} (x : (Δ[p] ⊗ Δ[q] : SSet.{u}).no
   obtain ⟨x, hx⟩ := x
   simpa only [objEquiv_nonDegenerate_iff,
     (objEquiv x).monotone.strictMono_iff_injective] using hx
+
+lemma nonDegenerate_iff_strictMono {n : ℕ} (z : (Δ[p] ⊗ Δ[q] : SSet.{u}) _⦋n⦌) :
+    z ∈ (Δ[p] ⊗ Δ[q]).nonDegenerate n ↔
+      StrictMono (objEquiv z) :=
+  ⟨fun h ↦ strictMono_of_nonDegenerate ⟨_, h⟩,
+    fun h ↦ (objEquiv_nonDegenerate_iff _).2 h.injective⟩
 
 @[simps coe]
 def orderHomOfSimplex {n : ℕ} (x : (Δ[p] ⊗ Δ[q] : SSet.{u}) _⦋n⦌) {m : ℕ} (hm : p + q = m) :
