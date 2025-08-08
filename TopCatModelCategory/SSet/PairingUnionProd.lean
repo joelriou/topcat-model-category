@@ -279,26 +279,18 @@ lemma strictMono_φ : StrictMono (φ k hd l) := by
     · rw [Fin.succ_castSucc, φ_castSucc, h₁]
       have h₂ := min_left k hd
       rw [hl] at h₂
-      have h₃ := hx' i.castSucc_lt_succ
-      rw [Prod.lt_iff] at h₃
-      dsimp at h₃
-      rw [h₂, ← Fin.le_castSucc_iff] at h₃
-      have h₄ := left_le_castSucc_iff k hd
-      dsimp at h₄
-      have := hx d hd i.succ
-      rw [isIndex_succ] at this
+      have h₃' := hx d hd i.castSucc
+      simp at h₃'
+      have h₃ := hx d hd i.succ
+      simp only [isIndex_succ, S.cast_dim, h₂, true_and] at h₃
+      have h₄ := (hx' i.castSucc_lt_succ).le
+      have h₅ := hx' i.castSucc_lt_succ
+      rw [Prod.le_def] at h₄
+      rw [Prod.lt_iff] at h₅
+      obtain ⟨h₄₁, h₄₂⟩ := h₄
+      dsimp at h₄₁ h₄₂ h₅
+      rw [h₂] at h₄₁ h₅
       sorry
-      --obtain ⟨h₄, h₅⟩ | ⟨h₄, h₅⟩ := h₃
-      --· obtain h₅ | h₅ := h₅.lt_or_eq
-      --  · exact Prod.lt_of_le_of_lt h₄ h₅
-      --  · dsimp
-      --    have ipf := this (by
-      --      refine ⟨?_, sorry⟩
-      --      sorry)
-      --    exfalso
-      --    sorry
-      --· simp [Prod.lt_iff]
-      --  sorry
   · rw [φ_castSucc]
     apply Prod.lt_of_lt_of_le
     · rw [φ_succ_left hl]
