@@ -277,20 +277,20 @@ lemma strictMono_φ : StrictMono (φ k hd l) := by
       rw [h₁, h₂]
       exact hx' i.castSucc_lt_succ
     · rw [Fin.succ_castSucc, φ_castSucc, h₁]
-      have h₂ := min_left k hd
-      rw [hl] at h₂
-      have h₃' := hx d hd i.castSucc
-      simp at h₃'
-      have h₃ := hx d hd i.succ
-      simp only [isIndex_succ, S.cast_dim, h₂, true_and] at h₃
-      have h₄ := (hx' i.castSucc_lt_succ).le
-      have h₅ := hx' i.castSucc_lt_succ
-      rw [Prod.le_def] at h₄
-      rw [Prod.lt_iff] at h₅
-      obtain ⟨h₄₁, h₄₂⟩ := h₄
-      dsimp at h₄₁ h₄₂ h₅
-      rw [h₂] at h₄₁ h₅
-      sorry
+      refine lt_of_le_of_ne ⟨?_, ?_⟩ ?_
+      · dsimp
+        rw [left_le_castSucc_iff, hl]
+        exact i.castSucc_lt_succ
+      · exact stdSimplex.monotone_apply _ i.castSucc_le_succ
+      · intro h
+        rw [Prod.ext_iff] at h
+        obtain ⟨h₁, h₂⟩ := h
+        dsimp at h₁ h₂
+        refine hx d hd i.succ ⟨h₁, ?_, h₂.symm⟩
+        · have := φ_succAbove k hd i.succ i.succ
+          rw [Fin.succAbove_castSucc_self] at this
+          rw [← φ_succ_left hl, this]
+          dsimp
   · rw [φ_castSucc]
     apply Prod.lt_of_lt_of_le
     · rw [φ_succ_left hl]
@@ -308,6 +308,9 @@ lemma strictMono_φ : StrictMono (φ k hd l) := by
         using hi.trans i.castSucc_le_succ)] at h₂
     rw [h₁, h₂]
     exact hx' i.castSucc_lt_succ
+
+#check lt_of_le_of_ne
+lemma test (a b : ℕ) (h : a ≤ b) (h' : a ≠ b) : a < b := by exact Nat.lt_of_le_of_ne h h'
 
 def simplex : (Δ[m + 1] ⊗ Δ[n] : SSet.{u}) _⦋d + 1⦌ :=
   objEquiv.symm ⟨φ k hd l, (hx.strictMono_φ hl).monotone⟩
@@ -444,11 +447,37 @@ lemma min_eq_of_δ_eq :
 include hx hxy in
 lemma eq_toι (hy : NotIsIndex k y) {l' : Fin (d + 1)} (hl' : min k hdy = l') :
     (hy.toι hl').x = x := by
-  have := hx
-  have := hxy
-  sorry
+  subst hxy
+  obtain rfl : l = l' := by rw [← hx.min_δ, hl']
+  conv_rhs => rw [← x.cast_eq_self hd]
+  ext
+  rw [S.ext_iff']
+  refine ⟨rfl, objEquiv.injective ?_⟩
+  ext i : 2
+  dsimp [NotIsIndex.simplex]
+  simp only [Equiv.apply_symm_apply, OrderHom.coe_mk]
+  obtain rfl | ⟨hi, rfl⟩ := l.castSucc.eq_self_or_eq_succAbove i
+  · rw [NotIsIndex.φ_castSucc]
+    ext : 1
+    · simp [hx.left_castSucc]
+    · simp [stdSimplex.δ_apply, Fin.succAbove_castSucc_self, hx.right_succ]
+  · rw [NotIsIndex.φ_succAbove]
+    rfl
 
 end IsIndex
+
+section
+
+variable {k n }
+
+noncomputable def ϕ (s : ι k n) : ℕ := (finset k (hd := s.hd)).card
+
+lemma ϕ_eq (s : ι k n) {d : ℕ} (hd : s.x.dim = d + 1) :
+    ϕ s = (finset k hd).card := by
+  obtain rfl : s.d = d := by simpa [s.hd] using hd
+  rfl
+
+end
 
 end pairingCore
 
@@ -542,6 +571,11 @@ lemma isInner_pairingCore (k : Fin m) :
   dsimp at h₁ h₂ hi
   rw [h₁, hi] at h₂
   simp [Fin.le_def] at h₂
+
+instance : (pairingCore k n).IsRegular := by
+  rw [Subcomplex.PairingCore.isRegular_iff]
+  refine ⟨ϕ, ?_⟩
+  sorry
 
 end prodStdSimplex
 
