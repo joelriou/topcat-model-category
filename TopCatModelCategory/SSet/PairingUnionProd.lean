@@ -713,10 +713,30 @@ instance : (pairingCore.{u} k n).IsRegular := by
         rw [Finset.mem_image] at hi
         obtain ⟨i, hi, rfl⟩ := hi
         rwa [← hs]
-    have : Ss.card = Su.card := by
+    replace hSs : Ss.card = Su.card := by
       rw [hSs]
       exact Finset.card_image_of_injective _ Fin.succAbove_right_injective
-    sorry
+    have ht (i : Fin (d + 1)) :
+        i ∈ Su ↔ lt.succ.succAbove i ∈ St := by
+      simp [Su, St, mem_finset_iff, u', ← hl']
+      rfl
+    have hSt : St = Finset.image lt.succ.succAbove Su ∪ {lt.succ} := by
+      ext i
+      obtain rfl | ⟨i, rfl⟩ := lt.succ.eq_self_or_eq_succAbove i
+      · simp [ht, St, mem_finset_iff, hlt.left_succ]
+      · simp [ht, lt.succ.succAbove_ne]
+    replace hSt : St.card = Su.card + 1 := by
+      rw [hSt, Finset.card_union_of_disjoint (by
+          simp only [Finset.disjoint_singleton_right, Finset.mem_image, not_exists, not_and]
+          intro _ _
+          exact Fin.succAbove_ne lt.succ _),
+        Finset.card_image_of_injective _ Fin.succAbove_right_injective,
+        Finset.card_singleton]
+    rw [hSs, hSt]
+    apply lt_add_one
+
+example : anodyneExtensions (Λ[m + 1, k.castSucc].unionProd ∂Δ[n]).ι :=
+  (pairingCore k n).pairing.anodyneExtensions
 
 end prodStdSimplex
 
