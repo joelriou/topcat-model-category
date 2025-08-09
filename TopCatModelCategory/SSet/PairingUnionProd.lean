@@ -160,6 +160,11 @@ lemma succ_le_left_iff (i : Fin (d + 1)) :
   · rw [← hl.left_succ]
     exact stdSimplex.monotone_apply _ hi
 
+lemma le_castSucc_iff (i : Fin (d + 1)) :
+    letI t : (Δ[m + 1] ⊗ Δ[n] : SSet.{u}) _⦋d⦌ := (x.cast hd).simplex
+    t.1 i ≤ k.castSucc ↔ i < l.succ := by
+  rw [Fin.le_castSucc_iff, ← not_le, hl.succ_le_left_iff, not_le]
+
 lemma min_eq : min k hd = l.succ :=
   le_antisymm (Finset.min'_le _ _ (by simpa using hl.left_succ))
     ((Finset.le_min'_iff _ _ ).2 (fun i hi ↦ by
@@ -309,9 +314,6 @@ lemma strictMono_φ : StrictMono (φ k hd l) := by
     rw [h₁, h₂]
     exact hx' i.castSucc_lt_succ
 
-#check lt_of_le_of_ne
-lemma test (a b : ℕ) (h : a ≤ b) (h' : a ≠ b) : a < b := by exact Nat.lt_of_le_of_ne h h'
-
 def simplex : (Δ[m + 1] ⊗ Δ[n] : SSet.{u}) _⦋d + 1⦌ :=
   objEquiv.symm ⟨φ k hd l, (hx.strictMono_φ hl).monotone⟩
 
@@ -370,7 +372,47 @@ lemma notIsIndex_δ : NotIsIndex k hl.δ := by
     · exact h₁.trans h₂.symm
     · exact h₅.symm.trans h₄
 
+
+variable (u : ((horn.{u} (m + 1) k.castSucc).unionProd (boundary n)).N)
+
+include hl in
+lemma eq_of_notIsIndex_δ {u : ((horn.{u} (m + 1) k.castSucc).unionProd (boundary n)).N}
+    (hu : NotIsIndex k u) (i : Fin (d + 2))
+    (hi : S.mk ((Δ[m + 1] ⊗ Δ[n]).δ i (x.cast hd).simplex) = S.mk u.simplex) :
+    i = l.castSucc ∨ i = l.succ := by
+  by_contra! hi₂
+  have hu₂ : u.dim = d := S.dim_eq_of_eq hi.symm
+  rw [← u.cast_eq_self hu₂, S.ext_iff] at hi
+  obtain hi₃ | rfl | hi₃ := lt_trichotomy i l.castSucc
+  · obtain ⟨i, rfl⟩ := Fin.eq_castSucc_of_ne_last (Fin.ne_last_of_lt hi₃)
+    rw [Fin.castSucc_lt_castSucc_iff] at hi₃
+    apply hu d hu₂ l
+    obtain ⟨l, rfl⟩ := Fin.eq_succ_of_ne_zero (Fin.ne_zero_of_lt hi₃)
+    rw [isIndex_succ, ← hi]
+    dsimp [stdSimplex.δ_apply]
+    rw [Fin.castSucc_succAbove_castSucc, Fin.succAbove_of_lt_succ _ _ hi₃,
+      Fin.succAbove_of_lt_succ _ _ (by simpa using hi₃.le),
+      hl.left_castSucc, hl.left_succ, hl.right_succ]
+    simp
+  · simp at hi₂
+  · rw [Fin.castSucc_lt_iff_succ_le] at hi₃
+    replace hi₃ := lt_of_le_of_ne' hi₃ hi₂.2
+    obtain ⟨l, rfl⟩ := Fin.eq_castSucc_of_ne_last (x := l) (by
+      rintro rfl
+      simp only [Fin.succ_last, Nat.succ_eq_add_one] at hi₃
+      have := Fin.le_last i
+      omega)
+    apply hu d hu₂ l.succ
+    rw [isIndex_succ, ← hi]
+    dsimp [stdSimplex.δ_apply]
+    rw [Fin.succAbove_of_castSucc_lt _ _ (lt_trans (by simp) hi₃),
+      Fin.succAbove_of_castSucc_lt _ _ hi₃, ← Fin.succ_castSucc,
+      hl.left_castSucc, hl.left_succ, hl.right_succ]
+    simp
+
 end IsIndex
+
+
 
 variable (n)
 
@@ -553,6 +595,19 @@ noncomputable def pairingCore :
           l := l
           isIndex := hx }, Or.inl (x.toS.cast_eq_self hd).symm ⟩
 
+variable {k n} in
+lemma pairingCore.δ_injective {s t : ι.{u} k n}
+    {ds : ℕ} {hds : s.x.dim = ds + 1} {i : Fin (ds + 1)} (hs : IsIndex k hds i.succ)
+    {dt : ℕ} {hdt : t.x.dim = dt + 1} {j : Fin (dt + 1)} (ht : IsIndex k hdt j.succ)
+    (hst : hs.δ = ht.δ) : s = t := by
+  apply (pairingCore k n).injective_type₂
+  rw [Subcomplex.N.ext_iff, SSet.N.ext_iff] at hst
+  obtain rfl : s.d = ds := by have := s.hd; omega
+  obtain rfl : i = s.l := hs.unique s.isIndex
+  obtain rfl : t.d = dt := by have := t.hd; omega
+  obtain rfl : j = t.l := ht.unique t.isIndex
+  exact hst
+
 instance : (pairingCore k n).IsProper where
   isUniquelyCodimOneFace s :=
     isUniquelyCodimOneFace (s.x.cast s.hd).nonDegenerate _
@@ -572,10 +627,96 @@ lemma isInner_pairingCore (k : Fin m) :
   rw [h₁, hi] at h₂
   simp [Fin.le_def] at h₂
 
-instance : (pairingCore k n).IsRegular := by
+instance : (pairingCore.{u} k n).IsRegular := by
   rw [Subcomplex.PairingCore.isRegular_iff]
-  refine ⟨ϕ, ?_⟩
-  sorry
+  refine ⟨ϕ, fun s t h₁ ⟨h₂, h₃⟩ ↦ ?_⟩
+  dsimp at s t h₁ h₂ h₃ ⊢
+  generalize hd : s.d = d
+  have hds : s.x.dim = d + 1 := by rw [s.hd, hd]
+  have hdt : t.x.dim = d + 1 := by rw [t.hd, ← h₁, hd]
+  obtain ⟨ls, hls⟩ : ∃ (l : Fin (d + 1)), l = Fin.cast (by omega) s.l := ⟨_, rfl⟩
+  replace h₃ : SSet.S.IsFace (S.mk ((Δ[m + 1] ⊗ Δ[n]).δ ls.castSucc (s.x.cast hds).simplex))
+      (t.x.cast hdt).toS := by
+    rw [isFace_iff_sIsFace] at h₃
+    convert h₃ using 1
+    · subst hd
+      dsimp at hls
+      subst hls
+      rfl
+    · simp [S.cast_eq_self]
+  obtain ⟨l', hl'⟩ :
+      ∃ l', (Δ[m + 1] ⊗ Δ[n]).δ l' (t.x.cast hdt).simplex =
+        (Δ[m + 1] ⊗ Δ[n]).δ ls.castSucc (s.x.cast hds).simplex := by
+    obtain ⟨f, _, _, h⟩ := h₃
+    obtain ⟨l', rfl⟩ := SimplexCategory.eq_δ_of_mono f
+    exact ⟨l', h⟩
+  replace hls : IsIndex k hds ls.succ := by
+    subst hd
+    dsimp at hls
+    subst hls
+    exact s.isIndex
+  obtain ⟨lt, hlt⟩ : ∃ (lt : Fin (d + 1)), IsIndex k hdt lt.succ := by
+    obtain rfl : t.d = d := by omega
+    exact ⟨_, t.isIndex⟩
+  generalize hu : (Δ[m + 1] ⊗ Δ[n]).δ ls.castSucc (s.x.cast hds).simplex = u
+  rw [hu] at hl'
+  let u' : ((horn.{u} (m + 1) k.castSucc).unionProd (boundary n)).N :=
+    { dim := d
+      simplex := u
+      nonDegenerate := by
+        subst hd
+        obtain rfl : ls = s.l := hls.unique s.isIndex
+        subst hu
+        exact hls.δ.nonDegenerate
+      notMem := by
+        subst hd
+        obtain rfl : ls = s.l := hls.unique s.isIndex
+        subst hu
+        exact hls.δ.notMem }
+  have hu₁ : u' = hls.δ := by
+    subst hd
+    obtain rfl : ls = s.l := hls.unique s.isIndex
+    subst hu
+    rfl
+  have hu₂ : NotIsIndex k u' := by
+    rw [hu₁]
+    exact hls.notIsIndex_δ
+  have hdu : u'.dim = d := rfl
+  obtain rfl | rfl := hlt.eq_of_notIsIndex_δ hu₂ l' (by rwa [S.ext_iff])
+  · refine (h₂ (pairingCore.δ_injective hls hlt ?_)).elim
+    rw [← hu₁]
+    obtain rfl : d = t.d := by omega
+    obtain rfl : lt = t.l := hlt.unique t.isIndex
+    rw [Subcomplex.N.ext_iff, SSet.N.ext_iff, S.ext_iff']
+    exact ⟨rfl, hl'.symm⟩
+  · rw [ϕ_eq _ hds, ϕ_eq _ hdt]
+    let Ss := finset k hds
+    let St := finset k hdt
+    let Su := finset k hdu
+    change Ss.card < St.card
+    have hs (i : Fin (d + 1)) :
+        i ∈ Su ↔ ls.castSucc.succAbove i ∈ Ss := by
+      simp [Su, Ss, mem_finset_iff, u', ← hu]
+      rfl
+    have hs' : ls.castSucc ∉ Ss := fun h ↦ by
+      simp only [Ss, mem_finset_iff] at h
+      simpa [h] using (hls.le_castSucc_iff ls.castSucc).2 (by simp)
+    have hSs : Ss = Finset.image ls.castSucc.succAbove Su := by
+      ext i
+      constructor
+      · intro hi
+        obtain rfl | ⟨i, rfl⟩ := ls.castSucc.eq_self_or_eq_succAbove i
+        · exact (hs' hi).elim
+        · rw [Finset.mem_image]
+          exact ⟨i, by rwa [hs], rfl⟩
+      · intro hi
+        rw [Finset.mem_image] at hi
+        obtain ⟨i, hi, rfl⟩ := hi
+        rwa [← hs]
+    have : Ss.card = Su.card := by
+      rw [hSs]
+      exact Finset.card_image_of_injective _ Fin.succAbove_right_injective
+    sorry
 
 end prodStdSimplex
 

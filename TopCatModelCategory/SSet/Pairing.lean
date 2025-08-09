@@ -85,6 +85,7 @@ namespace SSet
 
 variable {X : SSet.{u}}
 
+-- this should be refactored
 def IsFace {n m : ℕ} (x : X _⦋n⦌) (y : X _⦋m⦌) : Prop :=
   ∃ (f : ⦋n⦌ ⟶ ⦋m⦌), Mono f ∧ n ≠ m ∧ X.map f.op y = x
 
@@ -943,5 +944,21 @@ end
 end Pairing
 
 end Subcomplex
+
+section
+
+variable {X : SSet.{u}} (x y : X.S)
+
+namespace S
+
+
+def IsFace := SSet.IsFace x.2 y.2
+
+end S
+
+lemma isFace_iff_sIsFace {n m : ℕ} (x : X _⦋n⦌) (y : X _⦋m⦌) :
+    IsFace x y ↔ S.IsFace (S.mk x) (S.mk y) := Iff.rfl
+
+end
 
 end SSet
