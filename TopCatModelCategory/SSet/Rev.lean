@@ -20,6 +20,20 @@ lemma rev_map_apply {n m : SimplexCategory} (f : n ⟶ m) (i : Fin (n.len + 1)) 
     (rev.map f).toOrderHom (a := n) (b := m) i = (f.toOrderHom i.rev).rev := by
   rfl
 
+lemma rev_map_δ {n : ℕ} (i : Fin (n + 2)) :
+    rev.map (δ i) = δ i.rev := by
+  ext j : 3
+  rw [rev_map_apply]
+  dsimp [δ]
+  rw [Fin.succAbove_rev_right, Fin.rev_rev]
+
+lemma rev_map_σ {n : ℕ} (i : Fin (n + 1)) :
+    rev.map (σ i) = σ i.rev := by
+  ext j : 3
+  rw [rev_map_apply]
+  dsimp [σ]
+  rw [Fin.predAbove_rev_right, Fin.rev_rev]
+
 @[simps!]
 def revCompRevIso : rev ⋙ rev ≅ 𝟭 _ :=
   NatIso.ofComponents (fun _ ↦ Iso.refl _)
@@ -76,6 +90,11 @@ abbrev rev (X : SSet.{u}) : SSet.{u} := revFunctor.obj X
 
 def revObjEquiv {X : SSet.{u}} {n : SimplexCategoryᵒᵖ} :
     X.rev.obj n ≃ X.obj n := Equiv.refl _
+
+lemma rev_map (X : SSet.{u}) {n m : SimplexCategoryᵒᵖ} (f : n ⟶ m) (x : X.rev.obj n) :
+    X.rev.map f x =
+      revObjEquiv.symm (X.map (SimplexCategory.rev.map f.unop).op (revObjEquiv x)) := by
+  rfl
 
 namespace Subcomplex
 
