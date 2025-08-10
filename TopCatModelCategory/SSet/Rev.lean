@@ -62,7 +62,6 @@ end SimplicialObject
 
 namespace SSet
 
-@[simps!]
 def revFunctor : SSet.{u} ⥤ SSet.{u} := SimplicialObject.revFunctor
 
 @[simps!]
@@ -84,14 +83,21 @@ variable {X : SSet.{u}} (A : X.Subcomplex)
 
 def rev : X.rev.Subcomplex := Subcomplex.range (revFunctor.map A.ι)
 
+@[simp]
 lemma mem_rev_obj_iff {n : SimplexCategoryᵒᵖ} (x : X.rev.obj n) :
-    x ∈ A.rev.obj _ ↔ revObjEquiv x ∈ A.obj _ := by
+    x ∈ A.rev.obj n ↔ revObjEquiv x ∈ A.obj n := by
   dsimp [rev]
   constructor
   · rintro ⟨y, rfl⟩
     exact y.2
   · intro h
     exact ⟨⟨_, h⟩, rfl⟩
+
+lemma rev_iSup {ι : Type*} (A : ι → X.Subcomplex) :
+    (iSup A).rev = ⨆ (i : ι), (A i).rev := by
+  ext n x
+  obtain ⟨x, rfl⟩ := revObjEquiv.symm.surjective x
+  simp
 
 end Subcomplex
 
