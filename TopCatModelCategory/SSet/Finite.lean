@@ -49,7 +49,7 @@ lemma hasDimensionLT_of_isFinite [X.IsFinite] :
       exact ⟨0, fun s hs ↦ by simp at hs⟩
   refine ⟨d, ⟨fun n hn ↦ ?_⟩⟩
   ext x
-  simp only [mem_degenerate_iff_not_mem_nonDegenerate, Set.top_eq_univ,
+  simp only [mem_degenerate_iff_notMem_nonDegenerate, Set.top_eq_univ,
     Set.mem_univ, iff_true]
   intro hx
   have := hd (φ ⟨n, ⟨x, hx⟩⟩) (by simp)
@@ -63,7 +63,7 @@ instance [X.IsFinite] (n : SimplexCategoryᵒᵖ) : Finite (X.obj n) := by
     X.nonDegenerate m.1) → X _⦋n⦌ := fun ⟨m, f, x⟩ ↦ X.map f.op x.1
   have hφ : Function.Surjective φ := fun x ↦ by
     obtain ⟨m, f, hf, y, rfl⟩ := X.exists_nonDegenerate x
-    have := SimplexCategory.le_of_epi hf
+    have := SimplexCategory.le_of_epi f
     exact ⟨⟨⟨m, by omega⟩, f, y⟩, rfl⟩
   exact Finite.of_surjective _ hφ
 

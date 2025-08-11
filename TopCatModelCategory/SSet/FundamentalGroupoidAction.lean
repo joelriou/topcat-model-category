@@ -4,7 +4,7 @@ import TopCatModelCategory.SSet.HomotopyGroup
 
 universe u
 
-open HomotopicalAlgebra CategoryTheory Simplicial MonoidalCategory ChosenFiniteProducts
+open HomotopicalAlgebra CategoryTheory Simplicial MonoidalCategory CartesianMonoidalCategory
   SSet.modelCategoryQuillen
 
 namespace SSet
@@ -443,7 +443,7 @@ lemma action.bijective_map (n : ℕ) {X : SSet.{u}} {x y : FundamentalGroupoid X
   exact inferInstanceAs (IsIso ((action X n).map p))
 
 @[simps]
-def actionMap {X Y : SSet.{u}} [IsFibrant X] [IsFibrant Y] (f : X ⟶ Y) (n : ℕ) :
+noncomputable def actionMap {X Y : SSet.{u}} [IsFibrant X] [IsFibrant Y] (f : X ⟶ Y) (n : ℕ) :
     action X n ⟶ mapFundamentalGroupoid f ⋙ action Y n where
   app x := mapπ f n x.pt _ rfl
   naturality x y p := by

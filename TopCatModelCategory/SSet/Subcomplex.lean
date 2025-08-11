@@ -9,10 +9,11 @@ import Mathlib.AlgebraicTopology.SimplicialSet.Boundary
 import Mathlib.CategoryTheory.Sites.Subsheaf
 import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Multiequalizer
 import Mathlib.CategoryTheory.MorphismProperty.Limits
+import Mathlib.CategoryTheory.Adhesive
 import TopCatModelCategory.ColimitsType
 import TopCatModelCategory.CommSq
 import TopCatModelCategory.SSet.Basic
-
+import TopCatModelCategory.SSet.ChosenFiniteProducts
 
 /-!
 # Subcomplexes of simplicial sets
@@ -736,14 +737,14 @@ end
 variable {Y} in
 noncomputable def prodIso (S : X.Subcomplex) (T : Y.Subcomplex) :
     (S.prod T : SSet) ≅ (S : SSet) ⊗ (T : SSet) where
-  hom := ChosenFiniteProducts.lift
-    (lift ((S.prod T).ι ≫ ChosenFiniteProducts.fst _ _) (by
+  hom := CartesianMonoidalCategory.lift
+    (lift ((S.prod T).ι ≫ CartesianMonoidalCategory.fst _ _) (by
       ext n ⟨x, h⟩
       simpa using h.1))
-    (lift ((S.prod T).ι ≫ ChosenFiniteProducts.snd _ _) (by
+    (lift ((S.prod T).ι ≫ CartesianMonoidalCategory.snd _ _) (by
       ext n ⟨x, h⟩
       simpa using h.2))
-  inv := lift (S.ι ⊗ T.ι) (by
+  inv := lift (S.ι ⊗ₘ T.ι) (by
     ext n ⟨x, y⟩
     dsimp
     simp only [Set.mem_preimage, tensorHom_app_apply, Subpresheaf.ι_app,
@@ -829,7 +830,7 @@ noncomputable def multicoforkIsColimit :
   evaluationJointlyReflectsColimits _ (fun n ↦ by
     have h' : CompleteLattice.MulticoequalizerDiagram (A.obj n) (fun i ↦ (U i).obj n)
         (fun i j ↦ (V i j).obj n) :=
-      { min_eq := by simp [← h.min_eq]
+      { min_eq := by simp [h.min_eq]
         iSup_eq := by simp [← h.iSup_eq] }
     exact (Multicofork.isColimitMapEquiv _ _).2 (Types.isColimitMulticoforkMapSetToTypes h'))
 
@@ -838,7 +839,7 @@ noncomputable def multicoforkIsColimit' [LinearOrder ι] :
   Multicofork.isColimitToLinearOrder _ (multicoforkIsColimit h)
     { iso i j := toPresheafFunctor.mapIso (eqToIso (by
         dsimp
-        rw [← h.min_eq, ← h.min_eq, inf_comm]))
+        rw [h.min_eq, h.min_eq, inf_comm]))
       iso_hom_fst _ _ := rfl
       iso_hom_snd _ _ := rfl
       fst_eq_snd _ := rfl }

@@ -1,0 +1,12 @@
+name = "topcat-model-category"
+version = "0.1.0"
+defaultTargets = ["TopCatModelCategory"]
+
+[[lean_lib]]
+name = "TopCatModelCategory"
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/joelriou/mathlib4.git"
+rev = "c4bc53b7478aee3ea900abebb8d1f202430e021b"
+

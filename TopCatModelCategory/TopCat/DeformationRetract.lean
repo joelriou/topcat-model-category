@@ -7,7 +7,7 @@ import TopCatModelCategory.CommSq
 
 universe w u
 
-open CategoryTheory MonoidalCategory ChosenFiniteProducts Limits
+open CategoryTheory MonoidalCategory CartesianMonoidalCategory Limits
 
 namespace TopCat
 

@@ -14,7 +14,7 @@ noncomputable def Subcomplex.ofSimplexProd {p q : ℕ} (x₁ : X₁ _⦋p⦌) (x
   (Subcomplex.ofSimplex x₁).prod (Subcomplex.ofSimplex x₂)
 
 lemma Subcomplex.range_prod {X₁ X₂ Y₁ Y₂ : SSet.{u}} (f₁ : X₁ ⟶ Y₁)
-    (f₂ : X₂ ⟶ Y₂) : range (f₁ ⊗ f₂) = (range f₁).prod (range f₂) := by
+    (f₂ : X₂ ⟶ Y₂) : range (f₁ ⊗ₘ f₂) = (range f₁).prod (range f₂) := by
   ext m ⟨y₁, y₂⟩
   constructor
   · rintro ⟨⟨x₁, x₂⟩, h⟩
@@ -25,7 +25,7 @@ lemma Subcomplex.range_prod {X₁ X₂ Y₁ Y₂ : SSet.{u}} (f₁ : X₁ ⟶ Y�
 
 lemma Subcomplex.ofSimplexProd_eq_range {p q : ℕ} (x₁ : X₁ _⦋p⦌) (x₂ : X₂ _⦋q⦌) :
     (Subcomplex.ofSimplexProd x₁ x₂) =
-      Subcomplex.range (yonedaEquiv.symm x₁ ⊗ yonedaEquiv.symm x₂) := by
+      Subcomplex.range (yonedaEquiv.symm x₁ ⊗ₘ yonedaEquiv.symm x₂) := by
   simp only [ofSimplexProd, Subcomplex.range_prod, Subcomplex.ofSimplex_eq_range]
 
 instance {p q : ℕ} (x₁ : X₁ _⦋p⦌) (x₂ : X₂ _⦋q⦌) :
@@ -40,13 +40,12 @@ lemma subcomplex_prod_eq_top :
       ⨆ (x₂ : Σ (q : ℕ), X₂.nonDegenerate q),
         Subcomplex.ofSimplexProd x₁.2.1 x₂.2.1 = ⊤ := by
   ext m ⟨x₁, x₂⟩
-  simp only [Subpresheaf.iSup_obj, Set.iSup_eq_iUnion, Set.mem_iUnion, Sigma.exists,
+  simp only [Subpresheaf.iSup_obj, Set.mem_iUnion, Sigma.exists,
     Subtype.exists, exists_prop, Subpresheaf.top_obj, Set.top_eq_univ, Set.mem_univ, iff_true]
   have hx₁ : x₁ ∈ (⊤ : X₁.Subcomplex).obj _ := by simp
   have hx₂ : x₂ ∈ (⊤ : X₂.Subcomplex).obj _ := by simp
   rw [← Subcomplex.iSup_ofSimplex_nonDegenerate_eq_top] at hx₁ hx₂
-  simp only [Subpresheaf.iSup_obj, Set.iSup_eq_iUnion, Set.iUnion_coe_set, Set.mem_iUnion,
-    exists_prop] at hx₁ hx₂
+  simp only [Subpresheaf.iSup_obj, Set.mem_iUnion] at hx₁ hx₂
   obtain ⟨⟨p, y₁, hy₁⟩, hx₁⟩ := hx₁
   obtain ⟨⟨q, y₂, hy₂⟩, hx₂⟩ := hx₂
   exact ⟨p, y₁, hy₁, q, y₂, hy₂, hx₁, hx₂⟩
@@ -75,7 +74,7 @@ variable {X₁ X₂} {X₃ X₄ : SSet.{u}}
 
 lemma isFinite_of_isPullback {t : X₁ ⟶ X₂} {l : X₁ ⟶ X₃} {r : X₂ ⟶ X₄} {b : X₃ ⟶ X₄}
     (sq : IsPullback t l r b) [X₂.IsFinite] [X₃.IsFinite] : X₁.IsFinite := by
-  let φ : X₁ ⟶ X₂ ⊗ X₃ := ChosenFiniteProducts.lift t l
+  let φ : X₁ ⟶ X₂ ⊗ X₃ := CartesianMonoidalCategory.lift t l
   have hφ : Mono φ := by
     rw [NatTrans.mono_iff_mono_app]
     intro k

@@ -1,7 +1,7 @@
 import TopCatModelCategory.SSet.NonDegenerateProdSimplex
 import TopCatModelCategory.SSet.Monoidal
 
-open CategoryTheory Simplicial MonoidalCategory Opposite ChosenFiniteProducts
+open CategoryTheory Simplicial MonoidalCategory Opposite CartesianMonoidalCategory
 
 universe u
 
@@ -33,7 +33,8 @@ lemma mem_range_objEquiv_nonDegenerateEquiv₀_iff (i x : Fin (n + 1)) :
     have hy₁ := congr_arg Prod.fst hy
     have hy₂ := congr_arg Prod.snd hy
     dsimp at hy₁ hy₂
-    rw [stdSimplex.objMk₁_apply_eq_zero_iff, Fin.castSucc_lt_castSucc_iff] at hy₂
+    rw [stdSimplex.objMk₁_apply_eq_zero_iff, Fin.succ_castSucc,
+      Fin.castSucc_lt_castSucc_iff] at hy₂
     erw [← hy₁, stdSimplex.objEquiv_symm_σ_apply,
       Fin.predAbove_of_lt_succ _ _ hy₂, ← Fin.castSucc_le_castSucc_iff,
       Fin.castSucc_castPred, Fin.le_castSucc_iff]
@@ -53,7 +54,7 @@ lemma mem_range_objEquiv_nonDegenerateEquiv₁_iff (i x : Fin (n + 1)) :
     have hy₁ := congr_arg Prod.fst hy
     have hy₂ := congr_arg Prod.snd hy
     dsimp at hy₁ hy₂
-    rw [stdSimplex.objMk₁_apply_eq_one_iff, Fin.castSucc_le_castSucc_iff] at hy₂
+    rw [stdSimplex.objMk₁_apply_eq_one_iff, Fin.succ_castSucc, Fin.castSucc_le_castSucc_iff] at hy₂
     erw [← hy₁, stdSimplex.objEquiv_symm_σ_apply, Fin.predAbove_of_succ_le _ _ hy₂,
       ← Fin.succ_le_succ_iff, Fin.succ_pred]
     exact hy₂
@@ -97,7 +98,7 @@ noncomputable def intersectionNondeg (i j : Fin (n + 1)) :
 def codimOneSimplex (j : Fin (n + 2)) : (Δ[n] ⊗ Δ[1] : SSet.{u}).nonDegenerate n :=
   ⟨⟨stdSimplex.objMk .id, stdSimplex.objMk₁ j⟩, by
     have := stdSimplex.id_nonDegenerate.{u} n
-    rw [mem_nonDegenerate_iff_not_mem_degenerate] at this ⊢
+    rw [mem_nonDegenerate_iff_notMem_degenerate] at this ⊢
     intro h
     exact this (degenerate_map h (fst _ _))⟩
 
@@ -107,7 +108,7 @@ lemma δ_castSucc_nonDegenerateEquiv (j : Fin (n + 1)) :
   apply Prod.ext
   · exact stdSimplex.objEquiv.injective SimplexCategory.δ_comp_σ_self
   · dsimp
-    rw [stdSimplex.δ_objMk₁_of_lt _ _ (by simp), Fin.pred_castSucc_succ]
+    rw [stdSimplex.δ_objMk₁_of_lt _ _ (by simp), Fin.pred_succ]
 
 lemma δ_succ_nonDegenerateEquiv (j : Fin (n + 1)) :
     (Δ[n] ⊗ Δ[1]).δ j.succ (nonDegenerateEquiv j).1 =
@@ -115,7 +116,8 @@ lemma δ_succ_nonDegenerateEquiv (j : Fin (n + 1)) :
   apply Prod.ext
   · exact stdSimplex.objEquiv.injective SimplexCategory.δ_comp_σ_succ
   · dsimp
-    rw [stdSimplex.δ_objMk₁_of_le _ _ (by simp), Fin.castPred_castSucc]
+    rw [stdSimplex.δ_objMk₁_of_le _ _ (by simp)]
+    simp only [Fin.succ_castSucc, Fin.castPred_castSucc]
 
 lemma ofSimplex_codimOneSimplex (j : Fin n) :
     Subcomplex.ofSimplex (codimOneSimplex.{u} j.succ.castSucc).1 =
@@ -129,7 +131,7 @@ lemma ofSimplex_codimOneSimplex (j : Fin n) :
       rw [← Fin.succ_castSucc, ← δ_succ_nonDegenerateEquiv]
       rfl
     · refine ⟨SimplexCategory.δ j.succ.castSucc, ?_⟩
-      rw [← δ_castSucc_nonDegenerateEquiv]
+      rw [Fin.succ_castSucc, ← δ_castSucc_nonDegenerateEquiv]
       rfl
   · rintro ⟨k⟩ s hs
     induction' k using SimplexCategory.rec with k
@@ -155,8 +157,7 @@ lemma ofSimplex_codimOneSimplex (j : Fin n) :
       simpa [← h₁₁] using h₁₂
     · simp [stdSimplex.objMk₁_apply_eq_one_iff] at h₁₂ h₂₂ ⊢
       rw [Fin.predAbove_of_castSucc_lt _ _ h₂₂] at h₂₁
-      rw [← h₂₁, ← Fin.succ_le_succ_iff, Fin.succ_pred]
-      exact h₂₂
+      rwa [← h₂₁, ← Fin.succ_lt_succ_iff, Fin.succ_pred]
 
 lemma intersectionNondeg_le_intersectionNondeg (i j k : Fin (n + 1))
     (hij : i ≤ j) (hij : j ≤ k) :
@@ -264,7 +265,7 @@ lemma isPushout (j : Fin n) :
     rw [Subcomplex.homOfLE_ι,
       Subcomplex.isoOfRepresentableBy_ofSimplexRepresentableBy_hom]
     dsimp [CosimplicialObject.δ]
-    rw [← yonedaEquiv_symm_map, ← Fin.succ_castSucc,
+    rw [← yonedaEquiv_symm_map,
       ← δ_succ_nonDegenerateEquiv]
     rfl
   · apply Subcomplex.hom_ext
@@ -274,7 +275,7 @@ lemma isPushout (j : Fin n) :
       Subcomplex.isoOfRepresentableBy_ofSimplexRepresentableBy_hom,
       Subcomplex.isoOfRepresentableBy_ofSimplexRepresentableBy_hom]
     dsimp [CosimplicialObject.δ]
-    rw [← yonedaEquiv_symm_map, ← δ_castSucc_nonDegenerateEquiv]
+    rw [← yonedaEquiv_symm_map, Fin.succ_castSucc, ← δ_castSucc_nonDegenerateEquiv]
     rfl
   · simp
   · aesop_cat
@@ -330,7 +331,7 @@ lemma hom_ext {X : SSet.{u}} {f g : Δ[n] ⊗ Δ[1] ⟶ X}
   induction' m using SimplexCategory.rec with m
   have hx : x ∈ (⊤ : SSet.Subcomplex _).obj _ := by simp
   simp only [← filtration_last.{u} n, filtration, Subpresheaf.iSup_obj,
-    Set.iSup_eq_iUnion, Set.mem_iUnion, Subtype.exists, exists_prop,
+    Set.mem_iUnion, Subtype.exists, exists_prop,
     Subcomplex.mem_ofSimplex_obj_iff] at hx
   obtain ⟨i, _, ⟨s, rfl⟩⟩ := hx
   apply congr_fun (NatTrans.congr_app (h i) (op ⦋m⦌))
@@ -360,7 +361,7 @@ lemma δ_ι_last :
         (SimplexCategory.δ_comp_σ_succ (i := Fin.last n)) i
   · simp [ι, yonedaEquiv_snd, ← yonedaEquiv_symm_map, stdSimplex.map_op_apply,
       CosimplicialObject.δ, SimplexCategory.δ]
-    rw [stdSimplex.objMk₁_of_castSucc_lt _ _ (by simpa using i.castSucc_lt_last)]
+    rw [stdSimplex.objMk₁_of_castSucc_lt _ _ (by simp)]
     rfl
 
 @[reassoc]
@@ -387,7 +388,8 @@ lemma ι_whiskerRight_δ_of_le (i : Fin (n + 2)) (j : Fin (n + 1)) (hij : i ≤ 
     by_cases hk : k ≤ j.castSucc
     · rw [stdSimplex.objMk₁_of_castSucc_lt _ _ (by simpa [← Fin.le_castSucc_iff]),
         stdSimplex.objMk₁_of_castSucc_lt]
-      rw [Fin.castSucc_lt_castSucc_iff, ← Fin.le_castSucc_iff]
+      rw [Fin.succ_castSucc, Fin.succ_castSucc, Fin.castSucc_lt_castSucc_iff,
+        ← Fin.le_castSucc_iff]
       by_cases hk' : k < i
       · simpa [Fin.succAbove_of_castSucc_lt i.castSucc k (by simpa)]
           using hk.trans (j.castSucc_le_succ)
@@ -424,14 +426,14 @@ lemma ι_whiskerRight_δ_of_gt (i : Fin (n + 2)) (j : Fin (n + 1)) (hij : j.cast
         rw [← Fin.castSucc_lt_castSucc_iff] at hk
         rw [← Fin.succ_lt_succ_iff] at hij
         exact hk.trans hij
-      rw [stdSimplex.objMk₁_of_castSucc_lt _ _ (by simpa using hk),
+      rw [stdSimplex.objMk₁_of_castSucc_lt _ _ (by simpa [Fin.le_castSucc_iff] using hk),
         stdSimplex.objMk₁_of_castSucc_lt]
-      rwa [Fin.succAbove_of_castSucc_lt _ _ this,
-      Fin.castSucc_lt_castSucc_iff, Fin.castSucc_lt_succ_iff, Fin.le_castSucc_iff]
+      rwa [Fin.succAbove_of_castSucc_lt _ _ this, Fin.succ_castSucc,
+        Fin.castSucc_lt_castSucc_iff, Fin.castSucc_lt_succ_iff, Fin.le_castSucc_iff]
     · simp only [not_lt] at hk
       rw [stdSimplex.objMk₁_of_le_castSucc _ _ (by simpa using hk),
         stdSimplex.objMk₁_of_le_castSucc]
-      rw [Fin.castSucc_le_castSucc_iff]
+      rw [Fin.succ_castSucc, Fin.castSucc_le_castSucc_iff]
       by_cases hk' : k.castSucc < i.succ
       · simpa [Fin.succAbove_of_castSucc_lt _ _ hk'] using hk
       · simp only [Fin.castSucc_lt_succ_iff, not_le] at hk'
@@ -462,7 +464,7 @@ lemma δ_succ_castSucc_ι_succ (i : Fin n) :
   · simp [ι, ← yonedaEquiv_symm_map, stdSimplex.map_op_apply, CosimplicialObject.δ,
       SimplexCategory.δ]
     by_cases hk : k < i.succ
-    · rw [Fin.succAbove_of_castSucc_lt _ _ (by simpa using hk)]
+    · rw [Fin.succAbove_of_castSucc_lt _ _ (by simpa [Fin.le_castSucc_iff] using hk)]
       rw [stdSimplex.objMk₁_of_castSucc_lt, stdSimplex.objMk₁_of_castSucc_lt]
       . simpa [Fin.le_castSucc_iff]
       . simpa using hk.le
@@ -470,7 +472,7 @@ lemma δ_succ_castSucc_ι_succ (i : Fin n) :
       rw [Fin.succAbove_of_le_castSucc _ _ (by simpa using hk),
         stdSimplex.objMk₁_of_le_castSucc _ _ (by simpa using hk),
         stdSimplex.objMk₁_of_le_castSucc]
-      rw [Fin.castSucc_le_castSucc_iff, Fin.succ_le_succ_iff]
+      rw [Fin.succ_castSucc, Fin.castSucc_le_castSucc_iff, Fin.succ_le_succ_iff]
       exact i.castSucc_le_succ.trans hk
 
 end prodStdSimplex₁

@@ -1,6 +1,6 @@
 import Mathlib.Topology.Category.TopCat.Limits.Products
 import Mathlib.Topology.UnitInterval
-import Mathlib.CategoryTheory.ChosenFiniteProducts
+import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
 
 universe u
 
@@ -15,13 +15,15 @@ def const {X Y : TopCat.{u}} (y : Y) : X ⟶ Y :=
 lemma const_apply {X Y : TopCat.{0}} (y : Y) (x : X) :
     const y x = y := rfl
 
-instance : ChosenFiniteProducts TopCat.{u} where
-  terminal := ⟨_, isTerminalPUnit⟩
-  product X Y := ⟨prodBinaryFan X Y, X.prodBinaryFanIsLimit Y⟩
+instance : CartesianMonoidalCategory TopCat.{u} :=
+  .ofChosenFiniteProducts ⟨_, isTerminalPUnit⟩
+    (fun X Y ↦ ⟨prodBinaryFan X Y, X.prodBinaryFanIsLimit Y⟩)
+
+instance : BraidedCategory TopCat.{u} := .ofCartesianMonoidalCategory
 
 @[simp]
 theorem tensor_apply {W X Y Z : TopCat.{u}} (f : W ⟶ X) (g : Y ⟶ Z) (p : ↑(W ⊗ Y)) :
-    (f ⊗ g).hom p = (f p.1, g p.2) :=
+    (f ⊗ₘ g).hom p = (f p.1, g p.2) :=
   rfl
 
 @[simp]
@@ -100,7 +102,7 @@ theorem braiding_inv_apply {X Y : TopCat.{u}} {x : X} {y : Y} :
 
 @[simp]
 protected theorem lift_apply {X Y Z : TopCat.{u}} {f : X ⟶ Y} {g : X ⟶ Z} {x : X} :
-    ChosenFiniteProducts.lift f g x = (f x, g x) :=
+    CartesianMonoidalCategory.lift f g x = (f x, g x) :=
   rfl
 
 def I : TopCat.{u} := TopCat.of (ULift unitInterval)
@@ -142,7 +144,7 @@ instance : OfNat I 1 := ⟨I.mk 1⟩
 @[simp] lemma I.toℝ_zero : I.toℝ 0 = 0 := rfl
 @[simp] lemma I.toℝ_one : I.toℝ 1 = 1 := rfl
 
-open ChosenFiniteProducts
+open CartesianMonoidalCategory
 
 noncomputable def ι₀ {X : TopCat.{u}} : X ⟶ X ⊗ I :=
   lift (𝟙 X) (const 0)

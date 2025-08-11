@@ -51,7 +51,7 @@ lemma lt_iff (A B : NonemptyFiniteChains X) : A < B ↔ A.1 ⊂ B.1 := Iff.rfl
 
 noncomputable instance [DecidableLE X] : LinearOrder A.1 where
   le_total := A.2.2
-  decidableLE a b := by infer_instance
+  toDecidableLE a b := by infer_instance
 
 variable [DecidableLE X]
 
@@ -90,7 +90,7 @@ lemma mem_nonDegenerate_iff {n : ℕ} (s : (nerve X) _⦋n⦌) :
           Set.mem_iUnion, Set.mem_range]
         refine ⟨i, (nerve X).δ i.castSucc s, ?_⟩
         ext j
-        dsimp [nerve_σ_obj, nerve_δ_obj]
+        simp only [nerve_σ_obj, nerve_δ_obj]
         by_cases h' : j ≤ i.castSucc
         · rw [Fin.predAbove_of_le_castSucc _ _ h']
           obtain ⟨j, rfl⟩ :=
@@ -104,7 +104,7 @@ lemma mem_nonDegenerate_iff {n : ℕ} (s : (nerve X) _⦋n⦌) :
           rw [Fin.predAbove_of_castSucc_lt _ _ h']
           obtain ⟨j, rfl⟩ := Fin.eq_succ_of_ne_zero (Fin.ne_zero_of_lt h')
           rw [Fin.pred_succ, Fin.succAbove_of_lt_succ _ _ h']
-    · simp only [SSet.mem_nonDegenerate_iff_not_mem_degenerate,
+    · simp only [SSet.mem_nonDegenerate_iff_notMem_degenerate,
         SSet.degenerate_eq_iUnion_range_σ, Set.mem_iUnion, Set.mem_range, not_exists]
       rintro i x rfl
       exact (hs i.castSucc_lt_succ).ne (by simp [nerve_σ_obj])
@@ -163,7 +163,7 @@ lemma complSingleton_le_iff {s : NonemptyFiniteChains X} :
         by_cases hx : x = x₀
         · subst hx
           by_contra!
-          apply h.not_le
+          apply h.not_ge
           aesop
         · exact h.le (by simpa)
     · exact Or.inr rfl
@@ -185,7 +185,6 @@ lemma eq_complSingleton_iff (s : NonemptyFiniteChains X) :
       simp [← h] at this
     · ext
       simp
-      tauto
   · rintro ⟨h₁, h₂⟩
     have : complSingleton x₀ ≤ s := fun x hx ↦ by
       have := h₂.symm.le (Finset.mem_univ x)
@@ -210,7 +209,7 @@ lemma not_mem_horn_iff {n : ℕ} (s : (nerve (NonemptyFiniteChains X)) _⦋n⦌)
     s ∉ (horn x₀).obj _ ↔
       ∃ (i : Fin (n + 1)), s.obj i = ⊤ ∨ s.obj i = complSingleton x₀ := by
   simp only [mem_horn_iff, not_forall,
-    Classical.not_and_iff_or_not_not, not_not]
+    Classical.not_and_iff_not_or_not, not_not]
 
 lemma not_mem_horn_iff' {n : ℕ} (s : (nerve (NonemptyFiniteChains X)) _⦋n⦌) :
     s ∉ (horn x₀).obj _ ↔

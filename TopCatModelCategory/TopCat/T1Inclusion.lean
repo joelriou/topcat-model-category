@@ -2,7 +2,7 @@ import TopCatModelCategory.TopCat.ClosedEmbeddings
 import Mathlib.CategoryTheory.MorphismProperty.Composition
 import Mathlib.CategoryTheory.MorphismProperty.Limits
 import Mathlib.CategoryTheory.Types.Monomorphisms
-import Mathlib.CategoryTheory.Limits.Shapes.Types
+--import Mathlib.CategoryTheory.Limits.Shapes.Types
 import Mathlib.Topology.Category.TopCat.Limits.Basic
 
 universe u
@@ -152,14 +152,14 @@ lemma isT₁Inclusion_of_transfiniteCompositionOfShape {J : Type u'} [LinearOrde
       Set.mem_setOf_eq, forall_exists_index, S] at hi
     obtain ⟨j, hj, rfl⟩ : ∃ j, ¬IsMax j ∧ i = Order.succ j := by
       induction i using SuccOrder.limitRecOn with
-      | hm j hj =>
+      | isMin j hj =>
         obtain rfl := hj.eq_bot
         refine (hy ?_).elim
         simp only [← hf.fac]
         obtain ⟨z, rfl⟩ := ((forget _).mapIso hf.isoBot.symm).toEquiv.surjective x
         exact ⟨z, rfl⟩
-      | hs j hj hj' => exact ⟨j, hj, rfl⟩
-      | hl j hj hj' =>
+      | succ j hj hj' => exact ⟨j, hj, rfl⟩
+      | isSuccLimit j hj hj' =>
         obtain ⟨⟨k, hk⟩, y, rfl⟩ := Types.jointly_surjective_of_isColimit
           (isColimitOfPreserves (forget _) (hf.F.isColimitOfIsWellOrderContinuous j hj)) x
         exact (lt_irrefl _ (lt_of_lt_of_le hk (hi k y
@@ -285,7 +285,7 @@ lemma range_le_of_transfiniteCompositionOfShape (g : T ⟶ Y) :
       rintro ⟨⟨h₁, h₂⟩, h₃⟩
       obtain ⟨m, rfl⟩ := hS h₁
       have : Set.range f ≤ R (j 0) := by
-        simp only [Functor.const_obj_obj, hj₀, Set.le_eq_subset, R, Z]
+        simp only [Functor.const_obj_obj, hj₀, Set.le_eq_subset, R]
         rintro _ ⟨x, rfl⟩
         exact ⟨hf.isoBot.inv x, congr_fun ((forget _).congr_map hf.fac) x⟩
       exact hy₃ m (hR (hj.monotone (Nat.zero_le m)) (this h₃))

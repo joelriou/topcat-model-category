@@ -63,7 +63,7 @@ noncomputable def effectiveEpiStructOfEpi : EffectiveEpiStruct p where
     dsimp
     obtain ⟨y, rfl⟩ := surjective_app p x
     rw [descApp_eq, ← hl]
-    dsimp
+    rfl
 
 lemma effectiveEpi_of_epi : EffectiveEpi p where
   effectiveEpi := ⟨effectiveEpiStructOfEpi p⟩

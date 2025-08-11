@@ -1,5 +1,5 @@
 import Mathlib.Topology.Category.TopCat.Basic
-import Mathlib.CategoryTheory.Limits.TypesFiltered
+import Mathlib.CategoryTheory.Limits.Types.Filtered
 import Mathlib.CategoryTheory.MorphismProperty.Composition
 import TopCatModelCategory.SSet.Monomorphisms
 import TopCatModelCategory.ColimitsType
@@ -148,18 +148,20 @@ include h₁ h₂ hφ
 
 lemma injective_of_coproducts (hf : ∀ j, Function.Injective (f j)) :
     Function.Injective φ := by
-  have := ((monomorphisms (Type u)).isStableUnderCoproductsOfShape_of_isStableUnderCoproducts J)
-    (Discrete.functor X₁ ⋙ forget _) (Discrete.functor X₂ ⋙ forget _) _ _
-    (isColimitOfPreserves (forget _) h₁) (isColimitOfPreserves (forget _) h₂)
-    (whiskerRight (Discrete.natTrans (fun ⟨j⟩ ↦ f j)) _) (fun ⟨j⟩ ↦ by
-      simpa only [monomorphisms.iff, CategoryTheory.mono_iff_injective] using hf j)
   rw [← CategoryTheory.mono_iff_injective]
-  convert this
-  apply (isColimitOfPreserves (forget _) h₁).hom_ext
-  rintro ⟨j⟩
-  rw [IsColimit.fac]
-  ext x
-  exact congr_fun ((forget _).congr_map (hφ j)) x
+  refine colimitsOfShape_le _
+    (colimitsOfShape.mk' (W := monomorphisms (Type u))
+      (X₁ := Discrete.functor X₁ ⋙ forget _)
+      (X₂ := Discrete.functor X₂ ⋙ forget _)
+      (h₁ := (isColimitOfPreserves (forget _) h₁))
+      (h₂ := (isColimitOfPreserves (forget _) h₂))
+      (f := Discrete.natTrans (fun ⟨j⟩ ↦ (forget _).map (f j))) _ _ ?_ _ ?_)
+  · intro j
+    dsimp
+    rw [monomorphisms.iff, CategoryTheory.mono_iff_injective]
+    apply hf
+  · rintro ⟨j⟩
+    exact (forget _).congr_map (hφ j)
 
 lemma preimage_image_eq_of_coproducts
     (j : J) (F : Set (X₂ j)) :
@@ -302,13 +304,13 @@ lemma isClosedEmbedding_of_transfiniteCompositionOfShape
     (isClosedEmbedding_of_transfiniteCompositionOfShape_aux hf.isColimit (fun j ↦ ?_) inj)
     (isClosedEmbedding_of_isIso _)
   induction j using SuccOrder.limitRecOn with
-  | hm j hj =>
+  | isMin j hj =>
     obtain rfl := hj.eq_bot
     simpa using IsClosedEmbedding.id
-  | hs j hj hj' =>
+  | succ j hj hj' =>
     rw [← homOfLE_comp bot_le (Order.le_succ j), Functor.map_comp]
     exact (hf.map_mem j hj).comp hj'
-  | hl j hj hj' =>
+  | isSuccLimit j hj hj' =>
     letI : OrderBot (Set.Iio j) :=
       { bot := ⟨⊥, hj.bot_lt⟩
         bot_le j := bot_le }

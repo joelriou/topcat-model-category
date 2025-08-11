@@ -296,7 +296,7 @@ lemma monotone_insert (f : Fin (n + 1) →o α) (i : Fin n) (x : α)
     apply f.monotone
     apply predAbove_right_monotone
     exact castSucc_le_succ j
-  · simp only [Classical.not_and_iff_or_not_not,
+  · simp only [Classical.not_and_iff_not_or_not,
       Decidable.not_not, succ_inj] at hj
     conv_lhs at hj => rw [succ_castSucc, castSucc_inj]
     obtain rfl | rfl := hj
@@ -376,7 +376,7 @@ lemma strictMono_insert (f : Fin (n + 1) → α) (hf : StrictMono f)
     · rw [predAbove_eq_predAdove_iff_of_lt _ _ _ (castSucc_lt_succ j)] at h
       simp only [castSucc_inj, succ_inj, and_self, ne_eq] at h hj
       tauto
-  · simp only [Classical.not_and_iff_or_not_not,
+  · simp only [Classical.not_and_iff_not_or_not,
       Decidable.not_not, succ_inj] at hj
     conv_lhs at hj => rw [succ_castSucc, castSucc_inj]
     obtain rfl | rfl := hj

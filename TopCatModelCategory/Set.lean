@@ -1,5 +1,5 @@
 import TopCatModelCategory.ColimitsType
-import Mathlib.CategoryTheory.Limits.TypesFiltered
+import Mathlib.CategoryTheory.Limits.Types.Filtered
 import Mathlib.CategoryTheory.Limits.Set
 
 open CategoryTheory Limits

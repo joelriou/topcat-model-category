@@ -16,14 +16,11 @@ scoped [Simplicial] notation "|" X "|" => SSet.toTop.obj X
 
 namespace SSet
 
-def uliftFunctor₀IsoId : uliftFunctor.{0, 0} ≅ 𝟭 _ :=
-  NatIso.ofComponents (fun X ↦
-    NatIso.ofComponents (fun n ↦ Equiv.ulift.toIso))
+--def uliftFunctor₀IsoId : uliftFunctor.{0, 0} ≅ 𝟭 _ :=
+--  NatIso.ofComponents (fun X ↦
+--    NatIso.ofComponents (fun n ↦ Equiv.ulift.toIso))
 
-noncomputable def stdSimplexCompToTopIso :
-    stdSimplex ⋙ SSet.toTop ≅ SimplexCategory.toTop :=
-  isoWhiskerRight (isoWhiskerLeft _ uliftFunctor₀IsoId ≪≫
-    Functor.rightUnitor _ ) _ ≪≫ SSet.toTopSimplex
+--alias stdSimplexCompToTopIso := toTopSimplex
 
 instance : toTop.IsLeftAdjoint := sSetTopAdj.isLeftAdjoint
 
@@ -36,7 +33,7 @@ namespace SimplexCategory
 open SSet
 
 noncomputable def toTopHomeo (n : SimplexCategory) :
-    |stdSimplex.obj n| ≃ₜ n.toTopObj :=
+    |stdSimplex.{0}.obj n| ≃ₜ n.toTopObj :=
   TopCat.homeoOfIso (stdSimplexCompToTopIso.app n)
 
 lemma toTopHomeo_naturality {n m : SimplexCategory} (f : n ⟶ m) :

@@ -235,8 +235,8 @@ lemma mem_degenerate_iff {n : ℕ} (x : A.obj (op (.mk n))) :
 
 lemma mem_nonDegenerate_iff {n : ℕ} (x : A.obj (op (.mk n))) :
     x ∈ nonDegenerate A n ↔ x.1 ∈ X.nonDegenerate n := by
-  rw [mem_nonDegenerate_iff_not_mem_degenerate,
-    mem_nonDegenerate_iff_not_mem_degenerate, mem_degenerate_iff]
+  rw [mem_nonDegenerate_iff_notMem_degenerate,
+    mem_nonDegenerate_iff_notMem_degenerate, mem_degenerate_iff]
 
 lemma le_iff_contains_nonDegenerate (B : X.Subcomplex) :
     A ≤ B ↔ ∀ (n : ℕ) (x : X.nonDegenerate n), x.1 ∈ A.obj _ → x.1 ∈ B.obj _ := by
@@ -273,7 +273,7 @@ lemma iSup_ofSimplex_nonDegenerate_eq_top :
     ⨆ (x : Σ (p : ℕ), X.nonDegenerate p), ofSimplex x.2.1 = ⊤ := by
   rw [eq_top_iff_contains_nonDegenerate]
   intro n x hx
-  simp only [Subpresheaf.iSup_obj, Set.iSup_eq_iUnion, Set.mem_iUnion, Sigma.exists,
+  simp only [Subpresheaf.iSup_obj, Set.mem_iUnion, Sigma.exists,
     Subtype.exists, exists_prop]
   exact ⟨n, x, hx, mem_ofSimplex_obj x⟩
 
@@ -300,14 +300,12 @@ lemma degenerate_iff_of_isIso (f : X ⟶ Y) [IsIso f] {n : ℕ} (x : X _⦋n⦌)
     f.app _ x ∈ Y.degenerate n ↔ x ∈ X.degenerate n := by
   constructor
   · intro hy
-    have h₁ := congr_fun ((congr_app (IsIso.hom_inv_id f)) (op ⦋n⦌)) x
-    dsimp at h₁
-    simpa [h₁] using degenerate_map hy (inv f)
+    simpa [← FunctorToTypes.comp] using degenerate_map hy (inv f)
   · exact fun hx ↦ degenerate_map hx f
 
 lemma nonDegenerate_iff_of_isIso (f : X ⟶ Y) [IsIso f] {n : ℕ} (x : X _⦋n⦌) :
     f.app _ x ∈ Y.nonDegenerate n ↔ x ∈ X.nonDegenerate n := by
-  simp only [mem_nonDegenerate_iff_not_mem_degenerate,
+  simp only [mem_nonDegenerate_iff_notMem_degenerate,
     degenerate_iff_of_isIso]
 
 attribute [local simp] nonDegenerate_iff_of_isIso in
@@ -331,7 +329,7 @@ lemma degenerate_iff_of_mono {Y : SSet.{u}} (f : X ⟶ Y) [Mono f] (x : X _⦋n�
 variable {X} in
 lemma nonDegenerate_iff_of_mono {Y : SSet.{u}} (f : X ⟶ Y) [Mono f] (x : X _⦋n⦌) :
     f.app _ x ∈ Y.nonDegenerate n ↔ x ∈ X.nonDegenerate n := by
-  simp only [mem_nonDegenerate_iff_not_mem_degenerate, degenerate_iff_of_mono]
+  simp only [mem_nonDegenerate_iff_notMem_degenerate, degenerate_iff_of_mono]
 
 /-lemma _root_.Fin.eq_castSucc_of_ne_last {n : ℕ} {i : Fin (n + 1)} (hi : i ≠ Fin.last n) :
     ∃ (j : Fin n), i = j.castSucc := by
@@ -343,7 +341,7 @@ lemma eq_of_degenerate_of_δ_eq
     {X : SSet.{u}} {n : ℕ} {x y : X _⦋n + 1⦌} (hx : x ∈ X.degenerate (n + 1))
     (hy : y ∈ X.degenerate (n + 1))
     (h : ∀ (i : Fin (n + 2)), X.δ i x = X.δ i y) : x = y := by
-  simp only [degenerate_eq_iUnion_range_σ, Set.iSup_eq_iUnion, Set.mem_iUnion,
+  simp only [degenerate_eq_iUnion_range_σ, Set.mem_iUnion,
     Set.mem_range] at hx hy
   obtain ⟨p, x', hx'⟩ := hx
   obtain ⟨q, y', hy'⟩ := hy
@@ -378,7 +376,7 @@ lemma Subcomplex.range_le_iff_nonDegenerate {Y : SSet.{u}} (f : X ⟶ Y) (B : Y.
     simp only [Subpresheaf.range_obj, Set.mem_range] at h
     obtain ⟨x, rfl⟩ := h
     refine h n ⟨x, ?_⟩
-    rw [mem_nonDegenerate_iff_not_mem_degenerate] at hy ⊢
+    rw [mem_nonDegenerate_iff_notMem_degenerate] at hy ⊢
     intro hx
     exact hy (degenerate_map hx f)
 

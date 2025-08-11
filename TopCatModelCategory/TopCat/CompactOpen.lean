@@ -30,6 +30,7 @@ def tensorLeftAdj :
   Adjunction.mkOfHomEquiv { homEquiv _ _ := ihomEquiv }
 
 instance : Closed X where
+  rightAdj := _
   adj := tensorLeftAdj X
 
 instance : (tensorLeft X).IsLeftAdjoint := ⟨_, ⟨tensorLeftAdj X⟩⟩

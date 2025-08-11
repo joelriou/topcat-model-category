@@ -6,7 +6,7 @@ import TopCatModelCategory.SSet.ProdSimplexOne
 universe u
 
 open HomotopicalAlgebra CategoryTheory Simplicial Limits MonoidalCategory
-  ChosenFiniteProducts Opposite SSet.modelCategoryQuillen
+  CartesianMonoidalCategory Opposite SSet.modelCategoryQuillen
 
 namespace SSet
 
@@ -69,7 +69,7 @@ lemma comp_map_eq_const
   have : ¬ (x ∈ Y.degenerate n) := by
     intro hx'
     have := degenerate_map hx' φ
-    simp [hx, mem_degenerate_iff_not_mem_nonDegenerate,
+    simp [hx, mem_degenerate_iff_notMem_nonDegenerate,
       stdSimplex.nonDegenerate_top_dim] at this
   simp [Y.degenerate_eq_top_of_hasDimensionLT n n (by rfl)] at this
 
@@ -182,7 +182,7 @@ attribute [reassoc (attr := simp)] δ_succ_succ_map δ_castSucc_castSucc_map
 lemma δ_succ_castSucc_map {f g fg : X.PtSimplex n x} {i : Fin n}
     (h : MulStruct f g fg i) :
     stdSimplex.δ i.castSucc.succ ≫ h.map = fg.map := by
-  simp [Fin.succ_castSucc]
+  rw [Fin.succ_castSucc, h.δ_castSucc_succ_map]
 
 @[simps]
 def pushforward {f g fg : X.PtSimplex n x} {i : Fin n}
@@ -359,21 +359,22 @@ noncomputable def assoc
             simp at hj⟩ := by
     dsimp [μ]
     conv_lhs =>
-      rw [← Fin.succ_castSucc,
+      rw [Fin.succ_castSucc,
         ← Fin.succ_castSucc, stdSimplex.δ_comp_δ_assoc hj,
         hγ _ (by
-          simp only [ne_eq, Fin.castSucc_inj, μ]
+          simp only [ne_eq, Fin.castSucc_inj]
           rintro rfl
           simp at hj)]
   have hμ' (j : Fin (n + 2)) (hj : i.succ.castSucc ≤ j) :
       stdSimplex.δ j ≫ μ = stdSimplex.δ i.succ.castSucc ≫
           α ⟨j.succ, by
-            simp [← Fin.succ_castSucc]
+            simp
             rintro rfl
             simp at hj⟩ := by
     dsimp [μ]
     conv_lhs =>
-      rw [← stdSimplex.δ_comp_δ_assoc hj]
+      rw [Fin.succ_castSucc, Fin.succ_castSucc, ← stdSimplex.δ_comp_δ_assoc hj]
+    simp only [← Fin.succ_castSucc]
     rw [hγ]
   refine ⟨{
       map := μ
@@ -447,7 +448,7 @@ noncomputable def assoc'
       apply lt_of_le_of_lt hjk
       rw [← Fin.succ_lt_succ_iff]
       exact hk₁.trans (by simp)
-    · simp only [not_lt, α] at hk₁
+    · simp only [not_lt] at hk₁
       obtain hk₁ | hk₁ := hk₁.lt_or_eq; swap
       · have : j < i.castSucc.castSucc := lt_of_le_of_lt hjk (by
           rw [← Fin.succ_lt_succ_iff, ← hk₁]
@@ -506,8 +507,7 @@ noncomputable def assoc'
             simp [Fin.le_iff_val_le_val] at hj⟩ := by
     dsimp [μ]
     conv_lhs =>
-      rw [← Fin.succ_castSucc, ← Fin.succ_castSucc,
-        stdSimplex.δ_comp_δ_assoc hj,
+      rw [stdSimplex.δ_comp_δ_assoc hj,
         hγ _ (by
           simp only [ne_eq, Fin.castSucc_inj]
           rintro rfl
@@ -515,10 +515,11 @@ noncomputable def assoc'
   have hμ' (j : Fin (n + 2)) (hj : i.succ.succ ≤ j) :
       stdSimplex.δ j ≫ μ = stdSimplex.δ i.succ.succ ≫
           α ⟨j.succ, by
-            simp [← Fin.succ_castSucc]
+            simp
             rintro rfl
             simp at hj⟩ := by
     dsimp [μ]
+    simp only [Fin.succ_castSucc]
     rw [← stdSimplex.δ_comp_δ_assoc hj, hγ]
   refine ⟨{
       map := μ
@@ -747,7 +748,7 @@ lemma exists_left_inverse (i : Fin (n + 1)) :
     · rw [stdSimplex.δ_comp_δ_assoc hj]
       simp only [Fin.le_iff_val_le_val, Fin.val_succ] at hj
       rw [hγ _ (by simp [Fin.ext_iff]; omega), δ_map]
-    · simp only [not_le, α] at hj
+    · simp only [not_le] at hj
       obtain ⟨i, rfl⟩ := Fin.eq_castSucc_of_ne_last (x := i)
         (fun h ↦ Fin.ne_last_of_lt hj (by simp [h]))
       rw [Fin.succ_castSucc, Fin.succ_castSucc]

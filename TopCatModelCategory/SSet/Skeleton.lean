@@ -37,7 +37,7 @@ lemma mem_skeleton {i : ℕ} (x : X _⦋i⦌) {n : ℕ} (hi : i < n) :
     (X.skeleton n).map _ (this _ (Subcomplex.mem_ofSimplex_obj _))
   exact le_trans (by exact le_trans (by rfl) (le_iSup _ y))
     (le_iSup _ ⟨j, lt_of_le_of_lt
-      (SimplexCategory.len_le_of_epi (f := f) inferInstance) hi⟩)
+      (SimplexCategory.len_le_of_epi f) hi⟩)
 
 lemma skeleton_obj_eq_top {d n : ℕ} (h : d < n) :
     (X.skeleton n).obj (op ⦋d⦌) = ⊤ := by
@@ -58,8 +58,8 @@ lemma mem_skeleton_obj_iff_of_nonDegenerate
     obtain ⟨x, hx⟩ := x
     obtain ⟨⟨i, hi⟩, y, hy, ⟨f⟩, rfl⟩ := h
     dsimp at y hy f
-    have : d ≤ i := SimplexCategory.len_le_of_mono
-      (mono_of_nonDegenerate y f hx)
+    have := mono_of_nonDegenerate y f hx
+    have : d ≤ i := SimplexCategory.len_le_of_mono f
     omega
   · apply mem_skeleton
 
@@ -266,7 +266,7 @@ lemma sup_range_r_range_b :
   rintro n ⟨x, hx⟩ _
   simp only [skeletonOfMono_succ, Subpresheaf.range_obj, Set.mem_range, not_exists,
     Subpresheaf.max_obj, Subpresheaf.iSup_obj, Subcomplex.iSup_obj, Set.iUnion_coe_set,
-    Set.mem_union, Set.mem_iUnion, exists_prop, exists_and_left] at hx
+    Set.mem_union, Set.mem_iUnion, exists_prop] at hx
   simp only [Subpresheaf.toPresheaf_obj, Subpresheaf.max_obj, Subpresheaf.range_obj, Set.mem_union,
     Set.mem_range, Subtype.exists]
   obtain hx | ⟨y, hy₁, hy₂, ⟨f⟩, rfl⟩  := hx
@@ -372,6 +372,8 @@ noncomputable def relativeCellComplexOfMono [Mono i] :
   attachCells d hd :=
     { ι := ι i d
       π _ := ⟨⟩
+      cofan₁ := _
+      cofan₂ := _
       isColimit₁ := colimit.isColimit _
       isColimit₂ := colimit.isColimit _
       m := m i d

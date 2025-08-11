@@ -5,7 +5,7 @@ import TopCatModelCategory.LiftingProperties
 universe u
 
 open CategoryTheory HomotopicalAlgebra SSet.modelCategoryQuillen
-  MonoidalCategory MonoidalClosed Simplicial Limits ChosenFiniteProducts
+  MonoidalCategory MonoidalClosed Simplicial Limits CartesianMonoidalCategory
 
 namespace SSet
 

@@ -83,7 +83,7 @@ lemma simplexδ_snd_mem_boundary_of_gt (j : Fin (n + 2)) (i : Fin (n + 3))
   obtain ⟨j, rfl⟩ := j.eq_succ_of_ne_zero (by rintro rfl; simp at hij)
   obtain ⟨i, rfl⟩ := i.eq_castSucc_of_ne_last (by
     rintro rfl
-    exact hij.not_le (j.succ.castSucc.le_last))
+    exact hij.not_ge (j.succ.castSucc.le_last))
   simp only [Fin.castSucc_lt_castSucc_iff] at hij
   rw [SimplexCategory.δ_comp_σ_of_le (by rwa [Fin.le_castSucc_iff])]
   simp only [boundary_eq_iSup, Subpresheaf.iSup_obj, Set.mem_iUnion, stdSimplex.mem_face_iff,
@@ -97,7 +97,7 @@ lemma simplexδ_snd_mem_boundary_of_lt (j : Fin (n + 2)) (i : Fin (n + 3))
   erw [stdSimplex.map_objEquiv_symm]
   obtain ⟨j', rfl⟩ := j.eq_castSucc_of_ne_last (by
     rintro rfl
-    exact (Fin.le_last i).not_lt hij)
+    exact (Fin.le_last i).not_gt hij)
   obtain ⟨i', rfl⟩ := i.eq_succ_of_ne_zero (Fin.ne_zero_of_lt hij)
   rw [SimplexCategory.δ_comp_σ_of_gt (by simpa using hij)]
   simp only [boundary_eq_iSup, Subpresheaf.iSup_obj, Set.mem_iUnion, stdSimplex.mem_face_iff,
@@ -108,13 +108,14 @@ lemma simplexδ_succ_succ_castSucc (j : Fin (n + 1)) :
     simplexδ j.succ j.succ.castSucc = simplexδ j.castSucc j.succ.castSucc := by
   apply Prod.ext
   · ext k : 1
-    simp [simplexδ, simplex, SimplicialObject.δ, stdSimplex.map_op_apply,
+    simp [simplexδ, simplex, SimplicialObject.δ,
       stdSimplex.objMk₁, SimplexCategory.δ]
     by_cases h₁ : j.succ ≤ k
-    · simp only [j.succ.castSucc.succAbove_of_le_castSucc k (by simpa)]
+    · simp only [j.castSucc.succ.succAbove_of_le_castSucc k (by simpa)]
       rw [if_neg (by simpa), if_neg (by simpa using j.castSucc_le_succ.trans h₁)]
     · simp only [not_le] at h₁
-      simp only [j.succ.castSucc.succAbove_of_succ_le k (by simpa)]
+      dsimp
+      simp only [j.castSucc.succ.succAbove_of_succ_le k (by simpa [Fin.le_castSucc_iff])]
       rw [if_pos (by simpa using h₁.le), if_pos (by simpa [Fin.le_castSucc_iff])]
   · ext k : 1
     exact SimplexCategory.congr_toOrderHom_apply
@@ -150,6 +151,8 @@ lemma filtration₁_zero :
     filtration₁.{u} (0 : Fin (n + 2)) =
       Subcomplex.unionProd (stdSimplex.face {1}) (boundary n) := by
   simp [filtration₁]
+  intro i
+  fin_cases i
 
 lemma filtration₁_succ (i : Fin (n + 1)) :
     filtration₁.{u} i.succ = filtration₁ i.castSucc ⊔
@@ -198,7 +201,7 @@ lemma le_filtration₁_preimage_ιSimplex (j : Fin (n + 1)) :
   intro i hij
   simp only [stdSimplex.face_singleton_compl, filtration₁,
     Subcomplex.ofSimplex_le_iff, Subcomplex.preimage_obj, Set.mem_preimage,
-    Subpresheaf.max_obj, Set.mem_union, Subpresheaf.iSup_obj, Set.iSup_eq_iUnion,
+    Subpresheaf.max_obj, Set.mem_union, Subpresheaf.iSup_obj,
     Set.mem_iUnion]
   rw [ιSimplex_app_objEquiv_symm_δ]
   simp only [Subcomplex.mem_unionProd_iff, stdSimplex.mem_face_iff,
@@ -235,7 +238,7 @@ lemma le_filtration₁_preimage_ιSimplex (j : Fin (n + 1)) :
         (simplexδ_snd_mem_boundary_of_lt _ _ (by simpa using hij)))
 
 lemma Set.not_mem_setOf {α : Type*} (P : α → Prop) (x : α) :
-    x ∉ setOf P ↔ ¬ P x := by simp only [Set.nmem_setOf_iff]
+    x ∉ setOf P ↔ ¬ P x := by rfl
 
 lemma filtration₁_preimage_ιSimplex_le (j : Fin (n + 1)) :
     (filtration₁ j.castSucc).preimage (ιSimplex j) ≤
@@ -247,7 +250,7 @@ lemma filtration₁_preimage_ιSimplex_le (j : Fin (n + 1)) :
   simp [filtration₁, Subcomplex.unionProd, Set.prod, Set.not_mem_setOf]
   refine ⟨⟨?_, ⟨j, ?_⟩⟩, fun i ↦ ?_⟩
   · simpa only [simplexδ_succ_snd] using non_mem_boundary n
-  · simp [simplexδ, SimplicialObject.δ, stdSimplex.map_op_apply,
+  · simp [simplexδ, SimplicialObject.δ,
       stdSimplex.objMk₁, SimplexCategory.δ]
   · rw [prodStdSimplex.mem_ofSimplex_iff, Set.not_subset]
     refine ⟨⟨0, j⟩, ⟨j, ?_⟩, ?_⟩
@@ -344,9 +347,6 @@ lemma filtration₀_last :
     filtration₀.{u} (Fin.last _ : Fin (n + 2)) =
       Subcomplex.unionProd (stdSimplex.face {0}) (boundary n) := by
   simp [filtration₀]
-  intro i hi
-  simp only [Fin.ext_iff, Fin.coe_castSucc, Fin.val_last] at hi
-  omega
 
 variable (n) in
 lemma filtration₀_zero :
@@ -367,7 +367,7 @@ lemma le_filtration₀_preimage_ιSimplex (j : Fin (n + 1)) :
   intro i hij
   simp only [stdSimplex.face_singleton_compl, filtration₀,
     Subcomplex.ofSimplex_le_iff, Subcomplex.preimage_obj, Set.mem_preimage,
-    Subpresheaf.max_obj, Set.mem_union, Set.iSup_eq_iUnion,
+    Subpresheaf.max_obj, Set.mem_union,
     Set.mem_iUnion, Subcomplex.iSup_obj]
   rw [ιSimplex_app_objEquiv_symm_δ]
   simp only [Subcomplex.mem_unionProd_iff, stdSimplex.mem_face_iff,
@@ -408,7 +408,7 @@ lemma filtration₀_preimage_ιSimplex_le (j : Fin (n + 1)) :
   simp [filtration₀, Subcomplex.unionProd, Set.prod, Set.not_mem_setOf]
   refine ⟨⟨?_, ⟨j, ?_⟩⟩, fun i hi ↦ ?_⟩
   · simpa only [simplexδ_castSucc_snd] using non_mem_boundary n
-  · simp [simplexδ, SimplicialObject.δ, stdSimplex.map_op_apply,
+  · simp [simplexδ, SimplicialObject.δ,
       stdSimplex.objMk₁, SimplexCategory.δ]
   · rw [prodStdSimplex.mem_ofSimplex_iff, Set.not_subset]
     refine ⟨⟨1, j⟩, ⟨j, ?_⟩, ?_⟩
@@ -424,13 +424,11 @@ lemma filtration₀_preimage_ιSimplex_le (j : Fin (n + 1)) :
       rw [Fin.predAbove_of_succ_le _ _ ha₁] at ha₂
       obtain ⟨a, rfl⟩ := a.exists_eq_succ_of_ne_zero (by
         rintro rfl
-        rw [Fin.zero_eta, Fin.le_zero_iff, Fin.ext_iff] at ha₁
         simp at ha₁)
       simp at ha₂
       subst ha₂
       simp only [Fin.lt_iff_val_lt_val] at hi
-      simp only [Fin.le_iff_val_le_val, Fin.val_succ, Nat.succ_eq_add_one,
-        add_le_add_iff_right] at ha₁
+      simp only [Nat.succ_eq_add_one, Fin.lt_iff_val_lt_val, Fin.coe_castSucc] at ha₁
       omega
 
 lemma filtration₀_preimage_ιSimplex (j : Fin (n + 1)) :
@@ -490,7 +488,7 @@ section
 
 variable {n : ℕ} (k : Fin (n + 1))
 
-open ChosenFiniteProducts
+open CartesianMonoidalCategory
 
 namespace retractArrowHornCastSuccι
 
@@ -523,7 +521,7 @@ lemma monotone_ρ : Monotone (ρ k) := by
   · intro i
     fin_cases i
     · intro x y h
-      simp only [ρ, Fin.coe_eq_castSucc, le_inf_iff, inf_le_iff, inf_le_right, and_true,
+      simp only [ρ, le_inf_iff, inf_le_iff, and_true,
         le_refl, or_true]
       tauto
     · intro x y h

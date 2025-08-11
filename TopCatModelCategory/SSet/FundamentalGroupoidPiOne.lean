@@ -4,7 +4,7 @@ import TopCatModelCategory.SSet.PiZero
 universe u
 
 open CategoryTheory Simplicial HomotopicalAlgebra
-  SSet.modelCategoryQuillen MonoidalCategory ChosenFiniteProducts
+  SSet.modelCategoryQuillen MonoidalCategory CartesianMonoidalCategory
 
 namespace SSet
 
@@ -21,8 +21,8 @@ def π₀EquivπZero (x : X _⦋0⦌) : π₀ X ≃ π 0 X x where
       h := snd _ _ ≫ yonedaEquiv.symm s
       h₀ := by
         apply yonedaEquiv.injective
-        simp [PtSimplex.equiv₀, ← h₀, yonedaEquiv, yonedaCompUliftFunctorEquiv,
-          SimplicialObject.δ ]
+        simp [PtSimplex.equiv₀, ← h₀, yonedaEquiv, uliftYonedaEquiv,
+          SimplicialObject.δ]
         apply congr_fun
         congr 2
         ext i
@@ -30,8 +30,8 @@ def π₀EquivπZero (x : X _⦋0⦌) : π₀ X ≃ π 0 X x where
         rfl
       h₁ := by
         apply yonedaEquiv.injective
-        simp [PtSimplex.equiv₀, ← h₁, yonedaEquiv, yonedaCompUliftFunctorEquiv,
-          SimplicialObject.δ ]
+        simp [PtSimplex.equiv₀, ← h₁, yonedaEquiv, uliftYonedaEquiv,
+          SimplicialObject.δ]
         apply congr_fun
         congr 2
         ext i
@@ -104,7 +104,7 @@ lemma congr_toπ₀_of_hom {x y : FundamentalGroupoid X} (f : x ⟶ y) :
     simp only [← f.comm₀']
     dsimp only [SimplicialObject.δ]
     rw [← yonedaEquiv_map_comp]
-    dsimp [yonedaEquiv, yonedaCompUliftFunctorEquiv, stdSimplex, uliftFunctor]
+    dsimp [yonedaEquiv, uliftYoneda, uliftYonedaEquiv, stdSimplex, uliftFunctor]
     apply congr_arg
     ext i
     fin_cases i
@@ -112,7 +112,7 @@ lemma congr_toπ₀_of_hom {x y : FundamentalGroupoid X} (f : x ⟶ y) :
   · simp only [← f.comm₁']
     dsimp only [SimplicialObject.δ]
     rw [← yonedaEquiv_map_comp]
-    dsimp [yonedaEquiv, yonedaCompUliftFunctorEquiv, stdSimplex, uliftFunctor]
+    dsimp [yonedaEquiv, uliftYoneda, uliftYonedaEquiv, stdSimplex, uliftFunctor]
     apply congr_arg
     ext i
     fin_cases i

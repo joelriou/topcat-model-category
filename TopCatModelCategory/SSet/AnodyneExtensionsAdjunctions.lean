@@ -5,7 +5,7 @@ import Mathlib.CategoryTheory.LiftingProperties.ParametrizedAdjunction
 universe u
 
 open CategoryTheory MonoidalCategory Limits Simplicial HomotopicalAlgebra
-  ChosenFiniteProducts SSet.modelCategoryQuillen
+  CartesianMonoidalCategory SSet.modelCategoryQuillen
 
 namespace SSet
 
@@ -106,8 +106,8 @@ noncomputable def horn₁₁ :
   inl := fst _ _ ≫ pushout.inl _ _
   inr := pushout.inr _ _
   isPushout := (IsPushout.of_hasPushout i ι₁).of_iso
-      ((stdSimplex.rightUnitor _).symm ≪≫ (Iso.refl _ ⊗ (horn₁.iso 1)))
-      ((stdSimplex.rightUnitor _).symm ≪≫ (Iso.refl _ ⊗ (horn₁.iso 1)))
+      ((stdSimplex.rightUnitor _).symm ≪≫ (Iso.refl _ ⊗ᵢ (horn₁.iso 1)))
+      ((stdSimplex.rightUnitor _).symm ≪≫ (Iso.refl _ ⊗ᵢ (horn₁.iso 1)))
       (Iso.refl _) (Iso.refl _) (by aesop_cat) (by
         dsimp
         rw [Category.comp_id, id_tensorHom, Category.assoc,
@@ -131,8 +131,8 @@ noncomputable def horn₁₀ :
   inl := fst _ _ ≫ pushout.inl _ _
   inr := pushout.inr _ _
   isPushout := (IsPushout.of_hasPushout i ι₀).of_iso
-      ((stdSimplex.rightUnitor _).symm ≪≫ (Iso.refl _ ⊗ (horn₁.iso 0)))
-      ((stdSimplex.rightUnitor _).symm ≪≫ (Iso.refl _ ⊗ (horn₁.iso 0)))
+      ((stdSimplex.rightUnitor _).symm ≪≫ (Iso.refl _ ⊗ᵢ (horn₁.iso 0)))
+      ((stdSimplex.rightUnitor _).symm ≪≫ (Iso.refl _ ⊗ᵢ (horn₁.iso 0)))
       (Iso.refl _) (Iso.refl _) (by aesop_cat) (by
         dsimp
         rw [Category.comp_id, id_tensorHom, Category.assoc,

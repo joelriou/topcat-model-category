@@ -30,7 +30,7 @@ lemma non_mem_boundary (n : ℕ) :
 
 lemma boundary_lt_top (n : ℕ) :
     boundary.{u} n < ⊤ :=
-  lt_of_le_not_le (by simp) (fun h ↦ non_mem_boundary n (h _ (by simp)))
+  lt_of_le_not_ge (by simp) (fun h ↦ non_mem_boundary n (h _ (by simp)))
 
 lemma boundary_obj_eq_top (m n : ℕ) (h : m < n) :
     (boundary.{u} n).obj (op ⦋m⦌) = ⊤ := by
@@ -41,7 +41,7 @@ lemma boundary_obj_eq_top (m n : ℕ) (h : m < n) :
   · simp at h
   · obtain ⟨i, q, rfl⟩ := SimplexCategory.eq_comp_δ_of_not_surjective f (fun hf ↦ by
       rw [← SimplexCategory.epi_iff_surjective] at hf
-      have := SimplexCategory.le_of_epi (f := f) inferInstance
+      have := SimplexCategory.le_of_epi f
       omega)
     apply face_le_boundary i
     simp
@@ -60,7 +60,7 @@ lemma subcomplex_hasDimensionLT_of_neq_top (h : A ≠ ⊤) :
     simp
     obtain hi | rfl := hi.lt_or_eq
     · simp [Δ[n].degenerate_eq_top_of_hasDimensionLT (n + 1) i (by omega)]
-    · rw [mem_degenerate_iff_not_mem_nonDegenerate, nonDegenerate_top_dim]
+    · rw [mem_degenerate_iff_notMem_nonDegenerate, nonDegenerate_top_dim]
       change a ∉ {objMk .id}
       rintro rfl
       apply h
@@ -203,7 +203,7 @@ lemma exists_isPushout_of_ne_top {X : SSet.{u}} (A : X.Subcomplex) (hA : A ≠ �
   apply h
   let A' := A ⊔ .ofSimplex x
   have hA' : x ∈ A'.obj _ := Or.inr (Subcomplex.mem_ofSimplex_obj x)
-  have lt : A < A' := lt_of_le_not_le le_sup_left (fun hA ↦ hx (hA _ hA'))
+  have lt : A < A' := lt_of_le_not_ge le_sup_left (fun hA ↦ hx (hA _ hA'))
   have hA'' : A.preimage (yonedaEquiv.symm x) = boundary n := by
     rw [stdSimplex.eq_boundary_iff]
     constructor

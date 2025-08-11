@@ -5,7 +5,7 @@ import TopCatModelCategory.SSet.Monoidal
 import TopCatModelCategory.SSet.Subcomplex
 
 open CategoryTheory Category Simplicial MonoidalCategory Opposite
-  ChosenFiniteProducts Limits
+  CartesianMonoidalCategory Limits
 
 universe u
 
