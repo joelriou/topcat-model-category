@@ -6,7 +6,7 @@ import TopCatModelCategory.SSet.FundamentalGroupoid
 universe u
 
 open CategoryTheory HomotopicalAlgebra Simplicial MonoidalCategory
-  ChosenFiniteProducts Category Limits SSet.modelCategoryQuillen
+  CartesianMonoidalCategory Category Limits SSet.modelCategoryQuillen
 
 
 lemma CategoryTheory.IsPullback.types_ext {A B C D : Type u} {t : A ⟶ B} {l : A ⟶ C}
@@ -347,13 +347,13 @@ instance [Fibration p] : Nonempty (Selection p) := by
         · obtain ⟨x', rfl⟩ := hx
           obtain ⟨y', rfl⟩ := hy
           have := (Quotient.eq (r := s n)).2 ⟨hxy⟩
-          simp only [hσ, T] at this
+          simp only [hσ] at this
           rw [this]
       nonempty {n} x := by
         by_cases hx : x ∈ S n
         · exact ⟨_, Or.inr ⟨_, rfl⟩, ⟨rel ⟨x, hx⟩⟩⟩
         · simp only [Subtype.exists, exists_prop, not_exists, not_and, Set.mem_setOf_eq,
-            not_forall, Classical.not_imp, not_not, S] at hx
+            not_forall, not_not, S] at hx
           obtain ⟨y, hy, ⟨hxy⟩⟩ := hx
           exact ⟨y, Or.inl hy, ⟨hxy⟩⟩ }⟩
 
@@ -370,7 +370,7 @@ instance : PartialOrder selection.SubcomplexOfSelected := by
 
 instance : OrderTop selection.SubcomplexOfSelected where
   top := ⟨⨆ (A : selection.SubcomplexOfSelected), A.1, fun n ↦ by
-    simp only [Subpresheaf.iSup_obj, Set.iSup_eq_iUnion, Set.le_eq_subset, Set.iUnion_subset_iff]
+    simp only [Subpresheaf.iSup_obj, Set.le_eq_subset, Set.iUnion_subset_iff]
     intro A
     exact A.2 n⟩
   le_top A := le_iSup (ι := selection.SubcomplexOfSelected) (fun A ↦ A.1) A
@@ -397,7 +397,7 @@ lemma mem_subcomplex_of_boundary {n : ℕ} (x : E _⦋n⦌) (hx : x ∈ selectio
     obtain ⟨s, rfl⟩ := hy
     by_cases hs : s ∈ degenerate _ _
     · exact selection.le_set _ (degenerate_map hs _)
-    · rw [← mem_nonDegenerate_iff_not_mem_degenerate] at hs
+    · rw [← mem_nonDegenerate_iff_notMem_degenerate] at hs
       obtain h | rfl := (dim_le_of_nondegenerate _ ⟨s, hs⟩ n).lt_or_eq
       · apply subcomplex_obj_le
         apply hx'

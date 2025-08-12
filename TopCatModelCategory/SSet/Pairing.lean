@@ -15,7 +15,7 @@ import Mathlib.Order.ConditionallyCompleteLattice.Finset
 
 open HomotopicalAlgebra CategoryTheory Simplicial Limits Opposite
 
-lemma SimplexCategory.isIso_iff_of_mono
+/-lemma SimplexCategory.isIso_iff_of_mono
     {n m : SimplexCategory} (f : n ⟶ m) [Mono f] :
     IsIso f ↔ n.len = m.len := by
   have hf := SimplexCategory.len_le_of_mono (f := f) inferInstance
@@ -23,7 +23,7 @@ lemma SimplexCategory.isIso_iff_of_mono
     (SimplexCategory.len_le_of_epi (f:= f) inferInstance), fun h ↦ ?_⟩
   obtain rfl : n = m := by aesop
   have h := (mono_iff_injective (f := f)).1 inferInstance
-  exact isIso_of_bijective ⟨h, by rwa [← Finite.injective_iff_surjective]⟩
+  exact isIso_of_bijective ⟨h, by rwa [← Finite.injective_iff_surjective]⟩-/
 
 namespace SSet
 
@@ -49,7 +49,7 @@ instance {X : SSet.{u}} {A B : X.Subcomplex} (h : A ≤ B) (n : SimplexCategory�
 
 end SSet.Subcomplex
 
-lemma SimplexCategory.δ_injective {n : ℕ} :
+/-lemma SimplexCategory.δ_injective {n : ℕ} :
     Function.Injective (δ (n := n)) := by
   intro i j hij
   wlog h : i < j
@@ -61,7 +61,7 @@ lemma SimplexCategory.δ_injective {n : ℕ} :
   have : i.castSucc.succAbove i = j.succAbove i := by
     change δ i.castSucc i = δ j i
     rw [hij]
-  simp [Fin.succAbove_of_castSucc_lt _ _ h, Fin.ext_iff] at this
+  simp [Fin.succAbove_of_castSucc_lt _ _ h, Fin.ext_iff] at this-/
 
 universe u
 
@@ -99,7 +99,7 @@ instance : Mono hxy.f := hxy.choose_spec.1
 
 include hxy in
 lemma lt : n < m :=
-  Nat.lt_of_le_of_ne (SimplexCategory.len_le_of_mono (f := hxy.f) inferInstance)
+  Nat.lt_of_le_of_ne (SimplexCategory.len_le_of_mono hxy.f)
     hxy.choose_spec.2.1
 
 @[simp]
@@ -368,14 +368,14 @@ lemma finite_ancesters (y : P.II) :
       Σ (i : Fin ((P.p y).1.1.1.1 + 1)), ⦋i⦌ ⟶ ⦋(P.p y).1.1.1.1⦌ :=
     fun ⟨x, hxy⟩ ↦ ⟨⟨x.1.1.1.1, by
       simp only [Nat.lt_succ]
-      exact SimplexCategory.len_le_of_mono (f := hxy.2.f) inferInstance⟩, hxy.2.f⟩
+      exact SimplexCategory.len_le_of_mono hxy.2.f⟩, hxy.2.f⟩
   apply Finite.of_injective φ
   rintro ⟨⟨x₁, h₁''⟩, hx₁⟩ ⟨⟨x₂, h₂''⟩, hx₂⟩ h
   obtain ⟨n₁, x₁, h₁, h₁', rfl⟩ := x₁.mk_surjective
   obtain ⟨n₂, x₂, h₂, h₂', rfl⟩ := x₂.mk_surjective
   simp only [Sigma.mk.injEq, Fin.mk.injEq, φ] at h
   obtain rfl := h.1
-  simp only [N.mk_dim, N.mk_simplex, heq_eq_eq, true_and, φ] at h
+  simp only [N.mk_dim, N.mk_simplex, heq_eq_eq, true_and] at h
   obtain rfl : x₁ = x₂ := by
     have eq₁ := hx₁.2.eq
     have eq₂ := hx₂.2.eq
@@ -608,7 +608,7 @@ lemma filtration_preimage_map' {n : ℕ} (x : P.Cells n) :
               ← (P.isUniquelyCodimOneFace x).sMk_cast]
             refine ⟨fun h ↦ ?_, ?_⟩
             · simpa [← S.dim_eq_of_mk_eq h, (P.isUniquelyCodimOneFace t).dim_eq] using
-                SimplexCategory.len_le_of_mono (f := f) inferInstance
+                SimplexCategory.len_le_of_mono f
             · rw [← (P.isUniquelyCodimOneFace t).δ_index]
               apply Subcomplex.map_mem_obj
               rw [← ofSimplex_le_iff,
@@ -838,7 +838,7 @@ lemma exists_or_of_range_m_N {n : ℕ}
   rw [nonDegenerate_iff_of_mono, stdSimplex.mem_nonDegenerate_iff_mono,
       Equiv.apply_symm_apply] at hs
   dsimp at f
-  obtain hd | rfl := (SimplexCategory.le_of_mono (f := f) inferInstance).lt_or_eq
+  obtain hd | rfl := (SimplexCategory.le_of_mono f).lt_or_eq
   · rw [Nat.lt_succ_iff] at hd
     obtain hd | rfl := hd.lt_or_eq
     · exfalso
@@ -922,6 +922,8 @@ noncomputable def relativeCellComplex :
   attachCells n _ :=
     { ι := P.Cells n
       π x := ⟨_, P.index x.1⟩
+      cofan₁ := _
+      cofan₂ := _
       isColimit₁ := colimit.isColimit _
       isColimit₂ := colimit.isColimit _
       m := P.m n

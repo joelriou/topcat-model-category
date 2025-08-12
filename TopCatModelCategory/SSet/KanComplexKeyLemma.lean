@@ -60,7 +60,7 @@ namespace KanComplex
 
 section
 
-variable {F : SSet.{0}} {p : F ⟶ Δ[0]} (hp : I.rlp p)
+variable {F : SSet.{u}} {p : F ⟶ Δ[0]} (hp : I.rlp p)
 
 include hp
 lemma nonempty_of_rlp_I : Nonempty (F _⦋0⦌) := by
@@ -119,7 +119,7 @@ end
 
 section
 
-variable {E B : SSet.{0}} {p : E ⟶ B} (hp : I.rlp p)
+variable {E B : SSet.{u}} {p : E ⟶ B} (hp : I.rlp p)
 
 namespace W.of_rlp_I
 
@@ -314,7 +314,7 @@ lemma W.hasLiftingPropertyFixedTop {n : ℕ} (t : (∂Δ[n] : SSet) ⟶ E) :
 
 end
 
-lemma weakEquivalence_iff_of_fibration {E B : SSet.{0}} (p : E ⟶ B)
+lemma weakEquivalence_iff_of_fibration {E B : SSet.{u}} (p : E ⟶ B)
     [IsFibrant E] [IsFibrant B] [Fibration p] :
     I.rlp p ↔ KanComplex.W p :=
   ⟨fun hp ↦ W.of_rlp_I hp, fun hp ↦ by

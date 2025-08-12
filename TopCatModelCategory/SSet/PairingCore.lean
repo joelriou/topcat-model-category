@@ -220,7 +220,7 @@ def pairingCore : (horn (n + 1) i).PairingCore where
     obtain ⟨f, rfl⟩ := stdSimplex.objEquiv.symm.surjective x
     rw [stdSimplex.mem_nonDegenerate_iff_mono, Equiv.apply_symm_apply] at h₁
     dsimp at f
-    obtain hd | rfl := (SimplexCategory.le_of_mono (f := f) inferInstance).lt_or_eq
+    obtain hd | rfl := (SimplexCategory.le_of_mono f).lt_or_eq
     · rw [Nat.lt_succ] at hd
       obtain hd | rfl := hd.lt_or_eq
       · exact (h₂ (by simp [horn_obj_eq_top i (m := d) (by omega)])).elim

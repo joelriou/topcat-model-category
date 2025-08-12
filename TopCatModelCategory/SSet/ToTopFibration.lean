@@ -3,8 +3,9 @@ import TopCatModelCategory.ModelCategoryTopCat
 import TopCatModelCategory.SSet.MinimalFibrationsFactorization
 import TopCatModelCategory.TopCat.ToTopExact
 
+universe u
 open CategoryTheory HomotopicalAlgebra SSet.modelCategoryQuillen
-  TopCat.modelCategory Simplicial MonoidalCategory ChosenFiniteProducts Limits
+  TopCat.modelCategory Simplicial MonoidalCategory CartesianMonoidalCategory Limits
 
 namespace SSet
 
@@ -15,7 +16,7 @@ lemma trivialBundles_fst (X₁ X₂ : SSet.{u}) :
   simp only [trivialBundles, iSup_iff]
   exact ⟨X₂, ⟨{
     r := snd _ _
-    isLimit := (ChosenFiniteProducts.product X₁ X₂).isLimit
+    isLimit := tensorProductIsBinaryProduct _ _
   }⟩⟩
 
 lemma trivialBundles_snd (X₁ X₂ : SSet.{u}) :
@@ -24,10 +25,10 @@ lemma trivialBundles_snd (X₁ X₂ : SSet.{u}) :
   exact Arrow.isoMk (β_ _ _) (Iso.refl _)
 
 -- Gabriel-Zisman
-instance {E B : SSet} (p : E ⟶ B) [MinimalFibration p] :
+instance {E B : SSet.{u}} (p : E ⟶ B) [MinimalFibration p] :
     Fibration (toTop.map p) := sorry
 
-lemma fibration_toTop_map_of_trivialBundles {E B : SSet} (p : E ⟶ B)
+lemma fibration_toTop_map_of_trivialBundles {E B : SSet.{u}} (p : E ⟶ B)
     (hp : trivialBundles p) :
     Fibration (toTop.map p) := by
   sorry
@@ -41,10 +42,10 @@ lemma fibration_toTop_map_of_trivialBundles {E B : SSet} (p : E ⟶ B)
   --rw [HomotopicalAlgebra.fibration_iff] at hF ⊢
   --exact MorphismProperty.of_isPullback sq hF
 
-lemma fibration_toTop_map_of_rlp_I {E B : SSet} {p : E ⟶ B} (hp : I.rlp p) :
+lemma fibration_toTop_map_of_rlp_I {E B : SSet.{u}} {p : E ⟶ B} (hp : I.rlp p) :
     Fibration (toTop.map p) := by
   obtain ⟨W, k, hk, a, ha⟩ : ∃ (W : SSet) (k : E ⟶ W) (hk : Mono k) (a : W ⟶ Δ[0]), I.rlp a := by
-    have h := MorphismProperty.factorizationData (monomorphisms SSet.{0})
+    have h := MorphismProperty.factorizationData (monomorphisms SSet.{u})
       I.rlp (stdSimplex.isTerminalObj₀.from E)
     exact ⟨h.Z, h.i, h.hi, h.p, h.hp⟩
   have : HasLiftingProperty (lift k p) p := by

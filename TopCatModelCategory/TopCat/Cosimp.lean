@@ -180,7 +180,7 @@ lemma comp_forget_hom_ext
 lemma hom_ext
     {f g : cosimp I₁ ⟶ cosimp I₂}
     (h : f.app ⦋1⦌ = g.app ⦋1⦌) : f = g := by
-  have : whiskerRight f (forget _) = whiskerRight g (forget _) :=
+  have : Functor.whiskerRight f (forget _) = Functor.whiskerRight g (forget _) :=
     comp_forget_hom_ext ((forget _).congr_map h)
   ext n x
   exact congr_fun (NatTrans.congr_app this n) x
@@ -246,7 +246,7 @@ def orderIso (φ : cosimp I₁ ≅ cosimp I₂) : I₁ ≃o I₂ where
 lemma action_orderIso [OrderTopology I₁] [OrderTopology I₂] (φ : cosimp I₁ ≅ cosimp I₂) :
     action (orderIso φ).toOrderEmbedding.toOrderHom (orderIso φ).continuous
       (by simp) (by simp) = φ.hom := by
-  apply ((whiskeringRight SimplexCategory _ _).obj (forget TopCat)).map_injective
+  apply ((Functor.whiskeringRight SimplexCategory _ _).obj (forget TopCat)).map_injective
   apply comp_forget_hom_ext
   ext x : 1
   apply cosimp.obj₁OrderIso.symm.injective

@@ -3,6 +3,8 @@ import TopCatModelCategory.ModelCategoryTopCat
 import TopCatModelCategory.SSet.ToTopFibration
 import TopCatModelCategory.TopCat.ToTopExact
 
+universe u
+
 open CategoryTheory HomotopicalAlgebra SSet.modelCategoryQuillen
   TopCat.modelCategory Limits Simplicial Opposite
 
@@ -10,7 +12,7 @@ namespace SSet
 
 namespace FibrationSequence
 
-variable (seq : FibrationSequence.{0})
+variable (seq : FibrationSequence.{u})
 
 instance : IsIso (sSetTopAdj.unit.app Δ[0]) :=
   ⟨stdSimplex.isTerminalObj₀.from _, by simp,
@@ -50,15 +52,15 @@ noncomputable def ιtoTopToSSet : seq ⟶ seq.toTopToSSet where
 
 open KanComplex
 
-instance (X : SSet.{0}) [X.IsContractible] :
+instance (X : SSet.{u}) [X.IsContractible] :
     (TopCat.toSSet.obj (SSet.toTop.obj X)).IsContractible := sorry
 
-instance (X : SSet.{0}) [IsFibrant X] (x : X _⦋0⦌) :
+instance (X : SSet.{u}) [IsFibrant X] (x : X _⦋0⦌) :
     (loop X x).toTopToSSet.E.IsContractible := by
   dsimp
   infer_instance
 
-lemma bijective_δ_toTopToSSet_loop (X : SSet.{0}) [IsFibrant X] (x : X _⦋0⦌) (n : ℕ) :
+lemma bijective_δ_toTopToSSet_loop (X : SSet.{u}) [IsFibrant X] (x : X _⦋0⦌) (n : ℕ) :
     Function.Bijective ((FibrationSequence.loop X x).toTopToSSet.δ n) := by
   apply bijective_δ
 

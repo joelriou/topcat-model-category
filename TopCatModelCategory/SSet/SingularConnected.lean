@@ -35,13 +35,13 @@ instance (n : SimplexCategory) : PathConnectedSpace (SimplexCategory.toTopObj n)
 instance (n : ℕ) : PathConnectedSpace |Δ[n]| :=
   ⦋n⦌.toTopHomeo.symm.surjective.pathConnectedSpace (by continuity)
 
-lemma π₀.eq_of_path {X : TopCat.{0}} {x y : X} (p : _root_.Path x y) :
+lemma π₀.eq_of_path {X : TopCat.{u}} {x y : X} (p : _root_.Path x y) :
     π₀.mk (TopCat.toSSetObj₀Equiv.symm x) =
       π₀.mk (TopCat.toSSetObj₀Equiv.symm y) := by
-  let e := stdSimplex.simplexCategoryToTopObjHomeoUnitInterval.{0}
+  let e := stdSimplex.simplexCategoryToTopObjHomeoUnitInterval.{u}
   refine π₀.sound
-    (TopCat.toSSetObjEquiv.symm (p.comp (ContinuousMap.comp ⟨_, continuous_uliftDown⟩
-    ⟨_, stdSimplex.simplexCategoryToTopObjHomeoUnitInterval.{0}.continuous_toFun⟩))) ?_ ?_
+    ((TopCat.toSSetObjEquiv _ _).symm (p.comp (ContinuousMap.comp ⟨_, continuous_uliftDown⟩
+    ⟨_, stdSimplex.simplexCategoryToTopObjHomeoUnitInterval.{u}.continuous_toFun⟩))) ?_ ?_
   · apply TopCat.toSSetObj₀Equiv.injective
     dsimp
     rw [TopCat.toSSetObj₀Equiv_toSSet_obj_δ_one]
@@ -53,7 +53,7 @@ lemma π₀.eq_of_path {X : TopCat.{0}} {x y : X} (p : _root_.Path x y) :
     change p (e (e.symm 1)).1 = _
     aesop
 
-variable (X : SSet.{0})
+variable (X : SSet.{u})
 
 lemma surjective_mapπ₀_sSetTopAdj_unit_app :
     Function.Surjective (mapπ₀ (sSetTopAdj.unit.app X)) := by
@@ -79,12 +79,12 @@ lemma surjective_mapπ₀_sSetTopAdj_unit_app :
   apply TopCat.toSSetObj₀Equiv.injective
   dsimp [TopCat.toSSetObj₀Equiv, x₀]
   let f : ⦋0⦌ ⟶ ⦋n⦌ := SimplexCategory.const _ _ 0
-  have : toTop.map (stdSimplex.map f) =
-    TopCat.ofHom ((TopCat.toSSetObjEquiv
+  have : toTop.{u}.map (stdSimplex.map f) =
+    TopCat.ofHom ((TopCat.toSSetObjEquiv _ _
       (((sSetTopAdj.unit.app Δ[n]).app (op ⦋0⦌)) (yonedaEquiv (stdSimplex.map f)))).comp
       (toContinuousMap ⦋0⦌.toTopHomeo)) := by
     ext x₀
-    have h₁ : (stdSimplex.{0}.map f).app (op ⦋0⦌) (yonedaEquiv (𝟙 Δ[0])) =
+    have h₁ : (stdSimplex.{u}.map f).app (op ⦋0⦌) (yonedaEquiv (𝟙 Δ[0])) =
       yonedaEquiv (stdSimplex.map f) := rfl
     have h₂ := congr_fun (congr_app (sSetTopAdj.unit.naturality (stdSimplex.map f)) (op ⦋0⦌))
       (yonedaEquiv (𝟙 _))
@@ -92,12 +92,13 @@ lemma surjective_mapπ₀_sSetTopAdj_unit_app :
     rw [← h₁, h₂]
     apply congr_arg (toTop.map (stdSimplex.map f))
     apply Subsingleton.elim
+  simp only [Equiv.apply_symm_apply, ContinuousMap.coe_mk]
   rw [this, Subsingleton.elim default (⦋0⦌.toTopHomeo default)]
   rfl
 
 lemma bijective_mapπ₀_sSetTopAdj_unit_app :
     Function.Bijective (mapπ₀ (sSetTopAdj.unit.app X)) := by
-  have (Y : SSet.{0}) (hY : Subsingleton (π₀ Y)) :
+  have (Y : SSet.{u}) (hY : Subsingleton (π₀ Y)) :
       Function.Bijective (mapπ₀ (sSetTopAdj.unit.app Y)) :=
     ⟨Function.injective_of_subsingleton (α := π₀ Y) _,
       surjective_mapπ₀_sSetTopAdj_unit_app Y⟩

@@ -9,13 +9,13 @@ universe u
 
 open CategoryTheory Monoidal Simplicial MonoidalCategory MonoidalClosed
   SSet.modelCategoryQuillen HomotopicalAlgebra Opposite
-  ChosenFiniteProducts Limits
+  CartesianMonoidalCategory Limits
 
 namespace SSet
 
 variable (X : SSet.{u})
 
-instance (A : SSet) (a : A _⦋0⦌) [IsFibrant X] :
+instance (A : SSet.{u}) (a : A _⦋0⦌) [IsFibrant X] :
     Fibration ((A.ihomEv a).app X) := by
   have : IsSplitMono (yonedaEquiv.symm a) :=
     ⟨⟨{ retraction := stdSimplex.isTerminalObj₀.from _ }⟩⟩
@@ -39,7 +39,7 @@ noncomputable def pathEv₀₁ : X.path ⟶ X ⊗ X := lift X.pathEv₀ X.pathEv
 
 namespace boundary₁
 
-noncomputable def ihomObjIso : (ihom (∂Δ[1] : SSet)).obj X ≅ X ⊗ X where
+noncomputable def ihomObjIso : (ihom (∂Δ[1] : SSet.{u})).obj X ≅ X ⊗ X where
   hom := lift ((pre ι₀).app X ≫ stdSimplex.ihom₀.hom.app X)
       ((pre ι₁).app X ≫ stdSimplex.ihom₀.hom.app X)
   inv := curry ((boundary₁.isColimitRightTensor (X ⊗ X)).desc
@@ -69,9 +69,15 @@ noncomputable def ihomObjIso : (ihom (∂Δ[1] : SSet)).obj X ≅ X ⊗ X where
 
 end boundary₁
 
+lemma pre_boundary_ι_app_comp_boundary₁_ihomObjIso :
+    (pre ∂Δ[1].ι).app X ≫ (boundary₁.ihomObjIso X).hom = X.pathEv₀₁ := by
+  ext : 1
+  · sorry
+  · sorry
+
 noncomputable def arrowMkPathEv₀₁Iso : Arrow.mk X.pathEv₀₁ ≅ Arrow.mk ((pre ∂Δ[1].ι).app X) :=
   Iso.symm (Arrow.isoMk (Iso.refl _) (boundary₁.ihomObjIso X) (by
-    dsimp; ext : 1 <;> aesop))
+    simp [pre_boundary_ι_app_comp_boundary₁_ihomObjIso]))
 
 instance [IsFibrant X] : Fibration X.pathEv₀₁ := by
   rw [HomotopicalAlgebra.fibration_iff]
@@ -94,7 +100,7 @@ lemma constPath_eq : X.constPath x = ihom₀Equiv.symm (const x) :=
 @[simp] lemma pathEv₁_app_constPath : X.pathEv₁.app _ (X.constPath x) = x := by
   simp [pathEv₁, constPath_eq, ihomEv_app_app_ihom₀Equiv_symm]
 
-abbrev path₀ : Subcomplex X.path := Subcomplex.fiber X.pathEv₀ x
+noncomputable abbrev path₀ : Subcomplex X.path := Subcomplex.fiber X.pathEv₀ x
 
 def loop : Subcomplex X.path := X.path₀ x ⊓ Subcomplex.fiber X.pathEv₁ x
 
@@ -114,7 +120,7 @@ noncomputable def path₀BasePoint : (X.path₀ x : SSet) _⦋0⦌ :=
 noncomputable def loopBasePoint : (X.loop x : SSet) _⦋0⦌ :=
   ⟨_, constPath_mem_loop _ _⟩
 
-abbrev loopι : (X.loop x : SSet) ⟶ X.path₀ x :=
+noncomputable abbrev loopι : (X.loop x : SSet) ⟶ X.path₀ x :=
   Subcomplex.homOfLE (X.loop_le_path₀ x)
 
 noncomputable def path₀π : (X.path₀ x : SSet) ⟶ X := Subcomplex.ι _ ≫ X.pathEv₁

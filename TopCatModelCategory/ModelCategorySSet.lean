@@ -15,7 +15,7 @@ namespace modelCategoryQuillen
 open MorphismProperty SmallObject
 
 lemma rlp_I_eq_trivialFibrations :
-    I.rlp = trivialFibrations SSet := by
+    I.rlp = trivialFibrations SSet.{u} := by
   ext X Y f
   rw [mem_trivialFibrations_iff]
   constructor

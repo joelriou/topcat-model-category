@@ -4,7 +4,7 @@ import TopCatModelCategory.SSet.KanComplexWHomotopy
 
 universe u
 
-open CategoryTheory MonoidalCategory Simplicial ChosenFiniteProducts
+open CategoryTheory MonoidalCategory Simplicial CartesianMonoidalCategory
   HomotopicalAlgebra SSet.modelCategoryQuillen Limits Opposite
   MonoidalClosed
 

@@ -225,13 +225,15 @@ namespace SSet
 instance (n : ℕ) : T2Space |Δ[n]| := ⦋n⦌.toTopHomeo.symm.t2Space
 
 def horn.deformationRetracts_toTopMap {n : ℕ} (i : Fin (n + 2)) :
-    TopCat.deformationRetracts (toTop.map (horn (n + 1) i).ι) := by
-  sorry
-  --refine (deformationRetracts.arrow_mk_iso_iff ?_).2
-  --  (horn.deformationRetracts_ι i)
-  --exact (SSet.Subcomplex.arrowMkToTopMapιIso (stdSimplex.hιToTop (n + 1))
-  --  (horn (n + 1) i)) ≪≫ Arrow.isoMk (Iso.refl _)
-  --    (Set.functorToTopCat.mapIso (eqToIso (by simp))) rfl
+    TopCat.deformationRetracts (toTop.{u}.map (horn (n + 1) i).ι) := by
+  refine (deformationRetracts.arrow_mk_iso_iff
+    (toTop.mapArrow.mapIso (horn.arrowUliftIso.{u, 0} _ i))).1
+      (toTopMap_ulift_deformationRetracts.{u} ?_)
+  refine (deformationRetracts.arrow_mk_iso_iff ?_).2
+    (horn.deformationRetracts_ι i)
+  exact (SSet.Subcomplex.arrowMkToTopMapιIso (stdSimplex.hιToTop (n + 1))
+    (horn (n + 1) i)) ≪≫ Arrow.isoMk (Iso.refl _)
+      (Set.functorToTopCat.mapIso (eqToIso (by simp))) rfl
 
 noncomputable def horn.deformationRetractToTopMap {n : ℕ} (i : Fin (n + 2)) :
     TopCat.DeformationRetract |horn (n + 1) i| |Δ[n + 1]| :=

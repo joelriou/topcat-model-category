@@ -26,9 +26,6 @@ it sends faces to degeneracies and vice versa.
 
 open CategoryTheory Simplicial Opposite
 
-lemma Fin.castSucc_ne_last {n : ℕ} (x : Fin n) : x.castSucc ≠ Fin.last _ :=
-  x.castSucc_lt_last.ne
-
 namespace SimplexCategory
 
 namespace II
@@ -100,7 +97,7 @@ lemma map'_eq_last_iff (f : Fin (n + 1) →o Fin (m + 1)) (x : Fin (m + 2)) :
     by_contra!
     obtain ⟨i, rfl⟩ := Fin.eq_castSucc_of_ne_last this
     simp only [castSucc_mem_finset_iff] at hi
-    exact hi.not_lt (h i)
+    exact hi.not_gt (h i)
 
 lemma map'_eq_castSucc_iff (f : Fin (n + 1) →o Fin (m + 1)) (x : Fin (m + 2)) (y : Fin (n + 1)) :
     map' f x = y.castSucc ↔ x ≤ (f y).castSucc ∧
@@ -110,12 +107,12 @@ lemma map'_eq_castSucc_iff (f : Fin (n + 1) →o Fin (m + 1)) (x : Fin (m + 2)) 
   constructor
   · intro h' i hi
     by_contra!
-    exact hi.not_le (by simpa using h' i.castSucc (by simpa))
+    exact hi.not_ge (by simpa using h' i.castSucc (by simpa))
   · intro h' i hi
     obtain ⟨i, rfl⟩ | rfl := i.eq_castSucc_or_eq_last
     · simp only [Fin.castSucc_le_castSucc_iff]
       by_contra!
-      exact (h' i this).not_le (by simpa using hi)
+      exact (h' i this).not_ge (by simpa using hi)
     · apply Fin.le_last
 
 @[simp]
@@ -188,11 +185,11 @@ lemma map'_succAboveOrderEmb {n : ℕ} (i : Fin (n + 2)) (x : Fin (n + 3)):
       · obtain rfl : i = Fin.last _ := Fin.last_le_iff.1 hx
         rw [map'_eq_last_iff]
         intro j
-        simpa using j.castSucc_lt_last
+        simp [j.castSucc_lt_last]
     · simp only [not_le] at hx
       obtain ⟨x, rfl⟩ := Fin.eq_succ_of_ne_zero (Fin.ne_zero_of_lt hx)
-      rw [Fin.predAbove_of_castSucc_lt _ _ (by simpa), Fin.pred_castSucc_succ,
-        map'_eq_castSucc_iff]
+      rw [Fin.predAbove_of_castSucc_lt _ _ (by simpa [Fin.le_castSucc_iff]),
+        Fin.pred_castSucc_succ, map'_eq_castSucc_iff]
       simp only [Fin.succAbove_of_lt_succ _ _ hx,
         OrderEmbedding.toOrderHom_coe, Fin.succAboveOrderEmb_apply,
         le_refl, Fin.castSucc_lt_castSucc_iff, true_and]
@@ -317,8 +314,8 @@ lemma II.castSucc_lt_map_apply {n m : SimplexCategory} (f : n ⟶ m)
       exact h.2 _ (by simpa using hj)
     · intro hj
       by_contra!
-      simp only [not_lt, Fin.castSucc_le_castSucc_iff] at this
-      refine hj.not_le (h.1.trans ?_)
+      simp only [Fin.castSucc_le_castSucc_iff] at this
+      refine hj.not_ge (h.1.trans ?_)
       simpa only [Fin.castSucc_le_castSucc_iff] using f.toOrderHom.monotone this
   · refine ⟨fun _ ↦ ?_, fun _ ↦ j.castSucc_lt_last⟩
     simp only [II_obj, len_mk, map'_eq_last_iff] at h

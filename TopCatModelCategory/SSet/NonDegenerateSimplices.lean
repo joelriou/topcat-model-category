@@ -14,8 +14,8 @@ instance {C : Type*} [Category C] {X Y : C} (f : X ⟶ Y) [IsSplitEpi f] :
 
 lemma SimplexCategory.isIso_iff_len_eq_of_epi {n m : SimplexCategory} (f : n ⟶ m) [Epi f] :
     IsIso f ↔ n.len = m.len := by
-  have hf := len_le_of_epi (f := f) inferInstance
-  refine ⟨fun _ ↦ le_antisymm (len_le_of_mono (f := f) inferInstance) hf, fun h ↦ ?_⟩
+  have hf := len_le_of_epi f
+  refine ⟨fun _ ↦ le_antisymm (len_le_of_mono f) hf, fun h ↦ ?_⟩
   obtain rfl : n = m := by aesop
   have h := (epi_iff_surjective (f := f)).1 inferInstance
   exact isIso_of_bijective ⟨by rwa [Finite.injective_iff_surjective], h⟩
@@ -42,6 +42,7 @@ lemma mk'_surjective (s : X.N) :
 
 @[simps]
 def mk {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenerate n) : X.N where
+  simplex := x
   nonDegenerate := hx
 
 lemma mk_surjective (x : X.N) :
@@ -71,10 +72,10 @@ lemma le_iff_exists {x y : X.N} :
   have : IsIso (factorThruImage f) := by
     rw [SimplexCategory.isIso_iff_len_eq_of_epi]
     obtain h | h := (SimplexCategory.len_le_of_epi
-      (f := factorThruImage f) inferInstance).eq_or_lt
+      (factorThruImage f)).eq_or_lt
     · exact h.symm
     · exfalso
-      apply (mem_nonDegenerate_iff_not_mem_degenerate _ _).1 x.2
+      apply (mem_nonDegenerate_iff_notMem_degenerate _ _).1 x.2
       rw [mem_degenerate_iff]
       refine ⟨_, h, factorThruImage f, inferInstance, ?_⟩
       rw [← image.fac f, op_comp, FunctorToTypes.map_comp_apply] at hf
@@ -87,7 +88,7 @@ lemma le_iff_exists {x y : X.N} :
 lemma le_of_le {x y : X.N} (h : x ≤ y) : x.1.1 ≤ y.1.1 := by
   rw [le_iff_exists] at h
   obtain ⟨f, hf, _⟩ := h
-  exact SimplexCategory.len_le_of_mono hf
+  exact SimplexCategory.len_le_of_mono f
 
 instance : PartialOrder X.N where
   le_antisymm x₁ x₂ h h' := by

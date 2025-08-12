@@ -8,7 +8,7 @@ import TopCatModelCategory.CommSq
 universe u
 
 open CategoryTheory MonoidalCategory Simplicial HomotopicalAlgebra
-  SSet.modelCategoryQuillen ChosenFiniteProducts Limits MonoidalClosed
+  SSet.modelCategoryQuillen CartesianMonoidalCategory Limits MonoidalClosed
 
 namespace SSet
 
@@ -329,8 +329,7 @@ lemma surjective_app_of_minimalFibration (n : SimplexCategoryᵒᵖ) :
         p (fst _ _ ≫ yonedaEquiv.symm x ≫ p) := ⟨by
       ext : 1
       · simp [i]
-      · simp only [colimit.ι_desc_assoc, span_right,
-          Subcomplex.RelativeMorphism.botEquiv_symm_apply_map, PushoutCocone.mk_pt,
+      · simp only [colimit.ι_desc_assoc, span_right, PushoutCocone.mk_pt,
           PushoutCocone.mk_ι_app, Category.assoc, fac, whiskerRight_fst_assoc,
           yonedaEquiv_symm_comp, i]
         conv_lhs => rw [← hu.fac₀, reassoc_of% hy, yonedaEquiv_symm_comp]⟩
