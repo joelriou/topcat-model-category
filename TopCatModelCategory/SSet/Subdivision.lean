@@ -229,6 +229,8 @@ lemma not_mem_horn_iff'' {n : ℕ} (s : (nerve (NonemptyFiniteChains X)) _⦋n�
         complSingleton x₀ ≤ s.obj (Fin.last _) := by
   rw [not_mem_horn_iff', complSingleton_le_iff]
 
+open SSet
+
 end NonemptyFiniteChains
 
 end PartialOrder

@@ -642,6 +642,17 @@ instance (n : ℕ) (i : Fin (n + 2)) : IsSplitMono (SimplexCategory.δ i) := by
 instance (n : ℕ) (i : Fin (n + 2)) : Mono (stdSimplex.{u}.δ i) :=
   inferInstanceAs (Mono (stdSimplex.{u}.map (SimplexCategory.δ i)))
 
+def isoNerve {n : ℕ} (α : Type u) [Preorder α] (e : α ≃o Fin (n + 1)) :
+    (Δ[n] : SSet.{u}) ≅ nerve α :=
+  NatIso.ofComponents (fun d ↦ Equiv.toIso
+    { toFun s := ((e.symm.toOrderEmbedding.toOrderHom).comp
+        (objEquiv s).toOrderHom).monotone.functor
+      invFun F :=
+        objEquiv.symm (SimplexCategory.Hom.mk
+          (e.toOrderEmbedding.toOrderHom.comp (OrderHom.mk _ F.monotone)))
+      left_inv s := by aesop
+      right_inv F := ComposableArrows.ext (fun i ↦ by simp) (by subsingleton) })
+
 end stdSimplex
 
 namespace Subcomplex
