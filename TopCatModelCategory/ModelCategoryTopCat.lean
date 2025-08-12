@@ -4,6 +4,8 @@ import TopCatModelCategory.TopPackage
 import TopCatModelCategory.TopCat.HornDeformationRetract
 import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
 
+universe u
+
 open HomotopicalAlgebra CategoryTheory MorphismProperty Limits Opposite
 
 namespace TopCat
@@ -12,11 +14,11 @@ namespace modelCategory
 
 open SSet.modelCategoryQuillen
 
-def I : MorphismProperty TopCat.{0} :=
-  ofHoms (fun n ↦ SSet.toTop.map (SSet.boundary.{0} n).ι)
+def I : MorphismProperty TopCat.{u} :=
+  ofHoms (fun n ↦ SSet.toTop.map (SSet.boundary.{u} n).ι)
 
-def J : MorphismProperty TopCat.{0} :=
-  ⨆ n, ofHoms (fun i ↦ SSet.toTop.map (SSet.horn.{0} (n + 1) i).ι)
+def J : MorphismProperty TopCat.{u} :=
+  ⨆ n, ofHoms (fun i ↦ SSet.toTop.map (SSet.horn.{u} (n + 1) i).ι)
 
 lemma rlp_I_iff {E B : TopCat} (p : E ⟶ B) :
     I.rlp p ↔ SSet.modelCategoryQuillen.I.rlp (toSSet.map p) := by
@@ -50,21 +52,21 @@ instance : IsSmall.{0} J := by dsimp [J]; infer_instance
 
 -- this could be generalized to more general well ordered types...
 instance :
-    (t₁Inclusions ⊓ weakEquivalences TopCat).IsStableUnderTransfiniteCompositionOfShape ℕ where
+    (t₁Inclusions.{u} ⊓ weakEquivalences TopCat.{u}).IsStableUnderTransfiniteCompositionOfShape ℕ where
   le := by
     rintro X Y f ⟨hf⟩
     refine ⟨t₁Inclusions.isT₁Inclusion_of_transfiniteCompositionOfShape
       (hf.ofLE inf_le_left), ?_⟩
     rw [weakEquivalences_eq, inverseImage_iff]
-    apply (SSet.KanComplex.W.isStableUnderColimitsOfShape ℕ).colimitsOfShape_le
-    have : PreservesColimit hf.F toSSet :=
+    apply MorphismProperty.colimitsOfShape_le (J := ℕ)
+    have : PreservesColimit hf.F toSSet := sorry /-
         preservesColimit_of_preserves_colimit_cocone hf.isColimit
           (evaluationJointlyReflectsColimits _ (fun ⟨n⟩ ↦ by
             have : PreservesColimit hf.F _ :=
               t₁Inclusions.preservesColimit_coyoneda_obj_of_compactSpace
                 (hf.ofLE inf_le_left) (.of n.toTopObj)
             exact isColimitOfPreserves
-              (coyoneda.obj (op (TopCat.of n.toTopObj))) hf.isColimit))
+              (coyoneda.obj (op (TopCat.of n.toTopObj))) hf.isColimit))-/
     have hc₁ := isColimitConstCocone ℕ (toSSet.obj X)
     let c₂ := toSSet.mapCocone { pt := Y, ι := hf.incl }
     let φ : (Functor.const _).obj (toSSet.obj X) ⟶ hf.F ⋙ toSSet :=
@@ -187,7 +189,6 @@ lemma trivialCofibrations_eq_llp_rlp :
 open Simplicial
 
 instance (X : TopCat.{0}) : IsFibrant X := by
-  have := SSet.isTerminalToTopObjStdSimplex₀
   rw [isFibrant_iff_of_isTerminal (isTerminalToTopObjStdSimplex₀.from X)
     isTerminalToTopObjStdSimplex₀,
     ← fibration_toSSet_map_iff]

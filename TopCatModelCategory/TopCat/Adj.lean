@@ -9,6 +9,8 @@ import TopCatModelCategory.SSet.Finite
 import TopCatModelCategory.SSet.Skeleton
 import TopCatModelCategory.SSet.Contractible
 
+universe u
+
 open CategoryTheory HomotopicalAlgebra SSet.modelCategoryQuillen
   Simplicial NNReal Limits MonoidalCategory Opposite
 
@@ -26,6 +28,7 @@ instance : toTop.IsLeftAdjoint := sSetTopAdj.isLeftAdjoint
 
 instance {J : Type*} [LinearOrder J] :
     PreservesWellOrderContinuousOfShape J SSet.toTop where
+
 end SSet
 
 namespace SimplexCategory
@@ -33,33 +36,33 @@ namespace SimplexCategory
 open SSet
 
 noncomputable def toTopHomeo (n : SimplexCategory) :
-    |stdSimplex.{0}.obj n| ≃ₜ n.toTopObj :=
-  TopCat.homeoOfIso (stdSimplexCompToTopIso.app n)
+    |stdSimplex.{u}.obj n| ≃ₜ n.toTopObj :=
+  (TopCat.homeoOfIso (toTopSimplex.{u}.app n)).trans Homeomorph.ulift
 
 lemma toTopHomeo_naturality {n m : SimplexCategory} (f : n ⟶ m) :
-    m.toTopHomeo.toFun.comp (SSet.toTop.map (stdSimplex.map f)) =
+    (toTopHomeo m).toFun.comp (SSet.toTop.{u}.map (stdSimplex.map f)) =
     (toTopMap f).comp n.toTopHomeo := by
   ext x : 1
-  exact congr_fun ((forget _).congr_map
-    (stdSimplexCompToTopIso.hom.naturality f)) x
+  exact ULift.up_injective (congr_fun ((forget _).congr_map
+    (toTopSimplex.hom.naturality f)) x)
 
 lemma toTopHomeo_naturality_apply {n m : SimplexCategory} (f : n ⟶ m)
     (x : |stdSimplex.obj n|) :
-    m.toTopHomeo ((SSet.toTop.map (stdSimplex.map f) x)) =
+    m.toTopHomeo ((SSet.toTop.{u}.map (stdSimplex.map f) x)) =
       (toTopMap f) (n.toTopHomeo x) :=
   congr_fun (toTopHomeo_naturality f) x
 
 lemma toTopHomeo_symm_naturality {n m : SimplexCategory} (f : n ⟶ m) :
     m.toTopHomeo.invFun.comp (toTopMap f) =
-      (SSet.toTop.map (stdSimplex.map f)).hom.1.comp n.toTopHomeo.invFun := by
+      (SSet.toTop.{u}.map (stdSimplex.map f)).hom.1.comp n.toTopHomeo.invFun := by
   ext x : 1
   exact congr_fun ((forget _).congr_map
-    (stdSimplexCompToTopIso.inv.naturality f)) x
+    (toTopSimplex.inv.naturality f)) _
 
 lemma toTopHomeo_symm_naturality_apply {n m : SimplexCategory} (f : n ⟶ m)
     (x : n.toTopObj) :
     m.toTopHomeo.symm (toTopMap f x) =
-      SSet.toTop.map (stdSimplex.map f) (n.toTopHomeo.symm x) :=
+      SSet.toTop.{u}.map (stdSimplex.map f) (n.toTopHomeo.symm x) :=
   congr_fun (toTopHomeo_symm_naturality f) x
 
 end SimplexCategory
@@ -76,37 +79,29 @@ namespace TopCat
 
 instance : toSSet.IsRightAdjoint := sSetTopAdj.isRightAdjoint
 
-@[simps symm_apply]
-def toSSetObjEquiv {X : TopCat.{0}} {n : ℕ} :
-    toSSet.obj X _⦋n⦌ ≃ C(⦋n⦌.toTopObj, X) where
-  toFun f := f.1
-  invFun f := ofHom f
-  left_inv _ := rfl
-  right_inv _ := rfl
-
-@[simps symm_apply]
-def toSSetObj₀Equiv {X : TopCat.{0}} :
-    toSSet.obj X _⦋0⦌ ≃ X where
-  toFun f := f.hom.1 (default : ⦋0⦌.toTopObj)
-  invFun x := ofHom ⟨fun _ ↦ x, by continuity⟩
-  left_inv _ := by
-    apply ConcreteCategory.hom_ext
-    intro (x : ⦋0⦌.toTopObj)
-    obtain rfl := Subsingleton.elim x default
-    rfl
-  right_inv _ := rfl
+@[simps! symm_apply]
+def toSSetObj₀Equiv {X : TopCat.{u}} :
+    toSSet.obj X _⦋0⦌ ≃ X :=
+  (toSSetObjEquiv X _).trans
+    { toFun f := f.1 (default : ⦋0⦌.toTopObj)
+      invFun x := ⟨fun _ ↦ x, by continuity⟩
+      left_inv _ := by
+        ext x
+        obtain rfl := Subsingleton.elim x default
+        rfl
+      right_inv _ := rfl }
 
 @[simp]
-lemma toSSet_map_const (X : TopCat.{0}) {Y : TopCat.{0}} (y : Y) :
+lemma toSSet_map_const (X : TopCat.{u}) {Y : TopCat.{u}} (y : Y) :
     toSSet.map (TopCat.const (X := X) y) =
       SSet.const (toSSetObj₀Equiv.symm y) :=
   rfl
 
 end TopCat
 
-noncomputable instance : Unique (|Δ[0]|) := ⦋0⦌.toTopHomeo.unique
+noncomputable instance : Unique (|Δ[0]| : Type u) := ⦋0⦌.toTopHomeo.unique
 
-lemma sSetTopAdj_homEquiv_stdSimplex_zero {X : TopCat.{0}}
+lemma sSetTopAdj_homEquiv_stdSimplex_zero {X : TopCat.{u}}
     (f : |Δ[0]| ⟶ X) :
     sSetTopAdj.homEquiv Δ[0] X f =
       SSet.const (TopCat.toSSetObj₀Equiv.symm (f default)) := by
@@ -122,7 +117,7 @@ namespace SSet
 
 section
 
-variable (X : SSet.{0})
+variable (X : SSet.{u})
 
 @[simps]
 def functorFromElementsOp : X.Elementsᵒᵖ ⥤ SimplexCategory where
@@ -140,10 +135,8 @@ noncomputable def coconeFromElementsOp :
         rw [← yonedaEquiv_symm_map]
         simp }
 
-noncomputable def isColimitCoconeFromElementsOp : IsColimit X.coconeFromElementsOp := by
-  let e : X.functorFromElementsOp ⋙ stdSimplex ≅ Presheaf.functorToRepresentables X :=
-    NatIso.ofComponents (fun e ↦ uliftFunctor₀IsoId.app _)
-  exact (IsColimit.precomposeInvEquiv e _).1 (Presheaf.colimitOfRepresentable X)
+noncomputable def isColimitCoconeFromElementsOp : IsColimit X.coconeFromElementsOp :=
+  Presheaf.colimitOfRepresentable.{u} X
 
 end
 
@@ -205,7 +198,7 @@ example (X : SSet) [X.IsFinite] :
       SimplexCategory.toTopObj (.mk s.1))) := by
   infer_instance
 
-instance (T : SSet.{0}) [T.IsFinite] :
+instance (T : SSet.{u}) [T.IsFinite] :
     CompactSpace (SSet.toTop.obj T) where
   isCompact_univ := by
     simpa using IsCompact.image CompactSpace.isCompact_univ T.continuous_sigmaToTopObj
@@ -238,7 +231,7 @@ lemma δ_one_toSSetObjI :
   ext x
   obtain rfl := Subsingleton.elim x default
   dsimp only [toTopObjHomeoUnitInterval, simplexCategoryToTopObjHomeoUnitInterval]
-  simp [ContinuousMap.comp, Function.comp]
+  simp [ContinuousMap.comp]
   dsimp only [DFunLike.coe, EquivLike.coe]
   dsimp
   apply Homeomorph.ulift.injective
@@ -267,7 +260,7 @@ lemma δ_zero_toSSetObjI :
   ext x
   obtain rfl := Subsingleton.elim x default
   dsimp only [toTopObjHomeoUnitInterval, simplexCategoryToTopObjHomeoUnitInterval]
-  simp [ContinuousMap.comp, Function.comp]
+  simp [ContinuousMap.comp]
   dsimp only [DFunLike.coe, EquivLike.coe]
   dsimp
   apply Homeomorph.ulift.injective
@@ -334,27 +327,27 @@ namespace TopCat
 
 open Functor.Monoidal Functor.LaxMonoidal
 
-noncomputable instance : toSSet.Monoidal := toSSet.monoidalOfChosenFiniteProducts
+noncomputable instance : toSSet.Monoidal := .ofChosenFiniteProducts _
 
 @[reassoc (attr := simp)]
-lemma sSetι₀_whiskerLeft_toSSetObjI_μIso_hom (X : TopCat.{0}) :
+lemma sSetι₀_whiskerLeft_toSSetObjI_μIso_hom (X : TopCat.{u}) :
     SSet.ι₀ ≫ toSSet.obj X ◁ SSet.stdSimplex.toSSetObjI ≫
       μ TopCat.toSSet X I = toSSet.map TopCat.ι₀ := by
   rw [← cancel_mono (μIso _ _ _).inv, Category.assoc, Category.assoc, μIso_inv,
     μ_δ, Category.comp_id]
-  apply ChosenFiniteProducts.hom_ext <;> simp [← Functor.map_comp]
+  apply CartesianMonoidalCategory.hom_ext <;> simp [← Functor.map_comp]
 
 @[reassoc (attr := simp)]
-lemma sSetι₁_whiskerLeft_toSSetObjI_μIso_hom (X : TopCat.{0}) :
+lemma sSetι₁_whiskerLeft_toSSetObjI_μIso_hom (X : TopCat.{u}) :
     SSet.ι₁ ≫ toSSet.obj X ◁ SSet.stdSimplex.toSSetObjI ≫
       Functor.LaxMonoidal.μ TopCat.toSSet X I = toSSet.map TopCat.ι₁ := by
   rw [← cancel_mono (μIso _ _ _).inv, Category.assoc, Category.assoc, μIso_inv,
     μ_δ, Category.comp_id]
-  apply ChosenFiniteProducts.hom_ext <;> simp [← Functor.map_comp]
+  apply CartesianMonoidalCategory.hom_ext <;> simp [← Functor.map_comp]
 
 namespace DeformationRetract
 
-variable (X Y : TopCat.{0})
+variable (X Y : TopCat.{u})
 
 open Functor.Monoidal Functor.LaxMonoidal
 
@@ -366,7 +359,7 @@ noncomputable def toSSet : SSet.DeformationRetract (toSSet.obj X) (toSSet.obj Y)
   hi := by
     dsimp
     rw [← whisker_exchange_assoc, μ_natural_left_assoc, ← Functor.map_comp, hf.hi,
-      Functor.map_comp, μ_fst_assoc, ChosenFiniteProducts.whiskerLeft_fst_assoc]
+      Functor.map_comp, μ_fst_assoc, CartesianMonoidalCategory.whiskerLeft_fst_assoc]
   h₀ := by
     dsimp
     simpa only [sSetι₀_whiskerLeft_toSSetObjI_μIso_hom_assoc]
@@ -378,13 +371,13 @@ noncomputable def toSSet : SSet.DeformationRetract (toSSet.obj X) (toSSet.obj Y)
 
 end DeformationRetract
 
-lemma toSSetObj₀Equiv_toSSet_obj_δ_one (X : TopCat.{0}) (x : toSSet.obj X _⦋1⦌) :
+lemma toSSetObj₀Equiv_toSSet_obj_δ_one (X : TopCat.{u}) (x : toSSet.obj X _⦋1⦌) :
     toSSetObj₀Equiv ((toSSet.obj X).δ 1 x) =
-      toSSetObjEquiv x (SSet.stdSimplex.simplexCategoryToTopObjHomeoUnitInterval.{0}.symm 0) := by
-  obtain ⟨f, rfl⟩ := toSSetObjEquiv.symm.surjective x
+      toSSetObjEquiv _ _ x (SSet.stdSimplex.simplexCategoryToTopObjHomeoUnitInterval.{u}.symm 0) := by
+  obtain ⟨f, rfl⟩ := (toSSetObjEquiv _ _).symm.surjective x
   rw [Equiv.apply_symm_apply]
   apply congr_arg f
-  apply SSet.stdSimplex.simplexCategoryToTopObjHomeoUnitInterval.{0}.injective
+  apply SSet.stdSimplex.simplexCategoryToTopObjHomeoUnitInterval.{u}.injective
   apply Homeomorph.ulift.injective
   rw [Homeomorph.apply_symm_apply]
   erw [Homeomorph.apply_symm_apply]
@@ -395,13 +388,13 @@ lemma toSSetObj₀Equiv_toSSet_obj_δ_one (X : TopCat.{0}) (x : toSSet.obj X _�
   erw [SimplexCategory.toTopObjOneHomeo_toTopMap_δ_one_default]
   rfl
 
-lemma toSSetObj₀Equiv_toSSet_obj_δ_zero (X : TopCat.{0}) (x : toSSet.obj X _⦋1⦌) :
+lemma toSSetObj₀Equiv_toSSet_obj_δ_zero (X : TopCat.{u}) (x : toSSet.obj X _⦋1⦌) :
     toSSetObj₀Equiv ((toSSet.obj X).δ 0 x) =
-      toSSetObjEquiv x (SSet.stdSimplex.simplexCategoryToTopObjHomeoUnitInterval.{0}.symm 1) := by
-  obtain ⟨f, rfl⟩ := toSSetObjEquiv.symm.surjective x
+      toSSetObjEquiv _ _ x (SSet.stdSimplex.simplexCategoryToTopObjHomeoUnitInterval.{u}.symm 1) := by
+  obtain ⟨f, rfl⟩ := (toSSetObjEquiv _ _).symm.surjective x
   rw [Equiv.apply_symm_apply]
   apply congr_arg f
-  apply SSet.stdSimplex.simplexCategoryToTopObjHomeoUnitInterval.{0}.injective
+  apply SSet.stdSimplex.simplexCategoryToTopObjHomeoUnitInterval.{u}.injective
   apply Homeomorph.ulift.injective
   rw [Homeomorph.apply_symm_apply]
   erw [Homeomorph.apply_symm_apply]

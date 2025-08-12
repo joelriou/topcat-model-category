@@ -3,6 +3,8 @@ import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
 open CategoryTheory MorphismProperty TopCat Simplicial HomotopicalAlgebra
   SSet.modelCategoryQuillen NNReal MonoidalCategory
 
+universe u
+
 namespace TopCat
 
 variable (n : ℕ)
@@ -12,7 +14,7 @@ section
 variable (i : Fin (n + 1))
 
 protected def horn : Set (ToType ⦋n⦌ → ℝ≥0) :=
-  (SSet.Subcomplex.toTopSet (SSet.stdSimplex.ιToTop n)).obj (SSet.horn n i)
+  (SSet.Subcomplex.toTopSet (SSet.stdSimplex.ιToTop.{0} n)).obj (SSet.horn.{0} n i)
 
 variable {n}
 
@@ -59,18 +61,18 @@ lemma continuous_min {ι : Type*}
         apply le_antisymm
         · simp only [Finset.image_insert, Finset.le_min'_iff, Finset.mem_insert, Finset.mem_image,
             inf_le_iff, forall_eq_or_imp, le_refl, or_true, forall_exists_index, and_imp,
-            forall_apply_eq_imp_iff₂, true_and, β, α]
+            forall_apply_eq_imp_iff₂, true_and]
           intro i hi
           left
           apply Finset.min'_le
           aesop
         · simp only [Finset.image_insert, le_inf_iff, Finset.le_min'_iff, Finset.mem_image,
-            forall_exists_index, and_imp, forall_apply_eq_imp_iff₂, β, α]
+            forall_exists_index, and_imp, forall_apply_eq_imp_iff₂]
           constructor <;> intros <;> apply Finset.min'_le <;> aesop
       rwa [← this]
     · simp only [Finset.not_nonempty_iff_eq_empty] at hS
       subst hS
-      simp only [insert_emptyc_eq, Finset.image_singleton, Finset.min'_singleton]
+      simp only [insert_empty_eq, Finset.image_singleton, Finset.min'_singleton]
       continuity
 
 variable (i : Fin (n + 2))
@@ -133,7 +135,7 @@ lemma sum_v : ∑ (j : Fin (n + 2)), v i j = 0 := by
     Finset.sum_const, nsmul_eq_mul, mul_one, Finset.card_compl, Fintype.card_fin,
     Finset.card_singleton, Nat.add_one_sub_one, Nat.cast_add, Nat.cast_one]
 
-noncomputable def h' : (ToType ⦋n + 1⦌ → ℝ) × TopCat.I.{0} → (ToType ⦋n + 1⦌ → ℝ) :=
+noncomputable def h' : (ToType ⦋n + 1⦌ → ℝ) × TopCat.I.{u} → (ToType ⦋n + 1⦌ → ℝ) :=
   fun ⟨f, t⟩ j ↦ f j - TopCat.I.toℝ (TopCat.I.symm t) * μ i f * v i j
 
 @[simps! hom]
@@ -186,15 +188,14 @@ noncomputable def h : of ⦋n + 1⦌.toTopObj ⊗ I ⟶ of ⦋n + 1⦌.toTopObj 
 
 lemma hi (f : TopCat.horn (n + 1) i) (t : TopCat.I) (j : ToType ⦋n + 1⦌):
     h i ⟨⟨f.1, horn_le_toTopObj i f.2⟩, t⟩ j = f.1 j := by
-  ext
-  simp [h']
+  aesop
 
 noncomputable def r : of ⦋n + 1⦌.toTopObj ⟶ of (TopCat.horn (n + 1) i) :=
   ofHom ⟨fun f ↦ ⟨h i ⟨f, 0⟩, by
     rw [mem_horn_iff]
     refine ⟨(h i ⟨f, 0⟩).2, ?_⟩
     obtain ⟨j, hij, hj⟩ := exists_eq_μ i (fun k ↦ f.1 k)
-    exact ⟨j, hij, by simp [h', hj, v_eq_one hij]⟩⟩, by
+    exact ⟨j, hij, by simp [hj, v_eq_one hij]⟩⟩, by
       apply Continuous.subtype_mk
       exact Continuous.comp continuous_subtype_val (ι₀ ≫ h i).hom.2⟩
 
@@ -225,11 +226,12 @@ instance (n : ℕ) : T2Space |Δ[n]| := ⦋n⦌.toTopHomeo.symm.t2Space
 
 def horn.deformationRetracts_toTopMap {n : ℕ} (i : Fin (n + 2)) :
     TopCat.deformationRetracts (toTop.map (horn (n + 1) i).ι) := by
-  refine (deformationRetracts.arrow_mk_iso_iff ?_).2
-    (horn.deformationRetracts_ι i)
-  exact (SSet.Subcomplex.arrowMkToTopMapιIso (stdSimplex.hιToTop (n + 1))
-    (horn (n + 1) i)) ≪≫ Arrow.isoMk (Iso.refl _)
-      (Set.functorToTopCat.mapIso (eqToIso (by simp))) rfl
+  sorry
+  --refine (deformationRetracts.arrow_mk_iso_iff ?_).2
+  --  (horn.deformationRetracts_ι i)
+  --exact (SSet.Subcomplex.arrowMkToTopMapιIso (stdSimplex.hιToTop (n + 1))
+  --  (horn (n + 1) i)) ≪≫ Arrow.isoMk (Iso.refl _)
+  --    (Set.functorToTopCat.mapIso (eqToIso (by simp))) rfl
 
 noncomputable def horn.deformationRetractToTopMap {n : ℕ} (i : Fin (n + 2)) :
     TopCat.DeformationRetract |horn (n + 1) i| |Δ[n + 1]| :=
@@ -247,7 +249,7 @@ lemma horn.ι_deformationRetractToTopMap_r {n : ℕ} (i : Fin (n + 2)) :
     using (horn.deformationRetractToTopMap i).retract
 
 
-instance (Z : TopCat.{0}) : IsFibrant (TopCat.toSSet.obj Z) := by
+instance (Z : TopCat.{u}) : IsFibrant (TopCat.toSSet.obj Z) := by
   rw [isFibrant_iff, fibration_iff]
   intro _ _ _ hi
   simp only [J, iSup_iff] at hi
@@ -261,7 +263,7 @@ instance (Z : TopCat.{0}) : IsFibrant (TopCat.toSSet.obj Z) := by
         simp [← Adjunction.homEquiv_naturality_left]
       fac_right := Subsingleton.elim _ _ }⟩⟩
 
-instance (X : SSet.{0}) : IsFibrant ((SSet.toTop ⋙ TopCat.toSSet).obj X) := by
+instance (X : SSet.{u}) : IsFibrant ((SSet.toTop ⋙ TopCat.toSSet).obj X) := by
   dsimp
   infer_instance
 

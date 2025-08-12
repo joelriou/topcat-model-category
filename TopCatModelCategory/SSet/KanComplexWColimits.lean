@@ -426,7 +426,7 @@ namespace W
 
 variable (J : Type*) [Category J]
 
-lemma isStableUnderColimitsOfShape [Small.{u} J] [LocallySmall.{u} J]  [IsFiltered J] :
+instance isStableUnderColimitsOfShape [Small.{u} J] [LocallySmall.{u} J]  [IsFiltered J] :
     W.{u}.IsStableUnderColimitsOfShape J where
   condition F₁ F₂ c₁ c₂ hc₁ hc₂ f hf φ hφ := by
     have (j : J) := (hf j).isFibrant_src
