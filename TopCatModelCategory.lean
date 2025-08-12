@@ -14,6 +14,7 @@ import TopCatModelCategory.II
 import TopCatModelCategory.IsFibrant
 import TopCatModelCategory.Iso
 import TopCatModelCategory.JoyalTrickDual
+import TopCatModelCategory.LeftKanExtensionAlongUliftYoneda
 import TopCatModelCategory.LiftingProperties
 import TopCatModelCategory.ModelCategory
 import TopCatModelCategory.ModelCategoryCopy

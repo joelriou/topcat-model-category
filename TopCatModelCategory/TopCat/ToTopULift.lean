@@ -1,25 +1,10 @@
 import TopCatModelCategory.TopCat.Adj
+import TopCatModelCategory.LeftKanExtensionAlongUliftYoneda
 import TopCatModelCategory.SSet.ULift
 
 universe v v' u u'
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
-
-namespace CategoryTheory.Presheaf
-
-universe w v₁ v₂ u₁ u₂
-
-variable {C : Type u₁} [Category.{v₁} C] {ℰ : Type u₂} [Category.{v₂} ℰ] {A : C ⥤ ℰ}
-
-lemma isLeftKanExtension_along_uliftYoneda_iff'
-    [uliftYoneda.{max w v₁}.HasPointwiseLeftKanExtension A]
-    (L : (Cᵒᵖ ⥤ Type (max w v₁)) ⥤ ℰ)
-    (α : A ⟶ uliftYoneda.{max w v₁} ⋙ L) :
-    L.IsLeftKanExtension α ↔ IsIso α ∧
-      Limits.PreservesColimitsOfSize.{v₁, max w u₁ v₁} L := by
-  sorry
-
-end CategoryTheory.Presheaf
 
 lemma TopologicalSpace.isOpen_ulift_iff {X : Type u} [TopologicalSpace X]
     (F : Set (ULift.{v} X)) : IsOpen F ↔ IsOpen (ULift.up ⁻¹' F) := by
