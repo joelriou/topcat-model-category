@@ -260,7 +260,7 @@ lemma injective_toTop_map_face_ι (S : Finset (Fin (n + 1))) :
   dsimp [Subcomplex.toTopSet]
   generalize h : S.card = m
   obtain _ | m := m
-  · have hS : IsInitial (toTop.obj (stdSimplex.face S)) := by
+  · have hS : IsInitial (toTop.{u}.obj (stdSimplex.face S)) := by
       obtain rfl : S = ∅ := by rwa [← Finset.card_eq_zero]
       rw [stdSimplex.face_emptySet]
       apply IsInitial.isInitialObj
@@ -439,7 +439,7 @@ lemma t₁Inclusions_toObj_map_of_mono {X Y : SSet.{u}} (i : X ⟶ Y) [Mono i] :
   have : (MorphismProperty.coproducts.{u} I).pushouts ≤
       (t₁Inclusions.{u}).inverseImage SSet.toTop := by
     rw [← MorphismProperty.map_le_iff]
-    refine ((coproducts I).map_pushouts_le SSet.toTop).trans ?_
+    refine ((coproducts I).map_pushouts_le SSet.toTop.{u}).trans ?_
     simp only [pushouts_le_iff]
     refine (I.map_coproducts_le SSet.toTop).trans ?_
     simp only [coproducts_le_iff, MorphismProperty.map_le_iff]

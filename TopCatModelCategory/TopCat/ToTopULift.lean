@@ -1,9 +1,30 @@
 import TopCatModelCategory.TopCat.Adj
 import TopCatModelCategory.SSet.ULift
 
-open CategoryTheory
-
 universe v v' u u'
+
+open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
+
+namespace CategoryTheory.Presheaf
+
+universe w v₁ v₂ u₁ u₂
+
+variable {C : Type u₁} [Category.{v₁} C] {ℰ : Type u₂} [Category.{v₂} ℰ] {A : C ⥤ ℰ}
+
+lemma isLeftKanExtension_along_uliftYoneda_iff'
+    [uliftYoneda.{max w v₁}.HasPointwiseLeftKanExtension A]
+    (L : (Cᵒᵖ ⥤ Type (max w v₁)) ⥤ ℰ)
+    (α : A ⟶ uliftYoneda.{max w v₁} ⋙ L) :
+    L.IsLeftKanExtension α ↔ IsIso α ∧
+      Limits.PreservesColimitsOfSize.{v₁, max w u₁ v₁} L := by
+  sorry
+
+end CategoryTheory.Presheaf
+
+lemma TopologicalSpace.isOpen_ulift_iff {X : Type u} [TopologicalSpace X]
+    (F : Set (ULift.{v} X)) : IsOpen F ↔ IsOpen (ULift.up ⁻¹' F) := by
+  rw [Homeomorph.ulift.isInducing.isOpen_iff]
+  aesop
 
 namespace TopCat
 
@@ -11,6 +32,26 @@ def uliftFunctorComp :
     uliftFunctor.{v, u} ⋙ uliftFunctor.{v'} ≅ uliftFunctor.{max v v'} :=
   NatIso.ofComponents
     (fun X ↦ isoOfHomeo (Homeomorph.ulift.trans (Homeomorph.ulift.trans Homeomorph.ulift.symm)))
+
+instance uliftFunctor_preservesColimitsOfSize :
+    PreservesColimitsOfSize.{v', u'} uliftFunctor.{v, u} where
+  preservesColimitsOfShape {J} :=
+    { preservesColimit {K} := ⟨fun {c} hc ↦ by
+        rw [nonempty_isColimit_iff]
+        refine ⟨⟨isColimitOfPreserves (forget _ ⋙ CategoryTheory.uliftFunctor.{v}) hc⟩, ?_⟩
+        dsimp
+        ext F
+        dsimp [uliftFunctor] at F ⊢
+        rw [TopologicalSpace.isOpen_ulift_iff]
+        simp only [((nonempty_isColimit_iff c).1 ⟨hc⟩).2]
+        trans ∀ (i : J), IsOpen (c.ι.app i ⁻¹' (ULift.up ⁻¹' F))
+        · rw [isOpen_iSup_iff]
+          rfl
+        · rw [isOpen_iSup_iff]
+          apply forall_congr'
+          intro i
+          symm
+          apply TopologicalSpace.isOpen_ulift_iff ⟩ }
 
 end TopCat
 
@@ -42,11 +83,44 @@ lemma closedEmbeddings.uliftFunctor_map {X Y : TopCat.{u}} {f : X ⟶ Y}
 
 lemma deformationRetracts.uliftFunctor_map {X Y : TopCat.{u}} {f : X ⟶ Y}
     (hf : deformationRetracts f) : deformationRetracts (uliftFunctor.{v}.map f) := by
-  sorry
+  obtain ⟨hf, rfl⟩ := hf
+  exact ⟨{
+    i := uliftFunctor.map hf.i
+    r := uliftFunctor.map hf.r
+    retract := by simp [← Functor.map_comp]
+    h := ofHom ⟨fun ⟨x, t⟩ ↦ ULift.up (hf.h ⟨ULift.down x, homeomorphI.symm (homeomorphI t)⟩), by
+      continuity⟩
+    hi := by
+      ext ⟨x, t⟩
+      dsimp
+      exact ULift.down_injective (congr_fun ((forget _).congr_map hf.hi) (by
+        exact ⟨x.down, homeomorphI.symm (homeomorphI t)⟩))
+    h₀ := by
+      ext ⟨y⟩
+      exact ULift.down_injective (congr_fun ((forget _).congr_map hf.h₀) y)
+    h₁ := by
+      ext ⟨y⟩
+      exact ULift.down_injective (congr_fun ((forget _).congr_map hf.h₁) y)
+  }, rfl⟩
 
 end TopCat
 
 namespace SSet
+
+instance uliftFunctor_preservesColimit {J : Type u'} [Category.{v'} J]
+    [HasColimitsOfShape J (Type u)] (F : J ⥤ SSet.{u}) :
+    PreservesColimit F uliftFunctor.{v, u} := ⟨fun {c} hc ↦ ⟨by
+      apply evaluationJointlyReflectsColimits
+      intro k
+      exact isColimitOfPreserves (CategoryTheory.uliftFunctor.{v, u})
+        (isColimitOfPreserves ((evaluation _ _).obj k) hc)⟩⟩
+
+instance uliftFunctor_preservesColimitsOfSize :
+    PreservesColimitsOfSize.{0, u} uliftFunctor.{v, u} where
+  preservesColimitsOfShape := { }
+
+instance toTop_preservesColimitsOfSize :
+    PreservesColimitsOfSize.{0, u} toTop.{u} := inferInstance
 
 namespace toTopUliftIso
 
@@ -63,11 +137,15 @@ noncomputable def unit₂ : stdSimplex.{u} ⋙ SSet.uliftFunctor.{v} ⋙ SSet.to
       toTopSimplex.{max u v}
 
 instance : Functor.IsLeftKanExtension _ unit₁.{v, u}.inv := by
-  -- Presheaf.isLeftKanExtension_along_uliftYoneda_iff
-  sorry
+  have := TopCat.uliftFunctor_preservesColimitsOfSize.{0, v, u, u}
+  have := toTop_preservesColimitsOfSize.{u}
+  erw [Presheaf.isLeftKanExtension_along_uliftYoneda_iff']
+  exact ⟨inferInstance, inferInstance⟩
 
 instance : Functor.IsLeftKanExtension _ unit₂.{v, u}.inv := by
-  sorry
+  have := uliftFunctor_preservesColimitsOfSize.{v, u}
+  erw [Presheaf.isLeftKanExtension_along_uliftYoneda_iff']
+  exact ⟨inferInstance, inferInstance⟩
 
 end toTopUliftIso
 

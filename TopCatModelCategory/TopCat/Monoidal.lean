@@ -111,6 +111,8 @@ instance : LocallyCompactSpace I := by
   dsimp [I]
   infer_instance
 
+def homeomorphI : I ≃ₜ unitInterval := Homeomorph.ulift
+
 def I.mk (t : unitInterval) : I := ULift.up t
 
 @[continuity]
