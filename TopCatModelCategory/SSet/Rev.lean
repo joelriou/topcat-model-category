@@ -53,14 +53,14 @@ variable {C : Type*} [Category C]
 
 @[simps!]
 def revFunctor : SimplicialObject C ⥤ SimplicialObject C :=
-  (whiskeringLeft _ _ _).obj SimplexCategory.rev.op
+  (Functor.whiskeringLeft _ _ _).obj SimplexCategory.rev.op
 
 @[simps!]
 def revFunctorCompRevFunctor : revFunctor (C := C) ⋙ revFunctor ≅ 𝟭 _ :=
-  (whiskeringLeftObjCompIso _ _).symm ≪≫
-    (whiskeringLeft _ _ _).mapIso
+  (Functor.whiskeringLeftObjCompIso _ _).symm ≪≫
+    (Functor.whiskeringLeft _ _ _).mapIso
     ((Functor.opHom _ _).mapIso (SimplexCategory.revCompRevIso).symm.op) ≪≫
-    whiskeringLeftObjIdIso
+    Functor.whiskeringLeftObjIdIso
 
 @[simps!]
 def revEquivalence : SimplicialObject C ≌ SimplicialObject C where
@@ -70,7 +70,7 @@ def revEquivalence : SimplicialObject C ≌ SimplicialObject C where
   counitIso := revFunctorCompRevFunctor
   functor_unitIso_comp X := by
     ext
-    simp [whiskeringLeftObjIdIso, whiskeringLeftObjCompIso]
+    simp [Functor.whiskeringLeftObjIdIso, Functor.whiskeringLeftObjCompIso]
 
 end SimplicialObject
 

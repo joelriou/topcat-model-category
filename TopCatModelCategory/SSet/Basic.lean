@@ -51,7 +51,7 @@ lemma stdSimplex.σ_comp_yonedaEquiv_symm {X : SSet.{u}} {n : ℕ} (i : Fin (n +
 
 lemma yonedaEquiv_const {X : SSet.{u}} (x : X _⦋0⦌) :
     yonedaEquiv (const x : Δ[0] ⟶ X) = x := by
-  simp [yonedaEquiv, yonedaCompUliftFunctorEquiv]
+  simp [yonedaEquiv, uliftYonedaEquiv]
 
 @[simp]
 lemma yonedaEquiv_symm_zero {X : SSet.{u}} (x : X _⦋0⦌) :

@@ -10,15 +10,6 @@ open CategoryTheory Limits HomotopicalAlgebra SSet.modelCategoryQuillen
 
 namespace CategoryTheory
 
-namespace Limits.Cofork.IsColimit
-
-variable {C : Type*} [Category C] {X Y : C} {f g : X ⟶ Y} {c : Cofork f g}
-
-lemma epi (hc : IsColimit c) : Epi c.π where
-  left_cancellation _ _ h := hom_ext hc h
-
-end Limits.Cofork.IsColimit
-
 namespace Arrow
 
 variable {J C : Type*} [Category J] [Category C] {F : J ⥤ Arrow C}
@@ -323,15 +314,14 @@ variable (J : Type*) [Category J] [h₁ : Small.{u} J]
 
 open MorphismProperty
 
-lemma isStableUnderColimitsOfShape_inverseImage_isomorphisms_π₀Functor :
+instance isStableUnderColimitsOfShape_inverseImage_isomorphisms_π₀Functor :
     ((isomorphisms _).inverseImage
       π₀Functor.{u}).IsStableUnderColimitsOfShape J := by
   rw [isStableUnderColimitsOfShape_iff_colimitsOfShape_le]
   intro X Y f hf
   rw [inverseImage_iff]
-  apply (IsStableUnderColimitsOfShape.isomorphisms (Type u) J).colimitsOfShape_le
-  apply colimitsOfShape_monotone _ _ _ (map_colimitsOfShape _ hf π₀Functor)
-  rw [map_le_iff]
+  exact colimitsOfShape_le _
+    (colimitsOfShape_monotone (by rw [map_le_iff]) _ _ (map_colimitsOfShape _ hf π₀Functor))
 
 variable [LocallySmall.{u} J] [IsFiltered J]
 
@@ -347,25 +337,24 @@ instance (n : ℕ) : PreservesColimitsOfShape J (πSuccArrowFunctor.{u} n) where
         apply evaluation_preservesColimitsOfShape
       exact isColimitOfPreserves (SSet.evaluation.obj (op ⦋0⦌)) hc⟩⟩
 
-lemma isStableUnderColimitsOfShape_inverseImage_cartesianMorphisms_πSuccArrowFunctor (n : ℕ) :
+instance isStableUnderColimitsOfShape_inverseImage_cartesianMorphisms_πSuccArrowFunctor (n : ℕ) :
     ((Arrow.cartesianMorphisms _).inverseImage
       (πSuccArrowFunctor.{u} n)).IsStableUnderColimitsOfShape J := by
   rw [MorphismProperty.isStableUnderColimitsOfShape_iff_colimitsOfShape_le]
   intro X Y f hf
   rw [inverseImage_iff]
-  apply (Arrow.isStableUnderColimitsOfShape_cartesianMorphisms_type J).colimitsOfShape_le
-  apply colimitsOfShape_monotone _ _ _ (map_colimitsOfShape _ hf _)
-  rw [map_le_iff]
+  exact colimitsOfShape_le _
+    (colimitsOfShape_monotone (by rw [map_le_iff]) _ _ (map_colimitsOfShape _ hf _))
 
-lemma isStableUnderColimitsOfShape_naiveW :
-    naiveW.{u}.IsStableUnderColimitsOfShape J := by
-  intro X₁ X₂ c₁ c₂ hc₁ hc₂ f hf
-  have hf (j) := hf j
-  simp only [naiveW, MorphismProperty.min_iff, MorphismProperty.iInf_iff] at hf ⊢
-  exact ⟨isStableUnderColimitsOfShape_inverseImage_isomorphisms_π₀Functor _ _ _ _ _ _ hc₂ _
-      (fun j ↦ (hf j).1),
-    fun n ↦ isStableUnderColimitsOfShape_inverseImage_cartesianMorphisms_πSuccArrowFunctor
-      _ _ _ _ _ _ _ hc₂ _ (fun j ↦ (hf j).2 n)⟩
+
+instance isStableUnderColimitsOfShape_naiveW :
+    naiveW.{u}.IsStableUnderColimitsOfShape J where
+  condition X₁ X₂ c₁ c₂ hc₁ hc₂ f hf φ hφ := by
+    have hf (j) := hf j
+    simp only [naiveW, MorphismProperty.min_iff, MorphismProperty.iInf_iff] at hf ⊢
+    exact ⟨colimitsOfShape_le _ (colimitsOfShape.mk' _ _ _ _ hc₁ hc₂ _ (fun j ↦ (hf j).1) _ hφ),
+      fun n ↦ colimitsOfShape_le _
+        (colimitsOfShape.mk' _ _ _ _ hc₁ hc₂ _ (fun j ↦ (hf j).2 n) _ hφ)⟩
 
 end
 namespace KanComplex
@@ -437,16 +426,17 @@ namespace W
 
 variable (J : Type*) [Category J]
 
-lemma isStableUnderColimitsOfShape [Small.{u} J] [LocallySmall.{u} J]  [IsFiltered J] :
-    W.{u}.IsStableUnderColimitsOfShape J := by
-  intro F₁ F₂ c₁ c₂ hc₁ hc₂ f hf
-  have (j) := (hf j).isFibrant_src
-  have (j) := (hf j).isFibrant_tgt
-  have : IsFibrant c₁.pt := of_isColimit hc₁
-  have : IsFibrant c₂.pt := of_isColimit hc₂
-  replace hf (j) := hf j
-  simp only [W_iff_naiveW] at hf ⊢
-  exact isStableUnderColimitsOfShape_naiveW J _ _ _ _ _ hc₂ _ hf
+instance isStableUnderColimitsOfShape [Small.{u} J] [LocallySmall.{u} J]  [IsFiltered J] :
+    W.{u}.IsStableUnderColimitsOfShape J where
+  condition F₁ F₂ c₁ c₂ hc₁ hc₂ f hf φ hφ := by
+    have (j : J) := (hf j).isFibrant_src
+    have (j : J) := (hf j).isFibrant_tgt
+    have : IsFibrant c₁.pt := of_isColimit hc₁
+    have : IsFibrant c₂.pt := of_isColimit hc₂
+    replace hf (j) := hf j
+    simp only [W_iff_naiveW] at hf ⊢
+    exact MorphismProperty.colimitsOfShape_le _
+      (MorphismProperty.colimitsOfShape.mk' _ _ _ _ hc₁ hc₂ f hf _ hφ)
 
 end W
 

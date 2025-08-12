@@ -45,6 +45,12 @@ section
 def ofFibration {E B : SSet.{u}} (p : E ⟶ B) [Fibration p]
     {e : E _⦋0⦌} {b : B _⦋0⦌}
     (he : p.app _ e = b) : FibrationSequence where
+  E := _
+  F := _
+  B := _
+  i := _
+  e := _
+  b := _
   p := p
   isPullback := Subcomplex.fiber_isPullback p b
   f := Subcomplex.fiber.basePoint p he
@@ -242,6 +248,12 @@ noncomputable def δ_naturality (n : ℕ) :
 protected def fiber {E B : SSet.{u}} (p : E ⟶ B) [Fibration p]
     (e : E _⦋0⦌) (b : B _⦋0⦌)
     (he : p.app _ e = b) : FibrationSequence where
+  E := _
+  F := _
+  B := _
+  i := _
+  b := _
+  p := _
   f := Subcomplex.fiber.basePoint p he
   e := e
   isPullback := Subcomplex.fiber_isPullback p b

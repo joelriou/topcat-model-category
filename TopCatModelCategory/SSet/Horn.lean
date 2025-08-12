@@ -4,7 +4,7 @@ import TopCatModelCategory.SSet.Boundary
 universe u
 
 open CategoryTheory Category Limits Simplicial Opposite
-  MonoidalCategory ChosenFiniteProducts
+  MonoidalCategory CartesianMonoidalCategory
 
 namespace SSet
 
@@ -119,8 +119,8 @@ lemma objEquiv_symm_notMem_horn_of_isIso {n : ℕ} (i : Fin (n + 1))
   induction' d using SimplexCategory.rec with d
   obtain rfl : n = d :=
     le_antisymm
-      (SimplexCategory.len_le_of_epi (f := f) inferInstance)
-      (SimplexCategory.len_le_of_mono (f := f) inferInstance)
+      (SimplexCategory.len_le_of_epi f)
+      (SimplexCategory.len_le_of_mono f)
   obtain rfl := SimplexCategory.eq_id_of_isIso f
   rw [horn_eq_iSup]
   aesop

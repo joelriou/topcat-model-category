@@ -4,7 +4,7 @@ import TopCatModelCategory.SSet.Deformation
 universe u
 
 open CategoryTheory HomotopicalAlgebra SSet.modelCategoryQuillen
-  MonoidalCategory Simplicial ChosenFiniteProducts
+  MonoidalCategory Simplicial CartesianMonoidalCategory
 
 namespace SSet
 
@@ -30,7 +30,7 @@ lemma acyclic_fibration_retraction {E' E B : SSet.{u}} {p' : E' ⟶ B} {p : E �
       simpa [reassoc_of% hl₁] using
         congr_ι₀_comp (p := p') (n := n) (h₁ := (ι₁ ≫ l) ▷ Δ[1] ≫ h.h ≫ h.r)
           (h₂ := l ≫ h.r) (yonedaEquiv (v ≫ p'))
-          (by simp [← ι₁_comp_assoc, hl₃]) (by simpa)
+          (by simp [hl₃]) (by simpa)
           (by
             have : ∂Δ[n].ι ≫ ι₁ ≫ l = u := by
               rw [← ι₁_comp_assoc, hl₂, ι₁_comp_assoc, h.h₁, Category.comp_id]

@@ -87,7 +87,7 @@ lemma dim_ne_zero (s : I (x₀ := x₀)) : s.1.1.1.1 ≠ 0 := by
   obtain hi | hi := hi
   · obtain ⟨y, hy⟩ := exists_ne x₀
     have := Finset.mem_univ y
-    simp only [hi, coe_top, Finset.top_eq_univ] at hj
+    simp only [hi, coe_top] at hj
     exact hy (by simpa [hj] using this)
   · simp [hi] at hj
 
@@ -152,14 +152,14 @@ lemma not_mem_cast_obj_iff_of_isIndex {l : Fin (d + 2)}
     x₀ ∉ ((cast s hd).1.1.1.2.obj i).1 ↔ i < l := by
   obtain rfl | ⟨l, rfl⟩ := l.eq_zero_or_eq_succ
   · rw [isIndexI_zero] at hl'
-    simp only [nerve_obj, SimplexCategory.len_mk, cast_coe_dim, Fin.not_lt_zero, iff_false,
+    simp only [SimplexCategory.len_mk, cast_coe_dim, Fin.not_lt_zero, iff_false,
       Decidable.not_not]
     exact (cast s hd).1.1.1.2.monotone i.zero_le (by simp [hl'])
   · rw [isIndexI_succ] at hl'
     have : x₀ ∉ ((cast s hd).1.1.1.2.obj l.castSucc).1 := fun h ↦ by
       apply ((mem_nonDegenerate_iff _).1 (cast s hd).1.1.2 l.castSucc_lt_succ).ne
       rw [Subtype.ext_iff]
-      simpa [hl']
+      aesop
     rw [← not_iff_not, Decidable.not_not, ← Fin.le_castSucc_iff]
     constructor
     · intro h hi
@@ -212,7 +212,7 @@ lemma eq_complSingleton_of_index_eq_last (h : index s hd = Fin.last _) :
     (cast s hd).1.1.1.2.obj (Fin.last d).castSucc = complSingleton x₀ := by
   rw [cast_obj]
   have h₁ := isIndex s hd
-  simp only [IsIndexI, nerve_obj, SimplexCategory.len_mk, h, Fin.val_last] at h₁
+  simp only [IsIndexI, SimplexCategory.len_mk, h, Fin.val_last] at h₁
   dsimp
   have h₂ := eq_top_of_index_eq_last s hd h
   rw [cast_obj] at h₂
@@ -225,7 +225,8 @@ lemma eq_complSingleton_of_index_eq_last (h : index s hd = Fin.last _) :
 lemma simplex_not_mem_horn : simplex s hd ∉ (horn x₀).obj _ := by
   have h := (cast s hd).1.2
   rw [not_mem_horn_iff''] at h ⊢
-  dsimp [simplex, nerve_δ_obj]
+  dsimp [simplex]
+  rw [nerve_δ_obj]
   obtain ⟨i, hi⟩ | h := (index s hd).eq_castSucc_or_eq_last
   · rwa [hi, Fin.succAbove_of_lt_succ _ _ (i.castSucc_lt_last), Fin.succ_last]
   · simp only [h, Fin.succAbove_last]
@@ -246,20 +247,20 @@ noncomputable def toII : II (x₀ := x₀) := ⟨
     simplex := simplex s hd
     nonDegenerate := simplex_mem_nonDegenerate s hd
     notMem := simplex_not_mem_horn s hd }, by
-    simp only [II, I, nerve_obj, SimplexCategory.len_mk, Set.mem_compl_iff,
+    simp only [II, I, Set.mem_compl_iff,
       Set.mem_setOf_eq, not_exists]
     generalize hl : index s hd = l
     intro i h
     obtain rfl | ⟨i, rfl⟩ := i.eq_zero_or_eq_succ
-    · simp only [simplex, nerve_obj, SimplexCategory.len_mk,
-        cast_coe_dim, isIndexI_zero, hl, nerve_δ_obj] at h
+    · simp only [simplex, SimplexCategory.len_mk,
+        isIndexI_zero, hl, nerve_δ_obj] at h
       obtain rfl | ⟨l, rfl⟩ := l.eq_zero_or_eq_succ
       · rw [Fin.succAbove_of_le_castSucc _ _ (by simp),
           Fin.succ_zero_eq_one] at h
         have := (mem_nonDegenerate_iff _ ).1 (cast s hd).1.1.2
           Fin.zero_lt_one
         rw [← Subtype.coe_lt_coe, h] at this
-        simp only [nerve_obj, SimplexCategory.len_mk, cast_coe_dim,
+        simp only [SimplexCategory.len_mk, cast_coe_dim,
           Finset.lt_eq_subset, Finset.ssubset_singleton_iff] at this
         obtain ⟨x, hx⟩ := ((cast s hd).1.1.1.2.obj 0).2.1
         simp [this] at hx
@@ -268,8 +269,8 @@ noncomputable def toII : II (x₀ := x₀) := ⟨
         have : 0 < index s hd := by simp [hl]
         rw [← not_mem_cast_obj_iff] at this
         exact this (by simp [h])
-    · simp only [simplex, nerve_obj, SimplexCategory.len_mk,
-        cast_coe_dim, isIndexI_succ, hl, nerve_δ_obj] at h
+    · simp only [simplex, SimplexCategory.len_mk,
+        isIndexI_succ, hl, nerve_δ_obj] at h
       apply l.succAbove_ne i.succ
       by_cases hl' : l ≤ i.succ.castSucc
       · rw [Fin.succAbove_of_le_castSucc _ _ hl'] at h
@@ -375,7 +376,7 @@ lemma injective_q : Function.Injective (q (x₀ := x₀)) := by
   simp only [toII_coe_dim, cast_coe_dim, SSet.S.cast_dim, nerve_obj, SimplexCategory.len_mk,
     SSet.S.cast_simplex_rfl, exists_const]
   refine ComposableArrows.ext (fun i ↦ ?_) (fun _ _ ↦ rfl)
-  simp only [toII.simplex, hl, nerve_obj, ← this] at h
+  simp only [toII.simplex, hl, ← this] at h
   replace h := Functor.congr_obj h
   simp only [SimplexCategory.len_mk, nerve_δ_obj] at h
   by_cases hi : l = i
@@ -416,8 +417,7 @@ lemma surjective_q : Function.Surjective (q (x₀ := x₀)) := by
         rw [mem_finset_iff, Decidable.not_not] at h₀
         rw [Finset.ssubset_iff_subset_ne]
         refine ⟨by simp [h₀], fun h₀' ↦ ?_⟩
-        simp only [II, nerve_obj, SimplexCategory.len_mk,
-          Set.mem_compl_iff] at h₃
+        simp only [II, Set.mem_compl_iff] at h₃
         exact h₃ ⟨0, by simpa using h₀'.symm⟩
       · rw [← Fin.succ_castSucc, hφ, hφ]
         exact h₁ i.castSucc_lt_succ
@@ -464,8 +464,11 @@ lemma surjective_q : Function.Surjective (q (x₀ := x₀)) := by
       · obtain ⟨j, rfl⟩ := Fin.eq_castSucc_of_ne_last (Fin.ne_last_of_lt hj)
         rw [Fin.succ_castSucc, hφ₁ j.castSucc (by omega), hφ₁ j.succ hj]
         exact h₁ (Fin.castSucc_lt_succ j)
-      · simp [hφ₁ j (by rfl), hφ₂, lt_iff, Finset.ssubset_iff_subset_ne, s,
-          ← not_mem_finset_iff, hi]
+      · simp [hφ₁ j (by rfl), hφ₂, lt_iff, Finset.ssubset_iff_subset_ne, s]
+        apply Ne.symm
+        dsimp
+        rw [Finset.insert_eq_self, ← not_mem_finset_iff, hi]
+        simp
       · obtain ⟨j, rfl⟩ := Fin.eq_succ_of_ne_zero (Fin.ne_zero_of_lt hj)
         rw [← Fin.le_castSucc_iff] at hj
         rw [hφ₃ j.succ (by rwa [← Fin.le_castSucc_iff]), ← Fin.succ_castSucc]
@@ -496,11 +499,11 @@ lemma surjective_q : Function.Surjective (q (x₀ := x₀)) := by
     refine ⟨ψ, ?_⟩
     rw [q_eq _ rfl, Subtype.ext_iff, SSet.Subcomplex.N.ext_iff, SSet.N.ext_iff, SSet.S.ext_iff']
     simp only [toII, SSet.Subcomplex.N.mk_dim, SSet.S.cast_dim, nerve_obj, SimplexCategory.len_mk,
-      SSet.S.cast_simplex_rfl, SSet.Subcomplex.N.mk_simplex, exists_const, s]
+      SSet.S.cast_simplex_rfl, SSet.Subcomplex.N.mk_simplex, exists_const]
     apply Preorder.nerveExt
     ext (j : Fin (d + 1))
-    simp only [SimplexCategory.len_mk, toII.simplex, nerve_obj, hψ, Monotone.functor_obj, id_eq,
-      eq_mpr_eq_cast, cast_coe_dim, nerve_δ_obj, cast_obj, Fin.eta, ψ]
+    simp only [SimplexCategory.len_mk, toII.simplex, hψ, Monotone.functor_obj,
+      nerve_δ_obj, cast_obj, Fin.eta, ψ]
     by_cases hj : j ≤ i
     · rw [Fin.succAbove_of_castSucc_lt _ _ (by simpa), hφ₁ _ hj]
     · simp only [not_le] at hj
@@ -592,10 +595,11 @@ instance : (pairing x₀).IsRegular := by
       change (s.1.1.1.2.obj 0).1 = {x₀} at this
       simp only [II, Set.mem_compl_iff] at hx₃
       apply hx₃
-      simp only [I, nerve_obj, SimplexCategory.len_mk, Set.mem_setOf_eq]
+      simp only [I, Set.mem_setOf_eq]
       refine ⟨0, ?_⟩
       rw [isIndexI_zero]
-      dsimp [nerve_δ_obj]
+      dsimp
+      rw [nerve_δ_obj]
       rwa [cast_obj, Fin.succAbove_of_castSucc_lt _ _ (by simp)]
     simp [hi, hl] at h₂
   · have := isIndex' s hd
@@ -609,8 +613,8 @@ instance : (pairing x₀).IsRegular := by
         simp at hi₁)
       refine hx₃ ⟨l.succ, ?_⟩
       rw [isIndexI_succ]
-      dsimp [nerve_δ_obj]
-      rw [Fin.succAbove_of_le_castSucc _ _ hi₁.le,
+      dsimp
+      rw [nerve_δ_obj, nerve_δ_obj, Fin.succAbove_of_le_castSucc _ _ hi₁.le,
         Fin.succAbove_of_le_castSucc, this, Fin.succ_castSucc]
       rwa [Fin.le_castSucc_iff, Fin.succ_castSucc]
     have hi₂ : i ≤ l.succ := by
@@ -643,14 +647,14 @@ instance : (pairing x₀).IsRegular := by
           by_contra!
           rw [Fin.succAbove_of_le_castSucc _ _ (by simpa),
             Fin.succ_lt_succ_iff] at h
-          exact h.not_le this
+          exact h.not_ge this
         · intro h
           rw [Fin.succAbove_of_castSucc_lt _ _ (by simpa)]
           exact (Fin.castSucc_lt_castSucc_iff.2 h).trans (by simp)
       have hB : B = Finset.univ.filter (fun i ↦ i ≤ l) := by
         ext i
         simp only [mem_finset_iff, SimplexCategory.len_mk, nerve_δ_obj, Finset.mem_filter,
-          Finset.mem_univ, true_and, B, A]
+          Finset.mem_univ, true_and, B]
         rw [not_mem_cast_obj_iff, hl]
         constructor
         · intro h

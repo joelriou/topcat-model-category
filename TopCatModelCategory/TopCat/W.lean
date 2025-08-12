@@ -3,13 +3,15 @@ import TopCatModelCategory.SSet.KanComplexWRetracts
 import TopCatModelCategory.MorphismProperty
 import Mathlib.AlgebraicTopology.SingularSet
 
+universe u
+
 open CategoryTheory HomotopicalAlgebra SSet.modelCategoryQuillen
 
 namespace TopCat
 
 namespace modelCategory
 
-instance : CategoryWithWeakEquivalences TopCat.{0} where
+instance : CategoryWithWeakEquivalences TopCat.{u} where
   weakEquivalences := SSet.KanComplex.W.inverseImage TopCat.toSSet
 
 lemma weakEquivalences_eq :

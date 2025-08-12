@@ -1,5 +1,9 @@
 import TopCatModelCategory.TopCat.Adj
 import TopCatModelCategory.TopCat.Glueing
+import TopCatModelCategory.TopCat.ToTopULift
+import TopCatModelCategory.SSet.ULift
+
+universe u
 
 open CategoryTheory Simplicial MorphismProperty TopCat SSet.modelCategoryQuillen
   Topology Limits
@@ -20,13 +24,13 @@ namespace SSet
 
 namespace Subcomplex
 
-variable {X : SSet}
+variable {X : SSet.{u}}
 
 @[simps!]
 protected noncomputable def toTop : X.Subcomplex ⥤ TopCat :=
   toPresheafFunctor ⋙ SSet.toTop
 
-variable {Ω : Type} (ι : |X| → Ω)
+variable {Ω : Type u} (ι : |X| → Ω)
 
 @[simps]
 def toTopSet : X.Subcomplex ⥤ Set Ω where
@@ -63,6 +67,7 @@ lemma toTopSet_iSup {α : Type*} (U : α → X.Subcomplex) :
     exact leOfHom ((toTopSet ι).map (CategoryTheory.homOfLE (le_iSup _ _)))
 
 variable {ι} [TopologicalSpace Ω] (hι : IsClosedEmbedding ι)
+
 
 noncomputable def toTopNatTrans : Subcomplex.toTop ⟶ toTopSet ι ⋙ Set.functorToTopCat where
   app A := ofHom ⟨fun x ↦ ⟨ι (SSet.toTop.map A.ι x), by simp⟩, by
@@ -114,7 +119,8 @@ lemma multicoequalizerDiagram_toTopSet :
   apply MulticoequalizerDiagram.mk_of_isClosed
   · constructor
     · rw [Set.iSup_eq_iUnion, ← toTopSet_iSup, h.iSup_eq]
-    · exact hV
+    · intro i j
+      exact (hV i j).symm
   · intro i
     exact (hU i).isClosed_range
 
@@ -127,12 +133,12 @@ noncomputable def multispanHom :
     (fun ⟨i, j⟩ ↦
       (toTopNatTrans hι).naturality (CategoryTheory.homOfLE (by
         dsimp
-        rw [← h.min_eq]
+        rw [h.min_eq]
         exact inf_le_left)))
     (fun ⟨i, j⟩ ↦
       (toTopNatTrans hι).naturality (CategoryTheory.homOfLE (by
         dsimp
-        rw [← h.min_eq]
+        rw [h.min_eq]
         exact inf_le_right)))
 
 noncomputable def isColimitCoconesPrecomposeMultispanHom :
@@ -225,13 +231,16 @@ variable {n}
 
 lemma injective_toTopMap_stdSimplex_map_of_mono
     {n m : SimplexCategory} (i : n ⟶ m) (hi : Mono i) :
-    Function.Injective (SimplexCategory.toTop.map i) := by
+    Function.Injective (SimplexCategory.toTop.{u}.map i) := by
   rw [SimplexCategory.mono_iff_injective] at hi
   intro f₁ f₂ h
   dsimp at h
+  rw [← ULift.down_inj] at h ⊢
+  dsimp [ULift.map, TopCat.uliftFunctor] at h ⊢
   rw [Subtype.ext_iff] at h ⊢
   funext j
-  have (f : SimplexCategory.toTop.obj n) : f.1 j = SimplexCategory.toTopMap i f (i j) := by
+  have (f : SimplexCategory.toTop.{u}.obj n) :
+      f.down.1 j = SimplexCategory.toTopMap i f.down (i j) := by
     dsimp
     rw [Finset.sum_eq_single j _ (by simp)]
     rintro b hb hb'
@@ -240,19 +249,18 @@ lemma injective_toTopMap_stdSimplex_map_of_mono
 
 lemma injective_toTop_map_stdSimplex_map_of_mono
     {n m : SimplexCategory} (i : n ⟶ m) (hi : Mono i) :
-    Function.Injective (toTop.map (stdSimplex.map i)) := by
+    Function.Injective (toTop.{u}.map (stdSimplex.map i)) := by
   refine ((MorphismProperty.injective _).arrow_mk_iso_iff ?_).2
     (injective_toTopMap_stdSimplex_map_of_mono i hi)
-  refine Arrow.isoMk (isoOfHomeo n.toTopHomeo) (isoOfHomeo m.toTopHomeo) ?_
-  exact (forget _).map_injective
-    (SimplexCategory.toTopHomeo_naturality i).symm
+  refine Arrow.isoMk (toTopSimplex.app _) (toTopSimplex.app _)
+    (toTopSimplex.{u}.hom.naturality i).symm
 
 lemma injective_toTop_map_face_ι (S : Finset (Fin (n + 1))) :
-    Function.Injective (toTop.map (stdSimplex.face S).ι) := by
+    Function.Injective (toTop.{u}.map (stdSimplex.face S).ι) := by
   dsimp [Subcomplex.toTopSet]
   generalize h : S.card = m
   obtain _ | m := m
-  · have hS : IsInitial (toTop.obj (stdSimplex.face S)) := by
+  · have hS : IsInitial (toTop.{u}.obj (stdSimplex.face S)) := by
       obtain rfl : S = ∅ := by rwa [← Finset.card_eq_zero]
       rw [stdSimplex.face_emptySet]
       apply IsInitial.isInitialObj
@@ -262,7 +270,7 @@ lemma injective_toTop_map_face_ι (S : Finset (Fin (n + 1))) :
   · let e := S.orderIsoOfFin h
     let φ : ⦋m⦌ ⟶ ⦋n⦌ := SimplexCategory.mkHom
       ((OrderHom.Subtype.val _).comp e.toOrderEmbedding.toOrderHom)
-    have iso : Arrow.mk (stdSimplex.{0}.map φ) ≅ Arrow.mk (stdSimplex.face S).ι :=
+    have iso : Arrow.mk (stdSimplex.{u}.map φ) ≅ Arrow.mk (stdSimplex.face S).ι :=
       Arrow.isoMk (stdSimplex.isoOfRepresentableBy (stdSimplex.faceRepresentableBy _ _ e))
         (Iso.refl _) (by
           dsimp
@@ -292,7 +300,7 @@ lemma toTopSet_obj_face_compl (S : Finset (Fin (n + 1))) :
         Finset.mem_univ, forall_const, false_iff, not_and, not_forall]
       intro hf
       by_contra!
-      have (i) : f i = 0 := this _
+      replace this (x : Fin (n + 1)) : f x = 0 := this x
       replace hf := Set.mem_setOf.1 hf
       simp [this] at hf
   · generalize hm : Sᶜ.card = m
@@ -306,7 +314,7 @@ lemma toTopSet_obj_face_compl (S : Finset (Fin (n + 1))) :
     have range_φ : Set.range φ = (S.toSet)ᶜ := by
       ext x
       simp only [Set.mem_range,
-        Finset.coe_compl, Set.mem_compl_iff, Finset.mem_coe]
+        Set.mem_compl_iff, Finset.mem_coe]
       constructor
       · rintro ⟨y, rfl⟩
         have := (e y).2
@@ -405,7 +413,9 @@ lemma toTopSet_obj_face_pair_compl (i j : Fin (n + 1)) :
 end stdSimplex
 
 lemma boundary.closedEmbeddings_toTop_map_ι (n : ℕ) :
-    TopCat.closedEmbeddings (toTop.map ∂Δ[n].ι) := by
+    TopCat.closedEmbeddings (toTop.{u}.map ∂Δ[n].ι) := by
+  refine (TopCat.closedEmbeddings.arrow_mk_iso_iff (toTop.mapArrow.mapIso
+      (arrowUliftIso.{u, 0} n))).1 (toTopMap_ulift_closedEmbeddings.{u} ?_)
   refine Subcomplex.closedEmbeddings_toTop_map_ι (stdSimplex.hιToTop n)
     (SSet.boundary.multicoequalizerDiagram n) ?_ ?_
   · intro i
@@ -424,12 +434,12 @@ lemma boundary.t₁Inclusions_toTop_map_ι (n : ℕ) :
     TopCat.t₁Inclusions (toTop.map ∂Δ[n].ι) :=
   ⟨closedEmbeddings_toTop_map_ι n, fun _ _ ↦ isClosed_singleton⟩
 
-lemma t₁Inclusions_toObj_map_of_mono {X Y : SSet.{0}} (i : X ⟶ Y) [Mono i] :
+lemma t₁Inclusions_toObj_map_of_mono {X Y : SSet.{u}} (i : X ⟶ Y) [Mono i] :
     t₁Inclusions (SSet.toTop.map i) := by
-  have : (MorphismProperty.coproducts.{0, 0, 1} I).pushouts ≤
-      (t₁Inclusions.{0}).inverseImage SSet.toTop := by
+  have : (MorphismProperty.coproducts.{u} I).pushouts ≤
+      (t₁Inclusions.{u}).inverseImage SSet.toTop := by
     rw [← MorphismProperty.map_le_iff]
-    refine ((coproducts I).map_pushouts_le SSet.toTop).trans ?_
+    refine ((coproducts I).map_pushouts_le SSet.toTop.{u}).trans ?_
     simp only [pushouts_le_iff]
     refine (I.map_coproducts_le SSet.toTop).trans ?_
     simp only [coproducts_le_iff, MorphismProperty.map_le_iff]
@@ -440,7 +450,7 @@ lemma t₁Inclusions_toObj_map_of_mono {X Y : SSet.{0}} (i : X ⟶ Y) [Mono i] :
 
 namespace Subcomplex
 
-variable {X : SSet.{0}} {Ω : Type} {ι : |X| → Ω}
+variable {X : SSet.{u}} {Ω : Type u} {ι : |X| → Ω}
   [TopologicalSpace Ω] (hι : IsClosedEmbedding ι) (A : X.Subcomplex)
 
 instance : IsIso ((toTopNatTrans hι).app A) :=

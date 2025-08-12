@@ -5,7 +5,7 @@ import Mathlib.CategoryTheory.Retract
 universe u
 
 open CategoryTheory Category MonoidalCategory Simplicial
-  ChosenFiniteProducts
+  CartesianMonoidalCategory
 
 namespace SSet
 

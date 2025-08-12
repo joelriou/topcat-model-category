@@ -18,7 +18,7 @@ def revIso {n : SimplexCategory} : (stdSimplex.{u}.obj n).rev ≅ stdSimplex.obj
         ext g
         apply objEquiv.injective
         ext i : 3
-        simp [rev, objEquiv, stdSimplex, uliftFunctor, revObjEquiv, revFunctor])
+        simp [rev, objEquiv, stdSimplex, revObjEquiv, revFunctor])
 
 @[simp]
 lemma revObjEquiv_revIso_inv_app {n d : ℕ}

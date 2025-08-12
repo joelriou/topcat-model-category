@@ -89,13 +89,13 @@ noncomputable def fromPushoutProductCongr {K' L' A' B' : SSet.{u}} {f' : K' ⟶ 
     Arrow.mk (fromPushoutProduct i f) ≅ Arrow.mk (fromPushoutProduct i' f') := by
   refine Arrow.isoMk
     -- generalize as `pushout.mapIso`...
-    { hom := pushout.map _ _ _ _ (e₂.hom.right ⊗ e₁.hom.left) (e₂.hom.left ⊗ e₁.hom.right)
-        (e₂.hom.left ⊗ e₁.hom.left) ?_ ?_
-      inv := pushout.map _ _ _ _ (e₂.inv.right ⊗ e₁.inv.left) (e₂.inv.left ⊗ e₁.inv.right)
-        (e₂.inv.left ⊗ e₁.inv.left) ?_ ?_
+    { hom := pushout.map _ _ _ _ (e₂.hom.right ⊗ₘ e₁.hom.left) (e₂.hom.left ⊗ₘ e₁.hom.right)
+        (e₂.hom.left ⊗ₘ e₁.hom.left) ?_ ?_
+      inv := pushout.map _ _ _ _ (e₂.inv.right ⊗ₘ e₁.inv.left) (e₂.inv.left ⊗ₘ e₁.inv.right)
+        (e₂.inv.left ⊗ₘ e₁.inv.left) ?_ ?_
       hom_inv_id := ?_
       inv_hom_id := ?_ }
-    (Arrow.rightFunc.mapIso e₂ ⊗ Arrow.rightFunc.mapIso e₁) ?_
+    (Arrow.rightFunc.mapIso e₂ ⊗ᵢ Arrow.rightFunc.mapIso e₁) ?_
   · have := e₂.hom.w
     dsimp at this
     simp only [tensorHom_def, Category.assoc, whisker_exchange, ← comp_whiskerRight_assoc, this]

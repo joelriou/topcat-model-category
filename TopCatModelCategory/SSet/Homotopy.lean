@@ -8,7 +8,7 @@ import TopCatModelCategory.SSet.AnodyneExtensions
 import TopCatModelCategory.SSet.Horn
 
 open HomotopicalAlgebra CategoryTheory Category Simplicial MonoidalCategory Opposite
-  ChosenFiniteProducts Limits SSet.modelCategoryQuillen
+  CartesianMonoidalCategory Limits SSet.modelCategoryQuillen
 
 namespace SSet
 

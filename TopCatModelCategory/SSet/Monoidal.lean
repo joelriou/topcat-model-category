@@ -9,7 +9,7 @@ import TopCatModelCategory.SSet.StandardSimplex
 universe u
 
 open CategoryTheory MonoidalCategory Simplicial Opposite Limits
-  ChosenFiniteProducts MonoidalClosed
+  CartesianMonoidalCategory MonoidalClosed
 
 namespace SSet
 
@@ -69,8 +69,8 @@ namespace stdSimplex
 
 variable (X) {Y : SSet.{u}}
 
-def isTerminalObj₀ : IsTerminal (Δ[0] : SSet.{u}) :=
-  IsTerminal.ofUniqueHom (fun _ ↦ SSet.const (obj₀Equiv.symm 0)) (fun _ _ ↦ by ext; simp)
+/-def isTerminalObj₀ : IsTerminal (Δ[0] : SSet.{u}) :=
+  IsTerminal.ofUniqueHom (fun _ ↦ SSet.const (obj₀Equiv.symm 0)) (fun _ _ ↦ by ext; simp)-/
 
 noncomputable def leftUnitor : Δ[0] ⊗ X ≅ X where
   hom := snd _ _

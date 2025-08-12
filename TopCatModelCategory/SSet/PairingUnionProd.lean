@@ -213,7 +213,6 @@ lemma min_δ : min (x := hl.δ) k rfl = l := by
     dsimp
     rw [stdSimplex.δ_apply, Fin.succAbove_castSucc_self, hl.left_succ]
   · by_contra! hil
-    rw [not_le] at hil
     rw [mem_finset_iff] at hi
     dsimp at hi
     rw [stdSimplex.δ_apply, Fin.succAbove_of_castSucc_lt _ _ (by simpa)] at hi
@@ -245,7 +244,7 @@ variable (hl : min k hd = l)
 lemma φ_succAbove (i : Fin (d + 1)) :
     φ k hd l (l.castSucc.succAbove i) =
       objEquiv (x.cast hd).simplex i := by
-  simp [φ, if_neg (Fin.succAbove_ne l.castSucc i)]
+  simp [φ]
 
 lemma φ_succ_right : (φ k hd l l.succ).2 = (φ k hd l l.castSucc).2 := by
   have := φ_succAbove k hd l l

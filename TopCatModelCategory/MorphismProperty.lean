@@ -148,12 +148,12 @@ lemma map_colimitsOfShape (W : MorphismProperty C)
     (W.map F).colimitsOfShape J (F.map f) := by
   obtain ⟨_, _, c₁, c₂, hc₁, hc₂, φ, hφ⟩ := hf
   let hc₁' := isColimitOfPreserves F hc₁
-  have : F.map (hc₁.desc { ι := φ ≫ c₂.ι }) =
-    hc₁'.desc { ι := whiskerRight φ F ≫ (F.mapCocone c₂).ι } :=
+  have : F.map (hc₁.desc { pt := _, ι := φ ≫ c₂.ι }) =
+    hc₁'.desc { pt := _, ι := Functor.whiskerRight φ F ≫ (F.mapCocone c₂).ι } :=
       hc₁'.hom_ext (fun j ↦ by
         rw [IsColimit.fac]
         dsimp
-        rw [← F.map_comp, IsColimit.fac, NatTrans.comp_app, Functor.map_comp] )
+        rw [← F.map_comp, IsColimit.fac, NatTrans.comp_app, Functor.map_comp])
   rw [this]
   exact ⟨_, _, _, _, _, isColimitOfPreserves F hc₂, _,
     fun j ↦ W.map_mem_map F (φ.app j) (hφ j)⟩

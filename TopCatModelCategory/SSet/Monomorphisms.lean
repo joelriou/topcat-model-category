@@ -35,8 +35,7 @@ instance [HasCoproducts.{v} (Type u)] (J : Type*) [Category J] :
     IsStableUnderCoproducts.{v} (monomorphisms (J ⥤ Type u)) where
   isStableUnderCoproductsOfShape J := by
     rw [← functorCategory_monomorphisms]
-    apply IsStableUnderColimitsOfShape.functorCategory
-    apply isStableUnderCoproductsOfShape_of_isStableUnderCoproducts
+    infer_instance
 
 end Types
 
@@ -77,7 +76,6 @@ instance : IsStableUnderCoproducts.{u} (monomorphisms (SSet.{u})) :=
 
 instance {ι : Type u} {X Y : ι → SSet.{u}} (f : ∀ i, X i ⟶ Y i)
     [∀ i, Mono (f i)] : Mono (Limits.Sigma.map f) :=
-  ((monomorphisms SSet.{u}).isStableUnderCoproductsOfShape_of_isStableUnderCoproducts
-    ι).colimMap _ (fun _ ↦ monomorphisms.infer_property (f _))
+  (monomorphisms SSet.{u}).colimMap _ (fun _ ↦ monomorphisms.infer_property (f _))
 
 end SSet

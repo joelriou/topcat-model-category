@@ -33,6 +33,7 @@ section
 
 variable {B C : Type*} [Bicategory B] [Bicategory C] (F : Pseudofunctor B C)
 
+/-
 /-- More flexible variant of `mapId`. -/
 def mapId' {b : B} (f : b ⟶ b) (hf : f = 𝟙 b := by aesop_cat) :
     F.map f ≅ 𝟙 _ :=
@@ -51,7 +52,7 @@ def mapComp' {b₀ b₁ b₂ : B} (f : b₀ ⟶ b₁) (g : b₁ ⟶ b₂) (fg : 
 lemma mapComp'_eq_mapComp {b₀ b₁ b₂ : B} (f : b₀ ⟶ b₁) (g : b₁ ⟶ b₂) :
     F.mapComp' f g _ rfl = F.mapComp f g := by
   simp [mapComp']
-
+-/
 end
 
 section
@@ -61,14 +62,14 @@ variable {B C : Type*} [Bicategory B] [Bicategory C]
   (F : Pseudofunctor B C)
 
 lemma mapComp'_comp_id {b₀ b₁ : B} (f : b₀ ⟶ b₁) :
-    F.mapComp' f (𝟙 b₁) f (by nth_rw 1 [← Category.comp_id f]) =
+    F.mapComp' f (𝟙 b₁) f (by nth_rw 1 [Category.comp_id f]) =
     (ρ_ _).symm ≪≫ whiskerLeftIso _ (F.mapId b₁).symm := by
   ext
   simp [mapComp', mapComp_id_right_hom,
     Subsingleton.elim (ρ_ f).hom (eqToHom (by simp))]
 
 lemma mapComp'_id_comp {b₀ b₁ : B} (f : b₀ ⟶ b₁) :
-    F.mapComp' (𝟙 b₀) f f (by nth_rw 1 [← Category.id_comp f]) =
+    F.mapComp' (𝟙 b₀) f f (by nth_rw 1 [Category.id_comp f]) =
       (λ_ _).symm ≪≫ whiskerRightIso (F.mapId b₀).symm _ := by
   ext
   simp [mapComp', mapComp_id_left_hom,
@@ -78,10 +79,10 @@ lemma mapComp'_id_comp {b₀ b₁ : B} (f : b₀ ⟶ b₁) :
 lemma mapComp'_assoc {b₀ b₁ b₂ b₃ : B} (f₀₁ : b₀ ⟶ b₁)
     (f₁₂ : b₁ ⟶ b₂) (f₂₃ : b₂ ⟶ b₃)
     (f₀₂ : b₀ ⟶ b₂) (f₁₃ : b₁ ⟶ b₃)
-    (h₀₂ : f₀₂ = f₀₁ ≫ f₁₂) (h₁₃ : f₁₃ = f₁₂ ≫ f₂₃) (f : b₀ ⟶ b₃)
-    (hf : f = f₀₁ ≫ f₁₃) :
+    (h₀₂ : f₀₁ ≫ f₁₂ = f₀₂) (h₁₃ : f₁₂ ≫ f₂₃ = f₁₃) (f : b₀ ⟶ b₃)
+    (hf : f₀₁ ≫ f₁₃ = f) :
     (F.mapComp' f₀₁ f₁₃ f hf).hom ≫ F.map f₀₁ ◁ (F.mapComp' f₁₂ f₂₃ f₁₃ h₁₃).hom =
-      (F.mapComp' f₀₂ f₂₃ f (by rw [hf, h₀₂, h₁₃, Category.assoc])).hom ≫
+      (F.mapComp' f₀₂ f₂₃ f (by rw [← hf, ← h₀₂, ← h₁₃, Category.assoc])).hom ≫
       (F.mapComp' f₀₁ f₁₂ f₀₂ h₀₂).hom ▷ F.map f₂₃ ≫ (α_ _ _ _).hom := by
   subst h₀₂ h₁₃ hf
   rw [mapComp'_eq_mapComp, mapComp'_eq_mapComp, mapComp'_eq_mapComp,
@@ -94,10 +95,10 @@ lemma mapComp'_assoc {b₀ b₁ b₂ b₃ : B} (f₀₁ : b₀ ⟶ b₁)
 lemma mapComp'_inv_mapComp'_hom {b₀ b₁ b₂ b₃ : B} (f₀₁ : b₀ ⟶ b₁)
     (f₁₂ : b₁ ⟶ b₂) (f₂₃ : b₂ ⟶ b₃)
     (f₀₂ : b₀ ⟶ b₂) (f₁₃ : b₁ ⟶ b₃)
-    (h₀₂ : f₀₂ = f₀₁ ≫ f₁₂) (h₁₃ : f₁₃ = f₁₂ ≫ f₂₃) (f : b₀ ⟶ b₃)
-    (hf : f = f₀₁ ≫ f₁₃) :
+    (h₀₂ : f₀₁ ≫ f₁₂ = f₀₂ ) (h₁₃ : f₁₂ ≫ f₂₃ = f₁₃ ) (f : b₀ ⟶ b₃)
+    (hf : f₀₁ ≫ f₁₃ = f) :
       (F.mapComp' f₀₁ f₁₃ f hf).inv ≫
-        (F.mapComp' f₀₂ f₂₃ f (by rw [hf, h₀₂, h₁₃, Category.assoc])).hom =
+        (F.mapComp' f₀₂ f₂₃ f (by rw [← hf, ← h₀₂, ← h₁₃, Category.assoc])).hom =
     F.map f₀₁ ◁ (F.mapComp' f₁₂ f₂₃ f₁₃ h₁₃).hom ≫
         (α_ _ _ _).inv ≫ (F.mapComp' f₀₁ f₁₂ f₀₂ h₀₂).inv ▷ F.map f₂₃ := by
   rw [← cancel_epi (F.mapComp' f₀₁ f₁₃ f hf).hom, Iso.hom_inv_id_assoc,
@@ -108,9 +109,9 @@ lemma mapComp'_inv_mapComp'_hom {b₀ b₁ b₂ b₃ : B} (f₀₁ : b₀ ⟶ b�
 lemma mapComp'_hom_whiskerRight_mapComp'_hom {b₀ b₁ b₂ b₃ : B} (f₀₁ : b₀ ⟶ b₁)
     (f₁₂ : b₁ ⟶ b₂) (f₂₃ : b₂ ⟶ b₃)
     (f₀₂ : b₀ ⟶ b₂) (f₁₃ : b₁ ⟶ b₃)
-    (h₀₂ : f₀₂ = f₀₁ ≫ f₁₂) (h₁₃ : f₁₃ = f₁₂ ≫ f₂₃) (f : b₀ ⟶ b₃)
-    (hf : f = f₀₁ ≫ f₁₃) :
-    (F.mapComp' f₀₂ f₂₃ f (by rw [hf, h₀₂, h₁₃, Category.assoc])).hom ≫
+    (h₀₂ : f₀₁ ≫ f₁₂ = f₀₂ ) (h₁₃ : f₁₂ ≫ f₂₃ = f₁₃) (f : b₀ ⟶ b₃)
+    (hf : f₀₁ ≫ f₁₃ = f) :
+    (F.mapComp' f₀₂ f₂₃ f (by rw [← hf, ← h₀₂, ← h₁₃, Category.assoc])).hom ≫
       (F.mapComp' f₀₁ f₁₂ f₀₂ h₀₂).hom ▷ F.map f₂₃ =
     (F.mapComp' f₀₁ f₁₃ f hf).hom ≫ F.map f₀₁ ◁ (F.mapComp' f₁₂ f₂₃ f₁₃ h₁₃).hom ≫
       (α_ _ _ _).inv := by
@@ -167,18 +168,18 @@ lemma isoMapOfSq_horiz_comp :
   ext
   obtain ⟨φ, hφ⟩ : ∃ φ, t ≫ m = φ := ⟨_, rfl⟩
   obtain ⟨ψ, hψ⟩ : ∃ ψ, t' ≫ r = ψ := ⟨_, rfl⟩
-  obtain ⟨δ, hδ⟩ : ∃ δ, δ = t ≫ ψ := ⟨_, rfl⟩
-  have hδ' : t'' ≫ r = δ := by rw [hδ, ← hψ, reassoc_of% ht]
+  obtain ⟨δ, hδ⟩ : ∃ δ, t ≫ ψ = δ := ⟨_, rfl⟩
+  have hδ' : t'' ≫ r = δ := by rw [← hδ, ← hψ, reassoc_of% ht]
   rw [F.isoMapOfSq_eq ((sq.horiz_comp' sq' ht hb)) δ hδ',
     F.isoMapOfSq_eq sq' ψ hψ, F.isoMapOfSq_eq sq φ hφ]
   dsimp
   simp only [Bicategory.whiskerLeft_comp, comp_whiskerRight, Category.assoc]
   rw [← F.mapComp'_inv_mapComp'_hom_assoc _ _ _ _ _ _ _ _ hδ,
-    F.mapComp'_hom_whiskerRight_mapComp'_hom_assoc _ _ _ _ _ _ hb.symm _
-      (by rw [hδ, ← hψ, ← hb, sq'.w, sq.w_assoc]),
+    F.mapComp'_hom_whiskerRight_mapComp'_hom_assoc _ _ _ _ _ _ hb _
+      (by rw [← hδ, ← hψ, ← hb, sq'.w, sq.w_assoc]),
     Iso.inv_hom_id_assoc, whiskerLeft_hom_inv, Category.comp_id,
-    ← cancel_epi (F.mapComp' t'' r δ hδ'.symm).hom,
-    F.mapComp'_hom_whiskerRight_mapComp'_hom_assoc _ _ _ _ ψ ht.symm hψ.symm _ hδ,
+    ← cancel_epi (F.mapComp' t'' r δ hδ').hom,
+    F.mapComp'_hom_whiskerRight_mapComp'_hom_assoc _ _ _ _ ψ ht hψ _ hδ,
     Iso.hom_inv_id_assoc, Iso.inv_hom_id_assoc, whiskerLeft_hom_inv_assoc,
     Iso.hom_inv_id_assoc]
 
@@ -221,9 +222,9 @@ variable {X Y : B} (f : X ⟶ Y)
 
 lemma isoMapOfSq'_horiz_id :
     F.isoMapOfSq' (t := 𝟙 _) (b := 𝟙 _) (l := f) (r := f) ⟨by simp⟩ =
-        isoWhiskerRight (F.mapId ⟨X⟩) (F.map ⟨f⟩) ≪≫
+        Functor.isoWhiskerRight (F.mapId ⟨X⟩) (F.map ⟨f⟩) ≪≫
         Functor.leftUnitor _ ≪≫ (Functor.rightUnitor _).symm ≪≫
-        (isoWhiskerLeft (F.map ⟨f⟩) (F.mapId ⟨Y⟩)).symm := by
+        (Functor.isoWhiskerLeft (F.map ⟨f⟩) (F.mapId ⟨Y⟩)).symm := by
   apply isoMapOfSq_horiz_id
 
 end
@@ -241,10 +242,10 @@ include ht hb sq sq'
 
 lemma isoMapOfSq'_horiz_comp :
     F.isoMapOfSq' (sq.horiz_comp' sq' ht hb) =
-      isoWhiskerRight (F.mapComp' ⟨t⟩ ⟨t'⟩ ⟨t''⟩ (by rw [← ht]; rfl)) (F.map ⟨r⟩) ≪≫
-      Functor.associator _ _ _ ≪≫ isoWhiskerLeft (F.map ⟨t⟩) (F.isoMapOfSq' sq') ≪≫
-      (Functor.associator _ _ _).symm ≪≫ isoWhiskerRight (F.isoMapOfSq' sq) (F.map ⟨b'⟩) ≪≫
-      Functor.associator _ _ _ ≪≫ isoWhiskerLeft (F.map ⟨l⟩)
+      Functor.isoWhiskerRight (F.mapComp' ⟨t⟩ ⟨t'⟩ ⟨t''⟩ (by rw [← ht]; rfl)) (F.map ⟨r⟩) ≪≫
+      Functor.associator _ _ _ ≪≫ Functor.isoWhiskerLeft (F.map ⟨t⟩) (F.isoMapOfSq' sq') ≪≫
+      (Functor.associator _ _ _).symm ≪≫ Functor.isoWhiskerRight (F.isoMapOfSq' sq) (F.map ⟨b'⟩) ≪≫
+      Functor.associator _ _ _ ≪≫ Functor.isoWhiskerLeft (F.map ⟨l⟩)
         ((F.mapComp' ⟨b⟩ ⟨b'⟩ ⟨b''⟩ (by rw [← hb]; rfl)).symm) :=
   isoMapOfSq_horiz_comp _ _ _ (by rw [← ht]; rfl) (by rw [← hb]; rfl)
 

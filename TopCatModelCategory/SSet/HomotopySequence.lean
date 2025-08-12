@@ -6,7 +6,7 @@ import TopCatModelCategory.SSet.HomotopyGroup
 universe u
 
 open HomotopicalAlgebra CategoryTheory Simplicial SSet.modelCategoryQuillen
-  MonoidalCategory ChosenFiniteProducts Limits Opposite
+  MonoidalCategory CartesianMonoidalCategory Limits Opposite
 
 namespace SSet
 
@@ -435,7 +435,7 @@ lemma δ'_zero_mul {n : ℕ} (s s' : π (n + 2) B b) :
   have hf₁₂ : f ⟨n + 1, by simp⟩ = t₁₂.map := by aesop
   have hf₀₂ : f ⟨n + 2, by simp⟩ = t₀₂.map := by aesop
   have hf₀₁ : f ⟨n + 3, by simp⟩ = t₀₁.map := by aesop
-  have hf (i : Fin (n + 4)) (hi : i.1 ≤ n) : f ⟨i, by omega⟩ = const e := if_pos hi
+  have hf (i : Fin (n + 4)) (hi : i.1 ≤ n) : f i = const e := if_pos hi
   have hf' (i : Fin (n + 4)) (j : Fin (n + 2)) :
       stdSimplex.δ j.succ ≫ f i = const e := by
     dsimp [f]

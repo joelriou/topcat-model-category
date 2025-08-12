@@ -4,6 +4,8 @@ import TopCatModelCategory.TopPackage
 import TopCatModelCategory.TopCat.HornDeformationRetract
 import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
 
+universe v u
+
 open HomotopicalAlgebra CategoryTheory MorphismProperty Limits Opposite
 
 namespace TopCat
@@ -12,11 +14,11 @@ namespace modelCategory
 
 open SSet.modelCategoryQuillen
 
-def I : MorphismProperty TopCat.{0} :=
-  ofHoms (fun n ↦ SSet.toTop.map (SSet.boundary.{0} n).ι)
+def I : MorphismProperty TopCat.{u} :=
+  ofHoms (fun n ↦ SSet.toTop.map (SSet.boundary.{u} n).ι)
 
-def J : MorphismProperty TopCat.{0} :=
-  ⨆ n, ofHoms (fun i ↦ SSet.toTop.map (SSet.horn.{0} (n + 1) i).ι)
+def J : MorphismProperty TopCat.{u} :=
+  ⨆ n, ofHoms (fun i ↦ SSet.toTop.map (SSet.horn.{u} (n + 1) i).ι)
 
 lemma rlp_I_iff {E B : TopCat} (p : E ⟶ B) :
     I.rlp p ↔ SSet.modelCategoryQuillen.I.rlp (toSSet.map p) := by
@@ -45,26 +47,32 @@ lemma rlp_J_iff {E B : TopCat} (p : E ⟶ B) :
     simp only [SSet.modelCategoryQuillen.J, iSup_iff]
     exact ⟨n, ⟨i⟩⟩
 
-instance : IsSmall.{0} I := by dsimp [I]; infer_instance
-instance : IsSmall.{0} J := by dsimp [J]; infer_instance
+instance : IsSmall.{v} I.{u} := by dsimp [I]; infer_instance
+instance : IsSmall.{v} J.{u} := by dsimp [J]; infer_instance
 
 -- this could be generalized to more general well ordered types...
+-- ... and cleaned up
 instance :
-    (t₁Inclusions ⊓ weakEquivalences TopCat).IsStableUnderTransfiniteCompositionOfShape ℕ where
+    (t₁Inclusions.{u} ⊓ weakEquivalences TopCat.{u}).IsStableUnderTransfiniteCompositionOfShape ℕ where
   le := by
     rintro X Y f ⟨hf⟩
     refine ⟨t₁Inclusions.isT₁Inclusion_of_transfiniteCompositionOfShape
       (hf.ofLE inf_le_left), ?_⟩
     rw [weakEquivalences_eq, inverseImage_iff]
-    apply (SSet.KanComplex.W.isStableUnderColimitsOfShape ℕ).colimitsOfShape_le
-    have : PreservesColimit hf.F toSSet :=
-        preservesColimit_of_preserves_colimit_cocone hf.isColimit
-          (evaluationJointlyReflectsColimits _ (fun ⟨n⟩ ↦ by
-            have : PreservesColimit hf.F _ :=
-              t₁Inclusions.preservesColimit_coyoneda_obj_of_compactSpace
-                (hf.ofLE inf_le_left) (.of n.toTopObj)
-            exact isColimitOfPreserves
-              (coyoneda.obj (op (TopCat.of n.toTopObj))) hf.isColimit))
+    apply MorphismProperty.colimitsOfShape_le (J := ℕ)
+    have : PreservesColimit hf.F toSSet := by
+      apply preservesColimit_of_preserves_colimit_cocone hf.isColimit
+      apply evaluationJointlyReflectsColimits
+      rintro ⟨n⟩
+      have : CompactSpace (SimplexCategory.toTop.{u}.obj n) :=
+        inferInstanceAs (CompactSpace (ULift n.toTopObj))
+      have : PreservesColimit hf.F _ :=
+        t₁Inclusions.preservesColimit_coyoneda_obj_of_compactSpace
+                (hf.ofLE inf_le_left) (SimplexCategory.toTop.obj n)
+      refine (IsColimit.equivOfNatIsoOfIso (NatIso.ofComponents (fun n ↦ Equiv.ulift.toIso))
+        _ _ ?_).2 (isColimitOfPreserves
+          (coyoneda.obj (op (SimplexCategory.toTop.obj n))) hf.isColimit)
+      exact Cocones.ext Equiv.ulift.toIso
     have hc₁ := isColimitConstCocone ℕ (toSSet.obj X)
     let c₂ := toSSet.mapCocone { pt := Y, ι := hf.incl }
     let φ : (Functor.const _).obj (toSSet.obj X) ⟶ hf.F ⋙ toSSet :=
@@ -93,7 +101,7 @@ instance :
     exact MorphismProperty.comp_mem _ _ _ (.of_iso _) (hf' _)
 
 lemma deformationRetracts_le_weakEquivalences :
-    deformationRetracts ≤ weakEquivalences TopCat.{0} := by
+    deformationRetracts ≤ weakEquivalences TopCat.{u} := by
   rintro X Y _ ⟨r, rfl⟩
   rw [weakEquivalences_eq, inverseImage_iff]
   exact SSet.KanComplex.W.homotopyEquivHom (.ofDeformationRetract r.toSSet)
@@ -114,10 +122,10 @@ lemma J_le_deformationRetracts : TopCat.modelCategory.J ≤ deformationRetracts 
   obtain ⟨n, ⟨i⟩⟩ := h
   exact ⟨SSet.horn.deformationRetractToTopMap i, by simp⟩
 
-def packageTopCat : TopPackage.{0} TopCat.{0} where
+def packageTopCat : TopPackage.{u} TopCat.{u} where
   I' := TopCat.modelCategory.I
   J' := TopCat.modelCategory.J
-  S' := Set.range (fun (X : {(X : SSet.{0}) | SSet.IsFinite X}) ↦ SSet.toTop.obj X)
+  S' := Set.range (fun (X : {(X : SSet.{u}) | SSet.IsFinite X}) ↦ SSet.toTop.obj X)
   src_I_le_S' := by
     rintro _ _ _ ⟨i⟩
     simp only [Set.coe_setOf, Set.mem_setOf_eq, Set.mem_range, Subtype.exists, exists_prop]
@@ -152,13 +160,14 @@ def packageTopCat : TopPackage.{0} TopCat.{0} where
     · exact inf_le_inf (by simp) deformationRetracts_le_weakEquivalences
   fibration_is_trivial_iff' {X Y} p hp := by
     rw [rlp_J_iff, ← SSet.modelCategoryQuillen.fibration_iff] at hp
-    rw [weakEquivalence_iff, rlp_I_iff, SSet.KanComplex.weakEquivalence_iff_of_fibration]
+    rw [weakEquivalence_iff, rlp_I_iff,
+      SSet.KanComplex.weakEquivalence_iff_of_fibration]
 
-scoped instance instModelCategory : ModelCategory TopCat.{0} :=
+scoped instance instModelCategory : ModelCategory TopCat.{u} :=
   packageTopCat.modelCategoryCat
 
-lemma weakEquivalence_iff_of_fibration {X Y : TopCat.{0}} (f : X ⟶ Y) [Fibration f] :
-    (ofHoms (fun n ↦ SSet.toTop.map (SSet.boundary.{0} n).ι)).rlp f ↔
+lemma weakEquivalence_iff_of_fibration {X Y : TopCat.{u}} (f : X ⟶ Y) [Fibration f] :
+    (ofHoms (fun n ↦ SSet.toTop.map (SSet.boundary.{u} n).ι)).rlp f ↔
       WeakEquivalence f :=
   packageTopCat.I_rlp_iff_weakEquivalence_of_fibration f
 
@@ -181,13 +190,12 @@ instance {E B : TopCat} (p : E ⟶ B) [Fibration p] :
 
 lemma trivialCofibrations_eq_llp_rlp :
     trivialCofibrations TopCat =
-      (⨆ n, ofHoms (fun i ↦ SSet.toTop.map (SSet.horn.{0} (n + 1) i).ι)).rlp.llp :=
+      (⨆ n, ofHoms (fun i ↦ SSet.toTop.map (SSet.horn.{u} (n + 1) i).ι)).rlp.llp :=
   packageTopCat.trivialCofibrations_eq_llp_rlp_J
 
 open Simplicial
 
-instance (X : TopCat.{0}) : IsFibrant X := by
-  have := SSet.isTerminalToTopObjStdSimplex₀
+instance (X : TopCat.{u}) : IsFibrant X := by
   rw [isFibrant_iff_of_isTerminal (isTerminalToTopObjStdSimplex₀.from X)
     isTerminalToTopObjStdSimplex₀,
     ← fibration_toSSet_map_iff]

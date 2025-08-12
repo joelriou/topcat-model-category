@@ -26,7 +26,7 @@ lemma yonedaEquiv_map_comp {n m : SimplexCategory} (f : n ⟶ m) {X : SSet.{u}}
     (g : stdSimplex.obj m ⟶ X) :
     yonedaEquiv (stdSimplex.map f ≫ g) =
       X.map f.op (yonedaEquiv g) := by
-  dsimp [yonedaEquiv, yonedaCompUliftFunctorEquiv]
+  dsimp [yonedaEquiv, uliftYonedaEquiv]
   rw [← FunctorToTypes.naturality]
   rfl
 
@@ -94,8 +94,7 @@ lemma yonedaEquiv_id_apply {n : ℕ} (i : Fin (n + 1)) :
     yonedaEquiv.{u} (𝟙 (Δ[n])) i = i := rfl
 
 @[simp]
-lemma yonedaEquiv_const_apply {n : ℕ} {m : ℕ}
-    (x : Δ[n] _⦋0⦌) (i : Fin (m + 1)) :
+lemma yonedaEquiv_const_apply {n : ℕ} (x : Δ[n] _⦋0⦌) (i : Fin 1) :
     (yonedaEquiv (SSet.const x) : Δ[n] _⦋0⦌) i = x 0 := rfl
 
 /-@[simps]
@@ -138,44 +137,68 @@ lemma objEquiv_symm_σ_apply {n : ℕ} (i : Fin (n + 1)) (j : Fin (n + 1 + 1)) :
 lemma map_yonedaEquiv {X : SSet.{u}} {n m : SimplexCategory} (f : n ⟶ m)
     (g : stdSimplex.obj m ⟶ X) :
     X.map f.op (yonedaEquiv g) = g.app _ (yonedaEquiv (stdSimplex.map f)) := by
-  dsimp [yonedaEquiv, yonedaCompUliftFunctorEquiv]
+  dsimp [yonedaEquiv, uliftYonedaEquiv]
   rw [← FunctorToTypes.naturality]
   rfl
 
-instance (n : SimplexCategory) : (stdSimplex.{u}.obj n).StrictSegal where
-  spineToSimplex {j v} := objMk
-    { toFun i := obj₀Equiv (v.vertex i)
-      monotone' := by
-        induction' n using SimplexCategory.rec with n
-        rw [Fin.monotone_iff]
-        intro i
-        rw [← v.arrow_src i, ← v.arrow_tgt i]
-        exact (monotone_apply (v.arrow i) (Fin.zero_le (1 : Fin 2))) }
-  spine_spineToSimplex {i} p := by
-    induction' n using SimplexCategory.rec with n
-    dsimp
-    ext j k : 3
-    · fin_cases k
-      rfl
-    · fin_cases k
-      · exact (DFunLike.congr_fun (p.arrow_src j) 0).symm
-      · exact (DFunLike.congr_fun (p.arrow_tgt j) 0).symm
-  spineToSimplex_spine x := by
-    induction' n using SimplexCategory.rec with n
-    ext
-    rfl
+instance (n : SimplexCategory) : (stdSimplex.{u}.obj n).IsStrictSegal where
+  segal d := by
+    let e : stdSimplex.{u}.obj n _⦋d⦌ ≃ (stdSimplex.{u}.obj n).Path d :=
+      { toFun := SSet.spine _ _
+        invFun v := objMk
+          { toFun i := obj₀Equiv (v.vertex i)
+            monotone' := by
+              induction' n using SimplexCategory.rec with n
+              rw [Fin.monotone_iff]
+              intro i
+              rw [← v.arrow_src i, ← v.arrow_tgt i]
+              exact (monotone_apply (v.arrow i) (Fin.zero_le (1 : Fin 2))) }
+        right_inv p := by
+          induction' n using SimplexCategory.rec with n
+          dsimp
+          ext j k : 3
+          · fin_cases k
+            rfl
+          · fin_cases k
+            · exact (DFunLike.congr_fun (p.arrow_src j) 0).symm
+            · exact (DFunLike.congr_fun (p.arrow_tgt j) 0).symm
+        left_inv _ := by
+          induction' n using SimplexCategory.rec with n
+          ext
+          rfl }
+    exact e.bijective
 
 @[ext]
 lemma path_ext {n i : ℕ} {x y : Path Δ[n] i} (h : x.vertex = y.vertex) : x = y := by
-  obtain ⟨v, a, h₁, h₂⟩ := x
-  obtain ⟨w, b, h₃, h₄⟩ := y
-  obtain rfl := h
+  obtain ⟨v : Fin _ → Δ[n] _⦋0⦌, a : Fin _ → Δ[n] _⦋1⦌, h₁, h₂⟩ := x
+  obtain ⟨w : Fin _ → Δ[n] _⦋0⦌, b : Fin _ → Δ[n] _⦋1⦌, h₃, h₄⟩ := y
+  replace h₁ (j : Fin i) : a j 0 = v j.castSucc 0 := by
+    have := h₁ j
+    rw [← this]
+    rfl
+  replace h₂ (j : Fin i) : a j 1 = v j.succ 0 := by
+    have := h₂ j
+    rw [← this]
+    rfl
+  replace h₃ (j : Fin i) : b j 0 = w j.castSucc 0 := by
+    have := h₃ j
+    rw [← this]
+    rfl
+  replace h₄ (j : Fin i) : b j 1 = w j.succ 0 := by
+    have := h₄ j
+    rw [← this]
+    rfl
+  dsimp [Path.vertex] at h
+  obtain rfl : v = w := h
   dsimp at h₃ h₄
-  simp only [Path.mk.injEq, true_and]
-  ext j k : 2
-  fin_cases k
-  · exact (DFunLike.congr_fun (h₁ j) 0).trans (DFunLike.congr_fun (h₃ j) 0).symm
-  · exact (DFunLike.congr_fun (h₂ j) 0).trans (DFunLike.congr_fun (h₄ j) 0).symm
+  obtain rfl : a = b := by
+    ext j k : 2
+    fin_cases k
+    · dsimp
+      rw [h₁, h₃]
+    · dsimp
+      rw [h₂, h₄]
+  rfl
 
 lemma mono_iff (n : ℕ) (f : Δ[n] ⟶ Y) :
     Mono f ↔ Function.Injective (f.app (op ⦋0⦌)):= by
@@ -187,7 +210,7 @@ lemma mono_iff (n : ℕ) (f : Δ[n] ⟶ Y) :
   · intro hf
     rw [mono_iff_of_strictSegal]
     intro x₁ x₂ h
-    apply StrictSegal.spineInjective
+    apply (IsStrictSegal.segal _).injective
     ext i : 2
     apply hf
     dsimp [StrictSegal.spineEquiv, spine]
@@ -484,8 +507,8 @@ lemma mem_nonDegenerate_iff_mono {d : ℕ} (x : (Δ[n] : SSet.{u}) _⦋d⦌) :
       dsimp at i f
       simp only [SimplexCategory.len_mk, SimplexCategory.mkHom,
         SimplexCategory.Hom.toOrderHom_mk] at hi
-      simp only [← mem_degenerate_iff_not_mem_nonDegenerate, degenerate_eq_iUnion_range_σ,
-        Set.iSup_eq_iUnion, Set.mem_iUnion, Set.mem_range]
+      simp only [← mem_degenerate_iff_notMem_nonDegenerate, degenerate_eq_iUnion_range_σ,
+        Set.mem_iUnion, Set.mem_range]
       refine ⟨i, objMk (f.comp (SimplexCategory.δ i.castSucc).toOrderHom), ?_⟩
       ext j : 1
       dsimp [SimplicialObject.σ, SimplexCategory.δ, SimplexCategory.σ]
@@ -494,12 +517,13 @@ lemma mem_nonDegenerate_iff_mono {d : ℕ} (x : (Δ[n] : SSet.{u}) _⦋d⦌) :
       · simpa [hj] using hi.symm
       · exact congr_arg f (Fin.succAbove_predAbove hj)
   · intro
-    rw [mem_nonDegenerate_iff_not_mem_degenerate, SSet.mem_degenerate_iff]
+    rw [mem_nonDegenerate_iff_notMem_degenerate, SSet.mem_degenerate_iff]
     rintro ⟨m, hm, p, _, ⟨g, hg⟩⟩
     obtain ⟨g, rfl⟩ := objEquiv.symm.surjective g
     simp only [map_apply, Quiver.Hom.unop_op, Equiv.apply_symm_apply,
       EmbeddingLike.apply_eq_iff_eq] at hg
-    have := SimplexCategory.le_of_mono (mono_of_mono_fac hg)
+    have := mono_of_mono_fac hg
+    have := SimplexCategory.le_of_mono p
     omega
 
 variable (n) in
@@ -606,10 +630,10 @@ instance : (Δ[n] : SSet.{u}).HasDimensionLT (n + 1) where
     ext x
     obtain ⟨f, rfl⟩ := objEquiv.symm.surjective x
     simp only [Set.top_eq_univ, Set.mem_univ, iff_true]
-    rw [mem_degenerate_iff_not_mem_nonDegenerate, mem_nonDegenerate_iff_mono,
+    rw [mem_degenerate_iff_notMem_nonDegenerate, mem_nonDegenerate_iff_mono,
       Equiv.apply_symm_apply]
     intro hf
-    have := SimplexCategory.le_of_mono (f := f) inferInstance
+    have := SimplexCategory.le_of_mono f
     omega
 
 lemma face_hasDimensionLT (S : Finset (Fin (n + 1))) (k : ℕ)

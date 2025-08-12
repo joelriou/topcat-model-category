@@ -8,7 +8,7 @@ namespace SSet
 
 namespace KanComplex
 
-variable (X : SSet.{0})
+variable (X : SSet.{u})
 
 instance : IsFibrant ((toTop ⋙ TopCat.toSSet).obj X) := by dsimp; infer_instance
 
@@ -17,7 +17,7 @@ instance [IsFibrant X] : IsFibrant ((𝟭 _).obj X) := by dsimp; infer_instance
 lemma W.sSetTopAdj_unit_app [IsFibrant X] :
     W (sSetTopAdj.unit.app X) := by
   revert X
-  suffices ∀ (n : ℕ), ∀ (X : SSet.{0}) [IsFibrant X] (x : X _⦋0⦌),
+  suffices ∀ (n : ℕ), ∀ (X : SSet.{u}) [IsFibrant X] (x : X _⦋0⦌),
       Function.Bijective (mapπ (sSetTopAdj.unit.app X) n x _ rfl) by
     intro X _
     have hX : IsFibrant ((𝟭 _).obj X) := by dsimp; infer_instance

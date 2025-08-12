@@ -1,6 +1,10 @@
 import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 import Mathlib.CategoryTheory.Limits.Shapes.Multiequalizer
-import Mathlib.CategoryTheory.Limits.Shapes.Types
+--import Mathlib.CategoryTheory.Limits.Shapes.Types
+import Mathlib.CategoryTheory.Limits.Set
+import Mathlib.CategoryTheory.Limits.Types.Colimits
+import Mathlib.CategoryTheory.Limits.Types.ColimitType
+import Mathlib.CategoryTheory.Limits.Types.Limits
 import Mathlib.CategoryTheory.MorphismProperty.Limits
 import Mathlib.Order.CompleteLattice.MulticoequalizerDiagram
 import Mathlib.Data.Set.Lattice
@@ -233,7 +237,7 @@ lemma fac_apply (i : ι) (u : U i) :
     desc s ⟨u, by simp only [← d.iSup_eq]; aesop⟩ = s.π i u :=
   congr_fun (s.condition ⟨index d _, i⟩) ⟨u, by
     dsimp
-    simp only [← d.min_eq, Set.inf_eq_inter, Set.mem_inter_iff, Subtype.coe_prop, and_true]
+    simp only [d.min_eq, Set.inf_eq_inter, Set.mem_inter_iff, Subtype.coe_prop, and_true]
     apply mem⟩
 
 end
@@ -279,7 +283,7 @@ noncomputable def isColimitMulticoforkMapSetToTypes' [LinearOrder ι] :
     (d.multicofork.map Set.functorToTypes) (isColimitMulticoforkMapSetToTypes _)
     { iso i j := Set.functorToTypes.mapIso (eqToIso (by
         dsimp
-        rw [← d.min_eq, ← d.min_eq, inf_comm]))
+        rw [d.min_eq, d.min_eq, inf_comm]))
       iso_hom_fst _ _ := rfl
       iso_hom_snd _ _ := rfl
       fst_eq_snd _ := rfl }
@@ -434,7 +438,7 @@ lemma cofanInj_apply_eq_iff_of_isColimit {i j : ι} (x : X i) (y : X j) :
   constructor; swap
   · rintro ⟨rfl, rfl⟩
     rfl
-  · let ρ := Relation.EqvGen (Quot.Rel (Discrete.functor X))
+  · let ρ := Relation.EqvGen (Discrete.functor X).ColimitTypeRel
     have hρ (x y) (h : ρ x y) : x = y := by
       induction h with
       | rel a b r =>
@@ -450,7 +454,8 @@ lemma cofanInj_apply_eq_iff_of_isColimit {i j : ι} (x : X i) (y : X j) :
     suffices ρ ⟨_, x⟩ ⟨_, y⟩ by
       have := hρ _ _ this
       aesop
-    exact Quot.eq.1 (((isColimit_iff_bijective_desc _).1 ⟨hc⟩).1 h)
+    exact Quot.eq.1
+      (((isColimit_iff_coconeTypesIsColimit _).1 ⟨hc⟩).bijective.1 h)
 
 lemma cofanInj_injective_of_isColimit (i : ι) :
     Function.Injective (c.inj i) := by
@@ -541,7 +546,7 @@ lemma preimage_image_eq_of_isPushout (sq : IsPushout t l r b) (ht : Function.Inj
 
 lemma injective_of_isPushout (sq : IsPushout t l r b) (ht : Function.Injective t) :
     Function.Injective b :=
-  Types.pushoutCocone_injective_inr_of_isColimit sq.isColimit ht
+  Types.pushoutCocone_inr_injective_of_isColimit sq.isColimit ht
 
 end
 

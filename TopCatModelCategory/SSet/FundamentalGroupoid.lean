@@ -9,7 +9,7 @@ import TopCatModelCategory.SSet.Monoidal
 universe u
 
 open HomotopicalAlgebra CategoryTheory Category Simplicial Limits MonoidalCategory
-  ChosenFiniteProducts SSet.modelCategoryQuillen
+  CartesianMonoidalCategory SSet.modelCategoryQuillen
 
 namespace SSet
 
@@ -550,7 +550,7 @@ variable {p q : Edge x₀ x₁} (h : Homotopy p q)
 lemma h_app_zero_of_fst_zero (x : Δ[1] _⦋0⦌) :
     h.h.app _ (⟨stdSimplex.obj₀Equiv.symm 0, x⟩) = x₀.pt := by
   have := (stdSimplex.leftUnitor _).inv ≫= boundary₁.ι₀ ▷ _ ≫= h.rel
-  rw [Category.assoc, ChosenFiniteProducts.whiskerRight_fst_assoc,
+  rw [Category.assoc, CartesianMonoidalCategory.whiskerRight_fst_assoc,
     boundary₁.ι₀_desc_assoc, yonedaEquiv_symm_zero, const_comp,
     FunctorToTypes.comp, Subpresheaf.ι_app, Subcomplex.topIso_inv_app_coe,
     comp_const, comp_const, ← comp_whiskerRight_assoc,
@@ -563,7 +563,7 @@ lemma h_app_zero_of_fst_zero (x : Δ[1] _⦋0⦌) :
 lemma h_app_zero_of_fst_one (x : Δ[1] _⦋0⦌) :
     h.h.app _ (⟨stdSimplex.obj₀Equiv.symm 1, x⟩) = x₁.pt := by
   have := (stdSimplex.leftUnitor _).inv ≫= boundary₁.ι₁ ▷ _ ≫= h.rel
-  rw [Category.assoc, ChosenFiniteProducts.whiskerRight_fst_assoc,
+  rw [Category.assoc, CartesianMonoidalCategory.whiskerRight_fst_assoc,
     boundary₁.ι₁_desc_assoc, yonedaEquiv_symm_zero, const_comp,
     FunctorToTypes.comp, Subpresheaf.ι_app, Subcomplex.topIso_inv_app_coe,
     comp_const, comp_const, ← comp_whiskerRight_assoc,
@@ -575,12 +575,12 @@ lemma h_app_zero_of_fst_one (x : Δ[1] _⦋0⦌) :
 
 @[simp]
 lemma h_app_obj₀Equiv_zero :
-    h.h.app _ (prodStdSimplex.obj₀Equiv.symm 0) = x₀.pt := by
+    h.h.app _ (prodStdSimplex.obj₀Equiv.symm ⟨0, 0⟩) = x₀.pt := by
   apply h_app_zero_of_fst_zero
 
 @[simp]
 lemma h_app_obj₀Equiv_one :
-    h.h.app _ (prodStdSimplex.obj₀Equiv.symm 1) = x₁.pt := by
+    h.h.app _ (prodStdSimplex.obj₀Equiv.symm ⟨1, 1⟩) = x₁.pt := by
   apply h_app_zero_of_fst_one
 
 noncomputable abbrev diagonal : Edge x₀ x₁ :=
@@ -666,7 +666,7 @@ end Edge
 def Hom.id (x : FundamentalGroupoid X) : Hom x x :=
   (Edge.id x).homotopyClass
 
-def Hom.map {x₀ x₁ : FundamentalGroupoid X}
+noncomputable def Hom.map {x₀ x₁ : FundamentalGroupoid X}
     (p : Hom x₀ x₁) {Y : SSet.{u}} (f : X ⟶ Y) :
     Hom (x₀.map f) (x₁.map f) :=
   p.postcomp (Subcomplex.RelativeMorphism.ofHom f) (by
@@ -830,14 +830,13 @@ open FundamentalGroupoid
 variable {X} {Y : SSet.{u}} [IsFibrant X] [IsFibrant Y] (f : X ⟶ Y)
 
 @[simps! -isSimp obj_pt map]
-def mapFundamentalGroupoid :
+noncomputable def mapFundamentalGroupoid :
     FundamentalGroupoid X ⥤ FundamentalGroupoid Y where
   obj x := x.map f
   map {x₀ x₁} g := g.map f
   map_id x := by
     simp only [← homMk_refl, map_homMk, Edge.id_pushforward]
   map_comp {x₀ x₁ x₂} f₀₁ f₁₂ := by
-    dsimp only
     obtain ⟨p₀₁, rfl⟩ := homMk_surjective f₀₁
     obtain ⟨p₁₂, rfl⟩ := homMk_surjective f₁₂
     exact ((Edge.compStruct p₀₁ p₁₂).pushforward f).fac.symm

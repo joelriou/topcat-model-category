@@ -29,9 +29,7 @@ lemma objOfToTopObj_last : objOfToTopObj s (Fin.last _) = 1 := by
   rw [Subtype.ext_iff] at hs
   simp only [val_eq_coe, coe_sum, coe_one] at hs
   rw [← hs, objOfToTopObj]
-  congr
-  ext i
-  simpa using i.castSucc_lt_last
+  aesop
 
 @[simp]
 lemma objOfToTopObj_succ (i : Fin (n.len + 1)) :
@@ -49,7 +47,7 @@ lemma monotone_objOfToTopObj : Monotone (objOfToTopObj s) := by
 
 lemma objOfToTopObj_mem_unitInterval (i : Fin (n.len + 2)) :
     objOfToTopObj s i ∈ unitInterval := by
-  simp only [Fin.coe_eq_castSucc, Set.mem_Icc]
+  simp only [Set.mem_Icc]
   constructor
   · rw [← objOfToTopObj_zero s]
     exact monotone_objOfToTopObj _ (Fin.zero_le _)
@@ -100,15 +98,13 @@ lemma isHomeomorph_objUnitInterval (n : SimplexCategory) :
       rw [Subtype.ext_iff]
       simp only [val_eq_coe, coe_sum, coe_mk, coe_one, s]
       convert this using 1
-      congr
-      ext i
-      simpa using i.castSucc_lt_last
+      aesop
 
 noncomputable def objUnitIntervalHomeomorph (n : SimplexCategory) :
      SimplexCategory.toTopObj n ≃ₜ obj unitInterval n :=
   (isHomeomorph_objUnitInterval n).homeomorph
 
-noncomputable def toTopIso : SimplexCategory.toTop ≅ cosimp unitInterval :=
+noncomputable def toTopIso : SimplexCategory.toTop₀ ≅ cosimp unitInterval :=
   NatIso.ofComponents (fun n ↦ TopCat.isoOfHomeo (objUnitIntervalHomeomorph _)) (fun {n m} g ↦ by
     ext f
     dsimp [objUnitIntervalHomeomorph] at f ⊢

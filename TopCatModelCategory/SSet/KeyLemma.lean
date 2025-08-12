@@ -12,7 +12,7 @@ open modelCategoryQuillen
 
 namespace KanComplex
 
-lemma W_iff_weakEquivalence {X Y : SSet.{0}} [IsFibrant X] [IsFibrant Y] (f : X ⟶ Y) :
+lemma W_iff_weakEquivalence {X Y : SSet.{u}} [IsFibrant X] [IsFibrant Y] (f : X ⟶ Y) :
     W f ↔ WeakEquivalence f := by
   rw [weakEquivalence_iff, TopCat.modelCategory.weakEquivalence_iff,
     ← W.postcomp_iff _ _ (W.sSetTopAdj_unit_app Y),
@@ -25,7 +25,7 @@ namespace modelCategoryQuillen
 
 namespace rlp_I
 
-variable {E B : SSet.{0}} {p : E ⟶ B} (hp : I.rlp p)
+variable {E B : SSet.{u}} {p : E ⟶ B} (hp : I.rlp p)
 
 include hp
 
@@ -133,7 +133,8 @@ end rlp_I
 open MorphismProperty
 
 open TopCat.modelCategory in
-lemma weakEquivalence_of_fibration_of_isPullback {E' E B' B : SSet.{0}}
+
+lemma weakEquivalence_of_fibration_of_isPullback {E' E B' B : SSet.{u}}
     {t : E' ⟶ E} {l : E' ⟶ B'} {r : E ⟶ B} {b : B' ⟶ B}
     [WeakEquivalence r] [Fibration r]
     (sq : IsPullback t l r b) : WeakEquivalence l := by
@@ -146,7 +147,7 @@ lemma weakEquivalence_of_fibration_of_isPullback {E' E B' B : SSet.{0}}
   rwa [HomotopicalAlgebra.weakEquivalence_iff]
 
 lemma weakEquivalence_iff_of_fibration
-    {E B : SSet.{0}} (p : E ⟶ B) [Fibration p] :
+    {E B : SSet.{u}} (p : E ⟶ B) [Fibration p] :
     I.rlp p ↔ WeakEquivalence p :=
   ⟨rlp_I.weakEquivalence, by
     wlog _ : MinimalFibration p generalizing E with H

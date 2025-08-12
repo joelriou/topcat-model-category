@@ -142,7 +142,7 @@ lemma objMk₁_surjective {n : ℕ} : Function.Surjective (objMk₁ (n := n)) :=
       · exact hj.symm
       · exfalso
         exact hi (by simpa [S])
-    · simp only [Fin.castSucc_lt_castSucc_iff, Finset.lt_min'_iff, not_forall, Classical.not_imp,
+    · simp only [Fin.castSucc_lt_castSucc_iff, Finset.lt_min'_iff, not_forall,
         not_lt] at h
       obtain ⟨j, hj, hij⟩ := h
       replace hj : f j = 1 := by simpa [S] using hj
@@ -272,11 +272,11 @@ lemma subsimplex_le_subsimplex_iff {n m : ℕ}
 lemma objEquiv_nonDegenerate_iff {n : ℕ} (z : (Δ[p] ⊗ Δ[q] : SSet.{u}) _⦋n⦌) :
     z ∈ (Δ[p] ⊗ Δ[q]).nonDegenerate n ↔ Function.Injective (objEquiv z) := by
   rw [Fin.orderHom_injective_iff, ← not_iff_not,
-    ← mem_degenerate_iff_not_mem_nonDegenerate]
+    ← mem_degenerate_iff_notMem_nonDegenerate]
   simp only [not_forall, ne_eq, Decidable.not_not]
   obtain _ | n := n
   · simp
-  · simp only [degenerate_eq_iUnion_range_σ, Set.iSup_eq_iUnion, Set.mem_iUnion, Set.mem_range]
+  · simp only [degenerate_eq_iUnion_range_σ, Set.mem_iUnion, Set.mem_range]
     apply exists_congr
     intro i
     constructor
@@ -356,7 +356,7 @@ instance : (Δ[p] ⊗ Δ[q] : SSet.{u}).HasDimensionLT (p + q + 1) where
   degenerate_eq_top n hn := by
     ext x
     simp only [Set.top_eq_univ, Set.mem_univ, iff_true,
-      mem_degenerate_iff_not_mem_nonDegenerate]
+      mem_degenerate_iff_notMem_nonDegenerate]
     intro hx
     have := Fintype.card_le_of_injective _
       ((strictMono_orderHomOfSimplex ⟨x, hx⟩ rfl).injective)
@@ -426,16 +426,20 @@ lemma _root_.Fin.prod_exists_intermediate (k₀ k₂ : Fin (p + 1) × Fin (q + 1
     · exact ⟨⟨x₀, y₂⟩, by aesop⟩
     · obtain ⟨x₂', rfl⟩ := x₂.eq_succ_of_ne_zero (fun hx₂ ↦ by
         rw [Fin.ext_iff] at hx₂
-        dsimp at hx₂
-        omega)
+        simp at hx₂
+        rw [hx₂] at hx'
+        simp at hx')
       refine ⟨⟨x₂'.castSucc, y₀⟩, ?_⟩
       rw [Fin.val_succ] at h
       simp [Fin.lt_iff_val_lt_val]
       omega
   · obtain ⟨y₂', rfl⟩ := y₂.eq_succ_of_ne_zero (fun hy₂ ↦ by
       rw [Fin.ext_iff] at hy₂
-      dsimp at hy₂
-      omega)
+      simp only [Fin.coe_ofNat_eq_mod, Nat.zero_mod, Fin.val_eq_zero_iff] at hy₂
+      subst hy₂
+      simp only [Fin.le_zero_iff] at hy
+      subst hy
+      simp at h)
     refine ⟨⟨x₀, y₂'.castSucc⟩, ?_⟩
     rw [Fin.val_succ] at h
     simp [Fin.lt_iff_val_lt_val]
@@ -480,13 +484,13 @@ lemma nondegenerate_mem_ofSimplex_aux {d : ℕ}
       erw [yonedaEquiv_symm_app_apply, Equiv.apply_symm_apply, objEquiv_map_apply,
         Equiv.apply_symm_apply]
       dsimp [SimplexCategory.δ]
-      rw [← Fin.succ_castSucc, Fin.insert_apply_succAbove]
+      rw [Fin.succ_castSucc, Fin.insert_apply_succAbove]
   · simp only [Finset.not_nonempty_iff_eq_empty] at hS
     have h := Fin.strictMono_insert_last (objEquiv x.1)
       (strictMono_of_nonDegenerate x) ⟨Fin.last _, Fin.last _⟩ (by
         rw [_root_.Fin.prod_lt_last_last_iff]
         refine lt_of_le_of_lt ?_ hd
-        simpa [← hS, S] using Finset.not_mem_empty (Fin.last d))
+        simpa [← hS, S] using Finset.notMem_empty (Fin.last d))
     refine ⟨⟨_, (objEquiv_nonDegenerate_iff
       (objEquiv.{u}.symm ⟨_, h.monotone⟩)).2 h.injective⟩,
       stdSimplex.objEquiv.symm
@@ -610,7 +614,7 @@ noncomputable def nonDegenerateEquiv₁ :
       · exact ⟨i, nonDegenerate_ext (add_comm _ _) hi⟩
       · replace hi : x.1.1 (Fin.last _) = 0 := by
           rw [hi.symm]
-          simp [stdSimplex.objMk₁, Fin.ext_iff]
+          simp [stdSimplex.objMk₁]
         have := DFunLike.congr_fun hx (Fin.last _)
         dsimp at this
         simp only [hi, Fin.isValue, Fin.val_zero, zero_add, Fin.ext_iff, Fin.val_last] at this

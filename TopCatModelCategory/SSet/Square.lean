@@ -20,17 +20,17 @@ lemma Fin.range_eq_insert {α : Type*} (f : Fin (n + 1) → α) :
 
 lemma Fin.range₂ {α : Type*} (f : Fin 2 → α) :
     Set.range f = {f 0, f 1} := by
-  simp [Fin.range_eq_insert, Fin.range₁]
+  simp [Fin.range_eq_insert]
 
 lemma Fin.range₃ {α : Type*} (f : Fin 3 → α) :
     Set.range f = {f 0, f 1, f 2} := by
-  simp [Fin.range_eq_insert, Fin.range₂]
+  simp [Fin.range_eq_insert]
 
 namespace SSet
 
 namespace square
 
-open ChosenFiniteProducts
+open CartesianMonoidalCategory
 
 noncomputable def ιTriangle₀ : (Δ[2] : SSet.{u}) ⟶ Δ[1] ⊗ Δ[1] :=
   yonedaEquiv.symm (prodStdSimplex.nonDegenerateEquiv₁ (q := 1) 0).1

@@ -113,7 +113,7 @@ lemma preservesColimit (X : π.Cat) (hX : X ∈ π.S) {A B : T} (f : A ⟶ B)
   have := π.preservesColimit' X hX f hf'
   let e := Cardinal.aleph0OrdToTypeOrderIso.{w}.equivalence
   have : hf.F ≅ e.functor ⋙ hf'.F :=
-    (Functor.leftUnitor _).symm ≪≫ isoWhiskerRight e.unitIso hf.F ≪≫
+    (Functor.leftUnitor _).symm ≪≫ Functor.isoWhiskerRight e.unitIso hf.F ≪≫
       Functor.associator _ _ _
   apply preservesColimit_of_iso_diagram _ this.symm
 

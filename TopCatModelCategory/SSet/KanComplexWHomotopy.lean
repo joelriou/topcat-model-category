@@ -5,7 +5,7 @@ import TopCatModelCategory.SSet.DeformationRetract
 universe u
 
 open CategoryTheory HomotopicalAlgebra Simplicial SSet.modelCategoryQuillen
-  ChosenFiniteProducts MonoidalCategory
+  CartesianMonoidalCategory MonoidalCategory
 
 namespace SSet
 

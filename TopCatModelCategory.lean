@@ -14,6 +14,7 @@ import TopCatModelCategory.II
 import TopCatModelCategory.IsFibrant
 import TopCatModelCategory.Iso
 import TopCatModelCategory.JoyalTrickDual
+import TopCatModelCategory.LeftKanExtensionAlongUliftYoneda
 import TopCatModelCategory.LiftingProperties
 import TopCatModelCategory.ModelCategory
 import TopCatModelCategory.ModelCategoryCopy
@@ -102,6 +103,7 @@ import TopCatModelCategory.SSet.StrictSegal
 import TopCatModelCategory.SSet.Subcomplex
 import TopCatModelCategory.SSet.Subdivision
 import TopCatModelCategory.SSet.ToTopFibration
+import TopCatModelCategory.SSet.ULift
 import TopCatModelCategory.Set
 import TopCatModelCategory.SimplicialPresheaves.LocalLiftingProperty
 import TopCatModelCategory.TopCat.Adj
@@ -121,6 +123,7 @@ import TopCatModelCategory.TopCat.IsQuotientMap
 import TopCatModelCategory.TopCat.Monoidal
 import TopCatModelCategory.TopCat.T1Inclusion
 import TopCatModelCategory.TopCat.ToTopExact
+import TopCatModelCategory.TopCat.ToTopULift
 import TopCatModelCategory.TopCat.TopologyOrderHom
 import TopCatModelCategory.TopCat.W
 import TopCatModelCategory.TopCatIsColimit

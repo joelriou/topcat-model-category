@@ -128,8 +128,8 @@ lemma mk_map_eq_iff_of_mono {n m : ℕ} (x : X _⦋n⦌)
   · intro hf
     obtain rfl : n = m :=
       le_antisymm
-        (SimplexCategory.len_le_of_epi (f := f) inferInstance)
-        (SimplexCategory.len_le_of_mono (f := f) inferInstance)
+        (SimplexCategory.len_le_of_epi f)
+        (SimplexCategory.len_le_of_mono f)
     obtain rfl := SimplexCategory.eq_id_of_isIso f
     simp
 
