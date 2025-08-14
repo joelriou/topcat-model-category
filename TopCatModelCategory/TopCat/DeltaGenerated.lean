@@ -16,17 +16,27 @@ def deltaCoreflection : TopCat.{u} ⥤ TopCat.{u} :=
 def fromDeltaCoreflection : deltaCoreflection ⟶ 𝟭 TopCat.{u} :=
   coreflectorAdjunction.counit
 
-namespace DeltaGenerated
-
-variable {X Y : TopCat.{u}}
+instance (Z : TopCat.{u}) : DeltaGeneratedSpace (deltaCoreflection.obj Z) := by
+  dsimp [deltaCoreflection]
+  infer_instance
 
 instance (Z : DeltaGenerated.{u}) :
     IsIso (fromDeltaCoreflection.app (deltaGeneratedToTop.obj Z)) := by
   dsimp only [fromDeltaCoreflection]
   infer_instance
 
-instance [DeltaGeneratedSpace X] : IsIso (fromDeltaCoreflection.app X) :=
+instance {X : TopCat.{u}} [DeltaGeneratedSpace X] :
+    IsIso (fromDeltaCoreflection.app X) :=
   inferInstanceAs (IsIso (fromDeltaCoreflection.app (deltaGeneratedToTop.obj (.of X))))
+
+lemma deltaGeneratedSpace_iff_isIso_fromDeltaCoreflection_app (X : TopCat.{u}) :
+    DeltaGeneratedSpace X ↔ IsIso (fromDeltaCoreflection.app X) :=
+  ⟨fun _ ↦ inferInstance, fun _ ↦
+    (homeoOfIso (asIso (fromDeltaCoreflection.app X))).isQuotientMap.deltaGeneratedSpace⟩
+
+namespace DeltaGenerated
+
+variable {X Y : TopCat.{u}}
 
 variable [DeltaGeneratedSpace X]
 
