@@ -1,7 +1,7 @@
 import Mathlib.AlgebraicTopology.SimplicialSet.Basic
 import TopCatModelCategory.SSet.Subcomplex
 
-open CategoryTheory
+open CategoryTheory Simplicial
 
 universe u
 
