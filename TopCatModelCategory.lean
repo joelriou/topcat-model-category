@@ -117,6 +117,7 @@ import TopCatModelCategory.TopCat.CosimpInterior
 import TopCatModelCategory.TopCat.CosimpIso
 import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
 import TopCatModelCategory.TopCat.DeformationRetract
+import TopCatModelCategory.TopCat.DeltaGenerated
 import TopCatModelCategory.TopCat.Glueing
 import TopCatModelCategory.TopCat.HornDeformationRetract
 import TopCatModelCategory.TopCat.IsQuotientMap
