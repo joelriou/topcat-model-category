@@ -67,12 +67,23 @@ noncomputable def ihomObjIso : (ihom (∂Δ[1] : SSet.{u})).obj X ≅ X ⊗ X wh
         Category.comp_id]
       rfl
 
+@[reassoc (attr := simp)]
+lemma ihomObjIso_hom_fst :
+    (ihomObjIso.{u} X).hom ≫ fst _ _ = ((pre ι₀).app X ≫ stdSimplex.ihom₀.hom.app X) := rfl
+
+@[reassoc (attr := simp)]
+lemma ihomObjIso_hom_snd :
+    (ihomObjIso.{u} X).hom ≫ snd _ _ = ((pre ι₁).app X ≫ stdSimplex.ihom₀.hom.app X) := rfl
+
 end boundary₁
 
 lemma pre_boundary_ι_app_comp_boundary₁_ihomObjIso :
     (pre ∂Δ[1].ι).app X ≫ (boundary₁.ihomObjIso X).hom = X.pathEv₀₁ := by
   ext : 1
-  · sorry
+  · dsimp [pathEv₀]
+    rw [Category.assoc, boundary₁.ihomObjIso_hom_fst, ← NatTrans.comp_app_assoc, ← pre_map,
+      boundary₁.ι₀_ι]
+    sorry
   · sorry
 
 noncomputable def arrowMkPathEv₀₁Iso : Arrow.mk X.pathEv₀₁ ≅ Arrow.mk ((pre ∂Δ[1].ι).app X) :=
