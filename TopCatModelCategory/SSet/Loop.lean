@@ -13,6 +13,35 @@ open CategoryTheory Monoidal Simplicial MonoidalCategory MonoidalClosed
 
 namespace SSet
 
+namespace stdSimplex
+
+-- by E. Riehl
+instance {α : Type*} (β : Type*) [PartialOrder α] [PartialOrder β] [DecidableEq (α → β)] :
+    DecidableEq (α →o β) := fun a b =>
+  decidable_of_iff (a.toFun = b.toFun) OrderHom.ext_iff.symm
+
+-- by E. Riehl
+instance {n m : ℕ} : DecidableEq (⦋n⦌ ⟶ ⦋m⦌) := fun a b =>
+  decidable_of_iff (a.toOrderHom = b.toOrderHom) SimplexCategory.Hom.ext_iff.symm
+
+instance {n d : ℕ} : DecidableEq (Δ[n] _⦋d⦌) := fun a b ↦
+  decidable_of_iff (objEquiv a = objEquiv b) (by simp)
+
+instance {X : SSet} (d : ℕ) [DecidableEq (X _⦋d⦌)] : DecidableEq (Δ[d] ⟶ X) := fun a b ↦
+  decidable_of_iff (yonedaEquiv a = yonedaEquiv b) (by simp)
+
+instance {n m : ℕ} : DecidableEq (Δ[n] ⟶ Δ[m]) := inferInstance
+
+lemma δ_one :
+    stdSimplex.δ (1 : Fin 2) = yonedaEquiv.symm (const _ 0 _) := by
+  decide
+
+lemma δ_zero :
+    stdSimplex.δ (0 : Fin 2) = yonedaEquiv.symm (const _ 1 _) := by
+  decide
+
+end stdSimplex
+
 variable (X : SSet.{u})
 
 instance (A : SSet.{u}) (a : A _⦋0⦌) [IsFibrant X] :
@@ -82,9 +111,11 @@ lemma pre_boundary_ι_app_comp_boundary₁_ihomObjIso :
   ext : 1
   · dsimp [pathEv₀]
     rw [Category.assoc, boundary₁.ihomObjIso_hom_fst, ← NatTrans.comp_app_assoc, ← pre_map,
-      boundary₁.ι₀_ι]
-    sorry
-  · sorry
+      boundary₁.ι₀_ι, stdSimplex.δ_one]
+    rfl
+  · rw [Category.assoc, boundary₁.ihomObjIso_hom_snd, ← NatTrans.comp_app_assoc, ← pre_map,
+      boundary₁.ι₁_ι, stdSimplex.δ_zero]
+    rfl
 
 noncomputable def arrowMkPathEv₀₁Iso : Arrow.mk X.pathEv₀₁ ≅ Arrow.mk ((pre ∂Δ[1].ι).app X) :=
   Iso.symm (Arrow.isoMk (Iso.refl _) (boundary₁.ihomObjIso X) (by
@@ -112,6 +143,10 @@ lemma constPath_eq : X.constPath x = ihom₀Equiv.symm (const x) :=
   simp [pathEv₁, constPath_eq, ihomEv_app_app_ihom₀Equiv_symm]
 
 noncomputable abbrev path₀ : Subcomplex X.path := Subcomplex.fiber X.pathEv₀ x
+
+@[reassoc (attr := simp)]
+lemma path₀_ι_pathEv₀ : (X.path₀ x).ι ≫ X.pathEv₀ = const x := by
+  simp [path₀]
 
 def loop : Subcomplex X.path := X.path₀ x ⊓ Subcomplex.fiber X.pathEv₁ x
 
