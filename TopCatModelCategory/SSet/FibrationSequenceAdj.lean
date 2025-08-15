@@ -14,7 +14,7 @@ namespace FibrationSequence
 
 variable (seq : FibrationSequence.{u})
 
-instance : IsIso (sSetTopAdj.unit.app Δ[0]) :=
+instance : IsIso (sSetTopAdj.{u}.unit.app Δ[0]) :=
   ⟨stdSimplex.isTerminalObj₀.from _, by simp,
     (stdSimplex.isTerminalObj₀.isTerminalObj (SSet.toTop ⋙ TopCat.toSSet)).hom_ext _ _⟩
 
@@ -33,12 +33,12 @@ noncomputable def toTopToSSet : FibrationSequence where
   he := by simp only [← seq.he, ← FunctorToTypes.comp,
       Adjunction.unit_naturality]
   isPullback :=
-    sorry /-(seq.isPullback.map (SSet.toTop ⋙ TopCat.toSSet)).of_iso (Iso.refl _) (Iso.refl _)
+    (seq.isPullback.map (SSet.toTop ⋙ TopCat.toSSet)).of_iso (Iso.refl _) (Iso.refl _)
       (IsTerminal.uniqueUpToIso
         (stdSimplex.isTerminalObj₀.isTerminalObj (SSet.toTop ⋙ TopCat.toSSet))
         stdSimplex.isTerminalObj₀) (Iso.refl _) (by simp)
         (stdSimplex.isTerminalObj₀.hom_ext _ _) (by simp)
-        (by simp [← cancel_epi (sSetTopAdj.unit.app Δ[0])])-/
+        (by simp [← cancel_epi (sSetTopAdj.{u}.unit.app Δ[0])])
 
 instance : IsFibrant (seq.toTopToSSet.B) := by
   dsimp

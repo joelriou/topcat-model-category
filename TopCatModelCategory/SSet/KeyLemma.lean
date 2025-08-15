@@ -133,16 +133,16 @@ end rlp_I
 open MorphismProperty
 
 open TopCat.modelCategory in
-
 lemma weakEquivalence_of_fibration_of_isPullback {E' E B' B : SSet.{u}}
     {t : E' ⟶ E} {l : E' ⟶ B'} {r : E ⟶ B} {b : B' ⟶ B}
     [WeakEquivalence r] [Fibration r]
     (sq : IsPullback t l r b) : WeakEquivalence l := by
   have ⟨hl, _⟩ : trivialFibrations _ (toTop.map l) := by
-    sorry
-    --apply MorphismProperty.of_isPullback (sq.map toTop)
-    --rw [mem_trivialFibrations_iff]
-    --constructor <;> infer_instance
+    rw [← TopCat.mem_trivialFibrations_deltaCoreflection_map_iff]
+    apply MorphismProperty.of_isPullback (sq.map (toTop ⋙ TopCat.deltaCoreflection))
+    rw [mem_trivialFibrations_iff]
+    dsimp
+    constructor <;> infer_instance
   rw [weakEquivalence_iff]
   rwa [HomotopicalAlgebra.weakEquivalence_iff]
 

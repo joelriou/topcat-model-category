@@ -100,4 +100,15 @@ lemma fibration_deltaCoreflection_map_iff (f : X ⟶ Y) :
   rw [← fibration_toSSet_map_iff, ← fibration_toSSet_map_iff, fibration_iff, fibration_iff]
   exact MorphismProperty.arrow_mk_iso_iff _ (deltaCoreflectionToSSetArrowIso f)
 
+instance (f : X ⟶ Y) [WeakEquivalence f] : WeakEquivalence (deltaCoreflection.map f) := by
+  rwa [weakEquivalence_deltaCoreflection_map_iff]
+
+instance (f : X ⟶ Y) [Fibration f] : Fibration (deltaCoreflection.map f) := by
+  rwa [fibration_deltaCoreflection_map_iff]
+
+lemma mem_trivialFibrations_deltaCoreflection_map_iff (f : X ⟶ Y) :
+    trivialFibrations _ (deltaCoreflection.map f) ↔ trivialFibrations _ f := by
+  simp [mem_trivialFibrations_iff, fibration_deltaCoreflection_map_iff,
+    weakEquivalence_deltaCoreflection_map_iff]
+
 end TopCat

@@ -31,16 +31,17 @@ instance {E B : SSet.{u}} (p : E ⟶ B) [MinimalFibration p] :
 lemma fibration_toTop_map_of_trivialBundles {E B : SSet.{u}} (p : E ⟶ B)
     (hp : trivialBundles p) :
     Fibration (toTop.map p) := by
-  sorry
-  --simp only [trivialBundles, iSup_iff] at hp
-  --obtain ⟨F, ⟨h⟩⟩ := hp
-  --have hF : Fibration (toTop.map (stdSimplex.isTerminalObj₀.from F)) := by
-  --  rw [← isFibrant_iff_of_isTerminal _
-  --    (IsTerminal.isTerminalObj _ _ stdSimplex.isTerminalObj₀)]
-  --  infer_instance
-  --have sq := (h.isPullback_of_isTerminal stdSimplex.isTerminalObj₀).map toTop
-  --rw [HomotopicalAlgebra.fibration_iff] at hF ⊢
-  --exact MorphismProperty.of_isPullback sq hF
+  simp only [trivialBundles, iSup_iff] at hp
+  obtain ⟨F, ⟨h⟩⟩ := hp
+  have hF : Fibration (toTop.map (stdSimplex.isTerminalObj₀.from F)) := by
+    rw [← isFibrant_iff_of_isTerminal _
+      (IsTerminal.isTerminalObj _ _ stdSimplex.isTerminalObj₀)]
+    infer_instance
+  rw [← TopCat.fibration_deltaCoreflection_map_iff,
+    HomotopicalAlgebra.fibration_iff] at hF ⊢
+  exact MorphismProperty.of_isPullback
+    ((h.isPullback_of_isTerminal stdSimplex.isTerminalObj₀).map
+      (toTop ⋙ TopCat.deltaCoreflection)) hF
 
 lemma fibration_toTop_map_of_rlp_I {E B : SSet.{u}} {p : E ⟶ B} (hp : I.rlp p) :
     Fibration (toTop.map p) := by

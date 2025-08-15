@@ -32,6 +32,10 @@ lemma weakEquivalence_iff {X Y : SSet.{u}} (f : X ⟶ Y) :
   simp only [HomotopicalAlgebra.weakEquivalence_iff]
   rfl
 
+instance {X Y : SSet.{u}} (f : X ⟶ Y) [WeakEquivalence f] :
+    WeakEquivalence (toTop.map f) := by
+  rwa [← weakEquivalence_iff]
+
 instance : (weakEquivalences SSet).HasTwoOutOfThreeProperty := by
   rw [weakEquivalences_eq]
   infer_instance
