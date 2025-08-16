@@ -41,6 +41,10 @@ variable {X} (A : NonemptyFiniteChains X)
 
 instance nonempty : Nonempty A.1 := A.2.1
 
+@[ext]
+lemma ext {A B : NonemptyFiniteChains X} (h : A.1 = B.1) : A = B := by
+  rwa [Subtype.ext_iff]
+
 instance : PartialOrder (NonemptyFiniteChains X) := Subtype.partialOrder _
 
 @[simp]
@@ -65,6 +69,30 @@ lemma le_max (x : A.1) : x ≤ A.max :=
 noncomputable def orderHomMax : NonemptyFiniteChains X →o X where
   toFun A := A.max.1
   monotone' A B h := B.le_max ⟨A.max, h A.max.2⟩
+
+section
+
+variable {X Y Z : Type*} [PartialOrder X] [PartialOrder Y] [PartialOrder Z]
+
+noncomputable def map (s : NonemptyFiniteChains X) (f : X →o Y) : NonemptyFiniteChains Y := by
+  classical
+  refine ⟨Finset.image f s.1, ⟨⟨f s.nonempty.some.1, by aesop⟩⟩, fun ⟨y₁, hy₁⟩ ⟨y₂, hy₂⟩ ↦ ?_⟩
+  simp only [Finset.mem_image] at hy₁ hy₂
+  obtain ⟨x₁, hx₁, rfl⟩ := hy₁
+  obtain ⟨x₂, hx₂, rfl⟩ := hy₂
+  obtain h | h := s.2.2 ⟨_, hx₁⟩ ⟨_, hx₂⟩
+  · exact Or.inl (f.2 h)
+  · exact Or.inr (f.2 h)
+
+@[simp]
+lemma mem_map_iff (s : NonemptyFiniteChains X) (f : X →o Y) (y : Y) :
+    y ∈ (s.map f).1 ↔ ∃ x, x ∈ s.1 ∧ f x = y := by
+  simp [map]
+
+lemma monotone_map (f : X →o Y) :
+    Monotone (fun s ↦ map s f) := sorry
+
+end
 
 end NonemptyFiniteChains
 
@@ -233,3 +261,14 @@ open SSet
 end NonemptyFiniteChains
 
 end PartialOrder
+
+open PartialOrder
+
+noncomputable def PartOrd.nonemptyFiniteChainsFunctor : PartOrd.{u} ⥤ PartOrd.{u} where
+  obj X := .of (NonemptyFiniteChains X)
+  map f := PartOrd.ofHom ⟨_, NonemptyFiniteChains.monotone_map f.hom⟩
+
+@[simps]
+def PartOrd.nerveFunctor : PartOrd.{u} ⥤ SSet.{u} where
+  obj X := nerve X
+  map f := nerveMap f.hom.monotone.functor
