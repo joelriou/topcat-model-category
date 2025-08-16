@@ -78,6 +78,7 @@ import TopCatModelCategory.SSet.Monoidal
 import TopCatModelCategory.SSet.Monomorphisms
 import TopCatModelCategory.SSet.NonDegenerateProdSimplex
 import TopCatModelCategory.SSet.NonDegenerateSimplices
+import TopCatModelCategory.SSet.NonemptyFiniteChains
 import TopCatModelCategory.SSet.Pairing
 import TopCatModelCategory.SSet.PairingCore
 import TopCatModelCategory.SSet.PairingSubdivision
@@ -101,7 +102,6 @@ import TopCatModelCategory.SSet.Square
 import TopCatModelCategory.SSet.StandardSimplex
 import TopCatModelCategory.SSet.StrictSegal
 import TopCatModelCategory.SSet.Subcomplex
-import TopCatModelCategory.SSet.Subdivision
 import TopCatModelCategory.SSet.ToTopFibration
 import TopCatModelCategory.SSet.ULift
 import TopCatModelCategory.Set

@@ -1,5 +1,5 @@
 import TopCatModelCategory.SSet.Pairing
-import TopCatModelCategory.SSet.Subdivision
+import TopCatModelCategory.SSet.NonemptyFiniteChains
 
 universe u
 
