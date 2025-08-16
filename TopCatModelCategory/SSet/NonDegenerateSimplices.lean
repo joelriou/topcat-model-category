@@ -205,6 +205,12 @@ lemma toN_eq {n : ℕ} (x : X _⦋n⦌) (y : X.N) (f : ⦋n⦌ ⟶ ⦋y.1.1⦌) 
 lemma toN_surjective (s : X.N) : ∃ (n : ℕ) (x : X.nonDegenerate n), s = X.toN x.1 :=
   ⟨s.1.1, ⟨_, s.2⟩, (X.toN_eq _ _ (𝟙 _) (by simp)).symm⟩
 
+lemma self_le_toN (s : X.S) : s ≤ (X.toN s.simplex).toS := by
+  rw [S.le_iff, ofSimplex_toN]
+
+lemma toN_le_self (s : X.S) : (X.toN s.simplex).toS ≤ s := by
+  rw [S.le_iff, ofSimplex_toN]
+
 end
 
 namespace isColimitCoconeN

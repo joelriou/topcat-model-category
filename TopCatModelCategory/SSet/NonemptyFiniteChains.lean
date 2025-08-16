@@ -269,7 +269,7 @@ section
 
 variable {X : Type u} [PartialOrder X]
 
-noncomputable def ofN (s : (nerve X).N) : NonemptyFiniteChains X :=
+noncomputable def ofS (s : (nerve X).S) : NonemptyFiniteChains X :=
   ⟨by
     classical
     exact Finset.univ.image s.simplex.obj, ⟨s.simplex.obj 0, by simp⟩, fun ⟨x, hx⟩ ⟨y, hy⟩ ↦ by
@@ -281,10 +281,68 @@ noncomputable def ofN (s : (nerve X).N) : NonemptyFiniteChains X :=
       · exact Or.inr (s.simplex.monotone h)⟩
 
 @[simp]
-lemma ofN_le_ofN_iff {s t : (nerve X).N} : (ofN s).1 ⊆ (ofN t).1 ↔ s ≤ t := sorry
+lemma mem_ofS_iff (s : (nerve X).S) (x : X):
+    x ∈ (ofS s).1 ↔ x ∈ Set.range s.simplex.obj := by
+  simp [ofS]
+
+noncomputable def ofN (s : (nerve X).N) : NonemptyFiniteChains X := ofS s.toS
+
+@[simp]
+lemma mem_ofN_iff (s : (nerve X).N) (x : X):
+    x ∈ (ofN s).1 ↔ x ∈ Set.range s.simplex.obj := by
+  simp [ofN]
+
+lemma monotone_ofS : Monotone (ofS (X := X)) := by
+  intro s t h
+  rw [SSet.S.le_iff, Subpresheaf.ofSection_le_iff] at h
+  obtain ⟨f, hf⟩ := h
+  obtain ⟨f, rfl⟩ := Quiver.Hom.op_surjective f
+  intro i hi
+  rw [mem_ofS_iff, Set.mem_range] at hi ⊢
+  obtain ⟨x, rfl⟩ := hi
+  exact ⟨f x,  by rw [← hf]; rfl⟩
+
+lemma ofN_toN (s : (nerve X).S) : ofN (SSet.toN _ s.simplex) = ofS s := by
+  apply le_antisymm
+  · exact monotone_ofS (SSet.toN_le_self _ _)
+  · exact monotone_ofS (SSet.self_le_toN _ _)
+
+@[simp]
+lemma ofN_le_ofN_iff {s t : (nerve X).N} : (ofN s).1 ⊆ (ofN t).1 ↔ s ≤ t := by
+  refine ⟨?_, fun h ↦ monotone_ofS h⟩
+  sorry
+
+lemma injective_ofN : Function.Injective (ofN (X := X)) := by
+  intro s t h
+  rw [Subtype.ext_iff] at h
+  apply le_antisymm
+  all_goals rw [← ofN_le_ofN_iff, h]
+
+lemma surjective_ofN : Function.Surjective (ofN (X := X)) := by
+  intro s
+  let U : Type u := s.1
+  letI : LinearOrder U :=
+    { le_total := by apply s.2.2
+      toDecidableLE := by
+        classical
+        infer_instance }
+  obtain ⟨n, ⟨e⟩⟩ : ∃ (n : ℕ), Nonempty (Fin (n + 1) ≃o s.1) := by
+    generalize hn : s.1.card = n
+    obtain ⟨n, rfl⟩ := Nat.exists_eq_add_one_of_ne_zero (n := n) (by
+      rintro rfl
+      simp only [Finset.card_eq_zero] at hn
+      have := s.2.1
+      simp [hn] at this)
+    exact ⟨n, ⟨Fintype.orderIsoFinOfCardEq _ (by simpa)⟩⟩
+  refine ⟨⟨SSet.S.mk ((Subtype.mono_coe _).comp e.monotone).functor, ?_⟩, ?_⟩
+  · rw [mem_nonDegenerate_iff]
+    intro _ _ _
+    simpa
+  · aesop
 
 variable (X) in
-lemma bijective_ofN : Function.Bijective (ofN (X := X)) := sorry
+lemma bijective_ofN : Function.Bijective (ofN (X := X)) :=
+  ⟨injective_ofN, surjective_ofN⟩
 
 noncomputable def nerveNEquiv : (nerve X).N ≃o NonemptyFiniteChains X :=
   (Equiv.ofBijective _ (bijective_ofN X)).toOrderIso (fun s t h ↦ by simpa) (fun s t h ↦ by

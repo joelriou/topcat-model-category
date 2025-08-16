@@ -87,4 +87,20 @@ noncomputable def stdSimplexCompBIso : stdSimplex.{u} ⋙ B ≅ SimplexCategory.
 noncomputable def sdToB : sd.{u} ⟶ B :=
   sd.{u}.descOfIsLeftKanExtension stdSimplex.sdIso.inv _ stdSimplexCompBIso.{u}.inv
 
+lemma sdToB_app_stdSimplex_obj (n : SimplexCategory) :
+    sdToB.{u}.app (stdSimplex.obj n) =
+      stdSimplex.sdIso.hom.app n ≫ stdSimplexCompBIso.inv.app n := by
+  have := sd.{u}.descOfIsLeftKanExtension_fac_app
+    stdSimplex.sdIso.inv _ stdSimplexCompBIso.{u}.inv n
+  simp only [← this, Iso.hom_inv_id_app_assoc, sdToB]
+
+instance (n : SimplexCategory) : IsIso (sdToB.{u}.app (stdSimplex.obj n)) := by
+  rw [sdToB_app_stdSimplex_obj]
+  infer_instance
+
+instance : IsIso (Functor.whiskerLeft stdSimplex sdToB) := by
+  rw [NatTrans.isIso_iff_isIso_app]
+  dsimp
+  infer_instance
+
 end SSet
