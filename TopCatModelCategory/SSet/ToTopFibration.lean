@@ -24,10 +24,6 @@ lemma trivialBundles_snd (X₁ X₂ : SSet.{u}) :
   refine (MorphismProperty.arrow_mk_iso_iff _ ?_).1 (trivialBundles_fst X₂ X₁)
   exact Arrow.isoMk (β_ _ _) (Iso.refl _)
 
--- Gabriel-Zisman
-instance {E B : SSet.{u}} (p : E ⟶ B) [MinimalFibration p] :
-    Fibration (toTop.map p) := sorry
-
 lemma fibration_toTop_map_of_trivialBundles {E B : SSet.{u}} (p : E ⟶ B)
     (hp : trivialBundles p) :
     Fibration (toTop.map p) := by
@@ -42,6 +38,10 @@ lemma fibration_toTop_map_of_trivialBundles {E B : SSet.{u}} (p : E ⟶ B)
   exact MorphismProperty.of_isPullback
     ((h.isPullback_of_isTerminal stdSimplex.isTerminalObj₀).map
       (toTop ⋙ TopCat.deltaCoreflection)) hF
+
+-- Gabriel-Zisman
+instance {E B : SSet.{u}} (p : E ⟶ B) [MinimalFibration p] :
+    Fibration (toTop.map p) := sorry
 
 lemma fibration_toTop_map_of_rlp_I {E B : SSet.{u}} {p : E ⟶ B} (hp : I.rlp p) :
     Fibration (toTop.map p) := by
