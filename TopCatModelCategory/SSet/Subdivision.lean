@@ -1,8 +1,7 @@
 import Mathlib.CategoryTheory.Limits.Presheaf
-import Mathlib.Topology.Category.TopCat.Limits.Basic
-import Mathlib.Topology.Category.TopCat.ULift
 import TopCatModelCategory.SSet.NonemptyFiniteChains
-import TopCatModelCategory.SSet.StandardSimplex
+import TopCatModelCategory.SSet.NonDegenerateSimplices
+import TopCatModelCategory.ULift
 
 universe v u
 
@@ -45,9 +44,8 @@ end SimplexCategory
 
 namespace SSet
 
-noncomputable def sd : SSet.{u} ⥤ SSet.{u} := by
-  apply stdSimplex.{u}.leftKanExtension SimplexCategory.sd
-
+noncomputable def sd : SSet.{u} ⥤ SSet.{u} :=
+  stdSimplex.{u}.leftKanExtension SimplexCategory.sd
 
 noncomputable def ex : SSet.{u} ⥤ SSet.{u} :=
   Presheaf.restrictedULiftYoneda.{0} SimplexCategory.sd
@@ -66,6 +64,27 @@ namespace stdSimplex
 noncomputable def sdIso : stdSimplex.{u} ⋙ sd ≅ SimplexCategory.sd :=
   Presheaf.isExtensionAlongULiftYoneda _
 
+def partOrdIso : stdSimplex.{u} ≅ SimplexCategory.toPartOrd ⋙ PartOrd.nerveFunctor :=
+  NatIso.ofComponents (fun n ↦ by
+    induction' n using SimplexCategory.rec with n
+    exact isoNerve _ (orderIsoULift _).symm)
+
 end stdSimplex
+
+instance : sd.{u}.IsLeftKanExtension stdSimplex.sdIso.inv :=
+  inferInstanceAs (Functor.IsLeftKanExtension _
+    (SSet.stdSimplex.{u}.leftKanExtensionUnit SimplexCategory.sd.{u}))
+
+@[simps!]
+noncomputable def B : SSet.{u} ⥤ SSet.{u} := SSet.N.functor ⋙ PartOrd.nerveFunctor
+
+open Functor in
+noncomputable def stdSimplexCompBIso : stdSimplex.{u} ⋙ B ≅ SimplexCategory.sd :=
+  isoWhiskerRight stdSimplex.partOrdIso _ ≪≫
+    Functor.associator _ _ _ ≪≫ isoWhiskerLeft _ (Functor.associator _ _ _).symm ≪≫
+    isoWhiskerLeft _ (isoWhiskerRight PartOrd.nerveFunctorCompNIso PartOrd.nerveFunctor)
+
+noncomputable def sdToB : sd.{u} ⟶ B :=
+  sd.{u}.descOfIsLeftKanExtension stdSimplex.sdIso.inv _ stdSimplexCompBIso.{u}.inv
 
 end SSet

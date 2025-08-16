@@ -1,6 +1,7 @@
 import Mathlib.AlgebraicTopology.SimplicialSet.Nerve
 import Mathlib.AlgebraicTopology.SimplicialSet.Subcomplex
 import Mathlib.AlgebraicTopology.SimplicialSet.Degenerate
+import TopCatModelCategory.SSet.NonDegenerateSimplices
 
 universe u
 
@@ -90,7 +91,11 @@ lemma mem_map_iff (s : NonemptyFiniteChains X) (f : X →o Y) (y : Y) :
   simp [map]
 
 lemma monotone_map (f : X →o Y) :
-    Monotone (fun s ↦ map s f) := sorry
+    Monotone (fun s ↦ map s f) := by
+  intro s t h i hi
+  simp only [mem_map_iff] at hi ⊢
+  obtain ⟨x, hx, rfl⟩ := hi
+  exact ⟨x, h hx, rfl⟩
 
 end
 
@@ -162,6 +167,8 @@ lemma δ_injective_of_mem_nonDegenerate
 end
 
 namespace NonemptyFiniteChains
+
+section
 
 variable {X : Type u} [LinearOrder X] [Fintype X]
 
@@ -256,19 +263,61 @@ lemma not_mem_horn_iff'' {n : ℕ} (s : (nerve (NonemptyFiniteChains X)) _⦋n�
         complSingleton x₀ ≤ s.obj (Fin.last _) := by
   rw [not_mem_horn_iff', complSingleton_le_iff]
 
-open SSet
+end
+
+section
+
+variable {X : Type u} [PartialOrder X]
+
+noncomputable def ofN (s : (nerve X).N) : NonemptyFiniteChains X :=
+  ⟨by
+    classical
+    exact Finset.univ.image s.simplex.obj, ⟨s.simplex.obj 0, by simp⟩, fun ⟨x, hx⟩ ⟨y, hy⟩ ↦ by
+      simp only [SimplexCategory.len_mk, Finset.mem_image, Finset.mem_univ, true_and] at hx hy
+      obtain ⟨i, rfl⟩ := hx
+      obtain ⟨j, rfl⟩ := hy
+      obtain h | h := le_total i j
+      · exact Or.inl (s.simplex.monotone h)
+      · exact Or.inr (s.simplex.monotone h)⟩
+
+@[simp]
+lemma ofN_le_ofN_iff {s t : (nerve X).N} : (ofN s).1 ⊆ (ofN t).1 ↔ s ≤ t := sorry
+
+variable (X) in
+lemma bijective_ofN : Function.Bijective (ofN (X := X)) := sorry
+
+noncomputable def nerveNEquiv : (nerve X).N ≃o NonemptyFiniteChains X :=
+  (Equiv.ofBijective _ (bijective_ofN X)).toOrderIso (fun s t h ↦ by simpa) (fun s t h ↦ by
+    obtain ⟨s, rfl⟩ := (bijective_ofN _ ).2 s
+    obtain ⟨t, rfl⟩ := (bijective_ofN _ ).2 t
+    simpa using h)
+
+end
 
 end NonemptyFiniteChains
+
 
 end PartialOrder
 
 open PartialOrder
 
-noncomputable def PartOrd.nonemptyFiniteChainsFunctor : PartOrd.{u} ⥤ PartOrd.{u} where
+namespace PartOrd
+
+noncomputable def nonemptyFiniteChainsFunctor : PartOrd.{u} ⥤ PartOrd.{u} where
   obj X := .of (NonemptyFiniteChains X)
   map f := PartOrd.ofHom ⟨_, NonemptyFiniteChains.monotone_map f.hom⟩
 
 @[simps]
-def PartOrd.nerveFunctor : PartOrd.{u} ⥤ SSet.{u} where
+def nerveFunctor : PartOrd.{u} ⥤ SSet.{u} where
   obj X := nerve X
   map f := nerveMap f.hom.monotone.functor
+
+noncomputable def nerveFunctorCompNIso :
+    nerveFunctor.{u} ⋙ SSet.N.functor ≅ nonemptyFiniteChainsFunctor :=
+  NatIso.ofComponents (fun X ↦ PartOrd.Iso.mk (PartialOrder.NonemptyFiniteChains.nerveNEquiv)) (by
+    intro X Y f
+    ext x
+    dsimp at x ⊢
+    sorry)
+
+end PartOrd
