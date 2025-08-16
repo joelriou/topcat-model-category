@@ -438,7 +438,7 @@ lemma surjective_q : Function.Surjective (q (x₀ := x₀)) := by
     dsimp [ψ]
     simp only [exists_const]
     apply Preorder.nerveExt
-    ext j
+    ext j : 1
     simpa [toII.simplex, hψ, ψ] using hφ j
   · simp only [Fin.castSucc_lt_succ_iff] at hi
     let s : NonemptyFiniteChains X :=

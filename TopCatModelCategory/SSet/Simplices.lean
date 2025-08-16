@@ -61,6 +61,7 @@ lemma mk_surjective (s : X.S) :
   ⟨s.1, s.2, rfl⟩
 
 /-- The image of a simplex by a morphism of simplicial sets. -/
+@[simps]
 def map {Y : SSet.{u}} (f : X ⟶ Y) (s : X.S) : Y.S :=
   S.mk (f.app _ s.2)
 

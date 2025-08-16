@@ -344,4 +344,22 @@ lemma N.mk_eq_iff_sMk_eq {n m : ℕ} (x : X _⦋n⦌) (y : X _⦋m⦌)
   rw [ext_iff]
   rfl
 
+namespace N
+
+/-noncomputable def map : X.N →o Y.N :=
+  ⟨fun s ↦ Y.toN (s.1.map f).2, fun s t h ↦ by
+    dsimp
+    simp only [le_iff, ofSimplex_toN, Subpresheaf.ofSection_le_iff] at h ⊢
+    obtain ⟨g, hg⟩ := h
+    refine ⟨g, ?_⟩
+    dsimp
+    rw [← FunctorToTypes.naturality, hg]⟩-/
+
+attribute [local simp] mapN_mapN in
+noncomputable def functor : SSet.{u} ⥤ PartOrd.{u} where
+  obj X := .of X.N
+  map f := PartOrd.ofHom (mapN f)
+
+end N
+
 end SSet
