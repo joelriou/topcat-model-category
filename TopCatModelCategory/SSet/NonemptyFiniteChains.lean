@@ -269,6 +269,20 @@ section
 
 variable {X : Type u} [PartialOrder X]
 
+@[simp]
+lemma range_toN_simplex_obj {n : ℕ} (x : (nerve X) _⦋n⦌) :
+    Set.range (SSet.toN _ x).simplex.obj = Set.range x.obj := by
+  conv_rhs => rw [← SSet.map_toNπ_op_toN _ x]
+  ext y
+  constructor
+  · rintro ⟨i, rfl⟩
+    have hπ : Epi ((nerve X).toNπ x) := inferInstance
+    rw [SimplexCategory.epi_iff_surjective] at hπ
+    obtain ⟨j, rfl⟩ := hπ i
+    exact ⟨j, rfl⟩
+  · rintro ⟨i, rfl⟩
+    exact ⟨(nerve X).toNπ x i, rfl⟩
+
 noncomputable def ofS (s : (nerve X).S) : NonemptyFiniteChains X :=
   ⟨by
     classical
@@ -284,6 +298,9 @@ noncomputable def ofS (s : (nerve X).S) : NonemptyFiniteChains X :=
 lemma mem_ofS_iff (s : (nerve X).S) (x : X):
     x ∈ (ofS s).1 ↔ x ∈ Set.range s.simplex.obj := by
   simp [ofS]
+
+lemma obj_mem_ofS (s : (nerve X).S) (i : Fin (s.dim + 1)) :
+    s.simplex.obj i ∈ (ofS s).1 := by simp [ofS]
 
 noncomputable def ofN (s : (nerve X).N) : NonemptyFiniteChains X := ofS s.toS
 
@@ -309,8 +326,19 @@ lemma ofN_toN (s : (nerve X).S) : ofN (SSet.toN _ s.simplex) = ofS s := by
 
 @[simp]
 lemma ofN_le_ofN_iff {s t : (nerve X).N} : (ofN s).1 ⊆ (ofN t).1 ↔ s ≤ t := by
-  refine ⟨?_, fun h ↦ monotone_ofS h⟩
-  sorry
+  refine ⟨fun h ↦ ?_, fun h ↦ monotone_ofS h⟩
+  rw [SSet.N.le_iff, Subpresheaf.ofSection_le_iff, SSet.Subcomplex.mem_ofSimplex_obj_iff]
+  have hst (i : Fin (s.dim + 1)) : s.simplex.obj i ∈ Set.range (t.simplex.obj) := by
+    rw [← mem_ofS_iff]
+    exact h (obj_mem_ofS _ _)
+  choose φ hφ using hst
+  refine ⟨SimplexCategory.Hom.mk ⟨φ, StrictMono.monotone ?_⟩, by ext; apply hφ⟩
+  intro i₁ i₂ hi
+  have hs := s.nonDegenerate
+  have ht := t.nonDegenerate
+  rw [mem_nonDegenerate_iff] at hs ht
+  rw [← ht.lt_iff_lt, hφ, hφ]
+  apply hs hi
 
 lemma injective_ofN : Function.Injective (ofN (X := X)) := by
   intro s t h
@@ -350,17 +378,24 @@ noncomputable def nerveNEquiv : (nerve X).N ≃o NonemptyFiniteChains X :=
     obtain ⟨t, rfl⟩ := (bijective_ofN _ ).2 t
     simpa using h)
 
+@[simp]
+lemma nerveNEquiv_apply (x : (nerve X).N) :
+    nerveNEquiv x = ofN x :=
+  rfl
+
 end
 
 end NonemptyFiniteChains
-
 
 end PartialOrder
 
 open PartialOrder
 
+open NonemptyFiniteChains
+
 namespace PartOrd
 
+@[simps]
 noncomputable def nonemptyFiniteChainsFunctor : PartOrd.{u} ⥤ PartOrd.{u} where
   obj X := .of (NonemptyFiniteChains X)
   map f := PartOrd.ofHom ⟨_, NonemptyFiniteChains.monotone_map f.hom⟩
@@ -374,8 +409,12 @@ noncomputable def nerveFunctorCompNIso :
     nerveFunctor.{u} ⋙ SSet.N.functor ≅ nonemptyFiniteChainsFunctor :=
   NatIso.ofComponents (fun X ↦ PartOrd.Iso.mk (PartialOrder.NonemptyFiniteChains.nerveNEquiv)) (by
     intro X Y f
-    ext x
+    ext x : 3
     dsimp at x ⊢
-    sorry)
+    ext y : 2
+    simp only [SSet.mapN, nerveMap_app, SimplexCategory.len_mk, Functor.mapComposableArrows,
+      Functor.whiskeringRight_obj_obj, OrderHom.coe_mk, mem_ofN_iff, range_toN_simplex_obj,
+      mem_map_iff]
+    aesop)
 
 end PartOrd
