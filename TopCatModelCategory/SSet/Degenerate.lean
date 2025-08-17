@@ -380,4 +380,16 @@ lemma Subcomplex.range_le_iff_nonDegenerate {Y : SSet.{u}} (f : X ⟶ Y) (B : Y.
     intro hx
     exact hy (degenerate_map hx f)
 
+lemma epi_iff_nonDegenerate {Y : SSet.{u}} (f : X ⟶ Y) :
+    Epi f ↔ ∀ (n : ℕ) (y : Y _⦋n⦌) (_ : y ∈ Y.nonDegenerate n),
+      ∃ (x : X _⦋n⦌), f.app _ x = y := by
+  constructor
+  · intro hf
+    rw [NatTrans.epi_iff_epi_app] at hf
+    intro n y _
+    exact (epi_iff_surjective _).1 (hf _) y
+  · intro h
+    rw [← Subcomplex.range_eq_top_iff, Subcomplex.eq_top_iff_contains_nonDegenerate]
+    aesop
+
 end SSet

@@ -138,8 +138,7 @@ lemma N.lift_monotone_aux {s₀ s₁ : X.N} (hs : s₀ ≤ s₁)
 
 variable {X} in
 lemma N.lift_monotone {n : ℕ} (s : Fin (n + 1) →o X.N) :
-    ∃ (d : ℕ) (f : Δ[d] ⟶ X) (φ : Fin (n + 1) → Δ[d].N)
-      (hφ : Monotone φ),
+    ∃ (d : ℕ) (f : Δ[d] ⟶ X) (φ : Fin (n + 1) → Δ[d].N) (_ : Monotone φ),
       ∀ (i : Fin (n + 1)), (s i).toS = S.map f (φ i).toS := by
   induction n with
   | zero =>
@@ -169,12 +168,8 @@ lemma N.lift_monotone {n : ℕ} (s : Fin (n + 1) →o X.N) :
 
 open PartialOrder in
 instance : Epi (sdToB.app X) := by
-  rw [NatTrans.epi_iff_epi_app]
-  rintro ⟨n⟩
-  induction' n using SimplexCategory.rec with n
-  rw [epi_iff_surjective]
-  -- TODO: reduce to the case `b` is nondegenerate
-  intro b
+  rw [epi_iff_nonDegenerate]
+  intro n b hb
   obtain ⟨d, f, φ, hφ, hφ'⟩ := N.lift_monotone b.toOrderHom
   let ψ (i : Fin (n + 1)) : NonemptyFiniteChains (ULift.{u} (Fin (d + 1))) :=
     NonemptyFiniteChains.ofN (mapN (stdSimplex.partOrdIso.hom.app _) (φ i))
