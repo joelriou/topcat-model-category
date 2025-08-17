@@ -271,17 +271,19 @@ variable {X : Type u} [PartialOrder X]
 
 @[simp]
 lemma range_toN_simplex_obj {n : ℕ} (x : (nerve X) _⦋n⦌) :
-    Set.range (SSet.toN _ x).simplex.obj = Set.range x.obj := by
-  conv_rhs => rw [← SSet.map_toNπ_op_toN _ x]
+    Set.range ((SSet.S.mk x).toN).simplex.obj = Set.range x.obj := by
+  have := (SSet.S.mk x).map_toNπ
+  dsimp at this
+  conv_rhs => rw [← this]
   ext y
   constructor
   · rintro ⟨i, rfl⟩
-    have hπ : Epi ((nerve X).toNπ x) := inferInstance
+    have hπ : Epi ((SSet.S.mk x).toNπ)  := inferInstance
     rw [SimplexCategory.epi_iff_surjective] at hπ
     obtain ⟨j, rfl⟩ := hπ i
     exact ⟨j, rfl⟩
   · rintro ⟨i, rfl⟩
-    exact ⟨(nerve X).toNπ x i, rfl⟩
+    exact ⟨_, rfl⟩
 
 noncomputable def ofS (s : (nerve X).S) : NonemptyFiniteChains X :=
   ⟨by
@@ -319,10 +321,10 @@ lemma monotone_ofS : Monotone (ofS (X := X)) := by
   obtain ⟨x, rfl⟩ := hi
   exact ⟨f x,  by rw [← hf]; rfl⟩
 
-lemma ofN_toN (s : (nerve X).S) : ofN (SSet.toN _ s.simplex) = ofS s := by
+lemma ofN_toN (s : (nerve X).S) : ofN s.toN = ofS s := by
   apply le_antisymm
-  · exact monotone_ofS (SSet.toN_le_self _ _)
-  · exact monotone_ofS (SSet.self_le_toN _ _)
+  · apply monotone_ofS s.toS_toN_le_self
+  · apply monotone_ofS s.self_le_toS_toN
 
 @[simp]
 lemma ofN_le_ofN_iff {s t : (nerve X).N} : (ofN s).1 ⊆ (ofN t).1 ↔ s ≤ t := by
@@ -412,9 +414,6 @@ noncomputable def nerveFunctorCompNIso :
     ext x : 3
     dsimp at x ⊢
     ext y : 2
-    simp only [SSet.mapN, nerveMap_app, SimplexCategory.len_mk, Functor.mapComposableArrows,
-      Functor.whiskeringRight_obj_obj, OrderHom.coe_mk, mem_ofN_iff, range_toN_simplex_obj,
-      mem_map_iff]
-    aesop)
+    simp [SSet.mapN_coe, SSet.S.map])
 
 end PartOrd

@@ -70,6 +70,14 @@ def partOrdIso : stdSimplex.{u} ≅ SimplexCategory.toPartOrd ⋙ PartOrd.nerveF
     induction' n using SimplexCategory.rec with n
     exact isoNerve _ (orderIsoULift _).symm)
 
+@[simp]
+lemma partOrdIso_inv_app (n : ℕ) :
+    partOrdIso.{u}.inv.app ⦋n⦌ = (isoNerve _ (orderIsoULift _).symm).inv := rfl
+
+@[simp]
+lemma partOrdIso_hom_app (n : ℕ) :
+    partOrdIso.{u}.hom.app ⦋n⦌ = (isoNerve _ (orderIsoULift _).symm).hom := rfl
+
 end stdSimplex
 
 instance : sd.{u}.IsLeftKanExtension stdSimplex.sdIso.inv :=
@@ -178,6 +186,24 @@ instance : Epi (sdToB.app X) := by
     rw [NonemptyFiniteChains.le_iff, NonemptyFiniteChains.ofN_le_ofN_iff]
     exact (mapN _).monotone (hφ hij)
   let s : SimplexCategory.sd ^⦋d⦌ _⦋n⦌ := Monotone.functor hψ
+  have hs (i : Fin (n + 1)) :
+      ((stdSimplexCompBIso.inv.app ⦋d⦌).app (op ⦋n⦌) s).obj i = φ i := by
+    rw [N.ext_iff]
+    dsimp [s, stdSimplexCompBIso]
+    rw [toS_mapN_of_isIso]
+    dsimp [PartOrd.nerveFunctorCompNIso]
+    have : NonemptyFiniteChains.nerveNEquiv.symm (ψ i) =
+      N.mk' (S.map (stdSimplex.isoNerve.{u} (ULift.{u} (Fin (d + 1)))
+        (orderIsoULift _).symm).hom (φ i).toS) (by
+          rw [S.simplex_map_nonDegenerate_iff_of_mono]
+          exact (φ i).nonDegenerate) := by
+      apply NonemptyFiniteChains.nerveNEquiv.injective
+      simp [ψ]
+      congr
+      rw [N.ext_iff, toS_mapN_of_isIso]
+      rfl
+    erw [this]
+    rw [N.mk'_toS, S.map_map, Iso.hom_inv_id, S.map_id]
   refine ⟨(sd.map f).app _
     ((stdSimplex.sdIso.{u}.inv.app ⦋d⦌).app _ s), ?_⟩
   dsimp
@@ -188,15 +214,14 @@ instance : Epi (sdToB.app X) := by
   apply Preorder.nerveExt
   ext i
   dsimp [B, mapN]
-  rw [toN_of_nonDegenerate]
-  · rw [N.ext_iff]
+  rw [S.toN_of_nonDegenerate]
+  · dsimp
+    rw [N.ext_iff]
     change S.map f (((stdSimplexCompBIso.inv.app ⦋d⦌).app (op ⦋n⦌) s).obj i).toS = _
-    refine Eq.trans ?_ (hφ' i).symm
-    congr
-    dsimp [s, ψ]
-    ext
-    sorry
-  · sorry
+    rw [hs, ← hφ']
+    dsimp
+  · rw [hs, ← hφ']
+    exact (b.toOrderHom i).2
 
 noncomputable def isColimitBMapCoconeCoconeN :
     IsColimit (B.mapCocone X.coconeN) :=

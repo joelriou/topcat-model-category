@@ -5,6 +5,10 @@ universe u
 
 open CategoryTheory Simplicial Limits Opposite
 
+@[simp]
+lemma SSet.id_app {X : SSet.{u}} {n : SimplexCategoryᵒᵖ} (x : X.obj n) :
+    NatTrans.app (𝟙 X) n x = x := rfl
+
 lemma Quiver.Hom.op_surjective {C : Type*} [Quiver C] {X Y : Cᵒᵖ} (f : X ⟶ Y) :
     ∃ (g : Y.unop ⟶ X.unop), f = g.op := ⟨f.unop, rfl⟩
 
@@ -19,6 +23,14 @@ lemma SimplexCategory.isIso_iff_len_eq_of_epi {n m : SimplexCategory} (f : n ⟶
   obtain rfl : n = m := by aesop
   have h := (epi_iff_surjective (f := f)).1 inferInstance
   exact isIso_of_bijective ⟨by rwa [Finite.injective_iff_surjective], h⟩
+
+lemma SimplexCategory.exists_mono_fac {n m : SimplexCategory} (f : n ⟶ m) :
+    ∃ (d : ℕ) (p : n ⟶ ⦋d⦌) (i : ⦋d⦌ ⟶ m), Epi p ∧ Mono i ∧ p ≫ i = f := by
+  suffices ∃ (d : SimplexCategory) (p : n ⟶ d) (i : d ⟶ m), Epi p ∧ Mono i ∧ p ≫ i = f by
+    obtain ⟨d, p, i, _, _, fac⟩ := this
+    induction' d using SimplexCategory.rec with d
+    exact ⟨d, p, i, inferInstance, inferInstance, fac⟩
+  exact ⟨_, _, _, inferInstance, inferInstance, image.fac f⟩
 
 namespace SSet
 
@@ -59,7 +71,7 @@ lemma induction
 
 instance : Preorder X.N := Preorder.lift toS
 
-lemma le_iff {x y : X.N} : x ≤ y ↔ Subcomplex.ofSimplex x.1.2 ≤ Subcomplex.ofSimplex y.1.2 :=
+lemma le_iff {x y : X.N} : x ≤ y ↔ x.subcomplex ≤ y.subcomplex :=
   Iff.rfl
 
 lemma le_iff_exists {x y : X.N} :
@@ -100,7 +112,17 @@ instance : PartialOrder X.N where
     obtain rfl := SimplexCategory.eq_id_of_mono f
     aesop
 
-lemma eq_iff {x y : X.N} : x = y ↔ Subcomplex.ofSimplex x.1.2 = Subcomplex.ofSimplex y.1.2 :=
+lemma subcomplex_injective {x y : X.N} (h : x.subcomplex = y.subcomplex) :
+    x = y := by
+  apply le_antisymm
+  all_goals
+  · rw [le_iff, h]
+
+lemma subcomplex_injective_iff {x y : X.N} :
+    x.subcomplex = y.subcomplex ↔ x = y :=
+  ⟨subcomplex_injective, by rintro rfl; rfl⟩
+
+lemma eq_iff {x y : X.N} : x = y ↔ x.subcomplex = y.subcomplex :=
   ⟨by rintro rfl; rfl, fun h ↦ by
     apply le_antisymm
     all_goals
@@ -122,11 +144,28 @@ lemma cast_eq_self : s.cast hd = s := by
 
 end
 
+lemma ext_iff (x y : X.N) :
+    x = y ↔ x.toS = y.toS := by
+  obtain ⟨x, hx, rfl⟩ := x.mk'_surjective
+  obtain ⟨y, hy, rfl⟩ := y.mk'_surjective
+  simp [mk']
+
+@[ext]
+lemma ext {x y : X.N} (h : x.toS = y.toS) :
+    x = y := by
+  rwa [ext_iff]
+
+lemma mk_eq_iff_sMk_eq {n m : ℕ} (x : X _⦋n⦌) (y : X _⦋m⦌)
+    (hx : x ∈ X.nonDegenerate _) (hy : y ∈ X.nonDegenerate _) :
+    N.mk x hx = N.mk y hy ↔ S.mk x = S.mk y := by
+  rw [ext_iff]
+  rfl
+
 end N
 
 @[simps]
 def orderEmbeddingN : X.N ↪o X.Subcomplex where
-  toFun x := Subcomplex.ofSimplex x.1.2
+  toFun x := x.subcomplex
   inj' _ _ h := by
     dsimp at h
     apply le_antisymm <;> rw [N.le_iff, h]
@@ -141,12 +180,145 @@ variable {X} in
 lemma functorN_map {x₁ x₂ : X.N} (f : x₁ ⟶ x₂) :
     X.functorN.map f = Subcomplex.homOfLE (X.orderEmbeddingN.monotone (leOfHom f)) := rfl
 
+namespace S
+
+variable {X}
+
+lemma subcomplex_eq_of_epi (x y : X.S) (f : ⦋x.dim⦌ ⟶ ⦋y.dim⦌) [Epi f]
+    (hf : X.map f.op y.simplex = x.simplex) :
+    x.subcomplex = y.subcomplex := by
+  refine le_antisymm ?_ ?_
+  · simp only [Subcomplex.ofSimplex_le_iff]
+    exact ⟨f.op, by aesop⟩
+  · simp only [Subcomplex.ofSimplex_le_iff]
+    have := isSplitEpi_of_epi f
+    have : Function.Injective (X.map f.op) := by
+      rw [← mono_iff_injective]
+      infer_instance
+    refine ⟨(section_ f).op, this ?_⟩
+    dsimp
+    rw [← hf, ← FunctorToTypes.map_comp_apply, ← FunctorToTypes.map_comp_apply,
+      ← op_comp, ← op_comp, Category.assoc, IsSplitEpi.id, Category.comp_id]
+
+lemma existsUnique_n (x : X.S) : ∃! (y : X.N), y.subcomplex = x.subcomplex :=
+  existsUnique_of_exists_of_unique (by
+      obtain ⟨n, x, hx, rfl⟩ := x.mk_surjective
+      obtain ⟨m, f, _, y, rfl⟩ := X.exists_nonDegenerate x
+      exact ⟨N.mk y.1 y.2, (subcomplex_eq_of_epi _ _ f rfl).symm⟩)
+    (fun y₁ y₂ h₁ h₂ ↦ N.subcomplex_injective (by rw [h₁, h₂]))
+
+/-- This is the non degenerate simplex of a simplicial set which
+generates the same subcomplex as a given simplex. -/
+noncomputable def toN (x : X.S) : X.N := x.existsUnique_n.exists.choose
+
+@[simp]
+lemma subcomplex_toN (x : X.S) : x.toN.subcomplex = x.subcomplex :=
+  x.existsUnique_n.exists.choose_spec
+
+lemma toN_eq_iff {x : X.S} {y : X.N} :
+    x.toN = y ↔ y.subcomplex = x.subcomplex :=
+  ⟨by rintro rfl; simp, fun h ↦ x.existsUnique_n.unique (by simp) h⟩
+
+lemma toN_of_nonDegenerate (x : X.S) (hx : x.simplex ∈ X.nonDegenerate _) :
+    x.toN = N.mk _ hx := by
+  rw [toN_eq_iff]
+  rfl
+
+lemma existsUnique_toNπ' {x : X.S} {y : X.N} (hy : x.toN = y) :
+    ∃! (f : ⦋x.dim⦌ ⟶ ⦋y.dim⦌), Epi f ∧ X.map f.op y.simplex = x.simplex := by
+  obtain ⟨n, x, hx, rfl⟩ := x.mk_surjective
+  obtain ⟨m, f, _, z, rfl⟩ := X.exists_nonDegenerate x
+  obtain rfl : y = N.mk _ z.2 := by
+    rw [toN_eq_iff] at hy
+    rw [← N.subcomplex_injective_iff, hy]
+    exact subcomplex_eq_of_epi _ _ f rfl
+  exact existsUnique_of_exists_of_unique ⟨f, inferInstance, rfl⟩
+    (fun f₁ f₂ ⟨_, hf₁⟩ ⟨_, hf₂⟩ ↦ unique_nonDegenerate₃ _ _ _ _ hf₁.symm _ _ hf₂.symm)
+
+section
+
+variable {x : X.S} {y : X.N} (hy : x.toN = y)
+
+noncomputable def toNπ' {x : X.S} {y : X.N} (hy : x.toN = y) : ⦋x.dim⦌ ⟶ ⦋y.dim⦌ :=
+  (existsUnique_toNπ' hy).exists.choose
+
+instance : Epi (toNπ' hy) := (existsUnique_toNπ' hy).exists.choose_spec.1
+
+@[simp]
+lemma map_toNπ' : X.map (toNπ' hy).op y.simplex = x.simplex :=
+  (existsUnique_toNπ' hy).exists.choose_spec.2
+
+lemma dim_toN_le (x : X.S) : x.toN.dim ≤ x.dim :=
+  SimplexCategory.le_of_epi (toNπ' (x := x) rfl)
+
+lemma toNπ'_eq_iff (f : ⦋x.dim⦌ ⟶ ⦋y.dim⦌) :
+    toNπ' hy = f ↔ X.map f.op y.simplex = x.simplex := by
+  constructor
+  · rintro rfl
+    simp
+  · intro hf
+    refine (existsUnique_toNπ' hy).unique ⟨inferInstance, by simp⟩
+      ⟨?_, hf⟩
+    obtain ⟨d, p, i, _, _, fac⟩ := SimplexCategory.exists_mono_fac f
+    obtain h | rfl := (SimplexCategory.le_of_mono i).lt_or_eq
+    · exfalso
+      let z := S.mk (X.map i.op y.simplex)
+      have h₁ : z.toN = y := by
+        rw [toN_eq_iff]
+        apply le_antisymm
+        · rw [← hy, x.subcomplex_toN, Subpresheaf.ofSection_le_iff]
+          exact ⟨p.op, by simp [← hf, ← fac, z]⟩
+        · rw [Subpresheaf.ofSection_le_iff]
+          exact ⟨i.op, rfl⟩
+      have h₂ := z.dim_toN_le
+      rw [N.ext_iff] at h₁
+      rw [S.dim_eq_of_eq h₁] at h₂
+      simpa [z] using lt_of_lt_of_le h h₂
+    · obtain rfl := SimplexCategory.eq_id_of_mono i
+      simpa [← fac]
+
+end
+
+noncomputable def toNπ (x : X.S) : ⦋x.dim⦌ ⟶ ⦋x.toN.dim⦌ := toNπ' rfl
+
+instance (x : X.S) : Epi x.toNπ := by dsimp [toNπ]; infer_instance
+
+@[simp]
+lemma map_toNπ (x : X.S) : X.map x.toNπ.op x.toN.simplex = x.simplex := by
+  simp [toNπ]
+
+lemma toNπ_eq_iff (x : X.S) (f : ⦋x.dim⦌ ⟶ ⦋x.toN.dim⦌) :
+    x.toNπ = f ↔ X.map f.op x.toN.simplex = x.simplex := by
+  apply toNπ'_eq_iff
+
+lemma self_le_toS_toN (s : X.S) : s ≤ s.toN.toS := by
+  rw [S.le_iff, subcomplex_toN]
+
+lemma toS_toN_le_self (s : X.S) : s.toN.toS ≤ s := by
+  rw [S.le_iff, subcomplex_toN]
+
+end S
+
+variable {X}
+
+@[simp]
+lemma N.toS_toN (x : X.N) : x.toS.toN = x := by
+  rw [S.toN_eq_iff]
+
+lemma N.toN_surjective : Function.Surjective (S.toN (X := X)) :=
+  fun s ↦ ⟨s.toS, by simp⟩
+
+
+variable (X)
+
 @[simps]
 def coconeN : Cocone X.functorN where
   pt := X
   ι := { app _ := Subcomplex.ι _ }
 
-section
+
+
+/-section
 
 variable {n : ℕ} (x : X _⦋n⦌)
 
@@ -202,20 +374,9 @@ lemma toN_eq {n : ℕ} (x : X _⦋n⦌) (y : X.N) (f : ⦋n⦌ ⟶ ⦋y.1.1⦌) 
     (h : X.map f.op y.1.2 = x) : X.toN x = y :=
   N.ext' x _ _ (X.toNπ x) f (by simp) h
 
-lemma toN_surjective (s : X.N) : ∃ (n : ℕ) (x : X.nonDegenerate n), s = X.toN x.1 :=
-  ⟨s.1.1, ⟨_, s.2⟩, (X.toN_eq _ _ (𝟙 _) (by simp)).symm⟩
 
-lemma self_le_toN (s : X.S) : s ≤ (X.toN s.simplex).toS := by
-  rw [S.le_iff, ofSimplex_toN]
 
-lemma toN_le_self (s : X.S) : (X.toN s.simplex).toS ≤ s := by
-  rw [S.le_iff, ofSimplex_toN]
-
-lemma toN_of_nonDegenerate {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenerate _) :
-    X.toN x = N.mk _ hx :=
-  X.toN_eq x (N.mk _ hx) (𝟙 _) (by simp)
-
-end
+end-/
 
 namespace isColimitCoconeN
 
@@ -234,18 +395,17 @@ lemma hom_ext {Y : SSet.{u}} {f g : X ⟶ Y}
 variable (s : Cocone X.functorN)
 
 noncomputable def descApp {n : ℕ} (x : X _⦋n⦌) : s.pt _⦋n⦌ :=
-  yonedaEquiv (stdSimplex.map (X.toNπ x) ≫ Subcomplex.toOfSimplex _ ≫ s.ι.app (X.toN x))
+  yonedaEquiv (stdSimplex.map (S.mk x).toNπ ≫ Subcomplex.toOfSimplex _ ≫ s.ι.app (S.mk x).toN)
 
 lemma descApp_apply {n : ℕ} (x : X _⦋n⦌) (y : X.N) (f : ⦋n⦌ ⟶ ⦋y.1.1⦌) [Epi f]
     (hf : X.map f.op y.1.2 = x) :
     descApp s x = yonedaEquiv (stdSimplex.map f ≫ Subcomplex.toOfSimplex _ ≫ s.ι.app y) := by
-  obtain rfl : y = X.toN x := by
-    obtain ⟨m, y, rfl⟩ := y.mk_surjective
-    obtain rfl := X.unique_nonDegenerate₁ x _ _ hf.symm _ _ ((X.map_toNπ_op_toN x).symm)
-    obtain rfl := X.unique_nonDegenerate₂ x _ _ hf.symm _ _ ((X.map_toNπ_op_toN x).symm)
-    rfl
-  obtain rfl := X.unique_nonDegenerate₃ x _ _ hf.symm _ _ ((X.map_toNπ_op_toN x).symm)
-  rfl
+  obtain rfl : (S.mk x).toN = y := by
+    rw [S.toN_eq_iff, ← hf]
+    exact (S.subcomplex_eq_of_epi _ _ f rfl).symm
+  dsimp only [descApp]
+  congr
+  rwa [S.toNπ_eq_iff]
 
 @[simp]
 lemma descApp_apply' (x : X.N) :
@@ -265,8 +425,8 @@ noncomputable def desc : X ⟶ s.pt where
     dsimp [SimplexCategory.rec]
     ext x
     dsimp [descApp]
-    have h : X.toN (X.map f.op x) ≤ X.toN x := by
-      rw [N.le_iff, ofSimplex_toN, ofSimplex_toN, Subpresheaf.ofSection_le_iff,
+    have h : (S.mk (X.map f.op x)).toN ≤ (S.mk x).toN := by
+      rw [N.le_iff, S.subcomplex_toN, S.subcomplex_toN, Subpresheaf.ofSection_le_iff,
         Subcomplex.mem_ofSimplex_obj_iff]
       exact ⟨f, rfl⟩
     apply yonedaEquiv.symm.injective
@@ -278,7 +438,7 @@ noncomputable def desc : X ⟶ s.pt where
     apply yonedaEquiv.injective
     dsimp
     simp only [Category.assoc, Subcomplex.homOfLE_ι, Subcomplex.toOfSimplex_ι,
-      yonedaEquiv_map_comp, Equiv.apply_symm_apply, map_toNπ_op_toN]
+      yonedaEquiv_map_comp, Equiv.apply_symm_apply, S.map_toNπ]
 
 @[simp]
 lemma desc_app_apply {n : ℕ} (x : X _⦋n⦌) :
@@ -303,66 +463,40 @@ variable {X} {Y : SSet.{u}} (f : X ⟶ Y)
 
 @[simps -isSimp coe]
 noncomputable def mapN : X.N →o Y.N where
-  toFun x := Y.toN (f.app _ x.1.2)
+  toFun x := (S.map f x.toS).toN
   monotone' x x' h := by
-    simp only [N.le_iff, ofSimplex_toN, Subpresheaf.ofSection_le_iff,
-      mem_ofSimplex_obj_iff] at h ⊢
-    obtain ⟨g, hf⟩ := h
-    exact ⟨g, by simp only [← hf, FunctorToTypes.naturality]⟩
+    simp only [N.le_iff, S.subcomplex_toN, Subpresheaf.ofSection_le_iff, S.map_dim,
+      S.map_simplex, mem_ofSimplex_obj_iff] at h ⊢
+    obtain ⟨g, hg⟩ := h
+    exact ⟨g, by simp only [← hg, FunctorToTypes.naturality]⟩
 
 @[simp]
-lemma mapN_toN {n : ℕ} (x : X _⦋n⦌) :
-    mapN f (X.toN x) = Y.toN (f.app _ x) := by
-  have : IsSplitEpi (X.toNπ x) := isSplitEpi_of_epi _
+lemma mapN_toN (x : X.S) :
+    mapN f x.toN = (S.map f x).toN := by
   simp only [mapN_coe]
-  apply le_antisymm
-  · simp only [N.le_iff, ofSimplex_toN, Subpresheaf.ofSection_le_iff,
-      mem_ofSimplex_obj_iff]
-    exact ⟨section_ (X.toNπ x), by rw [← FunctorToTypes.naturality, map_section_eq_toN_snd]⟩
-  · simp only [N.le_iff, ofSimplex_toN, Subpresheaf.ofSection_le_iff,
-      mem_ofSimplex_obj_iff]
-    exact ⟨X.toNπ x, by rw [← FunctorToTypes.naturality, map_toNπ_op_toN]⟩
-
-@[simp]
-lemma simplex_toN (x : X.N) : X.toN x.simplex = x :=
-  toN_of_nonDegenerate _ _ x.nonDegenerate
+  simp [N.eq_iff]
 
 lemma toS_mapN_of_nonDegenerate (x : X.N) (hx : f.app _ x.simplex ∈ Y.nonDegenerate _) :
     (mapN f x).toS = S.map f x.toS := by
-  conv_lhs => rw [← simplex_toN x]
-  rw [mapN_toN, toN_of_nonDegenerate _ _ hx]
+  conv_lhs => rw [← x.toS_toN, mapN_toN]
+  rw [S.toN_of_nonDegenerate _ hx]
   rfl
 
-@[simp]
-lemma id_app {n : SimplexCategoryᵒᵖ} (x : X.obj n) : NatTrans.app (𝟙 X) n x = x := rfl
+lemma toS_mapN_of_isIso (x : X.N) [IsIso f] :
+    (mapN f x).toS = S.map f x.toS :=
+  toS_mapN_of_nonDegenerate _ _
+    (by simpa only [nonDegenerate_iff_of_isIso] using x.nonDegenerate)
 
 @[simp]
 lemma mapN_id : mapN (𝟙 X) = OrderHom.id := by
   ext x
-  obtain ⟨n, x, rfl⟩ := X.toN_surjective x
+  obtain ⟨x, rfl⟩ := x.toN_surjective
   simp
 
 lemma mapN_mapN {Z : SSet.{u}} (g : Y ⟶ Z) (x : X.N) :
     mapN g (mapN f x) = mapN (f ≫ g) x := by
-  obtain ⟨n, x, rfl⟩ := X.toN_surjective x
-  simp
-
-lemma N.ext_iff (x y : X.N) :
-    x = y ↔ x.toS = y.toS := by
-  obtain ⟨x, hx, rfl⟩ := x.mk'_surjective
-  obtain ⟨y, hy, rfl⟩ := y.mk'_surjective
-  simp [mk']
-
-@[ext]
-lemma N.ext {x y : X.N} (h : x.toS = y.toS) :
-    x = y := by
-  rwa [ext_iff]
-
-lemma N.mk_eq_iff_sMk_eq {n m : ℕ} (x : X _⦋n⦌) (y : X _⦋m⦌)
-    (hx : x ∈ X.nonDegenerate _) (hy : y ∈ X.nonDegenerate _) :
-    N.mk x hx = N.mk y hy ↔ S.mk x = S.mk y := by
-  rw [ext_iff]
-  rfl
+  obtain ⟨x, rfl⟩ := x.toN_surjective
+  simp [S.map_map]
 
 namespace N
 

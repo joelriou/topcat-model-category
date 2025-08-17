@@ -33,7 +33,6 @@ lemma S.eq_iff_of_ofSimplex_eq {n m : ℕ} (x : X _⦋n⦌) (y : X _⦋m⦌)
     (hx : x ∈ X.nonDegenerate _) (hy : y ∈ X.nonDegenerate _) :
     S.mk x = S.mk y ↔ Subcomplex.ofSimplex x = Subcomplex.ofSimplex y := by
   rw [← N.mk_eq_iff_sMk_eq _ _ hx hy, N.eq_iff]
-  dsimp
   rfl
 
 end SSet
@@ -232,10 +231,10 @@ lemma N.induction
   · exact h₁ ⟨x, hx⟩
 
 lemma existsN {n : ℕ} (s : X _⦋n⦌) (hs : s ∉ A.obj _) :
-    ∃ (x : A.N) (f : ⦋n⦌ ⟶ ⦋x.1.1.1⦌), Epi f ∧ X.map f.op x.1.1.2 = s :=
-  ⟨⟨X.toN s,
-    fun h ↦ hs (by simpa only [← ofSimplex_le_iff, ofSimplex_toN] using h)⟩,
-    X.toNπ s, inferInstance, by simp⟩
+    ∃ (x : A.N) (f : ⦋n⦌ ⟶ ⦋x.1.1.1⦌), Epi f ∧ X.map f.op x.1.1.2 = s := by
+  refine ⟨⟨(S.mk s).toN, fun h ↦ hs ?_⟩, (S.mk s).toNπ, inferInstance, by simp⟩
+  · simp only [← ofSimplex_le_iff, S.subcomplex_toN] at h
+    simpa only [Subpresheaf.ofSection_le_iff] using h
 
 namespace N
 
