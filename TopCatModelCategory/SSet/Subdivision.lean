@@ -1,11 +1,12 @@
 import Mathlib.CategoryTheory.Limits.Presheaf
 import TopCatModelCategory.SSet.NonemptyFiniteChains
 import TopCatModelCategory.SSet.NonDegenerateSimplices
+import TopCatModelCategory.SSet.StandardSimplex
 import TopCatModelCategory.ULift
 
 universe v u
 
-open CategoryTheory Limits
+open CategoryTheory Limits Simplicial Opposite
 
 instance : HasColimitsOfSize.{u, u} SSet.{u} := by
   dsimp [SSet, SimplicialObject]
@@ -102,5 +103,115 @@ instance : IsIso (Functor.whiskerLeft stdSimplex sdToB) := by
   rw [NatTrans.isIso_iff_isIso_app]
   dsimp
   infer_instance
+
+section
+
+variable (X : SSet.{u})
+
+variable {X} in
+lemma N.lift_monotone_aux {s₀ s₁ : X.N} (hs : s₀ ≤ s₁)
+    {d : ℕ} (f : Δ[d] ⟶ X) (φ₁ : Δ[d].N)
+    (hφ₁ : s₁.toS = S.map f φ₁.toS) :
+    ∃ (φ₀ : Δ[d].N), φ₀ ≤ φ₁ ∧ s₀.toS = S.map f φ₀.toS := by
+  obtain ⟨dx, ⟨x, hx⟩, rfl⟩ := φ₁.mk_surjective
+  obtain ⟨a, rfl⟩ := stdSimplex.objEquiv.symm.surjective x
+  rw [stdSimplex.mem_nonDegenerate_iff_mono, Equiv.apply_symm_apply] at hx
+  obtain rfl : s₁.dim = dx := S.dim_eq_of_eq hφ₁
+  rw [le_iff_exists] at hs
+  obtain ⟨g, _, hg⟩ := hs
+  rw [S.ext_iff'] at hφ₁
+  simp only [S.map_dim, mk_dim, S.cast_dim, S.cast_simplex_rfl, S.map_simplex, mk_simplex,
+    exists_const] at hφ₁
+  refine ⟨N.mk (SSet.stdSimplex.objEquiv.symm (g ≫ a)) ?_, ?_, ?_⟩
+  · rw [stdSimplex.mem_nonDegenerate_iff_mono, Equiv.apply_symm_apply]
+    infer_instance
+  · dsimp
+    rw [N.le_iff, Subpresheaf.ofSection_le_iff,
+      Subcomplex.mem_ofSimplex_obj_iff]
+    exact ⟨g, rfl⟩
+  · dsimp
+    rw [S.ext_iff']
+    simp only [S.map_dim, mk_dim, S.cast_dim, S.cast_simplex_rfl, S.map_simplex, mk_simplex,
+      exists_const]
+    rw [← hg, hφ₁, stdSimplex.objEquiv_symm_comp, ← FunctorToTypes.naturality]
+    rfl
+
+variable {X} in
+lemma N.lift_monotone {n : ℕ} (s : Fin (n + 1) →o X.N) :
+    ∃ (d : ℕ) (f : Δ[d] ⟶ X) (φ : Fin (n + 1) → Δ[d].N)
+      (hφ : Monotone φ),
+      ∀ (i : Fin (n + 1)), (s i).toS = S.map f (φ i).toS := by
+  induction n with
+  | zero =>
+    refine ⟨_, yonedaEquiv.symm (s 0).simplex,
+      fun _ ↦ N.mk _ (stdSimplex.id_nonDegenerate (s 0).dim), ?_, ?_⟩
+    · rw [Fin.monotone_iff_le_succ]
+      intro i
+      fin_cases i
+    · intro i
+      fin_cases i
+      simp [SSet.S.ext_iff']
+  | succ n hn =>
+    let t : Fin (n + 1) →o X.N := ⟨_, (s.monotone.comp Fin.strictMono_succ.monotone)⟩
+    obtain ⟨d, f, φ, hφ, hφ'⟩ := hn t
+    obtain ⟨φ₀, hφ₀, hφ₀'⟩ :=
+      N.lift_monotone_aux (s.monotone (Fin.zero_le 1)) f (φ 0) (hφ' 0)
+    refine ⟨d, f, Fin.cases φ₀ φ, ?_, ?_⟩
+    · rw [Fin.monotone_iff_le_succ]
+      intro i
+      induction i using Fin.cases with
+      | zero => exact hφ₀
+      | succ i => exact hφ (by simp)
+    · intro i
+      induction i using Fin.cases with
+      | zero =>  exact hφ₀'
+      | succ i => exact hφ' i
+
+open PartialOrder in
+instance : Epi (sdToB.app X) := by
+  rw [NatTrans.epi_iff_epi_app]
+  rintro ⟨n⟩
+  induction' n using SimplexCategory.rec with n
+  rw [epi_iff_surjective]
+  -- TODO: reduce to the case `b` is nondegenerate
+  intro b
+  obtain ⟨d, f, φ, hφ, hφ'⟩ := N.lift_monotone b.toOrderHom
+  let ψ (i : Fin (n + 1)) : NonemptyFiniteChains (ULift.{u} (Fin (d + 1))) :=
+    NonemptyFiniteChains.ofN (mapN (stdSimplex.partOrdIso.hom.app _) (φ i))
+  have hψ : Monotone ψ := fun i j hij ↦ by
+    dsimp [ψ]
+    rw [NonemptyFiniteChains.le_iff, NonemptyFiniteChains.ofN_le_ofN_iff]
+    exact (mapN _).monotone (hφ hij)
+  let s : SimplexCategory.sd ^⦋d⦌ _⦋n⦌ := Monotone.functor hψ
+  refine ⟨(sd.map f).app _
+    ((stdSimplex.sdIso.{u}.inv.app ⦋d⦌).app _ s), ?_⟩
+  dsimp
+  rw [← FunctorToTypes.comp, NatTrans.naturality, FunctorToTypes.comp,
+    sdToB_app_stdSimplex_obj, comp_app, types_comp_apply]
+  nth_rw 3 [← FunctorToTypes.comp]
+  rw [Iso.inv_hom_id_app, NatTrans.id_app, types_id_apply]
+  apply Preorder.nerveExt
+  ext i
+  dsimp [B, mapN]
+  rw [toN_of_nonDegenerate]
+  · rw [N.ext_iff]
+    change S.map f (((stdSimplexCompBIso.inv.app ⦋d⦌).app (op ⦋n⦌) s).obj i).toS = _
+    refine Eq.trans ?_ (hφ' i).symm
+    congr
+    dsimp [s, ψ]
+    ext
+    sorry
+  · sorry
+
+noncomputable def isColimitBMapCoconeCoconeN :
+    IsColimit (B.mapCocone X.coconeN) :=
+  evaluationJointlyReflectsColimits _ (fun n ↦ by
+    sorry)
+
+instance : PreservesColimit X.functorN B :=
+  preservesColimit_of_preserves_colimit_cocone X.isColimitCoconeN
+    X.isColimitBMapCoconeCoconeN
+
+end
 
 end SSet

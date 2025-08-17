@@ -211,6 +211,10 @@ lemma self_le_toN (s : X.S) : s ≤ (X.toN s.simplex).toS := by
 lemma toN_le_self (s : X.S) : (X.toN s.simplex).toS ≤ s := by
   rw [S.le_iff, ofSimplex_toN]
 
+lemma toN_of_nonDegenerate {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenerate _) :
+    X.toN x = N.mk _ hx :=
+  X.toN_eq x (N.mk _ hx) (𝟙 _) (by simp)
+
 end
 
 namespace isColimitCoconeN
@@ -318,6 +322,16 @@ lemma mapN_toN {n : ℕ} (x : X _⦋n⦌) :
   · simp only [N.le_iff, ofSimplex_toN, Subpresheaf.ofSection_le_iff,
       mem_ofSimplex_obj_iff]
     exact ⟨X.toNπ x, by rw [← FunctorToTypes.naturality, map_toNπ_op_toN]⟩
+
+@[simp]
+lemma simplex_toN (x : X.N) : X.toN x.simplex = x :=
+  toN_of_nonDegenerate _ _ x.nonDegenerate
+
+lemma toS_mapN_of_nonDegenerate (x : X.N) (hx : f.app _ x.simplex ∈ Y.nonDegenerate _) :
+    (mapN f x).toS = S.map f x.toS := by
+  conv_lhs => rw [← simplex_toN x]
+  rw [mapN_toN, toN_of_nonDegenerate _ _ hx]
+  rfl
 
 @[simp]
 lemma id_app {n : SimplexCategoryᵒᵖ} (x : X.obj n) : NatTrans.app (𝟙 X) n x = x := rfl
