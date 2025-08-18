@@ -54,7 +54,15 @@ lemma SSet.mem_range_B_map_ι_app_iff {X : SSet.{u}} (A : X.Subcomplex)
     rw [N.ext_iff, toS_mapN_of_mono, N.mk'_toS] at hz
     subst hz
     exact (y.obj (Fin.last d)).simplex.2
-  · sorry
+  · intro h
+    refine ⟨Monotone.functor (f := fun i ↦ N.toSubcomplex (x.obj i) ?_) ?_, ?_⟩
+    · simp only [← Subpresheaf.ofSection_le_iff] at h ⊢
+      refine le_trans ?_ h
+      rw [← N.le_iff]
+      exact x.monotone i.le_last
+    · intro i j h
+      simpa [N.toSubcomplex_le_toSubcomplex_iff] using x.monotone h
+    · apply Preorder.nerveExt (by aesop)
 
 namespace PartialOrder
 
