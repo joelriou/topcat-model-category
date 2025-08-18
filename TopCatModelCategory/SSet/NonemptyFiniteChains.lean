@@ -263,6 +263,11 @@ lemma not_mem_horn_iff'' {n : ℕ} (s : (nerve (NonemptyFiniteChains X)) _⦋n�
         complSingleton x₀ ≤ s.obj (Fin.last _) := by
   rw [not_mem_horn_iff', complSingleton_le_iff]
 
+lemma mem_horn_iff'' {n : ℕ} (s : (nerve (NonemptyFiniteChains X)) _⦋n⦌) :
+    s ∈ (horn x₀).obj _ ↔
+        ¬ (complSingleton x₀ ≤ s.obj (Fin.last _)) := by
+  rw [← not_mem_horn_iff'', not_not]
+
 end
 
 section

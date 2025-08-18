@@ -541,6 +541,9 @@ lemma image_le_iff (Z : Y.Subcomplex) :
 
 lemma image_top : (⊤ : X.Subcomplex).image f = range f := by aesop
 
+@[simp]
+lemma image_id : S.image (𝟙 _) = S := by aesop
+
 lemma image_comp {Z : SSet.{u}} (g : Y ⟶ Z) :
     S.image (f ≫ g) = (S.image f).image g := by aesop
 
@@ -967,6 +970,28 @@ lemma preimage_image_of_mono (S : X.Subcomplex) (f : X ⟶ Y) [Mono f] :
 lemma image_le_image_iff_of_mono (f : X ⟶ Y) (S T : X.Subcomplex) [Mono f] :
     S.image f ≤ T.image f ↔ S ≤ T := by
   rw [image_le_iff, preimage_image_of_mono]
+
+
+@[simps! hom_left hom_right hom_right inv_right]
+def congrArrowι (e : X ≅ Y) {A : X.Subcomplex} {B : Y.Subcomplex}
+    (h : A.image e.hom = B) :
+    Arrow.mk A.ι ≅ Arrow.mk B.ι :=
+  Arrow.isoMk
+    { hom := Subcomplex.lift (A.ι ≫ e.hom)
+        (le_antisymm (by simp) (by simp [range_comp, h]))
+      inv := Subcomplex.lift (B.ι ≫ e.inv)
+        (le_antisymm (by simp) (by
+          have h' : B.image e.inv = A := by
+            rw [← h, ← image_comp, e.hom_inv_id, image_id]
+          simp [range_comp, h']))
+      hom_inv_id := by simp [← cancel_mono A.ι]
+      inv_hom_id := by simp [← cancel_mono B.ι] } e
+
+@[simps! hom_left hom_right hom_right inv_right]
+def congrArrowι' (e : X ≅ Y) {A : X.Subcomplex} {B : Y.Subcomplex}
+    (h : B.preimage e.hom = A) :
+    Arrow.mk A.ι ≅ Arrow.mk B.ι :=
+  congrArrowι e (by simp [← h])
 
 end Subcomplex
 

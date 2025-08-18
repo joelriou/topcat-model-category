@@ -103,6 +103,7 @@ import TopCatModelCategory.SSet.StandardSimplex
 import TopCatModelCategory.SSet.StrictSegal
 import TopCatModelCategory.SSet.Subcomplex
 import TopCatModelCategory.SSet.Subdivision
+import TopCatModelCategory.SSet.SubdivisionAnodyneExtensions
 import TopCatModelCategory.SSet.ToTopFibration
 import TopCatModelCategory.SSet.ULift
 import TopCatModelCategory.Set
