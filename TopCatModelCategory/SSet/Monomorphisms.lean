@@ -68,6 +68,9 @@ instance : IsStableUnderTransfiniteComposition.{u} (monomorphisms (SSet.{u})) wh
     change (monomorphisms (_ ⥤ _)).IsStableUnderTransfiniteCompositionOfShape _
     infer_instance
 
+instance : IsStableUnderTransfiniteComposition.{0} (monomorphisms (SSet.{u})) :=
+  IsStableUnderTransfiniteComposition.shrink.{0, u} _
+
 instance : IsStableUnderCobaseChange (monomorphisms (SSet.{u})) :=
   inferInstanceAs (monomorphisms (_ ⥤ _)).IsStableUnderCobaseChange
 

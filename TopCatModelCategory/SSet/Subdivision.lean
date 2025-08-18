@@ -2,6 +2,9 @@ import Mathlib.CategoryTheory.Limits.Presheaf
 import TopCatModelCategory.SSet.NonemptyFiniteChains
 import TopCatModelCategory.SSet.NonDegenerateSimplices
 import TopCatModelCategory.SSet.StandardSimplex
+import TopCatModelCategory.SSet.Skeleton
+import TopCatModelCategory.SSet.Monomorphisms
+import TopCatModelCategory.MorphismProperty
 import TopCatModelCategory.ULift
 
 -- Jardine, *Simplicial approximation*
@@ -333,9 +336,28 @@ class IsWeaklyPolyhedralLike where
 
 attribute [instance] IsWeaklyPolyhedralLike.mono
 
+instance (T : Type u) [PartialOrder T] :
+    (nerve T).IsWeaklyPolyhedralLike where
+  mono := by
+    rintro d ⟨x, hx⟩
+    dsimp
+    rw [PartialOrder.mem_nonDegenerate_iff] at hx
+    rw [NatTrans.mono_iff_mono_app]
+    intro ⟨n⟩
+    induction' n using SimplexCategory.rec with n
+    rw [mono_iff_injective]
+    intro i j h
+    ext k : 1
+    apply hx.injective
+    exact Functor.congr_obj h k
+
+instance : (B.obj X).IsWeaklyPolyhedralLike := by
+  dsimp [B]
+  infer_instance
+
 section
 
-variable [IsWeaklyPolyhedralLike X]
+variable [X.IsWeaklyPolyhedralLike]
 
 variable {X}
 
@@ -381,6 +403,59 @@ lemma isWeaklyPolyhedralLike_of_mono {Y : SSet.{u}} (f : Y ⟶ X) [Mono f] :
 
 instance (A : X.Subcomplex) : A.toSSet.IsWeaklyPolyhedralLike :=
   isWeaklyPolyhedralLike_of_mono A.ι
+
+end
+
+instance [X.IsWeaklyPolyhedralLike] : (sd.obj X).IsWeaklyPolyhedralLike :=
+  isWeaklyPolyhedralLike_of_mono (asIso (sdToB.app X)).hom
+
+instance (n : SimplexCategory) : (stdSimplex.{u}.obj n).IsWeaklyPolyhedralLike :=
+  isWeaklyPolyhedralLike_of_mono (X := nerve _) (stdSimplex.partOrdIso.{u}.app n).hom
+
+instance : B.{u}.PreservesMonomorphisms where
+  preserves {X Y} f hf := by
+    rw [NatTrans.mono_iff_mono_app]
+    rintro ⟨n⟩
+    induction' n using SimplexCategory.rec with n
+    rw [mono_iff_injective]
+    intro s t h
+    apply Preorder.nerveExt
+    ext i
+    exact N.mapN_injective_of_mono f (Functor.congr_obj h i)
+
+open MorphismProperty in
+instance (n : ℕ) : Mono (sd.map (boundary.{u} n).ι) :=
+  ((monomorphisms _).arrow_mk_iso_iff
+    (Arrow.isoMk (asIso (sdToB.app _)) (asIso (sdToB.app _)))).2
+      (monomorphisms.infer_property (B.map (boundary.{u} n).ι))
+
+instance : PreservesWellOrderContinuousOfShape ℕ sd.{u} where
+
+section
+
+open MorphismProperty
+
+instance : IsStableUnderCoproducts.{u} ((monomorphisms SSet).inverseImage sd.{u}) where
+  isStableUnderCoproductsOfShape J := by
+    simp only [isStableUnderColimitsOfShape_iff_colimitsOfShape_le]
+    rintro X Y f hf
+    have hsd : ((monomorphisms _).inverseImage sd).map sd.{u} ≤ monomorphisms _ :=
+      (map_inverseImage_le _ _).trans (by rw [isoClosure_eq_self])
+    apply colimitsOfShape_le _ ((colimitsOfShape_monotone hsd _) _
+      (MorphismProperty.map_colimitsOfShape  _ hf sd))
+
+open MorphismProperty modelCategoryQuillen in
+instance : sd.{u}.PreservesMonomorphisms where
+  preserves {X Y} i _ := by
+    have : (coproducts.{u} I).pushouts ≤ (monomorphisms _).inverseImage sd.{u} := by
+      rw [← MorphismProperty.map_le_iff]
+      refine ((coproducts.{u} I).map_pushouts_le sd.{u}).trans ?_
+      simp only [pushouts_le_iff, map_le_iff, coproducts_le_iff]
+      intro _ _ _ ⟨n⟩
+      simp only [inverseImage_iff, monomorphisms.iff]
+      infer_instance
+    apply transfiniteCompositionsOfShape_le _ _ _
+      ((modelCategoryQuillen.transfiniteCompositionOfMono i).ofLE this).map.mem
 
 end
 

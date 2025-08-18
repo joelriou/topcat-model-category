@@ -1,7 +1,7 @@
 import Mathlib.CategoryTheory.MorphismProperty.TransfiniteComposition
 import Mathlib.CategoryTheory.SmallObject.IsCardinalForSmallObjectArgument
 
-universe w v v' u u'
+universe w' w v v' u u'
 
 local instance Cardinal.aleph0_isRegular : Fact Cardinal.aleph0.{w}.IsRegular where
   out := Cardinal.isRegular_aleph0
