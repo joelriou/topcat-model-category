@@ -4,6 +4,8 @@ import TopCatModelCategory.SSet.NonDegenerateSimplices
 import TopCatModelCategory.SSet.StandardSimplex
 import TopCatModelCategory.ULift
 
+-- Jardine, *Simplicial approximation*
+
 universe v u
 
 open CategoryTheory Limits Simplicial Opposite
@@ -223,14 +225,162 @@ instance : Epi (sdToB.app X) := by
   · rw [hs, ← hφ']
     exact (b.toOrderHom i).2
 
+noncomputable def N.equivSubcomplex (s : X.N) :
+    s.subcomplex.toSSet.N ≃o Set.Iic s where
+  toFun x := ⟨mapN s.subcomplex.ι x, by simp [le_iff_toS_le_toS, toS_mapN_of_mono, S.le_iff]⟩
+  invFun y := N.toSubcomplex y.1 (by
+    rw [← Subpresheaf.ofSection_le_iff]
+    exact y.2)
+  left_inv x := by simp
+  right_inv y := by aesop
+  map_rel_iff' {x y} := by
+    rw [← Subtype.coe_le_coe]
+    dsimp
+    rw [N.le_iff, N.le_iff, subcomplex_mapN, subcomplex_mapN,
+      Subcomplex.image_le_image_iff_of_mono]
+
+variable {X} in
+lemma isColimitBMapCoconeCoconeN_aux
+    {n : ℕ} {i : X.N} (x : ComposableArrows i.subcomplex.toSSet.N n)
+    {k : X.N} (hk : mapN i.subcomplex.ι (x.obj (Fin.last _)) = k) :
+    ∃ (z : ComposableArrows k.subcomplex.toSSet.N n), ∀ (d : Fin (n + 1)),
+      mapN k.subcomplex.ι (z.obj d) =
+        mapN i.subcomplex.ι (x.obj d) := by
+  let φ (d : Fin (n + 1)) : k.subcomplex.toSSet.N :=
+    (mapN i.subcomplex.ι (x.obj d)).toSubcomplex (by
+      simp only [← Subpresheaf.ofSection_le_iff, subcomplex_mapN]
+      have h₁ := x.monotone d.le_last
+      rw [N.le_iff] at h₁
+      exact (Subcomplex.image_monotone i.subcomplex.ι h₁).trans (by simp [← hk]))
+  have hφ : Monotone φ := by
+    intro d d' h
+    dsimp [φ]
+    rw [N.toSubcomplex_le_toSubcomplex_iff]
+    exact (mapN _).monotone (x.monotone h)
+  refine ⟨hφ.functor, fun d ↦ by simp [φ]⟩
+
+open Functor in
 noncomputable def isColimitBMapCoconeCoconeN :
     IsColimit (B.mapCocone X.coconeN) :=
-  evaluationJointlyReflectsColimits _ (fun n ↦ by
-    sorry)
+  evaluationJointlyReflectsColimits _ (fun ⟨n⟩ ↦ by
+    induction' n using SimplexCategory.rec with n
+    apply Nonempty.some
+    rw [Types.isColimit_iff_coconeTypesIsColimit]
+    refine ⟨⟨?_, fun b ↦ ?_⟩⟩
+    · intro x y h
+      obtain ⟨i, x, rfl⟩ := ιColimitType_jointly_surjective _ x
+      obtain ⟨j, y, rfl⟩ := ιColimitType_jointly_surjective _ y
+      dsimp at x y h
+      generalize hx : mapN i.subcomplex.ι (x.obj (Fin.last _)) = k
+      have hy : mapN j.subcomplex.ι (y.obj (Fin.last _)) = k := by
+        rw [← hx]
+        exact Functor.congr_obj h.symm (Fin.last _)
+      have hki : k ≤ i := by
+        rw [← hx, N.le_iff_toS_le_toS, toS_mapN_of_mono, S.le_iff]
+        simp
+      have hkj : k ≤ j := by
+        rw [← hy, N.le_iff_toS_le_toS, toS_mapN_of_mono, S.le_iff]
+        simp
+      obtain ⟨z, hz⟩ := isColimitBMapCoconeCoconeN_aux x hx
+      obtain ⟨z', hz'⟩ := isColimitBMapCoconeCoconeN_aux y hy
+      obtain rfl : z = z' := by
+        apply Preorder.nerveExt
+        ext d : 1
+        apply N.mapN_injective_of_mono k.subcomplex.ι
+        rw [hz, hz']
+        exact Functor.congr_obj h d
+      trans Functor.ιColimitType _ k z
+      · rw [← ιColimitType_map _ (homOfLE hki)]
+        congr
+        apply Preorder.nerveExt
+        ext d : 1
+        apply N.mapN_injective_of_mono i.subcomplex.ι
+        dsimp
+        rw [mapN_mapN]
+        exact (hz d).symm
+      · rw [← ιColimitType_map _ (homOfLE hkj)]
+        congr
+        apply Preorder.nerveExt
+        ext d : 1
+        apply N.mapN_injective_of_mono j.subcomplex.ι
+        dsimp
+        rw [mapN_mapN]
+        exact hz' d
+    · refine ⟨Functor.ιColimitType _ (b.obj (Fin.last _))
+        (Monotone.functor (f := fun i ↦ (b.obj i).toSubcomplex ?_) (fun i j hij ↦ ?_)),
+        Preorder.nerveExt ?_⟩
+      · dsimp
+        rw [← Subpresheaf.ofSection_le_iff, ← N.le_iff]
+        exact b.monotone i.le_last
+      · dsimp
+        rw [N.toSubcomplex_le_toSubcomplex_iff]
+        exact b.monotone hij
+      · ext i
+        rw [N.ext_iff]
+        dsimp
+        apply toS_mapN_of_mono)
 
 instance : PreservesColimit X.functorN B :=
   preservesColimit_of_preserves_colimit_cocone X.isColimitCoconeN
     X.isColimitBMapCoconeCoconeN
+
+end
+
+variable (X : SSet.{u})
+
+class IsWeaklyPolyhedralLike where
+  mono {n : ℕ} (x : X.nonDegenerate n) : Mono (yonedaEquiv.symm x.1)
+
+attribute [instance] IsWeaklyPolyhedralLike.mono
+
+section
+
+variable [IsWeaklyPolyhedralLike X]
+
+variable {X}
+
+lemma mono_yonedaEquiv_symm {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenerate n) :
+    Mono (yonedaEquiv.symm x) :=
+  IsWeaklyPolyhedralLike.mono ⟨x, hx⟩
+
+instance (x : X.N) : Mono (yonedaEquiv.symm x.simplex) :=
+  mono_yonedaEquiv_symm _ x.nonDegenerate
+
+lemma IsWeaklyPolyhedralLike.isIso_toOfSimplex {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenerate n) :
+    IsIso (Subcomplex.toOfSimplex x) := by
+  have : Mono (Subcomplex.toOfSimplex x) := by
+    have := mono_yonedaEquiv_symm x hx
+    exact mono_of_mono_fac (Subcomplex.toOfSimplex_ι x)
+  apply isIso_of_mono_of_epi
+
+@[simps! hom]
+noncomputable def IsWeaklyPolyhedralLike.iso {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenerate n) :
+    Δ[n] ≅ Subcomplex.ofSimplex x :=
+  have := IsWeaklyPolyhedralLike.isIso_toOfSimplex x hx
+  asIso (Subcomplex.toOfSimplex x)
+
+instance (x : X.N) : IsIso (sdToB.app x.subcomplex.toSSet) := by
+  rw [NatTrans.isIso_app_iff_of_iso _ (IsWeaklyPolyhedralLike.iso _ x.nonDegenerate).symm]
+  infer_instance
+
+open MorphismProperty
+
+instance : IsIso (sdToB.app X) :=
+  colimitsOfShape_le (W := isomorphisms SSet.{u}) _
+    (colimitsOfShape.mk' _ _ _ _ (isColimitOfPreserves sd X.isColimitCoconeN)
+      X.isColimitBMapCoconeCoconeN (Functor.whiskerLeft _ sdToB)
+      (fun s ↦ (by dsimp; simp only [isomorphisms.iff]; infer_instance)) _ (by simp))
+
+lemma isWeaklyPolyhedralLike_of_mono {Y : SSet.{u}} (f : Y ⟶ X) [Mono f] :
+    IsWeaklyPolyhedralLike Y where
+  mono {n} x := by
+    have := mono_yonedaEquiv_symm (f.app _ x.1) (by
+      rw [nonDegenerate_iff_of_mono]
+      exact x.2)
+    exact mono_of_mono_fac (yonedaEquiv_symm_comp x.1 f)
+
+instance (A : X.Subcomplex) : A.toSSet.IsWeaklyPolyhedralLike :=
+  isWeaklyPolyhedralLike_of_mono A.ι
 
 end
 

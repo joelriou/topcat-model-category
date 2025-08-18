@@ -583,6 +583,11 @@ instance : Epi (S.toImage f) := by
   rintro m ⟨_, ⟨y, hy, rfl⟩⟩ _
   exact ⟨⟨y, hy⟩, rfl⟩
 
+lemma image_monotone : Monotone (fun (S : X.Subcomplex) ↦ S.image f) := by
+  intro S T h
+  rw [image_le_iff]
+  exact h.trans (by rw [← image_le_iff])
+
 end
 
 section
@@ -944,6 +949,24 @@ noncomputable def isColimitCofan' : IsColimit (cofan' U) :=
   IsColimit.ofIsoColimit (isColimitCofan h) (Cofan.ext (topIso X) (fun i ↦ by simp))
 
 end coproducts
+
+variable {Y}
+
+@[simp]
+lemma preimage_image_of_mono (S : X.Subcomplex) (f : X ⟶ Y) [Mono f] :
+    (S.image f).preimage f = S := by
+  apply le_antisymm
+  · intro n x hx
+    simp only [preimage_obj, Subpresheaf.image_obj, Set.mem_preimage, Set.mem_image] at hx
+    obtain ⟨y, hy, hxy⟩ := hx
+    obtain rfl : y = x := (mono_iff_injective _).1 inferInstance hxy
+    exact hy
+  · rw [← image_le_iff]
+
+@[simp]
+lemma image_le_image_iff_of_mono (f : X ⟶ Y) (S T : X.Subcomplex) [Mono f] :
+    S.image f ≤ T.image f ↔ S ≤ T := by
+  rw [image_le_iff, preimage_image_of_mono]
 
 end Subcomplex
 

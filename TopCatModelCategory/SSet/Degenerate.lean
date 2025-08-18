@@ -331,12 +331,6 @@ lemma nonDegenerate_iff_of_mono {Y : SSet.{u}} (f : X ⟶ Y) [Mono f] (x : X _�
     f.app _ x ∈ Y.nonDegenerate n ↔ x ∈ X.nonDegenerate n := by
   simp only [mem_nonDegenerate_iff_notMem_degenerate, degenerate_iff_of_mono]
 
-/-lemma _root_.Fin.eq_castSucc_of_ne_last {n : ℕ} {i : Fin (n + 1)} (hi : i ≠ Fin.last n) :
-    ∃ (j : Fin n), i = j.castSucc := by
-  obtain ⟨j, rfl⟩ | rfl := i.eq_castSucc_or_eq_last
-  · exact ⟨j, rfl⟩
-  · simp at hi-/
-
 lemma eq_of_degenerate_of_δ_eq
     {X : SSet.{u}} {n : ℕ} {x y : X _⦋n + 1⦌} (hx : x ∈ X.degenerate (n + 1))
     (hy : y ∈ X.degenerate (n + 1))

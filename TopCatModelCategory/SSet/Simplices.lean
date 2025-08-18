@@ -24,7 +24,7 @@ simplices of a simplicial set `X` which do not belong to a given subcomplex.
 
 universe u
 
-open CategoryTheory Simplicial
+open CategoryTheory Simplicial Opposite
 
 namespace SSet
 
@@ -60,10 +60,18 @@ lemma mk_surjective (s : X.S) :
     ∃ (n : ℕ) (x : X _⦋n⦌), s = mk x :=
   ⟨s.1, s.2, rfl⟩
 
+@[simps!]
+def toSubcomplex (x : X.S) {A : X.Subcomplex} (hx : x.simplex ∈ A.obj _) : A.toSSet.S :=
+  S.mk ⟨x.simplex, hx⟩
+
 /-- The image of a simplex by a morphism of simplicial sets. -/
 @[simps]
 def map {Y : SSet.{u}} (f : X ⟶ Y) (s : X.S) : Y.S :=
   S.mk (f.app _ s.2)
+
+@[simp]
+lemma map_toSubcomplex (x : X.S) {A : X.Subcomplex} (hx : x.simplex ∈ A.obj _) :
+    S.map A.ι (x.toSubcomplex hx) = x := rfl
 
 lemma simplex_map_nonDegenerate_iff_of_mono {Y : SSet.{u}} (f : X ⟶ Y) [Mono f] (s : X.S) :
     (S.map f s).simplex ∈ Y.nonDegenerate _ ↔ s.simplex ∈ X.nonDegenerate _ := by
@@ -115,6 +123,16 @@ lemma ext_iff {n : ℕ} (x y : X _⦋n⦌) :
     S.mk x = S.mk y ↔ x = y := by
   simp
 
+lemma map_injective_of_mono {Y : SSet.{u}} (f : X ⟶ Y) [Mono f] :
+    Function.Injective (S.map f) := by
+  intro x y h
+  obtain ⟨d, x, rfl⟩ := x.mk_surjective
+  obtain ⟨d', y, rfl⟩ := y.mk_surjective
+  obtain rfl := S.dim_eq_of_mk_eq h
+  simp only [ext_iff', map_dim, cast_dim, cast_simplex_rfl, map_simplex, exists_const] at h
+  rw [ext_iff]
+  exact (mono_iff_injective _).1 inferInstance h
+
 instance : Preorder X.S where
   le x y := Subcomplex.ofSimplex x.2 ≤ Subcomplex.ofSimplex y.2
   le_refl _ := le_refl (α := Subcomplex X) _
@@ -163,6 +181,20 @@ def equivElements : X.S ≃ X.Elements where
 lemma subcomplex_map {Y : SSet.{u}} (f : X ⟶ Y) (x : X.S) :
     (S.map f x).subcomplex = x.subcomplex.image f := by
   simp [subcomplex]
+
+lemma toSubcomplex_le_toSubcomplex_iff
+    (x y : X.S) {A : X.Subcomplex} (hx : x.simplex ∈ A.obj _) (hy : y.simplex ∈ A.obj _) :
+    x.toSubcomplex hx ≤ y.toSubcomplex hy ↔ x ≤ y := by
+  simp only [le_iff, Subpresheaf.ofSection_le_iff]
+  constructor
+  · rintro ⟨f, hf⟩
+    exact ⟨f, by rwa [Subtype.ext_iff] at hf⟩
+  · rintro ⟨f, hf⟩
+    exact ⟨f, by rwa [Subtype.ext_iff]⟩
+
+@[simp]
+lemma map_ι_toSubcomplex (x : X.S) {A : X.Subcomplex} (hx : x.simplex ∈ A.obj _) :
+  S.map A.ι (x.toSubcomplex hx) = x := rfl
 
 end S
 
