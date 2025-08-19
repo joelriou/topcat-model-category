@@ -1,4 +1,4 @@
-import TopCatModelCategory.SemiSimplicial.SemiSimplexCategory
+import TopCatModelCategory.SemiSimplexCategory
 import TopCatModelCategory.TopCat.Adj
 import TopCatModelCategory.SSet.Subdivision
 

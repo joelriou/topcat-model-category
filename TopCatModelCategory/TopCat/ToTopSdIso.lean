@@ -1,4 +1,4 @@
-import TopCatModelCategory.SemiSimplicial.SdIso
+import TopCatModelCategory.TopCat.SdIso
 
 universe u
 

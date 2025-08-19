@@ -106,9 +106,7 @@ import TopCatModelCategory.SSet.Subdivision
 import TopCatModelCategory.SSet.SubdivisionAnodyneExtensions
 import TopCatModelCategory.SSet.ToTopFibration
 import TopCatModelCategory.SSet.ULift
-import TopCatModelCategory.SemiSimplicial.SdIso
-import TopCatModelCategory.SemiSimplicial.SemiSimplexCategory
-import TopCatModelCategory.SemiSimplicial.Subdivision
+import TopCatModelCategory.SemiSimplexCategory
 import TopCatModelCategory.Set
 import TopCatModelCategory.SimplicialPresheaves.LocalLiftingProperty
 import TopCatModelCategory.TopCat.Adj
@@ -127,8 +125,10 @@ import TopCatModelCategory.TopCat.Glueing
 import TopCatModelCategory.TopCat.HornDeformationRetract
 import TopCatModelCategory.TopCat.IsQuotientMap
 import TopCatModelCategory.TopCat.Monoidal
+import TopCatModelCategory.TopCat.SdIso
 import TopCatModelCategory.TopCat.T1Inclusion
 import TopCatModelCategory.TopCat.ToTopExact
+import TopCatModelCategory.TopCat.ToTopSdIso
 import TopCatModelCategory.TopCat.ToTopULift
 import TopCatModelCategory.TopCat.TopologyOrderHom
 import TopCatModelCategory.TopCat.W
