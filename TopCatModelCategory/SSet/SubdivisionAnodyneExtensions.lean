@@ -4,7 +4,7 @@ import TopCatModelCategory.SSet.Subdivision
 
 universe v u
 
-open CategoryTheory SSet Simplicial Opposite
+open CategoryTheory SSet Simplicial Opposite HomotopicalAlgebra
 
 instance (X : Type u) [Nontrivial X] :
     Nontrivial (ULift.{v} X) where
@@ -145,5 +145,29 @@ lemma anodyneExtensions_sd_map_horn_ι (n : ℕ) (i : Fin (n + 2)) :
   (anodyneExtensions.arrow_mk_iso_iff
     (sd.mapArrow.mapIso (PartialOrder.hornArrowIso.{u} n i))).1
       (PartialOrder.anodyneExtensions_sd_map_horn_ι _)
+
+section
+
+variable {X Y : SSet.{u}} (f : X ⟶ Y)
+
+open modelCategoryQuillen MorphismProperty
+
+instance [Fibration f] : Fibration (ex.map f) := by
+  rw [fibration_iff]
+  intro _ _ g hg
+  simp only [J, iSup_iff] at hg
+  obtain ⟨n, ⟨i⟩⟩ := hg
+  rw [← sdExAdjunction.hasLiftingProperty_iff]
+  exact (anodyneExtensions_sd_map_horn_ι n i).hasLeftLiftingProperty f
+
+lemma anodyneExtensions.sd_map {X Y : SSet.{u}} {f : X ⟶ Y}
+    (hf : anodyneExtensions f) :
+    anodyneExtensions (sd.map f) := by
+  intro E S p hp
+  rw [← HomotopicalAlgebra.fibration_iff] at hp
+  rw [sdExAdjunction.hasLiftingProperty_iff]
+  exact hf.hasLeftLiftingProperty _
+
+end
 
 end SSet
