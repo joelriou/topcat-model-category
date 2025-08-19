@@ -106,6 +106,9 @@ import TopCatModelCategory.SSet.Subdivision
 import TopCatModelCategory.SSet.SubdivisionAnodyneExtensions
 import TopCatModelCategory.SSet.ToTopFibration
 import TopCatModelCategory.SSet.ULift
+import TopCatModelCategory.SemiSimplicial.SdIso
+import TopCatModelCategory.SemiSimplicial.SemiSimplexCategory
+import TopCatModelCategory.SemiSimplicial.Subdivision
 import TopCatModelCategory.Set
 import TopCatModelCategory.SimplicialPresheaves.LocalLiftingProperty
 import TopCatModelCategory.TopCat.Adj

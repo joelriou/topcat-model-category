@@ -365,6 +365,25 @@ lemma mono_yonedaEquiv_symm {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenera
     Mono (yonedaEquiv.symm x) :=
   IsWeaklyPolyhedralLike.mono ⟨x, hx⟩
 
+instance : Functor.Faithful stdSimplex.{u} where
+  map_injective {n m f g} h := by
+    induction' n using SimplexCategory.rec with n
+    induction' m using SimplexCategory.rec with m
+    ext i : 3
+    exact DFunLike.congr_fun
+      ((congr_fun (NatTrans.congr_app h (op ⦋n⦌)) (stdSimplex.objEquiv.symm (𝟙 _)))) i
+
+lemma injective_map_of_nonDegenerate {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenerate n)
+    {m : SimplexCategory} {f g : m ⟶ ⦋n⦌}
+    (h : X.map f.op x = X.map g.op x) :
+    f = g := by
+  have := mono_yonedaEquiv_symm x hx
+  apply stdSimplex.{u}.map_injective
+  rw [← cancel_mono (yonedaEquiv.symm x)]
+  apply yonedaEquiv.injective
+  rwa [yonedaEquiv_comp, stdSimplex.yonedaEquiv_map,
+    yonedaEquiv_comp, stdSimplex.yonedaEquiv_map]
+
 instance (x : X.N) : Mono (yonedaEquiv.symm x.simplex) :=
   mono_yonedaEquiv_symm _ x.nonDegenerate
 
