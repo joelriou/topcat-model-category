@@ -9,6 +9,7 @@ import TopCatModelCategory.CommSq
 import TopCatModelCategory.Factorization
 import TopCatModelCategory.Fin
 import TopCatModelCategory.FunctorCategoryColimits
+import TopCatModelCategory.FunctorIterate
 import TopCatModelCategory.Homotopy.Basic
 import TopCatModelCategory.II
 import TopCatModelCategory.IsFibrant
