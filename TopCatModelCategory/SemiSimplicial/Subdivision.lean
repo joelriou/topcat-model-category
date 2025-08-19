@@ -72,6 +72,7 @@ noncomputable abbrev functorN' : X.N ⥤ SSet :=
     N.toSemiSimplexCategory X ⋙ SemiSimplexCategory.toSSet
 
 open Functor in
+@[simps! hom_app inv_app]
 noncomputable def functorN'CompSdCompToTopIso :
     X.functorN' ⋙ sd ⋙ toTop ≅ X.functorN' ⋙ toTop :=
   associator _ _ _ ≪≫ isoWhiskerLeft _ (associator _ _ _ ≪≫
@@ -84,6 +85,7 @@ noncomputable def functorN'CompSdCompToTopIso :
 noncomputable def functorN'Iso : X.functorN' ≅ X.functorN :=
   NatIso.ofComponents (fun x ↦ IsWeaklyPolyhedralLike.iso _ x.nonDegenerate)
 
+@[simps]
 noncomputable def coconeN' : Cocone X.functorN' where
   pt := X
   ι := { app s := yonedaEquiv.symm s.simplex }
@@ -92,6 +94,7 @@ noncomputable def isColimitCoconeN' : IsColimit X.coconeN' :=
   (IsColimit.equivOfNatIsoOfIso
     X.functorN'Iso.symm _ _ (Cocones.ext (Iso.refl _))).1 X.isColimitCoconeN
 
+@[simps! pt ι_app]
 noncomputable def toTopSdIsoCocone : Cocone (X.functorN' ⋙ toTop) :=
   (Cocones.precompose X.functorN'CompSdCompToTopIso.inv).obj
     ((sd ⋙ toTop).mapCocone X.coconeN')
@@ -103,5 +106,26 @@ noncomputable def isColimitToTopSdIsoCocone : IsColimit X.toTopSdIsoCocone :=
 noncomputable def toTopSdIso : |sd.obj X| ≅ |X| :=
   IsColimit.coconePointUniqueUpToIso X.isColimitToTopSdIsoCocone
     (isColimitOfPreserves toTop X.isColimitCoconeN')
+
+variable {X} in
+@[reassoc]
+lemma N.toTop_map_sd_map_yonedaEquiv_symm_simplex_comp_toTopSdIso_hom (x : X.N) :
+    toTop.map (sd.map (yonedaEquiv.symm x.simplex)) ≫ X.toTopSdIso.hom =
+    toTop.map (stdSimplex.sdIso.hom.app _) ≫ SemiSimplexCategory.sdIso.hom.app ⦋x.dim⦌ₛ ≫
+      toTopSimplex.inv.app ⦋x.dim⦌ ≫ toTop.map (yonedaEquiv.symm x.simplex) := by
+  have := IsColimit.comp_coconePointUniqueUpToIso_hom X.isColimitToTopSdIsoCocone
+    (isColimitOfPreserves toTop X.isColimitCoconeN') x
+  dsimp at this ⊢
+  simp only [toTopSdIsoCocone_ι_app, Category.assoc] at this
+  simp only [toTopSdIso, ← this, Iso.inv_hom_id_app_assoc, Iso.hom_inv_id_app_assoc,
+    ← Functor.map_comp_assoc]
+
+@[reassoc]
+lemma toTop_map_sd_map_yonedaEquiv_symm_comp_toTopSdIso_hom
+    {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenerate _) :
+    toTop.map (sd.map (yonedaEquiv.symm x)) ≫ X.toTopSdIso.hom =
+    toTop.map (stdSimplex.sdIso.hom.app _) ≫ SemiSimplexCategory.sdIso.hom.app ⦋n⦌ₛ ≫
+      toTopSimplex.inv.app ⦋n⦌ ≫ toTop.map (yonedaEquiv.symm x) :=
+  (N.mk _ hx).toTop_map_sd_map_yonedaEquiv_symm_simplex_comp_toTopSdIso_hom
 
 end SSet
