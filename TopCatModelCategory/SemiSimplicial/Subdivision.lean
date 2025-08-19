@@ -10,6 +10,7 @@ abbrev SemiSimplexCategory.toSSet : SemiSimplexCategory ⥤ SSet.{u} :=
 namespace SSet
 
 variable (X : SSet.{u}) [IsWeaklyPolyhedralLike X]
+  {Y : SSet.{u}} [IsWeaklyPolyhedralLike Y]
 
 namespace N
 
@@ -127,5 +128,32 @@ lemma toTop_map_sd_map_yonedaEquiv_symm_comp_toTopSdIso_hom
     toTop.map (stdSimplex.sdIso.hom.app _) ≫ SemiSimplexCategory.sdIso.hom.app ⦋n⦌ₛ ≫
       toTopSimplex.inv.app ⦋n⦌ ≫ toTop.map (yonedaEquiv.symm x) :=
   (N.mk _ hx).toTop_map_sd_map_yonedaEquiv_symm_simplex_comp_toTopSdIso_hom
+
+variable {X} (f : X ⟶ Y)
+
+@[reassoc]
+lemma toTopSdIso_hom_naturality
+    (hf : ∀ ⦃n : ℕ⦄ (x : X _⦋n⦌) (_ : x ∈ X.nonDegenerate _),
+      f.app _ x ∈ Y.nonDegenerate _):
+    toTop.map (sd.map f) ≫ Y.toTopSdIso.hom =
+      X.toTopSdIso.hom ≫ toTop.map f := by
+  apply X.isColimitToTopSdIsoCocone.hom_ext
+  intro x
+  obtain ⟨n, ⟨x, hx⟩, rfl⟩ := x.mk_surjective
+  dsimp
+  simp only [toTopSdIsoCocone_ι_app, Category.assoc]
+  dsimp
+  rw [toTop_map_sd_map_yonedaEquiv_symm_comp_toTopSdIso_hom_assoc _ _ hx]
+  nth_rw 2 [← toTop.map_comp_assoc]
+  rw [← sd.map_comp, yonedaEquiv_symm_comp,
+    toTop_map_sd_map_yonedaEquiv_symm_comp_toTopSdIso_hom _ _ (hf _ hx),
+    ← yonedaEquiv_symm_comp, Functor.map_comp]
+
+@[reassoc (attr := simp)]
+lemma Subcomplex.toTopSdIso_hom_naturality (A : X.Subcomplex) :
+    toTop.map (sd.map A.ι) ≫ X.toTopSdIso.hom =
+      A.toSSet.toTopSdIso.hom ≫ toTop.map A.ι :=
+  SSet.toTopSdIso_hom_naturality A.ι (fun _ _ ↦ by
+    simp [← nonDegenerate_iff_of_mono A.ι])
 
 end SSet
