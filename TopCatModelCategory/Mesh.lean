@@ -5,7 +5,7 @@ universe u v
 /-- If `U : ι → Set X` is an open covering of a compact metric space `X`,
 there exists `ε > 0` such that any subset of `X` of diameter `≤ ε`
 is containted in some `U i`. -/
-lemma CompactSpace.exists_mesh' {X : Type u} [MetricSpace X] [CompactSpace X]
+lemma CompactSpace.exists_mesh {X : Type u} [MetricSpace X] [CompactSpace X]
     {ι : Type v} (U : ι → Set X) (hU : ∀ i, IsOpen (U i))
     (hU' : ⋃ i, U i = Set.univ) :
     ∃ ε > 0, ∀ (S : Set X) (_ : S.Nonempty) (_ : Metric.diam S ≤ ε), ∃ (i : ι), S ⊆ U i := by
