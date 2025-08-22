@@ -6,7 +6,7 @@ universe u v
 there exists `ε > 0` such that any subset of `X` of diameter `≤ ε`
 is containted in some `U i`. -/
 lemma CompactSpace.exists_mesh {X : Type u} [MetricSpace X] [CompactSpace X]
-    {ι : Type*} [Nonempty ι] (U : ι → Set X) (hU : ∀ i, IsOpen (U i))
+    {ι : Type v} [Nonempty ι] (U : ι → Set X) (hU : ∀ i, IsOpen (U i))
     (hU' : ⋃ i, U i = Set.univ) :
     ∃ ε > 0, ∀ (S : Set X) (_ : Metric.diam S ≤ ε), ∃ (i : ι), S ⊆ U i := by
   let α := { p : (Σ (x : X), { r : ℝ // r > 0 }) //
