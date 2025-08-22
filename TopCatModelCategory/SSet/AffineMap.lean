@@ -1,8 +1,9 @@
 import TopCatModelCategory.TopCat.Adj
+import TopCatModelCategory.SSet.CoconeNPrime
 import Mathlib.Analysis.Normed.Module.Basic
 import Mathlib.Algebra.Module.BigOperators
 
-open CategoryTheory Simplicial Opposite NNReal
+open CategoryTheory Simplicial Opposite NNReal Limits
 
 universe v u
 
@@ -63,6 +64,21 @@ variable {E : Type v} [AddCommGroup E] [Module ℝ E] (f : n.toTopObj → E)
 def IsAffine : Prop :=
   ∀ (x : n.toTopObj), f x = ∑ (i : Fin (n.len + 1)), (x.1 i : ℝ) • f (vertex i)
 
+abbrev affineMap (p : Fin (n.len + 1) → E) : n.toTopObj → E :=
+  fun x ↦ ∑ (i : Fin (n.len + 1)), (x.1 i : ℝ) • p i
+
+@[simp]
+lemma affineMap_vertex (p : Fin (n.len + 1) → E) (i : Fin (n.len + 1)) :
+    affineMap p (vertex i) = p i := by
+  dsimp [affineMap, vertex]
+  rw [Finset.sum_eq_single (a := i)]
+  all_goals aesop
+
+lemma isAffine_affineMap (p : Fin (n.len + 1) → E) :
+    IsAffine (affineMap p) := by
+  intro
+  simp
+
 namespace IsAffine
 
 variable {f} (hf : IsAffine f)
@@ -70,14 +86,13 @@ variable {f} (hf : IsAffine f)
 include hf
 
 lemma exists_eq :
-    ∃ (p : Fin (n.len + 1) → E),
-      ∀ (x : n.toTopObj), f x = ∑ (i : Fin (n.len + 1)), (x.1 i : ℝ) • p i :=
-  ⟨_, hf⟩
+    ∃ (p : Fin (n.len + 1) → E), f = affineMap p :=
+  ⟨fun i ↦ f (vertex i), by ext; rw [hf]⟩
 
 lemma map_barycenter {α : Type*} [Fintype α] (p : α → n.toTopObj) (w : α → ℝ≥0)
     (hw : ∑ a, w a = 1) : f (barycenter p w hw) = ∑ (a : α), w a • f (p a) := by
-  obtain ⟨q, hq⟩ := hf.exists_eq
-  simp only [hq, Finset.smul_sum]
+  obtain ⟨q, rfl⟩ := hf.exists_eq
+  simp only [Finset.smul_sum, affineMap]
   rw [Finset.sum_comm]
   congr
   ext j
@@ -94,6 +109,12 @@ lemma precomp (g : m ⟶ n) : IsAffine (f.comp (toTopMap g)) := by
   dsimp [vertex]
   rw [Finset.sum_eq_single (a := a)]
   all_goals aesop
+
+lemma ext {g : n.toTopObj → E} (hg : IsAffine g)
+    (h : ∀ (i : Fin (n.len + 1)), f (vertex i) = g (vertex i)) : f = g := by
+  ext x
+  rw [hf, hg]
+  simp [h]
 
 end IsAffine
 
@@ -169,10 +190,77 @@ variable {X E} (f : AffineMap X E)
 noncomputable abbrev φ {d : SimplexCategory} (s : X.obj (op d)) : d.toTopObj → E :=
   IsAffineAt.φ f.f s
 
-noncomputable def isobarycenter {d : SimplexCategory} (s : X.obj (op d)) : E :=
-  f.φ s (SimplexCategory.toTopObj.isobarycenter _)
+noncomputable def isobarycenter (s : X.S) : E :=
+  f.φ s.simplex (SimplexCategory.toTopObj.isobarycenter _)
 
-noncomputable def vertex (x : X _⦋0⦌) : E := f.isobarycenter x
+namespace b
+
+noncomputable def affineMap (s : (B.obj X).N) : ⦋s.dim⦌.toTopObj → E :=
+  (SimplexCategory.toTopObj.affineMap
+    (fun i ↦ f.isobarycenter (s.simplex.obj i).toS))
+
+lemma affineMap_comp {s t : (B.obj X).N} (hst : s ≤ t) :
+    (affineMap f t).comp (SimplexCategory.toTopMap (N.monoOfLE hst)) =
+      affineMap f s := by
+  refine SimplexCategory.toTopObj.IsAffine.ext
+    (SimplexCategory.toTopObj.IsAffine.precomp
+      (SimplexCategory.toTopObj.isAffine_affineMap _) _)
+    (SimplexCategory.toTopObj.isAffine_affineMap _) (fun i ↦ ?_)
+  dsimp [affineMap]
+  simp only [SimplexCategory.toTopObj.toTopMap_vertex, SimplexCategory.len_mk,
+    SimplexCategory.toTopObj.affineMap_vertex, ← N.map_monoOfLE hst]
+  rfl
+
+noncomputable def coconeTypes :
+    ((B.obj X).functorN' ⋙ toTop ⋙ forget TopCat).CoconeTypes where
+  pt := E
+  ι s := Function.comp (affineMap f s) ⦋s.dim⦌.toTopHomeo
+  ι_naturality {s t} hst := by
+    rw [← affineMap_comp f (leOfHom hst), Function.comp_assoc, Function.comp_assoc]
+    apply congr_arg
+    exact SimplexCategory.toTopHomeo_naturality (N.monoOfLE (leOfHom hst))
+
+noncomputable def g : |B.obj X| → E :=
+  ((Types.isColimit_iff_coconeTypesIsColimit _).1
+    ⟨isColimitOfPreserves (toTop ⋙ forget _) (B.obj X).isColimitCoconeN'⟩).desc
+      (coconeTypes f)
+
+lemma comp_g_toTop_map (s : (B.obj X).N) :
+    Function.comp (g f) (toTop.map (yonedaEquiv.symm s.simplex)) =
+      Function.comp (affineMap f s) ⦋s.dim⦌.toTopHomeo := by
+  dsimp
+  exact
+  ((Types.isColimit_iff_coconeTypesIsColimit _).1
+    ⟨isColimitOfPreserves (toTop ⋙ forget _) (B.obj X).isColimitCoconeN'⟩).fac
+      (coconeTypes f) s
+
+lemma isAffineAtφ_g (s : (B.obj X).N) :
+    IsAffineAt.φ (g f) s.simplex =
+      SimplexCategory.toTopObj.affineMap
+        (fun i ↦ f.isobarycenter (s.simplex.obj i).toS) := by
+  dsimp [IsAffineAt.φ]
+  rw [← Function.comp_assoc, ← Function.comp_assoc]
+  erw [comp_g_toTop_map]
+  dsimp only [affineMap]
+  rw [Function.comp_assoc, Function.comp_assoc]
+  convert Function.comp_id _
+  dsimp [SimplexCategory.toTopHomeo]
+  ext x : 1
+  exact congr_arg ULift.down (congr_fun ((forget _).congr_map
+    (toTopSimplex.{u}.inv_hom_id_app ⦋s.dim⦌)) (ULift.up x))
+
+lemma isAffine_g : IsAffine (g f) := by
+  rw [isAffine_iff_eq_top, Subcomplex.eq_top_iff_contains_nonDegenerate]
+  intro n x hx
+  dsimp [SSet.isAffine, IsAffineAt]
+  have := isAffineAtφ_g f (N.mk x hx)
+  dsimp at this
+  rw [this]
+  exact SimplexCategory.toTopObj.isAffine_affineMap _
+
+end b
+
+noncomputable def b : AffineMap (B.obj X) E := ⟨_, b.isAffine_g f⟩
 
 end AffineMap
 

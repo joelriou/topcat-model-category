@@ -38,6 +38,7 @@ import TopCatModelCategory.SSet.Boundary
 import TopCatModelCategory.SSet.CategoryWithFibrations
 import TopCatModelCategory.SSet.CategoryWithWeakEquivalences
 import TopCatModelCategory.SSet.ChosenFiniteProducts
+import TopCatModelCategory.SSet.CoconeNPrime
 import TopCatModelCategory.SSet.ConnectedComponents
 import TopCatModelCategory.SSet.Contractible
 import TopCatModelCategory.SSet.Coproducts
