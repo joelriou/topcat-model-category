@@ -1,4 +1,5 @@
 import TopCatModelCategory.SSet.Simplices
+import TopCatModelCategory.SSet.Finite
 import Mathlib.AlgebraicTopology.SimplicialSet.Degenerate
 
 universe u
@@ -492,5 +493,12 @@ lemma N.mapN_injective_of_mono [Mono f] :
   intro s t h
   rw [N.ext_iff] at h ⊢
   exact S.map_injective_of_mono f (by simpa only [toS_mapN_of_mono] using h)
+
+instance [X.IsFinite] : Finite X.N :=
+  Finite.of_surjective
+    (fun (x : (Σ (n : ℕ), X.nonDegenerate n)) ↦ N.mk _ x.2.2) (by
+      intro x
+      obtain ⟨n, x, rfl⟩ := x.mk_surjective
+      exact ⟨⟨n, x⟩, rfl⟩)
 
 end SSet

@@ -39,6 +39,10 @@ lemma exists_barycenter_vertex (x : n.toTopObj) :
       x = barycenter vertex w hw :=
   ⟨_, _, eq_barycenter_vertex x⟩
 
+variable (n) in
+noncomputable def isobarycenter : n.toTopObj :=
+  barycenter vertex (fun _ ↦ 1 / (n.len + 1)) (by simp)
+
 @[simp]
 lemma toTopMap_vertex (f : n ⟶ m) (i : Fin (n.len + 1)) :
     toTopMap f (vertex i) = vertex (f i) := by
@@ -98,7 +102,10 @@ end SimplexCategory.toTopObj
 namespace SSet
 
 variable {X : SSet.{u}} {E : Type v} [AddCommGroup E] [Module ℝ E]
-  (f : |X| → E)
+
+section
+
+variable (f : |X| → E)
 
 namespace IsAffineAt
 
@@ -143,10 +150,30 @@ lemma mem_isAffine_iff {n : SimplexCategory} (x : X.obj (op n)) :
     x ∈ (isAffine f).obj _ ↔ IsAffineAt f x := Iff.rfl
 
 lemma isAffine_iff_eq_top : IsAffine f ↔ isAffine f = ⊤ := by
-  refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
+  refine ⟨fun h ↦ ?_, fun h n x ↦ ?_⟩
   · ext ⟨n⟩ x
     simpa using h x
-  · intro n x
-    simp [← mem_isAffine_iff, h]
+  · simp [← mem_isAffine_iff, h]
+
+end
+
+variable (X E)
+structure AffineMap where
+  f : |X| → E
+  isAffine : IsAffine f
+
+namespace AffineMap
+
+variable {X E} (f : AffineMap X E)
+
+noncomputable abbrev φ {d : SimplexCategory} (s : X.obj (op d)) : d.toTopObj → E :=
+  IsAffineAt.φ f.f s
+
+noncomputable def isobarycenter {d : SimplexCategory} (s : X.obj (op d)) : E :=
+  f.φ s (SimplexCategory.toTopObj.isobarycenter _)
+
+noncomputable def vertex (x : X _⦋0⦌) : E := f.isobarycenter x
+
+end AffineMap
 
 end SSet

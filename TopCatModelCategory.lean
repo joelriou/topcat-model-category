@@ -17,6 +17,7 @@ import TopCatModelCategory.Iso
 import TopCatModelCategory.JoyalTrickDual
 import TopCatModelCategory.LeftKanExtensionAlongUliftYoneda
 import TopCatModelCategory.LiftingProperties
+import TopCatModelCategory.Mesh
 import TopCatModelCategory.ModelCategory
 import TopCatModelCategory.ModelCategoryCopy
 import TopCatModelCategory.ModelCategorySSet
@@ -72,6 +73,7 @@ import TopCatModelCategory.SSet.KanComplexWRetracts
 import TopCatModelCategory.SSet.KanComplexWUnit
 import TopCatModelCategory.SSet.KeyLemma
 import TopCatModelCategory.SSet.Loop
+import TopCatModelCategory.SSet.Mesh
 import TopCatModelCategory.SSet.MinimalFibrations
 import TopCatModelCategory.SSet.MinimalFibrationsFactorization
 import TopCatModelCategory.SSet.MinimalFibrationsLemmas
@@ -80,6 +82,7 @@ import TopCatModelCategory.SSet.Monoidal
 import TopCatModelCategory.SSet.Monomorphisms
 import TopCatModelCategory.SSet.NonDegenerateProdSimplex
 import TopCatModelCategory.SSet.NonDegenerateSimplices
+import TopCatModelCategory.SSet.Nonempty
 import TopCatModelCategory.SSet.NonemptyFiniteChains
 import TopCatModelCategory.SSet.Pairing
 import TopCatModelCategory.SSet.PairingCore
