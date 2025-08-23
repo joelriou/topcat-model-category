@@ -71,10 +71,49 @@ lemma param_surjective : Function.Surjective (polarParametrization E) := fun v �
     exact ⟨⟨0, Classical.arbitrary _⟩, by simp⟩
   exact ⟨⟨⟨‖v‖, by simp⟩, ⟨‖v‖ ⁻¹ • v, by simp [hv, norm_smul]⟩⟩, by simp [hv]⟩
 
-lemma param_isQuotientMap_aux
+lemma param_isQuotientMap_aux [ProperSpace E]
     (U : Set E) (hU₀ : 0 ∈ U) (hU : IsOpen ((polarParametrization E) ⁻¹' U)) :
     ∃ ε > 0, Metric.ball 0 ε ⊆ U := by
-  sorry
+  let ι := Set (Metric.sphere (0 : E) 1) × ℝ
+  let α (i : ι) : Prop := IsOpen i.1 ∧ 0 < i.2 ∧
+    ∀ (v : i.1) (t : ℝ) (ht : 0 ≤ t) (ht' : t < i.2), t • v.1.1 ∈ U
+  obtain ⟨u, hu⟩ := isCompact_univ.elim_finite_subcover (U := fun (b : Subtype α) ↦ b.1.1)
+    (fun b ↦ b.2.1) (fun v _ ↦ by
+      obtain ⟨V, W, hV, hV₀, hW, hW₀, h⟩ := (mem_nhds_prod_iff' (s := (polarParametrization E) ⁻¹' U)
+        (x := 0) (y := v)).1 (hU.mem_nhds (by simpa))
+      obtain ⟨r, hr, hr'⟩ : ∃ (r : ℝ) (hr : 0 < r), Set.Iio ⟨r, hr.le⟩ ⊆ V := by
+        rw [Metric.isOpen_iff] at hV
+        obtain ⟨ε, hε, hε'⟩ := hV 0 hV₀
+        refine ⟨ε, hε, fun ⟨x, hx⟩ hx' ↦ hε' ?_⟩
+        simp at hx' ⊢
+        change dist x 0 < ε
+        simpa only [dist_zero_right, Real.norm_eq_abs, abs_of_nonneg hx]
+      simp only [Set.mem_iUnion, Subtype.exists, exists_prop]
+      exact ⟨⟨W, r⟩, ⟨hW, hr, fun ⟨w, hw⟩ t ht ht' ↦ @h ⟨⟨t, ht⟩, w⟩ ⟨hr' ht', hw⟩⟩, hW₀⟩)
+  let ρ (b : Subtype α) : ℝ := b.1.2
+  have hu' : u.Nonempty := by
+    by_contra!
+    obtain rfl : u = ∅ := by simpa using this
+    simp at hu
+  let r₀ := (Finset.image ρ u).min' (Finset.image_nonempty.2 hu')
+  have hr₀ : 0 < r₀ := by
+    have : r₀ ∈ _ := (Finset.image ρ u).min'_mem (Finset.image_nonempty.2 hu')
+    simp only [Finset.mem_image] at this
+    obtain ⟨s, hs, hs'⟩ := this
+    rw [← hs']
+    exact s.2.2.1
+  refine ⟨r₀, hr₀, fun x hx ↦ ?_⟩
+  obtain ⟨⟨⟨r, hr⟩, v⟩, rfl⟩ := param_surjective x
+  obtain hr | rfl := hr.lt_or_eq
+  · have := hu (Set.mem_univ v)
+    simp at this
+    obtain ⟨i, ⟨⟨h₁, h₂, h₃⟩, h₄⟩, h₅⟩ := this
+    simp [norm_smul, abs_of_pos hr] at hx
+    have : r₀ ≤ i.2 := (Finset.image ρ u).min'_le i.2 (by
+      simp
+      exact ⟨i, ⟨h₁, h₂, h₃⟩, h₄, rfl⟩)
+    exact h₃ ⟨v, h₅⟩ r hr.le (by grind)
+  · simpa
 
 variable (E)
 
