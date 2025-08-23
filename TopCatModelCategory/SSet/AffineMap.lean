@@ -1,6 +1,7 @@
 import TopCatModelCategory.TopCat.Adj
 import TopCatModelCategory.SSet.CoconeNPrime
 import Mathlib.Analysis.Normed.Module.Basic
+import Mathlib.Analysis.Convex.Combination
 import Mathlib.Algebra.Module.BigOperators
 
 open CategoryTheory Simplicial Opposite NNReal Limits
@@ -10,6 +11,11 @@ universe v u
 variable {n m : SimplexCategory}
 
 namespace SimplexCategory.toTopObj
+
+@[simp]
+lemma sum_coe_eq_one (a : n.toTopObj) :
+    ∑ (i : Fin (n.len + 1)), (a i : ℝ) = 1 := by
+  rw [← NNReal.coe_sum, a.2, coe_one]
 
 @[simps]
 def barycenter {α : Type*} [Fintype α] (p : α → n.toTopObj) (w : α → ℝ≥0)
@@ -116,6 +122,30 @@ lemma ext {g : n.toTopObj → E} (hg : IsAffine g)
   rw [hf, hg]
   simp [h]
 
+lemma convex_range : Convex ℝ (Set.range f) := by
+  rintro _ ⟨x, rfl⟩ _ ⟨y, rfl⟩ a b ha hb h
+  refine ⟨⟨fun i ↦ ⟨a * ↑(x i) + b * ↑(y i), ?_⟩, ?_⟩, ?_⟩
+  · positivity
+  · ext
+    simp [toTopObj, Finset.sum_add_distrib, ← Finset.mul_sum, h]
+  · obtain ⟨p, rfl⟩ := hf.exists_eq
+    simp [affineMap, Finset.smul_sum, add_smul, Finset.sum_add_distrib, ← smul_assoc]
+
+lemma map_barycenter_mem_of_convex
+    {α : Type*} [Fintype α] (p : α → n.toTopObj) (w : α → ℝ≥0) (hw : ∑ a, w a = 1)
+    {S : Set E} (hS : Convex ℝ S) (hq : ∀ (a : α), f (p a) ∈ S) :
+    f (barycenter p w hw) ∈ S := by
+  rw [hf.map_barycenter]
+  exact hS.sum_mem (by simp) (by simp [← NNReal.coe_sum, hw]) (by tauto)
+
+lemma range_subset_iff_of_convex {F : Set E} (hF : Convex ℝ F) :
+    Set.range f ⊆ F ↔ ∀ i, f (vertex i) ∈ F := by
+  have := hf
+  refine ⟨fun h i ↦ h (by simp), fun h ↦ ?_⟩
+  rintro _ ⟨x, rfl⟩
+  obtain ⟨w, hw, rfl⟩ := exists_barycenter_vertex x
+  exact hf.map_barycenter_mem_of_convex _ _ _ hF h
+
 end IsAffine
 
 end SimplexCategory.toTopObj
@@ -190,14 +220,64 @@ variable {X E} (f : AffineMap X E)
 noncomputable abbrev φ {d : SimplexCategory} (s : X.obj (op d)) : d.toTopObj → E :=
   IsAffineAt.φ f.f s
 
+lemma precomp_φ {d e : SimplexCategory} (s : X.obj (op d)) (g : e ⟶ d) :
+    f.φ (X.map g.op s) = f.φ s ∘ SimplexCategory.toTopMap g := by
+  simp [IsAffineAt.precomp_φ]
+
+lemma range_subset_of_le {s t : X.S} (hst : s ≤ t) :
+    Set.range (f.φ s.simplex) ⊆ Set.range (f.φ t.simplex) := by
+  obtain ⟨d, s, rfl⟩ := s.mk_surjective
+  obtain ⟨e, t, rfl⟩ := t.mk_surjective
+  rw [S.le_iff, Subpresheaf.ofSection_le_iff,
+    Subcomplex.mem_ofSimplex_obj_iff] at hst
+  dsimp at hst ⊢
+  obtain ⟨g, rfl⟩ := hst
+  rw [precomp_φ]
+  grind
+
 noncomputable def isobarycenter (s : X.S) : E :=
   f.φ s.simplex (SimplexCategory.toTopObj.isobarycenter _)
+
+lemma range_φ_subset_range_f (s : X.S) :
+    Set.range (f.φ s.simplex) ⊆ Set.range f.f := by
+  dsimp [φ, IsAffineAt.φ]
+  grind
+
+lemma range_f_eq' :
+    Set.range f.f = ⋃ (s : X.S), Set.range (f.φ s.simplex) := by
+  apply subset_antisymm
+  · rintro _ ⟨x, rfl⟩
+    obtain ⟨⟨⟨n⟩, s⟩, x, rfl⟩ := Types.jointly_surjective_of_isColimit
+      (isColimitOfPreserves (toTop ⋙ forget _)
+      (X.isColimitCoconeFromElementsOp)) x
+    induction' n using SimplexCategory.rec with n
+    dsimp at x ⊢
+    obtain ⟨x, rfl⟩ := (TopCat.homeoOfIso (toTopSimplex.{u}.app ⦋n⦌)).toEquiv.symm.surjective x
+    simp only [Set.mem_iUnion]
+    exact ⟨S.mk s, ULift.down x, rfl⟩
+  · simpa only [Set.iUnion_subset_iff] using f.range_φ_subset_range_f
+
+lemma range_f_eq :
+    Set.range f.f = ⋃ (s : X.N), Set.range (f.φ s.simplex) := by
+  rw [range_f_eq']
+  apply subset_antisymm
+  · simp only [Set.iUnion_subset_iff]
+    intro s
+    refine le_trans ?_ (le_iSup _ s.toN)
+    exact f.range_subset_of_le s.self_le_toS_toN
+  · simp only [Set.iUnion_subset_iff]
+    intro s
+    exact le_trans (by rfl) (le_iSup _ s.toS)
 
 namespace b
 
 noncomputable def affineMap (s : (B.obj X).N) : ⦋s.dim⦌.toTopObj → E :=
   (SimplexCategory.toTopObj.affineMap
     (fun i ↦ f.isobarycenter (s.simplex.obj i).toS))
+
+lemma isAffine_affineMap (s : (B.obj X).N) :
+    SimplexCategory.toTopObj.IsAffine (affineMap f s) :=
+  SimplexCategory.toTopObj.isAffine_affineMap _
 
 lemma affineMap_comp {s t : (B.obj X).N} (hst : s ≤ t) :
     (affineMap f t).comp (SimplexCategory.toTopMap (N.monoOfLE hst)) =
@@ -210,6 +290,17 @@ lemma affineMap_comp {s t : (B.obj X).N} (hst : s ≤ t) :
   simp only [SimplexCategory.toTopObj.toTopMap_vertex, SimplexCategory.len_mk,
     SimplexCategory.toTopObj.affineMap_vertex, ← N.map_monoOfLE hst]
   rfl
+
+lemma range_affineMap_le (s : (B.obj X).N) (t : X.N) (hs : s.simplex.obj (Fin.last _) ≤ t) :
+    Set.range (affineMap f s) ⊆ Set.range (f.φ t.simplex) := by
+  rw [(isAffine_affineMap f s).range_subset_iff_of_convex
+    (f.isAffine t.simplex).convex_range]
+  intro i
+  dsimp only [affineMap]
+  rw [SimplexCategory.toTopObj.affineMap_vertex]
+  exact (f.isAffine (s.simplex.obj i).simplex).map_barycenter_mem_of_convex _ _ _
+    (f.isAffine t.simplex).convex_range
+    (fun a ↦ f.range_subset_of_le ((s.simplex.monotone i.le_last).trans hs) (by simp))
 
 noncomputable def coconeTypes :
     ((B.obj X).functorN' ⋙ toTop ⋙ forget TopCat).CoconeTypes where
@@ -261,6 +352,17 @@ lemma isAffine_g : IsAffine (g f) := by
 end b
 
 noncomputable def b : AffineMap (B.obj X) E := ⟨_, b.isAffine_g f⟩
+
+lemma b_φ (s : (B.obj X).N) :
+    f.b.φ s.simplex = b.affineMap f s :=
+  b.isAffineAtφ_g _ _
+
+lemma range_b_f_subset_range_f : Set.range f.b.f ⊆ Set.range f.f := by
+  simp only [range_f_eq, Set.iUnion_subset_iff]
+  intro s
+  rw [b_φ]
+  exact (b.range_affineMap_le f s _ (le_refl _)).trans
+    (le_trans (by rfl) (le_iSup _ (s.simplex.obj (Fin.last _))))
 
 end AffineMap
 
