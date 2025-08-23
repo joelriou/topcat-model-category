@@ -142,6 +142,22 @@ lemma mem_nonDegenerate_iff {n : ℕ} (s : (nerve X) _⦋n⦌) :
       rintro i x rfl
       exact (hs i.castSucc_lt_succ).ne (by simp [nerve_σ_obj])
 
+lemma nerve_hasDimensionLT_iff (d : ℕ) :
+    (nerve X).HasDimensionLT d ↔
+      ∀ ⦃n : ℕ⦄ (f : Fin (n + 1) → X) (_ : StrictMono f), n < d := by
+  constructor
+  · intro _ n f hf
+    exact (nerve X).dim_lt_of_nondegenerate
+      ⟨hf.monotone.functor, by rwa [mem_nonDegenerate_iff]⟩ d
+  · intro h
+    constructor
+    intro n hn
+    ext x
+    simp only [nerve_obj, SimplexCategory.len_mk, Set.top_eq_univ, Set.mem_univ, iff_true]
+    by_contra!
+    rw [← SSet.mem_nonDegenerate_iff_notMem_degenerate, mem_nonDegenerate_iff] at this
+    exact hn.not_gt (h _ this)
+
 lemma mem_nonDegenerate_δ {n : ℕ} (s : (nerve X) _⦋n + 1⦌) (i : Fin (n + 2))
     (hs : s ∈ (nerve X).nonDegenerate (n + 1)) :
     (nerve X).δ i s ∈ (nerve X).nonDegenerate n := by
@@ -389,6 +405,15 @@ noncomputable def nerveNEquiv : (nerve X).N ≃o NonemptyFiniteChains X :=
 lemma nerveNEquiv_apply (x : (nerve X).N) :
     nerveNEquiv x = ofN x :=
   rfl
+
+instance [Finite X] : Finite (NonemptyFiniteChains X) := by
+  have := Fintype.ofFinite X
+  have := Finite.of_fintype (Finset X)
+  exact Subtype.finite
+
+instance [Finite X] : (nerve X).IsFinite := by
+  rw [SSet.isFinite_iff_isFinite_n]
+  exact Finite.of_surjective _ nerveNEquiv.symm.surjective
 
 end
 

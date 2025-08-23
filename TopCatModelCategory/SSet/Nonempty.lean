@@ -2,7 +2,7 @@ import TopCatModelCategory.SSet.NonDegenerateSimplices
 
 universe u
 
-open Simplicial
+open Simplicial CategoryTheory
 
 namespace SSet
 
@@ -16,5 +16,8 @@ instance (n : SimplexCategoryᵒᵖ) [X.Nonempty] : Nonempty (X.obj n) :=
 instance [X.Nonempty] : Nonempty X.N := ⟨N.mk (n := 0) (Classical.arbitrary _) (by simp)⟩
 
 instance [X.Nonempty] : Nonempty X.S := ⟨S.mk (dim := 0) (Classical.arbitrary _)⟩
+
+instance (T : Type u) [Preorder T] [Nonempty T] : (nerve T).Nonempty :=
+  ⟨.mk₀ (Classical.arbitrary _)⟩
 
 end SSet

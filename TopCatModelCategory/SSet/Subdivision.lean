@@ -1,9 +1,11 @@
 import Mathlib.CategoryTheory.Limits.Presheaf
+import Mathlib.SetTheory.Cardinal.Finite
 import TopCatModelCategory.SSet.NonemptyFiniteChains
 import TopCatModelCategory.SSet.NonDegenerateSimplices
 import TopCatModelCategory.SSet.StandardSimplex
 import TopCatModelCategory.SSet.Skeleton
 import TopCatModelCategory.SSet.Monomorphisms
+import TopCatModelCategory.SSet.Nonempty
 import TopCatModelCategory.MorphismProperty
 import TopCatModelCategory.ULift
 
@@ -91,6 +93,24 @@ instance : sd.{u}.IsLeftKanExtension stdSimplex.sdIso.inv :=
 
 @[simps!]
 noncomputable def B : SSet.{u} ⥤ SSet.{u} := SSet.N.functor ⋙ PartOrd.nerveFunctor
+
+instance (X : SSet.{u}) [X.Nonempty] : (B.obj X).Nonempty := by
+  dsimp [B]
+  infer_instance
+
+instance (X : SSet.{u}) [X.IsFinite] : (B.obj X).IsFinite := by
+  dsimp [B]
+  infer_instance
+
+instance b_hasDimensionLT (X : SSet.{u}) (d : ℕ) [X.HasDimensionLT d] :
+    (B.obj X).HasDimensionLT d := by
+  dsimp [B]
+  rw [PartialOrder.nerve_hasDimensionLT_iff]
+  intro n f hf
+  let φ (i : Fin (n + 1)) : Fin d :=
+    ⟨(f i).dim, X.dim_lt_of_nondegenerate ⟨_, (f i).nonDegenerate⟩ d⟩
+  have hφ : StrictMono φ := fun _ _ hij ↦ N.lt_of_lt (hf hij)
+  simpa using Nat.card_le_card_of_injective _ hφ.injective
 
 open Functor in
 noncomputable def stdSimplexCompBIso : stdSimplex.{u} ⋙ B ≅ SimplexCategory.sd :=

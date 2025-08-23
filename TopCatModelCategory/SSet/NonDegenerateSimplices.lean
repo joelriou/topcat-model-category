@@ -115,6 +115,19 @@ instance : PartialOrder X.N where
     obtain rfl := SimplexCategory.eq_id_of_mono f
     aesop
 
+lemma lt_of_lt {x y : X.N} (h : x < y) : x.dim < y.dim := by
+  obtain h' | h' := (le_of_le h.le).lt_or_eq
+  · exact h'
+  · have h'' := h.le
+    rw [le_iff_exists] at h''
+    obtain ⟨d, ⟨x, hx⟩, rfl⟩ := x.mk_surjective
+    obtain ⟨d', ⟨y, hy⟩, rfl⟩ := y.mk_surjective
+    obtain rfl : d = d' := h'
+    obtain ⟨f, _, hf⟩ := h''
+    obtain rfl := SimplexCategory.eq_id_of_mono f
+    obtain rfl : x = y := by simpa using hf.symm
+    simp at h
+
 lemma subcomplex_injective {x y : X.N} (h : x.subcomplex = y.subcomplex) :
     x = y := by
   apply le_antisymm
@@ -500,5 +513,12 @@ instance [X.IsFinite] : Finite X.N :=
       intro x
       obtain ⟨n, x, rfl⟩ := x.mk_surjective
       exact ⟨⟨n, x⟩, rfl⟩)
+
+variable (X) in
+lemma isFinite_iff_isFinite_n :
+    X.IsFinite ↔ Finite X.N :=
+  ⟨fun _ ↦ inferInstance, fun _ ↦
+    ⟨Finite.of_surjective (fun (x : X.N) ↦ ⟨_, ⟨x.simplex, x.nonDegenerate⟩⟩)
+      (fun ⟨_, x⟩ ↦ ⟨N.mk _ x.2, rfl⟩)⟩⟩
 
 end SSet

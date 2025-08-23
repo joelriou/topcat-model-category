@@ -12,6 +12,11 @@ variable {n m : SimplexCategory}
 
 namespace SimplexCategory.toTopObj
 
+@[continuity]
+lemma continuous_eval (i : ToType n) :
+    Continuous (fun (x : n.toTopObj) ↦ x.1 i) :=
+  (continuous_apply i).comp continuous_subtype_val
+
 @[simp]
 lemma sum_coe_eq_one (a : n.toTopObj) :
     ∑ (i : Fin (n.len + 1)), (a i : ℝ) = 1 := by
@@ -85,6 +90,11 @@ lemma isAffine_affineMap (p : Fin (n.len + 1) → E) :
   intro
   simp
 
+lemma continuous_affineMap {E : Type v} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
+    (p : Fin (n.len + 1) → E) :
+    Continuous (affineMap p) := by
+  continuity
+
 namespace IsAffine
 
 variable {f} (hf : IsAffine f)
@@ -145,6 +155,14 @@ lemma range_subset_iff_of_convex {F : Set E} (hF : Convex ℝ F) :
   rintro _ ⟨x, rfl⟩
   obtain ⟨w, hw, rfl⟩ := exists_barycenter_vertex x
   exact hf.map_barycenter_mem_of_convex _ _ _ hF h
+
+omit hf
+
+lemma continuous {F : Type v} [SeminormedAddCommGroup F] [NormedSpace ℝ F]
+    (f : n.toTopObj → F) (hf : IsAffine f) :
+    Continuous f := by
+  obtain ⟨p, rfl⟩ := hf.exists_eq
+  exact continuous_affineMap p
 
 end IsAffine
 
@@ -219,6 +237,11 @@ variable {X E} (f : AffineMap X E)
 
 noncomputable abbrev φ {d : SimplexCategory} (s : X.obj (op d)) : d.toTopObj → E :=
   IsAffineAt.φ f.f s
+
+lemma continuous_φ {E : Type v} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
+    (f : AffineMap X E)
+    {n : SimplexCategory} (x : X.obj (op n)) : Continuous (f.φ x) :=
+  (f.isAffine x).continuous
 
 lemma precomp_φ {d e : SimplexCategory} (s : X.obj (op d)) (g : e ⟶ d) :
     f.φ (X.map g.op s) = f.φ s ∘ SimplexCategory.toTopMap g := by
