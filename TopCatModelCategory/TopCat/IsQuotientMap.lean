@@ -4,10 +4,14 @@ universe u
 
 open Topology NNReal
 
-lemma Homeomorph.isOpen_iff {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
-    (e : X ≃ₜ Y) (U : Set Y) :
-    IsOpen (e ⁻¹' U) ↔ IsOpen U := by
-  simp only [isOpen_preimage]
+theorem Topology.IsQuotientMap.restrictPreimage_isClosed {X Y : Type*}
+    [TopologicalSpace X] [TopologicalSpace Y] {f : X → Y} (hf : IsQuotientMap f)
+    {s : Set Y} (hs : IsClosed s) : IsQuotientMap (s.restrictPreimage f) :=
+  isQuotientMap_iff.2 ⟨hf.surjective.restrictPreimage _, fun U ↦ by
+    simp only [← isClosed_compl_iff,
+      hs.isClosedEmbedding_subtypeVal.isClosed_iff_image_isClosed, ← hf.isClosed_preimage,
+      (hs.preimage hf.continuous).isClosedEmbedding_subtypeVal.isClosed_iff_image_isClosed,
+      Set.preimage_diff, Set.image_val_compl, Set.image_val_preimage_restrictPreimage]⟩
 
 namespace NormedSpace
 
