@@ -521,4 +521,9 @@ lemma isFinite_iff_isFinite_n :
     ⟨Finite.of_surjective (fun (x : X.N) ↦ ⟨_, ⟨x.simplex, x.nonDegenerate⟩⟩)
       (fun ⟨_, x⟩ ↦ ⟨N.mk _ x.2, rfl⟩)⟩⟩
 
+lemma N.dim_le_of_toS_le {x : X.N} {y : X.S} (h : x.toS ≤ y) : x.dim ≤ y.dim := by
+  refine (N.le_of_le ?_).trans y.dim_toN_le
+  rw [le_iff_toS_le_toS]
+  exact h.trans (y.self_le_toS_toN)
+
 end SSet

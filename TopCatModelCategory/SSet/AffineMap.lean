@@ -8,6 +8,20 @@ open CategoryTheory Simplicial Opposite NNReal Limits
 
 universe v u
 
+@[simp]
+lemma SimplexCategory.const_apply' (x y : SimplexCategory)
+    (i : Fin (y.len + 1)) (j : Fin (x.len + 1)) :
+    const x y i j = i :=
+  rfl
+
+namespace SSet
+
+def vertexOfSimplex {X : SSet.{u}} {n : SimplexCategory}
+    (x : X.obj (op n)) (i : Fin (n.len + 1)) : X _⦋0⦌ :=
+  X.map (SimplexCategory.const ⦋0⦌ n i).op x
+
+end SSet
+
 variable {n m : SimplexCategory}
 
 namespace SimplexCategory.toTopObj
@@ -54,6 +68,7 @@ lemma exists_barycenter_vertex (x : n.toTopObj) :
 variable (n) in
 noncomputable def isobarycenter : n.toTopObj :=
   barycenter vertex (fun _ ↦ 1 / (n.len + 1)) (by simp)
+
 
 @[simp]
 lemma toTopMap_vertex (f : n ⟶ m) (i : Fin (n.len + 1)) :
@@ -155,6 +170,15 @@ lemma range_subset_iff_of_convex {F : Set E} (hF : Convex ℝ F) :
   rintro _ ⟨x, rfl⟩
   obtain ⟨w, hw, rfl⟩ := exists_barycenter_vertex x
   exact hf.map_barycenter_mem_of_convex _ _ _ hF h
+
+lemma range_eq_convexHull :
+    Set.range f = convexHull ℝ (Set.range (fun i ↦ f (vertex i))) := by
+  apply subset_antisymm
+  · rw [hf.range_subset_iff_of_convex (convex_convexHull _ _)]
+    intro i
+    exact subset_convexHull _ _ (by simp)
+  · rw [(hf.convex_range).convexHull_subset_iff]
+    grind
 
 omit hf
 
@@ -386,6 +410,23 @@ lemma range_b_f_subset_range_f : Set.range f.b.f ⊆ Set.range f.f := by
   rw [b_φ]
   exact (b.range_affineMap_le f s _ (le_refl _)).trans
     (le_trans (by rfl) (le_iSup _ (s.simplex.obj (Fin.last _))))
+
+noncomputable def vertex (x : X _⦋0⦌) : E := f.φ x default
+
+lemma φ_vertex {n : SimplexCategory} (x : X.obj (op n)) (i : Fin (n.len + 1)) :
+    f.φ x (SimplexCategory.toTopObj.vertex i) = f.vertex (vertexOfSimplex x i) := by
+  have h₁ := congr_fun (f.precomp_φ x (SimplexCategory.const ⦋0⦌ n i)) default
+  have h₂ := SimplexCategory.toTopObj.toTopMap_vertex (SimplexCategory.const ⦋0⦌ n i) 0
+  dsimp [vertex, vertexOfSimplex] at h₁ ⊢
+  rw [SimplexCategory.const_apply'] at h₂
+  rw [h₁, ← h₂]
+  congr
+  subsingleton
+
+lemma range_φ_eq_convexHull {d : SimplexCategory} (x : X.obj (op d)) :
+    Set.range (f.φ x) =
+      convexHull ℝ (Set.range (fun (i : Fin (d.len + 1)) ↦ f.vertex (vertexOfSimplex x i))) := by
+  simp only [(f.isAffine x).range_eq_convexHull, ← f.φ_vertex]
 
 end AffineMap
 
