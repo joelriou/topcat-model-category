@@ -5,6 +5,7 @@ universe u
 
 open CategoryTheory Limits
 
+-- #28908
 namespace Types
 
 variable {W X Y Z : Type u} {f : X ⟶ Z} {g : Y ⟶ Z}
