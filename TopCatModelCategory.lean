@@ -30,6 +30,7 @@ import TopCatModelCategory.Multiequalizer
 import TopCatModelCategory.PseudoFunctor.LaxNatTrans
 import TopCatModelCategory.PseudoFunctor.MorphismProperty
 import TopCatModelCategory.PseudoFunctor.Pseudofunctor
+import TopCatModelCategory.Pullback
 import TopCatModelCategory.SSet.AffineMap
 import TopCatModelCategory.SSet.AnodyneExtensions
 import TopCatModelCategory.SSet.AnodyneExtensionsAdjunctions
