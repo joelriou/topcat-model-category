@@ -98,6 +98,7 @@ import TopCatModelCategory.SSet.ProdSimplex
 import TopCatModelCategory.SSet.ProdSimplexOne
 import TopCatModelCategory.SSet.Pseudofunctor
 import TopCatModelCategory.SSet.PtSimplex
+import TopCatModelCategory.SSet.Pullback
 import TopCatModelCategory.SSet.Quotient
 import TopCatModelCategory.SSet.Rev
 import TopCatModelCategory.SSet.RevStdSimplex

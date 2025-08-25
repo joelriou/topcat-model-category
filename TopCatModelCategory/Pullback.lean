@@ -48,4 +48,6 @@ def overPushoutAdjunction : overPullback f ⊣ overPushout f :=
       homEquiv_naturality_left_symm _ _ := rfl
       homEquiv_naturality_right _ _ := rfl }
 
+instance : (overPullback f).IsLeftAdjoint := (overPushoutAdjunction f).isLeftAdjoint
+
 end Types
