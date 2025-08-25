@@ -1,10 +1,32 @@
 import Mathlib.CategoryTheory.Comma.Over.Pullback
+import Mathlib.CategoryTheory.Limits.Types.Shapes
 
 universe u
 
-open CategoryTheory
+open CategoryTheory Limits
 
 namespace Types
+
+variable {W X Y Z : Type u} {f : X ⟶ Z} {g : Y ⟶ Z}
+
+@[simp]
+lemma pullback_lift_fst_apply (h : W → X) (k : W → Y) (fac : h ≫ f = k ≫ g) (w : W) :
+    pullback.fst f g ((pullback.lift h k fac : _ ⟶ pullback f g) w) = h w :=
+  congr_fun (pullback.lift_fst (C := Type u) h k fac) w
+
+@[simp]
+lemma pullback_lift_snd_apply (h : W → X) (k : W → Y) (fac : h ≫ f = k ≫ g) (w : W) :
+    pullback.snd f g ((pullback.lift h k fac : _ ⟶ pullback f g) w) = k w :=
+  congr_fun (pullback.lift_snd (C := Type u) h k fac) w
+
+@[ext]
+lemma pullback_ext
+    {z₁ z₂ : pullback f g}
+    (h₁ : pullback.fst f g z₁ = pullback.fst f g z₂)
+    (h₂ : pullback.snd f g z₁ = pullback.snd f g z₂) : z₁ = z₂ := by
+  obtain ⟨z₁, rfl⟩ := (Types.pullbackIsoPullback f g).toEquiv.symm.surjective z₁
+  obtain ⟨z₂, rfl⟩ := (Types.pullbackIsoPullback f g).toEquiv.symm.surjective z₂
+  aesop
 
 variable {E B : Type u} (f : E → B)
 
@@ -13,6 +35,9 @@ def overPullback : Over B ⥤ Over E where
   obj S := Over.mk (Y := { x : S.left × E // S.hom x.1 = f x.2}) (fun x ↦ x.1.2)
   map φ := Over.homMk (fun x ↦ ⟨⟨φ.left x.1.1, x.1.2⟩, by
     simpa only [← x.2] using congr_fun (Over.w φ) x.1.1⟩)
+
+noncomputable def overPullbackIso : overPullback f ≅ Over.pullback f :=
+  NatIso.ofComponents (fun X ↦ Over.isoMk (Types.pullbackIsoPullback X.hom f).symm)
 
 @[simps]
 def overPushout : Over E ⥤ Over B where
@@ -49,5 +74,8 @@ def overPushoutAdjunction : overPullback f ⊣ overPushout f :=
       homEquiv_naturality_right _ _ := rfl }
 
 instance : (overPullback f).IsLeftAdjoint := (overPushoutAdjunction f).isLeftAdjoint
+
+instance (f : E ⟶ B) : (Over.pullback f).IsLeftAdjoint :=
+  Functor.isLeftAdjoint_of_iso (overPullbackIso f)
 
 end Types
