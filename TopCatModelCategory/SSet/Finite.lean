@@ -101,4 +101,16 @@ lemma isFinite_of_epi {Y : SSet.{u}} [X.IsFinite] (f : X ⟶ Y) [hf : Epi f] : Y
 lemma isFinite_of_iso {Y : SSet.{u}} (e : X ≅ Y) [X.IsFinite] : Y.IsFinite :=
   isFinite_of_mono e.inv
 
+lemma isFinite_iff_of_iso {Y : SSet.{u}} (e : X ≅ Y) : X.IsFinite ↔ Y.IsFinite :=
+  ⟨fun _ ↦ isFinite_of_iso e, fun _ ↦ isFinite_of_iso e.symm⟩
+
+variable (X) in
+lemma isFinite_iff_isFinite_subcomplex_top :
+    X.IsFinite ↔ IsFinite (⊤ : X.Subcomplex) :=
+  isFinite_iff_of_iso (Subcomplex.topIso X).symm
+
+instance isFinite_range {Y : SSet.{u}} (f : Y ⟶ X) [Y.IsFinite]:
+    IsFinite (Subcomplex.range f) :=
+  isFinite_of_epi (toRangeSubcomplex f)
+
 end SSet

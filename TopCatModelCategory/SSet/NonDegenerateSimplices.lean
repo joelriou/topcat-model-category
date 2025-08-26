@@ -526,4 +526,19 @@ lemma N.dim_le_of_toS_le {x : X.N} {y : X.S} (h : x.toS ≤ y) : x.dim ≤ y.dim
   rw [le_iff_toS_le_toS]
   exact h.trans (y.self_le_toS_toN)
 
+lemma isFinite_iSup_iff {ι : Type*} [Finite ι] (A : ι → X.Subcomplex) :
+    IsFinite (⨆ i, A i :) ↔ ∀ i, IsFinite (A i) := by
+  refine ⟨fun _ i ↦ isFinite_of_mono (Subcomplex.homOfLE (le_iSup A i)), fun _ ↦ ?_⟩
+  rw [isFinite_iff_isFinite_n]
+  let f : (Σ (i : ι), (A i).toSSet.N) → (⨆ i, A i :).toSSet.N :=
+    fun ⟨i, s⟩ ↦ N.mk' (S.map (Subcomplex.homOfLE (le_iSup A i)) s.toS) (by
+      have := s.nonDegenerate
+      rwa [Subcomplex.mem_nonDegenerate_iff] at this ⊢)
+  refine Finite.of_surjective f (fun s ↦ ?_)
+  obtain ⟨n, ⟨⟨s, hs⟩, hs'⟩, rfl⟩ := s.mk_surjective
+  simp only [Subpresheaf.iSup_obj, Set.mem_iUnion] at hs
+  obtain ⟨i, hi⟩ := hs
+  rw [Subcomplex.mem_nonDegenerate_iff] at hs'
+  exact ⟨⟨i, N.mk ⟨s, hi⟩ (by rwa [Subcomplex.mem_nonDegenerate_iff])⟩, rfl⟩
+
 end SSet

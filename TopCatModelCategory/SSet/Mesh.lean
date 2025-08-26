@@ -83,6 +83,11 @@ lemma isBounded {n : SimplexCategory} (x : X.obj (op n)) :
 
 noncomputable def diam (x : X.S) : ℝ := Metric.diam (Set.range (f.φ x.simplex))
 
+@[simp]
+lemma diam_precomp {Y : SSet.{u}} (g : Y ⟶ X) (y : Y.S) :
+    (f.precomp g).diam y = f.diam (S.map g y) := by
+  simp [diam]
+
 lemma monotone_diam : Monotone f.diam := by
   intro x y h
   exact Metric.diam_mono (f.range_subset_of_le h) (f.isBounded y.simplex)
@@ -170,19 +175,37 @@ lemma diam_le_mesh [X.IsFinite] (x : X.S) : f.diam x ≤ f.mesh := by
   refine le_trans ?_ (le_ciSup (Set.finite_range _).bddAbove x.toN)
   exact f.monotone_diam x.self_le_toS_toN
 
-variable [X.Nonempty] [X.IsFinite]
+variable [X.IsFinite]
 
-lemma mesh_le_iff (r : ℝ) :
+lemma mesh_le_iff [X.Nonempty] (r : ℝ) :
     f.mesh ≤ r ↔ ∀ (x : X.N), f.diam x.toS ≤ r :=
   ciSup_le_iff (Set.finite_range _).bddAbove
 
-lemma mesh_b_le (d : ℕ) [X.HasDimensionLE d] : f.b.mesh ≤ d / (d + 1) * f.mesh := by
+lemma mesh_b_le [X.Nonempty] (d : ℕ) [X.HasDimensionLE d] : f.b.mesh ≤ d / (d + 1) * f.mesh := by
   rw [mesh_le_iff]
   intro x
   refine (f.diam_b_le x.toS _ (le_refl _)).trans
     (mul_le_mul (monotone_self_div_succ _ _ ?_) (diam_le_mesh _ _) (zero_le_diam _ _) (by positivity))
   simpa [Nat.lt_succ] using
     X.dim_lt_of_nondegenerate ⟨_, (x.simplex.obj (Fin.last _)).nonDegenerate⟩ (d + 1)
+
+section
+
+variable {Y : SSet.{u}} (g : Y ⟶ X)
+
+lemma mesh_precomp_le [Y.Nonempty] [Y.IsFinite] : (f.precomp g).mesh ≤ f.mesh := by
+  rw [mesh_le_iff]
+  intro y
+  simpa using f.diam_le_mesh (S.map g y.toS)
+
+end
+
+lemma mesh_sd_le_mesh_b [X.Nonempty] : f.sd.mesh ≤ f.b.mesh :=
+  f.b.mesh_precomp_le _
+
+lemma mesh_sd_le [X.Nonempty] (d : ℕ) [X.HasDimensionLE d] :
+    f.sd.mesh ≤ d / (d + 1) * f.mesh :=
+  f.mesh_sd_le_mesh_b.trans (f.mesh_b_le d)
 
 end AffineMap
 

@@ -136,7 +136,7 @@ lemma map_barycenter {α : Type*} [Fintype α] (p : α → n.toTopObj) (w : α �
   simp only [barycenter, smul_eq_mul, coe_sum, NNReal.coe_mul, Finset.sum_smul, ← smul_assoc]
   rfl
 
-lemma precomp (g : m ⟶ n) : IsAffine (f.comp (toTopMap g)) := by
+lemma map (g : m ⟶ n) : IsAffine (f.comp (toTopMap g)) := by
   intro x
   obtain ⟨w, hw, rfl⟩ := exists_barycenter_vertex x
   dsimp
@@ -200,7 +200,7 @@ end SimplexCategory.toTopObj
 
 namespace SSet
 
-variable {X : SSet.{u}} {E : Type v} [AddCommGroup E] [Module ℝ E]
+variable {X Y : SSet.{u}} {E : Type v}
 
 section
 
@@ -212,8 +212,13 @@ noncomputable def φ (x : X.obj (op n)) : n.toTopObj → E :=
   f.comp (Function.comp
     (toTopSimplex.inv.app _ ≫ toTop.map (yonedaEquiv.symm x)) ULift.up)
 
-omit [AddCommGroup E] [Module ℝ E] in
-lemma precomp_φ {n : SimplexCategory} (x : X.obj (op n)) (g : m ⟶ n) :
+lemma precomp_φ (g : Y ⟶ X) (y : Y.obj (op n)) :
+    φ (f.comp (toTop.map g).hom) y = φ f (g.app _ y) := by
+  dsimp [φ]
+  rw [Function.comp_assoc, ← yonedaEquiv_symm_comp, Functor.map_comp]
+  rfl
+
+lemma map_φ {n : SimplexCategory} (x : X.obj (op n)) (g : m ⟶ n) :
     φ f (X.map g.op x) = φ f x ∘ SimplexCategory.toTopMap g := by
   dsimp only [φ]
   rw [SSet.yonedaEquiv_symm_map]
@@ -227,6 +232,8 @@ lemma precomp_φ {n : SimplexCategory} (x : X.obj (op n)) (g : m ⟶ n) :
 
 end IsAffineAt
 
+variable [AddCommGroup E] [Module ℝ E]
+
 def IsAffineAt {n : SimplexCategory} (x : X.obj (op n)) : Prop :=
   SimplexCategory.toTopObj.IsAffine (IsAffineAt.φ f x)
 
@@ -235,8 +242,14 @@ lemma IsAffineAt.map {n m : SimplexCategory} {x : X.obj (op n)}
     (hx : IsAffineAt f x) (g : m ⟶ n) :
     IsAffineAt f (X.map g.op x) := by
   dsimp [IsAffineAt] at hx ⊢
+  rw [map_φ]
+  exact hx.map g
+
+lemma IsAffineAt.precomp {y : Y.obj (op n)} {g : Y ⟶ X} (hy : IsAffineAt f (g.app _ y)) :
+    IsAffineAt (f.comp (toTop.map g).hom) y := by
+  dsimp [IsAffineAt] at hy ⊢
   rw [precomp_φ]
-  exact hx.precomp g
+  assumption
 
 def IsAffine : Prop := ∀ ⦃n : SimplexCategory⦄ (x : X.obj (op n)), IsAffineAt f x
 
@@ -256,6 +269,8 @@ lemma isAffine_iff_eq_top : IsAffine f ↔ isAffine f = ⊤ := by
 
 end
 
+variable [AddCommGroup E] [Module ℝ E]
+
 variable (X E)
 structure AffineMap where
   f : |X| → E
@@ -273,9 +288,9 @@ lemma continuous_φ {E : Type v} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
     {n : SimplexCategory} (x : X.obj (op n)) : Continuous (f.φ x) :=
   (f.isAffine x).continuous
 
-lemma precomp_φ {d e : SimplexCategory} (s : X.obj (op d)) (g : e ⟶ d) :
+lemma map_φ {d e : SimplexCategory} (s : X.obj (op d)) (g : e ⟶ d) :
     f.φ (X.map g.op s) = f.φ s ∘ SimplexCategory.toTopMap g := by
-  simp [IsAffineAt.precomp_φ]
+  simp [IsAffineAt.map_φ]
 
 lemma range_subset_of_le {s t : X.S} (hst : s ≤ t) :
     Set.range (f.φ s.simplex) ⊆ Set.range (f.φ t.simplex) := by
@@ -285,7 +300,7 @@ lemma range_subset_of_le {s t : X.S} (hst : s ≤ t) :
     Subcomplex.mem_ofSimplex_obj_iff] at hst
   dsimp at hst ⊢
   obtain ⟨g, rfl⟩ := hst
-  rw [precomp_φ]
+  rw [map_φ]
   grind
 
 noncomputable def isobarycenter (s : X.S) : E :=
@@ -322,6 +337,15 @@ lemma range_f_eq :
     intro s
     exact le_trans (by rfl) (le_iSup _ s.toS)
 
+noncomputable def precomp (g : Y ⟶ X) : AffineMap Y E where
+  f := Function.comp f.f (toTop.map g).hom
+  isAffine _ y := (f.isAffine (g.app _ y)).precomp
+
+@[simp]
+lemma precomp_φ (g : Y ⟶ X) {d : SimplexCategory} (y : Y.obj (op d)) :
+    (f.precomp g).φ y = f.φ (g.app _ y) :=
+  IsAffineAt.precomp_φ f.f g y
+
 namespace b
 
 noncomputable def affineMap (s : (B.obj X).N) : ⦋s.dim⦌.toTopObj → E :=
@@ -336,7 +360,7 @@ lemma affineMap_comp {s t : (B.obj X).N} (hst : s ≤ t) :
     (affineMap f t).comp (SimplexCategory.toTopMap (N.monoOfLE hst)) =
       affineMap f s := by
   refine SimplexCategory.toTopObj.IsAffine.ext
-    (SimplexCategory.toTopObj.IsAffine.precomp
+    (SimplexCategory.toTopObj.IsAffine.map
       (SimplexCategory.toTopObj.isAffine_affineMap _) _)
     (SimplexCategory.toTopObj.isAffine_affineMap _) (fun i ↦ ?_)
   dsimp [affineMap]
@@ -430,7 +454,7 @@ noncomputable def vertex (x : X _⦋0⦌) : E := f.φ x default
 
 lemma φ_vertex {n : SimplexCategory} (x : X.obj (op n)) (i : Fin (n.len + 1)) :
     f.φ x (SimplexCategory.toTopObj.vertex i) = f.vertex (vertexOfSimplex x i) := by
-  have h₁ := congr_fun (f.precomp_φ x (SimplexCategory.const ⦋0⦌ n i)) default
+  have h₁ := congr_fun (f.map_φ x (SimplexCategory.const ⦋0⦌ n i)) default
   have h₂ := SimplexCategory.toTopObj.toTopMap_vertex (SimplexCategory.const ⦋0⦌ n i) 0
   dsimp [vertex, vertexOfSimplex] at h₁ ⊢
   rw [SimplexCategory.const_apply'] at h₂
@@ -463,6 +487,8 @@ lemma isobarycenter_eq_centerMass (s : X.S) :
     ext
     simpa using mul_inv_cancel₀ (by positivity)
   · positivity
+
+protected noncomputable def sd : (sd.obj X).AffineMap E := f.b.precomp (sdToB.app X)
 
 end AffineMap
 

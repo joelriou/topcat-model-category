@@ -20,4 +20,11 @@ instance [X.Nonempty] : Nonempty X.S := ⟨S.mk (dim := 0) (Classical.arbitrary 
 instance (T : Type u) [Preorder T] [Nonempty T] : (nerve T).Nonempty :=
   ⟨.mk₀ (Classical.arbitrary _)⟩
 
+variable {X} in
+lemma nonempty_of_hom {Y : SSet.{u}} (f : Y ⟶ X) [Y.Nonempty] : X.Nonempty :=
+  ⟨f.app _ (Classical.arbitrary _)⟩
+
+instance (n : SimplexCategory) : (stdSimplex.obj n).Nonempty :=
+  ⟨stdSimplex.objEquiv.symm (SimplexCategory.const _ _ 0)⟩
+
 end SSet

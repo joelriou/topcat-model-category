@@ -498,4 +498,55 @@ instance : sd.{u}.PreservesMonomorphisms where
 
 end
 
+instance [X.Nonempty] : (B.obj X).Nonempty :=
+  ⟨.mk₀ (Classical.arbitrary X.N)⟩
+
+instance (n : ℕ) : (sd.obj Δ[n]).Nonempty :=
+  nonempty_of_hom (inv (sdToB.app Δ[n]))
+
+instance [X.Nonempty] : (sd.obj X).Nonempty :=
+  nonempty_of_hom (sd.map (yonedaEquiv.symm (Classical.arbitrary _) : Δ[0] ⟶ X))
+
+instance (n : ℕ) : (sd.{u}.obj Δ[n]).HasDimensionLE n :=
+  hasDimensionLT_of_mono (sdToB.app _) _
+
+instance [X.IsFinite] {d : ℕ} : Finite ((B.obj X) _⦋d⦌) := by
+  let f (s : (B.obj X) _⦋d⦌) (i : Fin (d + 1)) : X.N := s.obj i
+  exact Finite.of_injective f (fun _ _ ↦ Preorder.nerveExt)
+
+instance [X.IsWeaklyPolyhedralLike] [X.IsFinite] {d : ℕ} : Finite ((sd.obj X) _⦋d⦌) :=
+  Finite.of_surjective _ ((asIso (sdToB.app X)).app (op ⦋d⦌)).symm.toEquiv.surjective
+
+instance (n : ℕ) : (sd.{u}.obj Δ[n]).IsFinite :=
+  isFinite_of_hasDimensionLT _ (n + 1) (by infer_instance)
+
+lemma iSup_range_sd_map :
+    ⨆ (s : X.N),
+      Subcomplex.range (sd.map (yonedaEquiv.symm s.simplex)) = ⊤ := by
+  ext ⟨n⟩ x
+  induction' n using SimplexCategory.rec with n
+  simp only [Subpresheaf.iSup_obj, Subpresheaf.range_obj, Set.mem_iUnion, Set.mem_range,
+    Subpresheaf.top_obj, Set.top_eq_univ, Set.mem_univ, iff_true]
+  obtain ⟨s, y, hs⟩ := Types.jointly_surjective_of_isColimit
+    (isColimitOfPreserves ((CategoryTheory.evaluation _ _).obj (op ⦋n⦌))
+    (isColimitOfPreserves sd X.isColimitCoconeN)) x
+  dsimp at y hs
+  have h : Epi (sd.map (Subcomplex.toOfSimplex s.simplex)) := inferInstance
+  rw [NatTrans.epi_iff_epi_app] at h
+  replace h := h (op ⦋n⦌)
+  rw [epi_iff_surjective] at h
+  obtain ⟨z, rfl⟩ := h y
+  refine ⟨s, z, by rwa [← FunctorToTypes.comp, ← Functor.map_comp] at hs⟩
+
+instance (n : ℕ) [X.HasDimensionLT n] : (sd.obj X).HasDimensionLT n := by
+  rw [hasDimensionLT_iff_subcomplex_top, ← iSup_range_sd_map,
+    hasDimensionLT_iSup_iff]
+  intro x
+  exact hasDimensionLT_of_le _ (x.dim + 1) _
+    (by simpa only [Nat.lt_iff_add_one_le] using X.dim_lt_of_nondegenerate ⟨_, x.nonDegenerate⟩ n)
+
+instance [X.IsFinite] : (sd.obj X).IsFinite := by
+  rw [isFinite_iff_isFinite_subcomplex_top, ← iSup_range_sd_map, isFinite_iSup_iff]
+  infer_instance
+
 end SSet
