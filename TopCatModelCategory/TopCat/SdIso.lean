@@ -1,6 +1,6 @@
 import TopCatModelCategory.SemiSimplexCategory
 import TopCatModelCategory.TopCat.Adj
-import TopCatModelCategory.SSet.Subdivision
+import TopCatModelCategory.SSet.AffineMap
 
 universe u
 
