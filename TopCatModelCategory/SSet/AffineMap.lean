@@ -428,6 +428,16 @@ lemma range_φ_eq_convexHull {d : SimplexCategory} (x : X.obj (op d)) :
       convexHull ℝ (Set.range (fun (i : Fin (d.len + 1)) ↦ f.vertex (vertexOfSimplex x i))) := by
   simp only [(f.isAffine x).range_eq_convexHull, ← f.φ_vertex]
 
+@[simp]
+lemma vertex_b (x : (B.obj X) _⦋0⦌) :
+    f.b.vertex x = f.isobarycenter (x.obj 0).toS := by
+  have := f.b_φ (N.mk x (by simp))
+  dsimp [b.affineMap] at this
+  dsimp only [vertex]
+  rw [this]
+  convert SimplexCategory.toTopObj.affineMap_vertex (fun i ↦ f.isobarycenter (x.obj i).toS) 0
+  subsingleton
+
 end AffineMap
 
 end SSet
