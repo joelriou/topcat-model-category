@@ -20,6 +20,13 @@ def vertexOfSimplex {X : SSet.{u}} {n : SimplexCategory}
     (x : X.obj (op n)) (i : Fin (n.len + 1)) : X _⦋0⦌ :=
   X.map (SimplexCategory.const ⦋0⦌ n i).op x
 
+lemma vertexOfSimplex_map {X : SSet.{u}} {m n : SimplexCategory}
+    (x : X.obj (op n)) (f : m ⟶ n) (i : Fin (m.len + 1)) :
+    vertexOfSimplex (X.map f.op x) i = vertexOfSimplex x (f i) := by
+  dsimp [vertexOfSimplex]
+  rw [← FunctorToTypes.map_comp_apply]
+  rfl
+
 end SSet
 
 variable {n m : SimplexCategory}
@@ -68,7 +75,6 @@ lemma exists_barycenter_vertex (x : n.toTopObj) :
 variable (n) in
 noncomputable def isobarycenter : n.toTopObj :=
   barycenter vertex (fun _ ↦ 1 / (n.len + 1)) (by simp)
-
 
 @[simp]
 lemma toTopMap_vertex (f : n ⟶ m) (i : Fin (n.len + 1)) :
@@ -411,6 +417,15 @@ lemma range_b_f_subset_range_f : Set.range f.b.f ⊆ Set.range f.f := by
   exact (b.range_affineMap_le f s _ (le_refl _)).trans
     (le_trans (by rfl) (le_iSup _ (s.simplex.obj (Fin.last _))))
 
+lemma φ_barycenter (s : X.obj (op n))
+    {α : Type*} [Fintype α] (p : α → n.toTopObj) (w : α → ℝ≥0) (hw : ∑ a, w a = 1) :
+    f.φ s (SimplexCategory.toTopObj.barycenter p w hw) =
+      Finset.centerMass (R := ℝ) (Finset.univ) (fun a ↦ w a) (fun a ↦ f.φ s (p a)) := by
+  dsimp [φ]
+  rw [(f.isAffine s).map_barycenter, Finset.centerMass_eq_of_sum_1 _ _ (by
+    rw [← NNReal.coe_sum, hw, coe_one])]
+  rfl
+
 noncomputable def vertex (x : X _⦋0⦌) : E := f.φ x default
 
 lemma φ_vertex {n : SimplexCategory} (x : X.obj (op n)) (i : Fin (n.len + 1)) :
@@ -437,6 +452,17 @@ lemma vertex_b (x : (B.obj X) _⦋0⦌) :
   rw [this]
   convert SimplexCategory.toTopObj.affineMap_vertex (fun i ↦ f.isobarycenter (x.obj i).toS) 0
   subsingleton
+
+lemma isobarycenter_eq_centerMass (s : X.S) :
+    f.isobarycenter s = Finset.univ.centerMass (fun _ ↦ (1 : ℝ))
+        (fun i ↦ f.vertex (vertexOfSimplex s.simplex i)) := by
+  dsimp [isobarycenter, SimplexCategory.toTopObj.isobarycenter]
+  simp [φ_barycenter, φ_vertex]
+  rw [← Finset.centerMass_smul_left (c := (s.dim : ℝ) + 1)]
+  · congr
+    ext
+    simpa using mul_inv_cancel₀ (by positivity)
+  · positivity
 
 end AffineMap
 

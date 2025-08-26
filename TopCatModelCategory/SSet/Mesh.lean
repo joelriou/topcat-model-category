@@ -135,8 +135,20 @@ lemma dist_b_vertex_le {x₁ x₂ : X.N} (hx : x₁ ≤ x₂) :
     dist (f.b.vertex (.mk₀ x₁)) (f.b.vertex (.mk₀ x₂)) ≤ x₂.dim / (x₂.dim + 1) * f.diam x₂.toS := by
   dsimp
   nth_rw 2 [vertex_b]
-  dsimp [isobarycenter, SimplexCategory.toTopObj.isobarycenter]
-  sorry
+  convert dist_centerMass_le (fun i ↦ f.vertex (vertexOfSimplex x₂.simplex i))
+    ⟨f.b.vertex (.mk₀ x₁), ?_⟩ using 2
+  · rw [isobarycenter_eq_centerMass]
+    rfl
+  · dsimp [diam]
+    rw [range_φ_eq_convexHull]
+    rfl
+  · rw [vertex_b, isobarycenter_eq_centerMass]
+    apply Finset.centerMass_mem_convexHull _ (by simp) (by simp; positivity)
+    intro i _
+    dsimp
+    obtain ⟨g, _, hg⟩ := N.le_iff_exists.1 hx
+    rw [← hg, vertexOfSimplex_map ]
+    exact ⟨_, rfl⟩
 
 lemma diam_b_le (x : (B.obj X).S) (y : X.S) (h : (x.simplex.obj (Fin.last _)).toS ≤ y) :
     f.b.diam x ≤ y.dim / (y.dim + 1) * f.diam y := by
