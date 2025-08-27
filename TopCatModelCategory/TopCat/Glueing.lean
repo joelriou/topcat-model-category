@@ -1,19 +1,20 @@
 import Mathlib.Topology.Category.TopCat.Limits.Basic
+import Mathlib.Topology.Homeomorph.Lemmas
 import TopCatModelCategory.ColimitsType
 
-universe w u
+universe w v u
 
 open CategoryTheory Topology Limits
 
-namespace CompleteLattice.MulticoequalizerDiagram
-
-variable {T : Type*} [CompleteLattice T] {ι : Type w} {A : T} {U : ι → T} {V : ι → ι → T}
-
-lemma le (h : MulticoequalizerDiagram A U V) (i : ι) : U i ≤ A := by
-  rw [← h.iSup_eq]
-  exact le_iSup U i
-
-end CompleteLattice.MulticoequalizerDiagram
+lemma Topology.IsEmbedding.isHomeomorph {X Y : Type*} [TopologicalSpace X]
+    [TopologicalSpace Y] {f : X → Y} (hf : IsEmbedding f) (hf' : Function.Surjective f) :
+    IsHomeomorph f where
+  continuous := hf.continuous
+  bijective := ⟨hf.injective, hf'⟩
+  isOpenMap U hU := by
+    rw [hf.eq_induced] at hU
+    obtain ⟨W, hW, rfl⟩ := hU
+    rwa [Set.image_preimage_eq _ hf']
 
 namespace Set
 
@@ -121,6 +122,139 @@ lemma mk_of_isClosed [Finite ι] (h : CompleteLattice.MulticoequalizerDiagram A 
       aesop
     rw [this]
     exact isClosed_iUnion_of_finite (fun i ↦ (hf' i).isClosedMap _ (hF i))
+
+variable (h : MulticoequalizerDiagram A U V)
+
+section
+
+variable {Y : Type v}
+
+lemma funext {f g : A → Y} (hfg : ∀ (i : ι) (u : U i), f ⟨u.1, h.le i u.2⟩ = g ⟨u.1, h.le i u.2⟩) :
+    f = g :=
+  Types.MulticoequalizerDiagram.funext h.toMulticoequalizerDiagram hfg
+
+variable [TopologicalSpace Y]
+  (f : ∀ (i : ι), U i → Y) (hf : ∀ i, Continuous (f i)) (hf' : ∀ (i j : ι) (x : V i j),
+    f i ⟨x, h.le₁ i j x.2⟩ = f j ⟨x, h.le₂ i j x.2⟩)
+
+include hf hf' in
+lemma exists_desc : ∃ (φ : C(A, Y)), ∀ (i : ι) (x : U i), φ ⟨x.1, h.le i x.2⟩ = f i x := by
+  obtain ⟨φ, hφ⟩ := Types.MulticoequalizerDiagram.exists_desc h.toMulticoequalizerDiagram f hf'
+  refine ⟨⟨φ, ?_⟩, hφ⟩
+  rw [continuous_iff h]
+  simpa [hφ] using hf
+
+noncomputable def desc : C(A, Y) := (exists_desc h f hf hf').choose
+
+@[simp]
+noncomputable def fac {i : ι} (x : U i) : desc h f hf hf' ⟨x.1, h.le i x.2⟩ = f i x :=
+  (exists_desc h f hf hf').choose_spec i x
+
+end
+
+variable {X' : TopCat.{v}} {A' : Set X'} {U' : ι → Set X'} {V' : ι → ι → Set X'}
+  (h' : MulticoequalizerDiagram A' U' V') (φ : X → X')
+  (hφ₁ : ∀ (i : ι), Set.image φ (U i) = U' i)
+  (hφ₂ : ∀ (i : ι), IsEmbedding (φ.comp (Subtype.val : U i → _)))
+  (hφ₃ : ∀ (i j : ι), V' i j ⊆ Set.image φ (V i j))
+
+namespace homeomorph
+
+def hom : C(A, A') :=
+  ⟨fun a ↦ ⟨φ a, by
+      obtain ⟨a, ha⟩ := a
+      simp only [← h.iSup_eq, Set.iSup_eq_iUnion, Set.mem_iUnion] at ha
+      obtain ⟨i, hi⟩ := ha
+      apply h'.le i
+      rw [← hφ₁]
+      exact ⟨a, hi, rfl⟩⟩, by
+    rw [continuous_iff h]
+    intro i
+    exact ((hφ₂ i).continuous).subtype_mk _⟩
+
+@[simps! apply_coe]
+noncomputable def homeo (i : ι) : U i ≃ₜ U' i := by
+  apply IsHomeomorph.homeomorph (f := (fun ⟨u, hu⟩ ↦ ⟨φ u,
+      by simpa only [← hφ₁] using ⟨u, hu, rfl⟩⟩))
+  exact Topology.IsEmbedding.isHomeomorph (by
+    rw [← IsEmbedding.subtypeVal.of_comp_iff]
+    exact hφ₂ _) (by
+    rintro ⟨u', hu'⟩
+    rw [← hφ₁, Set.mem_image] at hu'
+    obtain ⟨u, hu, rfl⟩ := hu'
+    exact ⟨⟨u, hu⟩, rfl⟩)
+
+lemma homeo_symm_apply (x : X) (i : ι) (hx : x ∈ U i) :
+    (homeo φ hφ₁ hφ₂ i).symm ⟨φ x, by simpa only [← hφ₁] using ⟨x, hx, rfl⟩⟩ = ⟨x, hx⟩ :=
+  (homeo φ hφ₁ hφ₂ i).symm_apply_apply ⟨x, hx⟩
+
+include h hφ₃ in
+lemma exists_inv : ∃ (ψ : C(A', A)), ∀ (i : ι) (u' : U' i),
+    (ψ ⟨u'.1, by
+        simpa only [← h'.iSup_eq, Set.iSup_eq_iUnion, Set.mem_iUnion] using ⟨i, u'.2⟩⟩).1 =
+      (homeo φ hφ₁ hφ₂ i).symm u' := by
+  obtain ⟨ψ, hψ⟩ :=
+    exists_desc h' (Y := A)
+      (fun i u' ↦ ⟨(homeo φ hφ₁ hφ₂ i).symm u', h.le i (by simp)⟩) (fun i ↦
+        (Set.functorToTopCat.map (homOfLE (h.le i))).hom.continuous.comp
+          (homeo φ hφ₁ hφ₂ i).symm.continuous) (fun i j ↦ by
+      rintro ⟨v', hv'⟩
+      obtain ⟨v, hv, rfl⟩ := hφ₃ _ _ hv'
+      rw [h.min_eq] at hv
+      ext
+      dsimp
+      rw [homeo_symm_apply _ _ _ _ _ hv.1, homeo_symm_apply _ _ _ _ _ hv.2])
+  exact ⟨ψ, fun i u' ↦ by simp [hψ]⟩
+
+noncomputable def inv : C(A', A) := (exists_inv h h' φ hφ₁ hφ₂ hφ₃).choose
+
+lemma inv_apply (a' : A') (i : ι) (ha' : a'.1 ∈ U' i) :
+    (inv h h' φ hφ₁ hφ₂ hφ₃ a').1 =
+    (homeo φ hφ₁ hφ₂ i).symm ⟨a'.1, ha'⟩ :=
+  (exists_inv h h' φ hφ₁ hφ₂ hφ₃).choose_spec i ⟨a'.1, ha'⟩
+
+lemma hom_apply (a : A) : hom h h' φ hφ₁ hφ₂ a = ⟨φ a, by
+  obtain ⟨a, ha⟩ := a
+  rw [← h.iSup_eq, Set.iSup_eq_iUnion, Set.mem_iUnion] at ha
+  obtain ⟨i, hi⟩ := ha
+  simp only [← h'.iSup_eq, Set.iSup_eq_iUnion, Set.mem_iUnion, ← hφ₁]
+  exact ⟨i, a, hi, rfl⟩⟩ := rfl
+
+@[simp]
+lemma hom_apply_coe (a : A) : (hom h h' φ hφ₁ hφ₂ a).1 = φ a := rfl
+
+@[simp]
+lemma inv_hom_apply (a : A) :
+    (inv h h' φ hφ₁ hφ₂ hφ₃) (hom h h' φ hφ₁ hφ₂ a) = a := by
+  obtain ⟨a, ha⟩ := a
+  simp only [← h.iSup_eq, Set.iSup_eq_iUnion, Set.mem_iUnion] at ha
+  obtain ⟨i, hi⟩ := ha
+  ext
+  rw [inv_apply _ _ _ _ _ _ _ i (by simpa only [hom_apply_coe, ← hφ₁] using ⟨a, hi, rfl⟩)]
+  dsimp only [hom_apply_coe]
+  rw [homeo_symm_apply _ _ _ _ _ hi]
+
+@[simp]
+lemma hom_inv_apply (a' : A') :
+    (hom h h' φ hφ₁ hφ₂) (inv h h' φ hφ₁ hφ₂ hφ₃ a') = a' := by
+  obtain ⟨a', ha'⟩ := a'
+  simp only [← h'.iSup_eq, Set.iSup_eq_iUnion, Set.mem_iUnion] at ha'
+  obtain ⟨i, hi⟩ := ha'
+  ext
+  simp only [hom_apply_coe]
+  rw [← hφ₁, Set.mem_image] at hi
+  obtain ⟨x, hx, rfl⟩ := hi
+  have := congr_arg (φ ∘ Subtype.val) (inv_hom_apply h h' φ hφ₁ hφ₂ hφ₃ ⟨x, h.le i hx⟩)
+  rwa [hom_apply] at this
+
+end homeomorph
+
+@[simps! apply_coe]
+noncomputable def homeomorph : A ≃ₜ A' where
+  toFun := homeomorph.hom h h' φ hφ₁ hφ₂
+  invFun := homeomorph.inv h h' φ hφ₁ hφ₂ hφ₃
+  left_inv _ := by simp
+  right_inv _ := by simp
 
 end MulticoequalizerDiagram
 

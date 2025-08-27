@@ -11,7 +11,7 @@ import Mathlib.Data.Set.Lattice
 import Mathlib.Data.Set.FunctorToTypes
 import TopCatModelCategory.Multiequalizer
 
-universe v u
+universe w v u
 
 open CategoryTheory Limits
 
@@ -40,6 +40,25 @@ lemma commSq : CommSq (homOfLE sq.le₁₂) (homOfLE sq.le₁₃)
 end BicartSq
 
 end Lattice-/
+
+namespace CompleteLattice.MulticoequalizerDiagram
+
+variable {T : Type*} [CompleteLattice T] {ι : Type w} {A : T} {U : ι → T} {V : ι → ι → T}
+
+lemma le (h : MulticoequalizerDiagram A U V) (i : ι) : U i ≤ A := by
+  rw [← h.iSup_eq]
+  exact le_iSup U i
+
+lemma le₁ (h : MulticoequalizerDiagram A U V) (i j : ι) : V i j ≤ U i := by
+  rw [h.min_eq]
+  exact inf_le_left
+
+lemma le₂ (h : MulticoequalizerDiagram A U V) (i j : ι) : V i j ≤ U j := by
+  rw [h.min_eq]
+  exact inf_le_right
+
+end CompleteLattice.MulticoequalizerDiagram
+
 
 @[deprecated (since := "2025-03-18")] alias Set.toTypes := Set.functorToTypes
 
@@ -380,6 +399,34 @@ noncomputable def isColimitMulticoforkMapSetToTypes' [LinearOrder ι] :
       iso_hom_fst _ _ := rfl
       iso_hom_snd _ _ := rfl
       fst_eq_snd _ := rfl }
+
+namespace MulticoequalizerDiagram
+
+variable {Y : Type w}
+
+lemma funext {f g : X → Y} (h : ∀ (i : ι) (u : U i), f ⟨u.1, d.le i u.2⟩ = g ⟨u.1, d.le i u.2⟩) :
+    f = g :=
+  MultispanIndex.MulticoforkTypes.IsColimit.funext
+    (isColimit_multicoforkTypesMapSetToTypes d) (fun i ↦ by ext; apply h)
+
+
+variable (f : ∀ (i : ι), U i → Y) (hf : ∀ (i j : ι) (x : V i j),
+  f i ⟨x, d.le₁ i j x.2⟩ = f j ⟨x, d.le₂ i j x.2⟩)
+
+include hf in
+lemma exists_desc : ∃ (φ : X → Y), ∀ (i : ι) (x : U i), φ ⟨x.1, d.le i x.2⟩ = f i x := by
+  obtain ⟨φ, hφ⟩ := MultispanIndex.MulticoforkTypes.IsColimit.exists_desc
+    (isColimit_multicoforkTypesMapSetToTypes d) f (fun ⟨i, j⟩ ↦ by
+      ext v
+      exact hf i j v)
+  exact ⟨φ, fun i ↦ congr_fun (hφ i)⟩
+
+noncomputable def desc : X → Y := (exists_desc d f hf).choose
+
+noncomputable def fac {i : ι} (x : U i) : desc d f hf ⟨x.1, d.le i x.2⟩ = f i x :=
+  (exists_desc d f hf).choose_spec i x
+
+end MulticoequalizerDiagram
 
 end
 
