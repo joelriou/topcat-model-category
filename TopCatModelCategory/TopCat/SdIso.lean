@@ -4,9 +4,60 @@ import TopCatModelCategory.SSet.AffineMap
 
 universe u
 
-open CategoryTheory
+open CategoryTheory SSet NNReal Simplicial Topology
 
 namespace SimplexCategory
+
+section
+
+variable {n : ℕ}
+
+def toTopObjι (f : ⦋n⦌.toTopObj) (i : Fin (n + 1)) : ℝ := (f.1 i).1
+
+lemma isClosedEmbedding_toTopObjι :
+    IsClosedEmbedding (toTopObjι (n := n)) :=
+  Isometry.isClosedEmbedding (fun _ _ ↦ rfl)
+
+variable (n)
+
+lemma isAffineMap_aux :
+    (IsAffineAt.φ (fun s i ↦ ((⦋n⦌.toTopHomeo s).1 i).1)
+      (SSet.yonedaEquiv.{u} (𝟙 _))) = toTopObjι := by
+  dsimp [IsAffineAt.φ]
+  ext x i
+  dsimp [toTopHomeo, toTopObjι]
+  simp only [Equiv.symm_apply_apply, CategoryTheory.Functor.map_id, TopCat.hom_id,
+    ContinuousMap.id_apply, coe_inj]
+  exact congr_fun (congr_arg Subtype.val (congr_arg ULift.down
+    (congr_fun ((forget _).congr_map ((toTopSimplex.{u}.app ⦋n⦌).inv_hom_id)) (ULift.up x)))) i
+
+@[simp]
+lemma toTopObjι_apply (f : ⦋n⦌.toTopObj) (i : Fin (n + 1)) :
+    toTopObjι f i = f i := rfl
+
+noncomputable def affineMap : AffineMap.{_, u} Δ[n] (Fin (n + 1) → ℝ) where
+  f s i := ((⦋n⦌.toTopHomeo s).1 i).1
+  isAffine := by
+    rw [isAffine_iff_eq_top, stdSimplex.subcomplex_eq_top_iff, mem_isAffine_iff, IsAffineAt]
+    erw [isAffineMap_aux]
+    intro x
+    ext i
+    dsimp
+    simp [toTopObj.vertex]
+    rw [Finset.sum_eq_single i (by aesop) (by simp)]
+    simp
+
+namespace affineMap
+
+lemma f_eq_comp : (affineMap n).f = Function.comp toTopObjι ⦋n⦌.toTopHomeo := rfl
+
+lemma isClosedEmbedding_f :
+    IsClosedEmbedding (affineMap n).f :=
+  isClosedEmbedding_toTopObjι.comp ⦋n⦌.toTopHomeo.isClosedEmbedding
+
+end affineMap
+
+end
 
 noncomputable abbrev sdToTop : CosimplicialObject TopCat.{u} :=
   sd ⋙ SSet.toTop

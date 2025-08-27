@@ -753,6 +753,17 @@ lemma δ_apply (x : Δ[n] _⦋d + 1⦌) (i : Fin (d + 2)) (j : Fin (d + 1)):
 lemma σ_apply (x : Δ[n] _⦋d⦌) (i : Fin (d + 1)) (j : Fin (d + 2)):
     Δ[n].σ i x j = x (i.predAbove j) := rfl
 
+lemma subcomplex_eq_top_iff {n : SimplexCategory} (A : (stdSimplex.{u}.obj n).Subcomplex) :
+    A = ⊤ ↔ yonedaEquiv (𝟙 _) ∈ A.obj (op n) := by
+  induction' n using SimplexCategory.rec with n
+  refine ⟨by rintro rfl; simp, fun h ↦ le_antisymm (by simp) ?_⟩
+  have : Subcomplex.ofSimplex (yonedaEquiv.{u} (X := Δ[n]) (𝟙 _)) = ⊤ :=
+    le_antisymm (by simp) (by
+      intro ⟨d⟩ x _
+      obtain ⟨f, rfl⟩ := objEquiv.symm.surjective x
+      exact ⟨f.op, by ext : 4; rfl⟩)
+  simpa only [← this, Subpresheaf.ofSection_le_iff]
+
 end stdSimplex
 
 end SSet

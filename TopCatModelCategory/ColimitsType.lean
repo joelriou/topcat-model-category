@@ -208,6 +208,90 @@ end CompleteLattice-/
 
 namespace CategoryTheory.Limits
 
+namespace MultispanIndex
+
+variable {J : MultispanShape} (d : MultispanIndex J (Type u))
+
+abbrev MulticoforkTypes := d.multispan.CoconeTypes
+
+namespace MulticoforkTypes
+
+variable {d}
+
+def π (c : d.MulticoforkTypes) (b : J.R) : d.right b → c.pt := c.ι (.right b)
+
+lemma ι_left_eq_π_comp_fst (c : d.MulticoforkTypes) (a : J.L) :
+    c.ι (.left a) = c.π (J.fst a) ∘ d.fst a :=
+  (c.ι_naturality (.fst a)).symm
+
+lemma ι_left_eq_π_comp_snd (c : d.MulticoforkTypes) (a : J.L) :
+    c.ι (.left a) = c.π (J.snd a) ∘ d.snd a :=
+  (c.ι_naturality (.snd a)).symm
+
+lemma condition (c : d.MulticoforkTypes) (b : J.L) :
+    c.π (J.fst b) ∘ d.fst b = c.π (J.snd b) ∘ d.snd b := by
+  rw [← ι_left_eq_π_comp_fst, ι_left_eq_π_comp_snd]
+
+section
+
+variable (P : Type v) (π : ∀ (b : J.R), d.right b → P)
+  (h : ∀ (a : J.L), π (J.fst a) ∘ d.fst a = π (J.snd a) ∘ d.snd a)
+
+def ofπ : d.MulticoforkTypes where
+  pt := P
+  ι j := match j with
+    | .left a => π (J.fst a) ∘ d.fst a
+    | .right b => π b
+  ι_naturality := by
+    rintro (a | _) (_ | _) (_ | _ | _)
+    · rfl
+    · rfl
+    · exact (h _).symm
+    · rfl
+
+@[simp]
+lemma π_ofπ (b : J.R) : (ofπ P π h).π b = π b := rfl
+
+end
+
+variable {c : d.MulticoforkTypes} (hc : c.IsColimit)
+
+namespace IsColimit
+
+variable {P : Type v}
+
+include hc in
+lemma funext {f g : c.pt → P} (h : ∀ (b : J.R), f ∘ c.π b = g ∘ c.π b) : f = g := by
+  apply hc.funext
+  rintro (a | b)
+  · rw [ι_left_eq_π_comp_fst, ← Function.comp_assoc, ← Function.comp_assoc, h]
+  · apply h
+
+variable (π : ∀ (b : J.R), d.right b → P)
+    (h : ∀ (a : J.L), π (J.fst a) ∘ d.fst a = π (J.snd a) ∘ d.snd a)
+
+include hc h in
+lemma exists_desc : ∃ (φ : c.pt → P), ∀ (b : J.R), φ ∘ c.π b = π b := by
+  obtain ⟨f, hf⟩ := hc.exists_desc (ofπ P π h)
+  exact ⟨f, fun b ↦ hf (.right b)⟩
+
+noncomputable def desc : c.pt → P := (exists_desc hc π h).choose
+
+@[simp]
+lemma fac (b : J.R) : (desc hc π h) ∘ c.π b = π b :=
+  (exists_desc hc π h).choose_spec b
+
+@[simp]
+lemma fac_apply {b : J.R} (x : d.right b) :
+    (desc hc π h) (c.π b x) = π b x :=
+  congr_fun (fac hc π h b) x
+
+end IsColimit
+
+end MulticoforkTypes
+
+end MultispanIndex
+
 namespace Types
 
 section
@@ -275,6 +359,15 @@ noncomputable def isColimitMulticoforkMapSetToTypes :
   Multicofork.IsColimit.mk _ desc (fun s i ↦ by ext x; apply fac_apply) (fun s m hm ↦ by
     ext x
     exact congr_fun (hm (index d x)) ⟨x.1, mem d x⟩)
+
+abbrev multicoforkTypesMapSetToTypes :
+    (d.multispanIndex.map Set.functorToTypes).MulticoforkTypes :=
+  (Functor.coconeTypesEquiv _).symm (d.multicofork.map Set.functorToTypes)
+
+lemma isColimit_multicoforkTypesMapSetToTypes :
+    (multicoforkTypesMapSetToTypes d).IsColimit :=
+  (isColimit_iff_coconeTypesIsColimit _).1
+    ⟨isColimitMulticoforkMapSetToTypes d⟩
 
 open isColimitMulticoforkMapSetToTypes in
 noncomputable def isColimitMulticoforkMapSetToTypes' [LinearOrder ι] :
