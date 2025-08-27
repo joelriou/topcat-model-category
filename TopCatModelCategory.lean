@@ -57,6 +57,7 @@ import TopCatModelCategory.SSet.FibrationSequence
 import TopCatModelCategory.SSet.FibrationSequenceAdj
 import TopCatModelCategory.SSet.Fibrations
 import TopCatModelCategory.SSet.Finite
+import TopCatModelCategory.SSet.FiniteInduction
 import TopCatModelCategory.SSet.FundamentalGroupoid
 import TopCatModelCategory.SSet.FundamentalGroupoidAction
 import TopCatModelCategory.SSet.FundamentalGroupoidPiOne
