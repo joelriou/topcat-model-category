@@ -233,7 +233,7 @@ lemma simplex_not_mem_horn : simplex s hd ∉ (horn x₀).obj _ := by
     rwa [eq_complSingleton_of_index_eq_last]
 
 lemma not_mem_simplex_obj_iff (i : Fin (d + 1)) :
-    x₀ ∉ ((simplex s hd).1.obj i).1 ↔ i.castSucc < index s hd := by
+    x₀ ∉ ((simplex s hd).obj i).1 ↔ i.castSucc < index s hd := by
   generalize hl : index s hd = l
   simp [simplex, hl, nerve_δ_obj, not_mem_cast_obj_iff,
     Fin.succAbove_lt_iff_castSucc_lt]

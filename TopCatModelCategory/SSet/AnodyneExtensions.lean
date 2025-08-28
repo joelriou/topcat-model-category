@@ -151,8 +151,6 @@ lemma filtration₁_zero :
     filtration₁.{u} (0 : Fin (n + 2)) =
       Subcomplex.unionProd (stdSimplex.face {1}) (boundary n) := by
   simp [filtration₁]
-  intro i
-  fin_cases i
 
 lemma filtration₁_succ (i : Fin (n + 1)) :
     filtration₁.{u} i.succ = filtration₁ i.castSucc ⊔

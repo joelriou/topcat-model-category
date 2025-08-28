@@ -7,15 +7,15 @@ jriou-adjunction-three-lifting #22834
 jriou-multicoequalizer-preserves #22205 
 complete-lattice-multicoequalizer-diagram #26037 
 jriou-joyal-trick #26169
-
--- migrated to fork
 category-theory-limits-yoneda-ulift #27576
 sset-nondegenerate2 #26076
-jriou-is-stable-under-transfinite-composition-argument #26030
 simplex-category-better-len-lemmas #27968
+jriou-is-stable-under-transfinite-composition-argument #26030
+
+-- migrated to fork
 jriou-types-mono #28219
+lifting-property-fixed-bot #28489
 
 -- to cleanup ?
 sset-simplices #28034
 
-28034
