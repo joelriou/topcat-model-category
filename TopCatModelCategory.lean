@@ -135,6 +135,7 @@ import TopCatModelCategory.TopCat.Glueing
 import TopCatModelCategory.TopCat.HornDeformationRetract
 import TopCatModelCategory.TopCat.IsQuotientMap
 import TopCatModelCategory.TopCat.Monoidal
+import TopCatModelCategory.TopCat.RelativeT1CellComplex
 import TopCatModelCategory.TopCat.SdIso
 import TopCatModelCategory.TopCat.T1Inclusion
 import TopCatModelCategory.TopCat.ToTopExact
