@@ -3,6 +3,7 @@ import Mathlib.CategoryTheory.Limits.Lattice
 import TopCatModelCategory.SSet.Degenerate
 import TopCatModelCategory.SSet.Evaluation
 import TopCatModelCategory.SSet.Monomorphisms
+import TopCatModelCategory.SSet.NonDegenerateSimplices
 import TopCatModelCategory.ColimitsType
 
 open CategoryTheory Simplicial HomotopicalAlgebra Limits Opposite
@@ -381,6 +382,28 @@ noncomputable def relativeCellComplexOfMono [Mono i] :
       g₁ := t i d
       g₂ := b i d
       isPushout := isPushout i d }
+
+variable (X) in
+noncomputable def relativeCellComplex  :
+    RelativeCellComplex.{u} (basicCell := fun (n : ℕ) (_ : Unit) ↦ (boundary n).ι)
+      (Subcomplex.ι ⊥ : _ ⟶ X) :=
+  relativeCellComplexOfMono _
+
+variable (X) in
+def relativeCellComplexCellsEquiv :
+    (relativeCellComplex X).Cells ≃ X.N where
+  toFun c := N.mk _ c.k.1.2
+  invFun s :=
+    { j := s.dim
+      hj := by simp
+      k := ⟨⟨_, s.nonDegenerate⟩, by simp ⟩ }
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+/-lemma relativeCellComplexι_eq (s : (relativeCellComplex X).Cells) :
+    s.ι = yonedaEquiv.symm s.k.1.1 := by
+  obtain ⟨n, hn, ⟨s, hs⟩, _⟩ := s
+  sorry-/
 
 namespace modelCategoryQuillen
 
