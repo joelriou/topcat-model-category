@@ -383,8 +383,13 @@ noncomputable def relativeCellComplexOfMono [Mono i] :
       g₂ := b i d
       isPushout := isPushout i d }
 
+open relativeCellComplexOfMono in
+lemma relativeCellComplexOfMono_attachCells_cell [Mono i] {d : ℕ} (s : ι i d) :
+    ((relativeCellComplexOfMono i).attachCells d (by simp)).cell s = β s :=
+  Sigma.ι_desc _ _
+
 variable (X) in
-noncomputable def relativeCellComplex  :
+noncomputable def relativeCellComplex :
     RelativeCellComplex.{u} (basicCell := fun (n : ℕ) (_ : Unit) ↦ (boundary n).ι)
       (Subcomplex.ι ⊥ : _ ⟶ X) :=
   relativeCellComplexOfMono _
@@ -400,10 +405,12 @@ def relativeCellComplexCellsEquiv :
   left_inv _ := rfl
   right_inv _ := rfl
 
-/-lemma relativeCellComplexι_eq (s : (relativeCellComplex X).Cells) :
+@[simp]
+lemma relativeCellComplexι_eq (s : (relativeCellComplex X).Cells) :
     s.ι = yonedaEquiv.symm s.k.1.1 := by
-  obtain ⟨n, hn, ⟨s, hs⟩, _⟩ := s
-  sorry-/
+  dsimp only [relativeCellComplex, RelativeCellComplex.Cells.ι] at s ⊢
+  rw [relativeCellComplexOfMono_attachCells_cell]
+  apply yonedaEquiv_symm_comp
 
 namespace modelCategoryQuillen
 
