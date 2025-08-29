@@ -207,7 +207,24 @@ instance (x : E) (e : ℝ) [FiniteDimensional ℝ E] :
 
 lemma of_isOpen_normedSpace [FiniteDimensional ℝ E] {U : Set E} (hU : IsOpen U) :
     DeltaGeneratedSpace U := by
-  sorry
+  let ι := { i : E × ℝ // Metric.ball i.1 i.2 ⊆ U }
+  let Y (i : ι) : Set E := Metric.ball i.1.1 i.1.2
+  have hY (i : ι) : IsOpen (Y i) := Metric.isOpen_ball
+  let f (i : ι) : C(Y i, U) := ⟨fun x ↦ ⟨x.1, i.2 x.2⟩, by continuity⟩
+  apply DeltaGeneratedSpace.of_coinduced' f
+  intro V hV
+  simp only [isOpen_iSup_iff, isOpen_coinduced] at hV
+  obtain ⟨W, hW, rfl⟩ : ∃ (W : Set E), W ⊆ U ∧ V = Subtype.val ⁻¹' W :=
+    ⟨Subtype.val '' V, by simp, by simp⟩
+  have hV (i : ι) := (hY i).isOpenMap_subtype_val _ (hV i)
+  refine ⟨W, ?_, by simp⟩
+  convert isOpen_iUnion hV
+  ext w
+  simp only [ContinuousMap.coe_mk, Set.mem_iUnion, Set.mem_image, Set.mem_preimage, Subtype.exists,
+    exists_and_left, exists_prop, exists_eq_right_right, iff_self_and, f]
+  intro hw
+  obtain ⟨ε, _, hε⟩ := Metric.mem_nhds_iff.1 (hU.mem_nhds (hW hw))
+  exact ⟨⟨⟨w, ε⟩, hε⟩, by simp [Y]; positivity⟩
 
 end
 
@@ -216,4 +233,24 @@ end DeltaGeneratedSpace
 lemma IsOpen.deltaGeneratedSpace
     {X : Type u} [TopologicalSpace X] [DeltaGeneratedSpace X] {U : Set X}
     (hU : IsOpen U) :
-    DeltaGeneratedSpace U := sorry
+    DeltaGeneratedSpace U := by
+  let ι := Σ (n : ℕ), C((Fin n → ℝ), X)
+  let Y (i : ι) : Set (Fin i.1 → ℝ) := i.2 ⁻¹' U
+  have hY (i : ι) : IsOpen (Y i) := i.2.continuous.isOpen_preimage _ hU
+  let f (i : ι) : C(Y i, U) := i.snd.restrictPreimage U
+  have (i : ι) := DeltaGeneratedSpace.of_isOpen_normedSpace (hY i)
+  apply DeltaGeneratedSpace.of_coinduced' f
+  intro V hV
+  obtain ⟨W, hW, rfl⟩ : ∃ (W : Set X), W ⊆ U ∧ V = Subtype.val ⁻¹' W :=
+    ⟨Subtype.val '' V, by simp, by simp⟩
+  refine ⟨W, ?_, rfl⟩
+  simp only [isOpen_iSup_iff, isOpen_coinduced] at hV
+  rw [DeltaGeneratedSpace.isOpen_iff]
+  intro n p
+  have := (hY ⟨n, p⟩).isOpenMap_subtype_val _ (hV ⟨n, p⟩)
+  convert this
+  ext g
+  simp only [Set.mem_preimage, Set.mem_image, ContinuousMap.restrictPreimage_apply,
+    Set.restrictPreimage_coe, Subtype.exists, exists_and_left, exists_prop, exists_eq_right_right,
+    iff_self_and, Y, f]
+  apply hW
