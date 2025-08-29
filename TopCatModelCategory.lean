@@ -1,12 +1,12 @@
 import TopCatModelCategory.AlephZero
 import TopCatModelCategory.Arrow
 import TopCatModelCategory.AttachCells
-import TopCatModelCategory.BallRetract
 import TopCatModelCategory.CWComplex
 import TopCatModelCategory.CatCommSq
 import TopCatModelCategory.CellComplex
 import TopCatModelCategory.ColimitsType
 import TopCatModelCategory.CommSq
+import TopCatModelCategory.DeltaGeneratedSpace
 import TopCatModelCategory.Factorization
 import TopCatModelCategory.Fin
 import TopCatModelCategory.FunctorCategoryColimits
@@ -14,6 +14,7 @@ import TopCatModelCategory.FunctorIterate
 import TopCatModelCategory.Homotopy.Basic
 import TopCatModelCategory.II
 import TopCatModelCategory.IsFibrant
+import TopCatModelCategory.IsTerminal
 import TopCatModelCategory.Iso
 import TopCatModelCategory.JoyalTrickDual
 import TopCatModelCategory.LeftKanExtensionAlongUliftYoneda
