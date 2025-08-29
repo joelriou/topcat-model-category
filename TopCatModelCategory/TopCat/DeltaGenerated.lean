@@ -2,13 +2,38 @@ import Mathlib.Topology.Category.DeltaGenerated
 import Mathlib.AlgebraicTopology.SingularSet
 import TopCatModelCategory.ModelCategoryTopCat
 
-open CategoryTheory Opposite Simplicial HomotopicalAlgebra
+open CategoryTheory Opposite Simplicial HomotopicalAlgebra Limits DeltaGenerated
 
-universe u
+namespace CategoryTheory
+
+namespace IsPullback
+
+variable {C : Type*} [Category C] {X₁ X₂ X₃ X₄ Y₁ Y₂ Y₃ Y₄ : C}
+  {t : X₁ ⟶ X₂} {l : X₁ ⟶ X₃} {r : X₂ ⟶ X₄} {b : X₃ ⟶ X₄} (sq : IsPullback t l r b)
+  {t' : Y₁ ⟶ Y₂} {l' : Y₁ ⟶ Y₃} {r' : Y₂ ⟶ Y₄} {b' : Y₃ ⟶ Y₄} (sq' : IsPullback t' l' r' b')
+  (e₂ : X₂ ≅ Y₂) (e₃ : X₃ ≅ Y₃) (e₄ : X₄ ≅ Y₄)
+  (commr : r ≫ e₄.hom = e₂.hom ≫ r') (commb : b ≫ e₄.hom = e₃.hom ≫ b')
+
+include sq sq' commr commb
+lemma exists_iso_of_isos :
+    ∃ (e₁ : X₁ ≅ Y₁), t ≫ e₂.hom = e₁.hom ≫ t' ∧
+      l ≫ e₃.hom = e₁.hom ≫ l' :=
+   ⟨{ hom := sq'.lift (t ≫ e₂.hom) (l ≫ e₃.hom)
+        (by simp only [Category.assoc, ← commr, sq.w_assoc, commb])
+      inv := sq.lift (t' ≫ e₂.inv) (l' ≫ e₃.inv)
+        (by simp only [Category.assoc, ← cancel_mono e₄.hom, commr,
+          Iso.inv_hom_id_assoc, sq'.w, commb])
+      hom_inv_id := by apply sq.hom_ext <;> simp
+      inv_hom_id := by apply sq'.hom_ext <;> simp}, by simp, by simp⟩
+
+end IsPullback
+
+end CategoryTheory
 
 namespace TopCat
 
-open DeltaGenerated
+instance : deltaGeneratedToTop.IsLeftAdjoint := inferInstance
+instance : topToDeltaGenerated.IsRightAdjoint := coreflectorAdjunction.isRightAdjoint
 
 def deltaCoreflection : TopCat.{u} ⥤ TopCat.{u} :=
   topToDeltaGenerated ⋙ DeltaGenerated.deltaGeneratedToTop
@@ -55,9 +80,29 @@ instance (n : SimplexCategory) :
   sorry
 
 instance (n : SimplexCategory) :
+    DeltaGeneratedSpace (ULift.{u} n.toTopObj) :=
+  Homeomorph.ulift.symm.isQuotientMap.deltaGeneratedSpace
+
+instance (n : SimplexCategory) :
     DeltaGeneratedSpace (SimplexCategory.toTop.{u}.obj n) := by
   dsimp [uliftFunctor]
-  exact Homeomorph.ulift.symm.isQuotientMap.deltaGeneratedSpace
+  infer_instance
+
+noncomputable def deltaGeneratedToTopCompToSSetCompEvaluationIso (n : SimplexCategory):
+    deltaGeneratedToTop.{u} ⋙ toSSet ⋙ SSet.evaluation.obj (op n) ≅
+      coyoneda.obj (op (.of (SimplexCategory.toTop.{u}.obj n))) :=
+  NatIso.ofComponents (fun X ↦ Equiv.toIso ((TopCat.toSSetObjEquiv _ _).trans
+    ((Homeomorph.continuousMapCongr (Homeomorph.ulift.{u}.symm) (Homeomorph.refl _)).trans
+      ((ConcreteCategory.homEquiv (C := TopCat.{u})
+        (X := uliftFunctor.obj (.of n.toTopObj)) (Y := X.toTop)).symm))))
+
+instance : PreservesFiniteLimits (deltaGeneratedToTop.{u} ⋙ TopCat.toSSet) where
+  preservesFiniteLimits J :=
+    ⟨fun {F} ↦ ⟨fun {c} hc ↦ ⟨evaluationJointlyReflectsLimits _ (fun ⟨n⟩ ↦
+      (IsLimit.equivOfNatIsoOfIso
+        (Functor.isoWhiskerLeft F (deltaGeneratedToTopCompToSSetCompEvaluationIso n).symm) _ _
+          (Cones.ext ((deltaGeneratedToTopCompToSSetCompEvaluationIso n).app _)).symm).1
+        (isLimitOfPreserves (coyoneda.obj _) hc))⟩⟩⟩
 
 variable (Y) in
 lemma bijective_toSSet_map_fromDeltaCoreflection_app_app (n : SimplexCategoryᵒᵖ) :
@@ -111,4 +156,108 @@ lemma mem_trivialFibrations_deltaCoreflection_map_iff (f : X ⟶ Y) :
   simp [mem_trivialFibrations_iff, fibration_deltaCoreflection_map_iff,
     weakEquivalence_deltaCoreflection_map_iff]
 
+lemma deltaGeneratedSpace_of_isColimit {J : Type*} [Category J] {F : J ⥤ TopCat.{u}}
+    {c : Cocone F} (hc : IsColimit c) [∀ j, DeltaGeneratedSpace (F.obj j)] :
+    DeltaGeneratedSpace c.pt :=
+  (TopCat.IsColimit.isQuotientMap hc).deltaGeneratedSpace
+
+instance (n : SimplexCategory) :
+    DeltaGeneratedSpace (SSet.toTop.obj (SSet.stdSimplex.{u}.obj n)) := by
+  have e : SSet.toTop.obj (SSet.stdSimplex.{u}.obj n) ≃ₜ n.toTopObj :=
+    (homeoOfIso (SSet.toTopSimplex.{u}.app n)).trans Homeomorph.ulift
+  exact e.symm.isQuotientMap.deltaGeneratedSpace
+
+instance (X : SSet.{u}) : DeltaGeneratedSpace (SSet.toTop.obj X) := by
+  have (j : (Functor.Elements X)ᵒᵖ) :
+      DeltaGeneratedSpace ((Presheaf.functorToRepresentables X ⋙ SSet.toTop).obj j) :=
+    inferInstanceAs (DeltaGeneratedSpace (SSet.toTop.obj (SSet.stdSimplex.{u}.obj j.unop.1.unop)))
+  exact deltaGeneratedSpace_of_isColimit (isColimitOfPreserves SSet.toTop
+    (Presheaf.colimitOfRepresentable X))
+
+instance :
+    ((fibrations TopCat.{u}).inverseImage deltaGeneratedToTop).IsStableUnderBaseChange where
+  of_isPullback := by
+    intro X₃ X₂ X₁ X₄ b r t l sq h
+    let b' : X₃.toTop ⟶ X₄.toTop := b
+    let r' : X₂.toTop ⟶ X₄.toTop := r
+    let Z := pullback r' b'
+    let t' : Z ⟶ _ := pullback.fst r' b'
+    let l' : Z ⟶ _ := pullback.snd r' b'
+    have sq' : IsPullback t' l' r' b' := IsPullback.of_hasPullback r' b'
+    have hl' := MorphismProperty.of_isPullback (P := fibrations TopCat.{u}) sq' h
+    rw [MorphismProperty.inverseImage_iff]
+    rw [← fibration_iff, ← fibration_deltaCoreflection_map_iff, fibration_iff] at hl'
+    obtain ⟨e, he⟩ : ∃ (e : DeltaGenerated.topToDeltaGenerated.obj Z ≅ X₁),
+        e.hom ≫ l = deltaCoreflection.map l' ≫ fromDeltaCoreflection.app X₃.toTop := by
+      obtain ⟨e', _, h⟩ :=
+        IsPullback.exists_iso_of_isos sq (sq'.map DeltaGenerated.topToDeltaGenerated)
+          (asIso (coreflectorAdjunction.unit.app _))
+          (asIso (coreflectorAdjunction.unit.app _))
+          (asIso (coreflectorAdjunction.unit.app _))
+          (coreflectorAdjunction.unit.naturality r)
+          (coreflectorAdjunction.unit.naturality b)
+      refine ⟨e'.symm, ?_⟩
+      dsimp at h ⊢
+      rw [← cancel_mono (DeltaGenerated.coreflectorAdjunction.unit.app X₃), Category.assoc,
+        h, e'.inv_hom_id_assoc]
+      apply deltaGeneratedToTop.map_injective
+      dsimp
+      -- neees cleaning up...
+      erw [Category.assoc, coreflectorAdjunction.right_triangle_components X₃.toTop,
+        Category.comp_id]
+      rfl
+    refine (MorphismProperty.arrow_mk_iso_iff _ ?_).1 hl'
+    refine Arrow.isoMk (DeltaGenerated.deltaGeneratedToTop.mapIso e)
+      (asIso (fromDeltaCoreflection.app X₃.toTop)) he
+
+instance :
+    ((trivialFibrations TopCat.{u}).inverseImage deltaGeneratedToTop).IsStableUnderBaseChange where
+  of_isPullback := by
+    intro X₃ X₂ X₁ X₄ b r t l sq h
+    let b' : X₃.toTop ⟶ X₄.toTop := b
+    let r' : X₂.toTop ⟶ X₄.toTop := r
+    let Z := pullback r' b'
+    let t' : Z ⟶ _ := pullback.fst r' b'
+    let l' : Z ⟶ _ := pullback.snd r' b'
+    have sq' : IsPullback t' l' r' b' := IsPullback.of_hasPullback r' b'
+    have hl' := MorphismProperty.of_isPullback (P := trivialFibrations TopCat.{u}) sq' h
+    rw [MorphismProperty.inverseImage_iff]
+    rw [← mem_trivialFibrations_deltaCoreflection_map_iff] at hl'
+    obtain ⟨e, he⟩ : ∃ (e : DeltaGenerated.topToDeltaGenerated.obj Z ≅ X₁),
+        e.hom ≫ l = deltaCoreflection.map l' ≫ fromDeltaCoreflection.app X₃.toTop := by
+      obtain ⟨e', _, h⟩ :=
+        IsPullback.exists_iso_of_isos sq (sq'.map DeltaGenerated.topToDeltaGenerated)
+          (asIso (coreflectorAdjunction.unit.app _))
+          (asIso (coreflectorAdjunction.unit.app _))
+          (asIso (coreflectorAdjunction.unit.app _))
+          (coreflectorAdjunction.unit.naturality r)
+          (coreflectorAdjunction.unit.naturality b)
+      refine ⟨e'.symm, ?_⟩
+      dsimp at h ⊢
+      rw [← cancel_mono (DeltaGenerated.coreflectorAdjunction.unit.app X₃), Category.assoc,
+        h, e'.inv_hom_id_assoc]
+      apply deltaGeneratedToTop.map_injective
+      dsimp
+      -- neees cleaning up...
+      erw [Category.assoc, coreflectorAdjunction.right_triangle_components X₃.toTop,
+        Category.comp_id]
+      rfl
+    refine (MorphismProperty.arrow_mk_iso_iff _ ?_).1 hl'
+    refine Arrow.isoMk (DeltaGenerated.deltaGeneratedToTop.mapIso e)
+      (asIso (fromDeltaCoreflection.app X₃.toTop)) he
+
 end TopCat
+
+noncomputable def SSet.toDeltaGenerated : SSet.{u} ⥤ DeltaGenerated where
+  obj X := .of (toTop.obj X)
+  map f := toTop.map f
+
+noncomputable def SSet.toDeltaGeneratedCompIso :
+    toDeltaGenerated.{u} ⋙ deltaGeneratedToTop ≅ toTop := Iso.refl _
+
+noncomputable def SSet.toDeltaGeneratedIso :
+    toDeltaGenerated.{u} ≅ toTop ⋙ topToDeltaGenerated :=
+  (Functor.rightUnitor _).symm ≪≫
+    Functor.isoWhiskerLeft _ (asIso coreflectorAdjunction.unit) ≪≫
+    (Functor.associator _ _ _).symm ≪≫
+    Functor.isoWhiskerRight SSet.toDeltaGeneratedCompIso topToDeltaGenerated

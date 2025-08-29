@@ -89,9 +89,22 @@ end
 
 namespace IsColimit
 
-variable {c} (hc : IsColimit c) {T : Type w}
+variable {c} (hc : IsColimit c)
 
 include hc
+
+lemma isQuotientMap :
+    IsQuotientMap (Y := c.pt) (fun (x : Σ (j : J), F.obj j) ↦ c.ι.app x.1 x.2) where
+  surjective y := by
+    obtain ⟨j, x, rfl⟩ := Types.jointly_surjective_of_isColimit
+      (isColimitOfPreserves (forget _) hc) y
+    exact ⟨⟨j, x⟩, rfl⟩
+  eq_coinduced := by
+    ext U
+    rw [isOpen_iff_of_isColimit _ hc, isOpen_coinduced, isOpen_sigma_iff]
+    rfl
+
+variable {T : Type w}
 
 lemma funext {f g : c.pt → T}
     (h : ∀ (j : J), f.comp (c.ι.app j).hom = g.comp (c.ι.app j).hom) :

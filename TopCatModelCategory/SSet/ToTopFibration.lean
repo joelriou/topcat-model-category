@@ -33,11 +33,10 @@ lemma fibration_toTop_map_of_trivialBundles {E B : SSet.{u}} (p : E ⟶ B)
     rw [← isFibrant_iff_of_isTerminal _
       (IsTerminal.isTerminalObj _ _ stdSimplex.isTerminalObj₀)]
     infer_instance
-  rw [← TopCat.fibration_deltaCoreflection_map_iff,
-    HomotopicalAlgebra.fibration_iff] at hF ⊢
-  exact MorphismProperty.of_isPullback
-    ((h.isPullback_of_isTerminal stdSimplex.isTerminalObj₀).map
-      (toTop ⋙ TopCat.deltaCoreflection)) hF
+  rw [HomotopicalAlgebra.fibration_iff] at hF ⊢
+  apply MorphismProperty.of_isPullback
+    (P := ((fibrations _).inverseImage DeltaGenerated.deltaGeneratedToTop))
+    ((h.isPullback_of_isTerminal stdSimplex.isTerminalObj₀).map SSet.toDeltaGenerated) hF
 
 -- Gabriel-Zisman
 instance {E B : SSet.{u}} (p : E ⟶ B) [MinimalFibration p] :
