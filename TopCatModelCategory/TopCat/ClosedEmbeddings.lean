@@ -66,6 +66,11 @@ def closedEmbeddings : MorphismProperty TopCat.{u} :=
 lemma closedEmbeddings_iff {X Y : TopCat.{u}} (f : X ⟶ Y) :
     closedEmbeddings f ↔ IsClosedEmbedding f := Iff.rfl
 
+lemma closedEmbeddings.isOpen {X Y : TopCat.{u}} {f : X ⟶ Y}
+    (hf : closedEmbeddings f) : IsOpen (Set.range f)ᶜ := by
+  rw [closedEmbeddings_iff] at hf
+  simpa only [isOpen_compl_iff] using hf.isClosed_range
+
 lemma closedEmbedding_le_inverseImage_monomorphisms :
     closedEmbeddings.{u} ≤ (monomorphisms (Type u)).inverseImage (forget _) :=
   fun _ _ _ hf ↦ by simpa [CategoryTheory.mono_iff_injective] using hf.injective
@@ -508,5 +513,53 @@ lemma coconeOfTransfiniteCompositionOfShape.closedEmbeddings_ιPoint :
   · exact closedEmbeddings_ιPoint_of_not_final hf hι hl hl'
 
 end closedEmbeddings
+
+section
+
+variable {X₁ X₂ X₃ X₄ : TopCat.{u}} {t : X₁ ⟶ X₂} {l : X₁ ⟶ X₃}
+  {r : X₂ ⟶ X₄} {b : X₃ ⟶ X₄}
+  (sq : IsPushout t l r b) (ht : closedEmbeddings t)
+
+include sq ht
+
+noncomputable def homeomorphOfIsPushoutOfClosedEmbedding :
+    ((Set.range t)ᶜ : Set _) ≃ₜ ((Set.range b)ᶜ : Set _) where
+  toEquiv := Types.equivOfIsPushoutOfInjective (sq.map (forget _)) ht.injective
+  continuous_toFun := Continuous.subtype_mk (by continuity) _
+  continuous_invFun := by
+    let e : ((Set.range t)ᶜ : Set _) ≃ ((Set.range b)ᶜ : Set _) :=
+      Types.equivOfIsPushoutOfInjective (sq.map (forget _)) ht.injective
+    change Continuous e.symm
+    rw [continuous_def]
+    intro U h
+    obtain ⟨V, rfl⟩ : ∃ V, U = e ⁻¹' V := ⟨e '' U, by simp⟩
+    obtain ⟨W, hW, rfl⟩ : ∃ (W : Set X₄) (hW : W ⊆ (Set.range b)ᶜ), V =
+        Subtype.val ⁻¹' W := ⟨Subtype.val '' V, by simp, by simp⟩
+    simp only [Equiv.symm_preimage_preimage]
+    rw [((MorphismProperty.of_isPushout sq.flip
+      ht).isOpen.isOpenEmbedding_subtypeVal).isOpen_iff_image_isOpen,
+      Subtype.image_preimage_coe, Set.inter_eq_self_of_subset_right hW]
+    replace h : IsOpen (r ⁻¹' W) := by
+      rw [ht.isOpen.isOpenEmbedding_subtypeVal.isOpen_iff_image_isOpen] at h
+      convert h
+      ext x₂
+      simp only [Set.mem_preimage, ConcreteCategory.forget_map_eq_coe, Set.mem_image,
+        Types.equivOfIsPushoutOfInjective_apply, Subtype.exists, Set.mem_compl_iff, Set.mem_range,
+        not_exists, exists_and_left, exists_prop, exists_eq_right_right, iff_self_and, e]
+      rintro hx₂ x₁ rfl
+      exact hW hx₂ ⟨l x₁, congr_fun ((forget _).congr_map sq.w.symm) x₁⟩
+    rw [isOpen_iff_of_isPushout sq]
+    refine ⟨h, ?_⟩
+    convert isOpen_empty
+    ext x₃
+    simp only [Set.mem_preimage, Set.mem_empty_iff_false, iff_false]
+    intro hx₃
+    simpa using hW hx₃
+
+@[simp]
+lemma homeomorphOfIsPushoutOfClosedEmbedding_apply (x : ((Set.range t)ᶜ : Set _)) :
+    (homeomorphOfIsPushoutOfClosedEmbedding sq ht x).1 = r x.1 := rfl
+
+end
 
 end TopCat
