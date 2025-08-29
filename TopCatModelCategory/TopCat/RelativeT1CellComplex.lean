@@ -17,6 +17,13 @@ def RelativeCellComplex (_ : ∀ j i, W (basicCell j i)) {X Y : C} (f : X ⟶ Y)
 
 end CategoryTheory.MorphismProperty
 
+namespace TopCat
+
+variable {X₁ X₂ X₃ X₄ : TopCat.{u}} {t : X₁ ⟶ X₂} {l : X₁ ⟶ X₃} {r : X₂ ⟶ X₄}
+  {b : X₃ ⟶ X₄} (sq : IsPushout t l r b)
+
+end TopCat
+
 namespace CategoryTheory.Types
 
 variable {J : Type v} [LinearOrder J] [OrderBot J] [SuccOrder J] [WellFoundedLT J]

@@ -684,9 +684,45 @@ lemma preimage_image_eq_of_isPushout (sq : IsPushout t l r b) (ht : Function.Inj
   · rintro ⟨x₁, hx₁, rfl⟩
     exact ⟨l x₁, hx₁, congr_fun sq.w.symm x₁⟩
 
-lemma injective_of_isPushout (sq : IsPushout t l r b) (ht : Function.Injective t) :
+lemma preimage_range_eq_of_isPushout (sq : IsPushout t l r b) (ht : Function.Injective t) :
+    r ⁻¹' (Set.range b) = Set.range t := by
+  simpa using preimage_image_eq_of_isPushout sq ht .univ
+
+section
+
+variable (sq : IsPushout t l r b) (ht : Function.Injective t)
+
+include sq ht
+
+lemma injective_of_isPushout  :
     Function.Injective b :=
   Types.pushoutCocone_inr_injective_of_isColimit sq.isColimit ht
+
+noncomputable def equivOfIsPushoutOfInjective :
+    ((Set.range t)ᶜ : Set _) ≃ ((Set.range b)ᶜ : Set _) :=
+  Equiv.ofBijective (fun ⟨x₂, hx₂⟩ ↦ ⟨r x₂, by
+      simpa [← preimage_range_eq_of_isPushout sq ht] using hx₂⟩) (by
+    constructor
+    · rintro ⟨x₂, hx₂⟩ ⟨y₂, hy₂⟩ h
+      rw [Subtype.ext_iff] at h
+      dsimp at h
+      obtain rfl | ⟨x₁, _, rfl, _⟩ :=
+        (pushoutCocone_inl_eq_inl_iff_of_isColimit sq.isColimit ht x₂ y₂).1 h
+      · rfl
+      · simp at hx₂
+    · rintro ⟨x₄, hx₄⟩
+      obtain ⟨x₃, rfl⟩ | ⟨x₂, rfl, hx₂⟩ :=  eq_or_eq_of_isPushout' sq.flip x₄
+      · simp at hx₄
+      · refine ⟨⟨x₂, ?_⟩, rfl⟩
+        rintro ⟨x₁, rfl⟩
+        simp only [Set.mem_compl_iff, Set.mem_range, not_exists] at hx₄
+        exact hx₄ (l x₁) (congr_fun sq.w.symm x₁))
+
+@[simp]
+lemma equivOfIsPushoutOfInjective_apply (x : ((Set.range t)ᶜ : Set _)) :
+    (equivOfIsPushoutOfInjective sq ht x).1 = r x.1 := rfl
+
+end
 
 end
 
