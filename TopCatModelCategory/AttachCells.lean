@@ -1,3 +1,6 @@
+import Mathlib.AlgebraicTopology.RelativeCellComplex.AttachCells
+import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Products
+
 /-import Mathlib.CategoryTheory.MorphismProperty.Limits
 
 universe w t t' v u
@@ -122,3 +125,35 @@ lemma nonempty_attachCells_iff :
         isPushout := sq }⟩
 
 end HomotopicalAlgebra-/
+
+open CategoryTheory Limits
+
+namespace HomotopicalAlgebra
+
+namespace AttachCells
+
+variable {C D : Type*} [Category C] [Category D]
+  {α : Type*} {A B : α → C} {g : ∀ a, A a ⟶ B a}
+  {X Y : C} {f : X ⟶ Y} (hf : AttachCells g f)
+  (F : C ⥤ D)
+  [PreservesColimit (Discrete.functor (fun i ↦ A (hf.π i))) F]
+  [PreservesColimit (Discrete.functor (fun i ↦ B (hf.π i))) F]
+  [PreservesColimit (span hf.g₁ hf.m) F]
+
+@[simps]
+noncomputable def map : AttachCells (g := fun a ↦ F.map (g a)) (F.map f) where
+  ι := hf.ι
+  π := hf.π
+  cofan₁ := Cofan.mk _ (fun i ↦ F.map (hf.cofan₁.inj i))
+  cofan₂ := Cofan.mk _ (fun i ↦ F.map (hf.cofan₂.inj i))
+  isColimit₁ := (isColimitMapCoconeCofanMkEquiv _ _ _).1 (isColimitOfPreserves F hf.isColimit₁)
+  isColimit₂ := (isColimitMapCoconeCofanMkEquiv _ _ _).1 (isColimitOfPreserves F hf.isColimit₂)
+  m := F.map hf.m
+  hm i := by simp [← Functor.map_comp]
+  g₁ := F.map hf.g₁
+  g₂ := F.map hf.g₂
+  isPushout := hf.isPushout.map F
+
+end AttachCells
+
+end HomotopicalAlgebra
