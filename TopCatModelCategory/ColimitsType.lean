@@ -452,6 +452,21 @@ lemma eq_or_eq_of_isPushout' (h : IsPushout t l r b)
       exact Or.inl ⟨t x₁, by simpa only [hx₃] using congr_fun h.w.symm x₁⟩
     · exact Or.inr ⟨x₃, hx₃, h₂⟩
 
+lemma exists_of_inl_eq_inr_of_isPushout (h : IsPushout t l r b) (ht : Function.Injective t)
+    (x₂ : X₂) (x₃ : X₃) (hx : r x₂ = b x₃) :
+    ∃ x₁, t x₁ = x₂ ∧ l x₁ = x₃ :=
+  (pushoutCocone_inl_eq_inr_iff_of_isColimit h.isColimit ht x₂ x₃).1 hx
+
+--lemma pushoutCocone_inl_eq_inr_iff_of_isColimit {c : PushoutCocone f g} (hc : IsColimit c)
+--    (h₁ : Function.Injective f) (x₁ : X₁) (x₂ : X₂) :
+--    c.inl x₁ = c.inr x₂ ↔ ∃ (s : S), f s = x₁ ∧ g s = x₂ := by
+--  rw [pushoutCocone_inl_eq_inr_iff_of_iso
+--    (Cocones.ext (IsColimit.coconePointUniqueUpToIso hc (Pushout.isColimitCocone f g))
+--    (by simp))]
+--  have := (mono_iff_injective f).2 h₁
+--  apply Pushout.inl_eq_inr_iff
+
+
 lemma ext_of_isPullback (h : IsPullback t l r b) {x₁ y₁ : X₁}
     (h₁ : t x₁ = t y₁) (h₂ : l x₁ = l y₁) : x₁ = y₁ := by
   apply (h.isLimit.conePointUniqueUpToIso
@@ -466,6 +481,7 @@ lemma exists_of_isPullback (h : IsPullback t l r b)
   rw [Subtype.ext_iff] at hx₁
   exact ⟨x₁, congr_arg _root_.Prod.fst hx₁.symm,
     congr_arg _root_.Prod.snd hx₁.symm⟩
+
 
 open MorphismProperty
 
