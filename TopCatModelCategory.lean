@@ -121,6 +121,7 @@ import TopCatModelCategory.SemiSimplexCategory
 import TopCatModelCategory.Set
 import TopCatModelCategory.SimplicialPresheaves.LocalLiftingProperty
 import TopCatModelCategory.TopCat.Adj
+import TopCatModelCategory.TopCat.AttachCells
 import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
 import TopCatModelCategory.TopCat.ClosedEmbeddings
 import TopCatModelCategory.TopCat.Colimits
@@ -139,6 +140,7 @@ import TopCatModelCategory.TopCat.Monoidal
 import TopCatModelCategory.TopCat.RelativeT1CellComplex
 import TopCatModelCategory.TopCat.SdIso
 import TopCatModelCategory.TopCat.T1Inclusion
+import TopCatModelCategory.TopCat.ToTopEqualizers
 import TopCatModelCategory.TopCat.ToTopExact
 import TopCatModelCategory.TopCat.ToTopSdIso
 import TopCatModelCategory.TopCat.ToTopULift
