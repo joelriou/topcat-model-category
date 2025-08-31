@@ -20,13 +20,7 @@ variable {F Y Y' X X' : C} {f : Y ⟶ X} (hf : TrivialBundleWithFiber F f)
 include hf in
 lemma exists_of_splitMono (hb : SplitMono b) :
     ∃ (h : TrivialBundleWithFiber F f), h.pullback sq = hf' := by
-  obtain ⟨u, hu₁, hu₂⟩ :
-      ∃ (u : Y ⟶ Y'), u ≫ f' = f ≫ hb.retraction ∧ u ≫ hf'.r = hf.r := by
-    have := Limits.BinaryFan.IsLimit.lift' hf'.isLimit (f ≫ hb.retraction) hf.r
-    aesop
-  have squ : IsPullback u f f' hb.retraction :=
-    { isLimit' := ⟨sorry⟩ }
-  exact ⟨hf'.pullback squ, sorry⟩
+  sorry
 
 end
 

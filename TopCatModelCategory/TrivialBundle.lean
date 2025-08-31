@@ -6,6 +6,12 @@ open Limits
 
 variable {C : Type*} [Category C]
 
+lemma Limits.BinaryFan.IsLimit.exists_lift
+    {X₁ X₂ : C} {c : BinaryFan X₁ X₂} (hc : IsLimit c)
+    {T : C} (f₁ : T ⟶ X₁) (f₂ : T ⟶ X₂) :
+    ∃ φ, φ ≫ c.fst = f₁ ∧ φ ≫ c.snd = f₂ :=
+  ⟨(Limits.BinaryFan.IsLimit.lift' hc f₁ f₂).1, by simp⟩
+
 namespace MorphismProperty
 
 structure TrivialBundleWithFiber (F : C) {E B : C} (p : E ⟶ B) where
@@ -85,6 +91,27 @@ lemma isPullback_of_isTerminal {T : C} (hT : IsTerminal T) :
         apply BinaryFan.IsLimit.hom_ext h.isLimit
         · exact hm₂.trans (BinaryFan.IsLimit.lift' h.isLimit s.snd s.fst).2.1.symm
         · exact hm₁.trans (BinaryFan.IsLimit.lift' h.isLimit s.snd s.fst).2.2.symm)⟩
+
+lemma exists_iso {E' : C} {p' : E' ⟶ B} (h' : TrivialBundleWithFiber F p') :
+    ∃ (e : E ≅ E'), e.hom ≫ p' = p ∧ e.hom ≫ h'.r = h.r := by
+  obtain ⟨hom, h₁, h₂⟩ := BinaryFan.IsLimit.exists_lift h'.isLimit p h.r
+  obtain ⟨inv, h₃, h₄⟩ := BinaryFan.IsLimit.exists_lift h.isLimit p' h'.r
+  dsimp at h₁ h₂ h₃ h₄
+  refine ⟨
+    { hom := hom
+      inv := inv
+      hom_inv_id := ?_
+      inv_hom_id := ?_ }, ?_, ?_⟩
+  · apply BinaryFan.IsLimit.hom_ext h.isLimit <;> aesop
+  · apply BinaryFan.IsLimit.hom_ext h'.isLimit <;> aesop
+  · aesop
+  · aesop
+
+@[simps]
+def ofIso {E' : C} (e : E' ≅ E) {p' : E' ⟶ B} (hp' : e.hom ≫ p = p') :
+    TrivialBundleWithFiber F p' where
+  r := e.hom ≫ h.r
+  isLimit := IsLimit.ofIsoLimit h.isLimit (BinaryFan.ext e (by aesop) (by simp)).symm
 
 end TrivialBundleWithFiber
 
