@@ -50,4 +50,49 @@ lemma exists_lift (sq : IsPullback t l r b)
 
 end IsPullback
 
+namespace IsPullback
+
+variable {C : Type*} [Category C] {X₁ X₂ X₃ X₄ Y₁ Y₂ Y₃ Y₄ : C}
+  {t : X₁ ⟶ X₂} {l : X₁ ⟶ X₃} {r : X₂ ⟶ X₄} {b : X₃ ⟶ X₄} (sq : IsPullback t l r b)
+  {t' : Y₁ ⟶ Y₂} {l' : Y₁ ⟶ Y₃} {r' : Y₂ ⟶ Y₄} {b' : Y₃ ⟶ Y₄} (sq' : IsPullback t' l' r' b')
+  (e₂ : X₂ ≅ Y₂) (e₃ : X₃ ≅ Y₃) (e₄ : X₄ ≅ Y₄)
+  (commr : r ≫ e₄.hom = e₂.hom ≫ r') (commb : b ≫ e₄.hom = e₃.hom ≫ b')
+
+include sq sq' commr commb
+lemma exists_iso_of_isos :
+    ∃ (e₁ : X₁ ≅ Y₁), t ≫ e₂.hom = e₁.hom ≫ t' ∧
+      l ≫ e₃.hom = e₁.hom ≫ l' :=
+   ⟨{ hom := sq'.lift (t ≫ e₂.hom) (l ≫ e₃.hom)
+        (by simp only [Category.assoc, ← commr, sq.w_assoc, commb])
+      inv := sq.lift (t' ≫ e₂.inv) (l' ≫ e₃.inv)
+        (by simp only [Category.assoc, ← cancel_mono e₄.hom, commr,
+          Iso.inv_hom_id_assoc, sq'.w, commb])
+      hom_inv_id := by apply sq.hom_ext <;> simp
+      inv_hom_id := by apply sq'.hom_ext <;> simp}, by simp, by simp⟩
+
+end IsPullback
+
+namespace IsPushout
+
+variable {C : Type*} [Category C] {X₁ X₂ X₃ X₄ Y₁ Y₂ Y₃ Y₄ : C}
+  {t : X₁ ⟶ X₂} {l : X₁ ⟶ X₃} {r : X₂ ⟶ X₄} {b : X₃ ⟶ X₄} (sq : IsPushout t l r b)
+  {t' : Y₁ ⟶ Y₂} {l' : Y₁ ⟶ Y₃} {r' : Y₂ ⟶ Y₄} {b' : Y₃ ⟶ Y₄} (sq' : IsPushout t' l' r' b')
+  (e₁ : X₁ ≅ Y₁) (e₂ : X₂ ≅ Y₂) (e₃ : X₃ ≅ Y₃)
+  (commt : t ≫ e₂.hom = e₁.hom ≫ t') (comml : l ≫ e₃.hom = e₁.hom ≫ l')
+
+include sq sq' commt comml
+lemma exists_iso_of_isos :
+    ∃ (e₄ : X₄ ≅ Y₄), r ≫ e₄.hom = e₂.hom ≫ r' ∧
+      b ≫ e₄.hom = e₃.hom ≫ b' :=
+   ⟨{ hom := sq.desc (e₂.hom ≫ r') (e₃.hom ≫ b')
+        (by simp only [reassoc_of% comml, reassoc_of% commt, sq'.w])
+      inv := sq'.desc (e₂.inv ≫ r) (e₃.inv ≫ b)
+        (by
+          simp only [← cancel_epi e₁.hom, ← reassoc_of% commt, Iso.hom_inv_id_assoc,
+            ← reassoc_of% comml, sq.w])
+      hom_inv_id := by apply sq.hom_ext <;> simp
+      inv_hom_id := by apply sq'.hom_ext <;> simp }, by simp, by simp⟩
+
+end IsPushout
+
 end CategoryTheory

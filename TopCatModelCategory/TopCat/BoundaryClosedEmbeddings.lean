@@ -1,5 +1,5 @@
 import TopCatModelCategory.TopCat.Adj
-import TopCatModelCategory.TopCat.Glueing
+import TopCatModelCategory.TopCat.Gluing
 import TopCatModelCategory.TopCat.ToTopULift
 import TopCatModelCategory.SSet.ULift
 

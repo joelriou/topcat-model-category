@@ -4,32 +4,6 @@ import TopCatModelCategory.ModelCategoryTopCat
 
 open CategoryTheory Opposite Simplicial HomotopicalAlgebra Limits DeltaGenerated
 
-namespace CategoryTheory
-
-namespace IsPullback
-
-variable {C : Type*} [Category C] {X₁ X₂ X₃ X₄ Y₁ Y₂ Y₃ Y₄ : C}
-  {t : X₁ ⟶ X₂} {l : X₁ ⟶ X₃} {r : X₂ ⟶ X₄} {b : X₃ ⟶ X₄} (sq : IsPullback t l r b)
-  {t' : Y₁ ⟶ Y₂} {l' : Y₁ ⟶ Y₃} {r' : Y₂ ⟶ Y₄} {b' : Y₃ ⟶ Y₄} (sq' : IsPullback t' l' r' b')
-  (e₂ : X₂ ≅ Y₂) (e₃ : X₃ ≅ Y₃) (e₄ : X₄ ≅ Y₄)
-  (commr : r ≫ e₄.hom = e₂.hom ≫ r') (commb : b ≫ e₄.hom = e₃.hom ≫ b')
-
-include sq sq' commr commb
-lemma exists_iso_of_isos :
-    ∃ (e₁ : X₁ ≅ Y₁), t ≫ e₂.hom = e₁.hom ≫ t' ∧
-      l ≫ e₃.hom = e₁.hom ≫ l' :=
-   ⟨{ hom := sq'.lift (t ≫ e₂.hom) (l ≫ e₃.hom)
-        (by simp only [Category.assoc, ← commr, sq.w_assoc, commb])
-      inv := sq.lift (t' ≫ e₂.inv) (l' ≫ e₃.inv)
-        (by simp only [Category.assoc, ← cancel_mono e₄.hom, commr,
-          Iso.inv_hom_id_assoc, sq'.w, commb])
-      hom_inv_id := by apply sq.hom_ext <;> simp
-      inv_hom_id := by apply sq'.hom_ext <;> simp}, by simp, by simp⟩
-
-end IsPullback
-
-end CategoryTheory
-
 namespace TopCat
 
 instance : deltaGeneratedToTop.IsLeftAdjoint := inferInstance

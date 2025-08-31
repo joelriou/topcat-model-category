@@ -16,6 +16,22 @@ namespace TrivialBundleWithFiber
 
 variable {F E B : C} {p : E ⟶ B} (h : TrivialBundleWithFiber F p)
 
+lemma ext_iff {h₁ h₂ : TrivialBundleWithFiber F p} :
+    h₁ = h₂ ↔ h₁.r = h₂.r := by
+  constructor
+  · rintro rfl
+    rfl
+  · obtain ⟨r₁, h₁⟩ := h₁
+    obtain ⟨r₂, h₂⟩ := h₂
+    rintro rfl
+    obtain rfl : h₁ = h₂ := by subsingleton
+    rfl
+
+@[ext]
+lemma ext {h₁ h₂ : TrivialBundleWithFiber F p} (eq : h₁.r = h₂.r) : h₁ = h₂ := by
+  rwa [ext_iff]
+
+@[simps]
 noncomputable def pullback {E' B' : C} {p' : E' ⟶ B'} {f : B' ⟶ B} {f' : E' ⟶ E}
     (sq : IsPullback f' p' p f) :
     TrivialBundleWithFiber F p' where

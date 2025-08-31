@@ -133,7 +133,7 @@ import TopCatModelCategory.TopCat.CosimpIso
 import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
 import TopCatModelCategory.TopCat.DeformationRetract
 import TopCatModelCategory.TopCat.DeltaGenerated
-import TopCatModelCategory.TopCat.Glueing
+import TopCatModelCategory.TopCat.Gluing
 import TopCatModelCategory.TopCat.HornDeformationRetract
 import TopCatModelCategory.TopCat.IsQuotientMap
 import TopCatModelCategory.TopCat.Monoidal
@@ -150,5 +150,6 @@ import TopCatModelCategory.TopCat.W
 import TopCatModelCategory.TopCatIsColimit
 import TopCatModelCategory.TopPackage
 import TopCatModelCategory.TrivialBundle
+import TopCatModelCategory.TrivialBundleGluing
 import TopCatModelCategory.ULift
 import TopCatModelCategory.WellOrderContinuous
