@@ -140,6 +140,7 @@ import TopCatModelCategory.TopCat.Monoidal
 import TopCatModelCategory.TopCat.RelativeT1CellComplex
 import TopCatModelCategory.TopCat.SdIso
 import TopCatModelCategory.TopCat.T1Inclusion
+import TopCatModelCategory.TopCat.ToTopDecomposition
 import TopCatModelCategory.TopCat.ToTopEqualizers
 import TopCatModelCategory.TopCat.ToTopExact
 import TopCatModelCategory.TopCat.ToTopSdIso
