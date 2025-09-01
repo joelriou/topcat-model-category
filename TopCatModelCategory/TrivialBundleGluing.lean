@@ -20,7 +20,32 @@ variable {F Y Y' X X' : C} {f : Y ⟶ X} (hf : TrivialBundleWithFiber F f)
 include hf in
 lemma exists_of_splitMono (hb : SplitMono b) :
     ∃ (h : TrivialBundleWithFiber F f), h.pullback sq = hf' := by
-  sorry
+  have : Mono b := hb.mono
+  obtain ⟨u, h₁, h₂, h₃⟩ : ∃ (u : Y ⟶ Y'), u ≫ t ≫ hf.r = hf.r ∧
+      u ≫ t ≫ f = f ≫ hb.retraction ≫ b ∧ u ≫ f' = f ≫ hb.retraction := by
+    obtain ⟨φ, h₁, h₂⟩ :=
+      Limits.BinaryFan.IsLimit.exists_lift hf.isLimit (f ≫ hb.retraction ≫ b) hf.r
+    dsimp at φ h₁ h₂
+    obtain ⟨u, rfl, h₄⟩ := sq.exists_lift φ (f ≫ hb.retraction) (by simpa)
+    simp only [Category.assoc] at h₁ h₂
+    exact ⟨u, h₂, h₁, h₄⟩
+  have sq' : IsPullback (u ≫ t) f f (hb.retraction ≫ b) :=
+    hf.isPullback hf _ _ (by simpa) (by simpa)
+  have sq'' : IsPullback u f f' hb.retraction := IsPullback.of_right sq' h₃ sq
+  have htut : t ≫ u ≫ t = t := by
+    apply Limits.BinaryFan.IsLimit.hom_ext hf.isLimit <;> dsimp
+    · rw [Category.assoc, Category.assoc, h₂, ← sq''.w_assoc, reassoc_of% h₃,
+        sq.w_assoc, hb.id_assoc, sq.w]
+    · rw [Category.assoc, Category.assoc, h₁]
+  have htu : t ≫ u = 𝟙 Y' := by
+    apply sq.hom_ext
+    · simpa
+    · dsimp
+      rw [Category.id_comp, Category.assoc, ← cancel_mono b,
+        Category.assoc, Category.assoc, ← sq.w, reassoc_of% htut]
+  refine ⟨hf'.pullback sq'', ?_⟩
+  ext
+  simp [reassoc_of% htu]
 
 end
 

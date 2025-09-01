@@ -6,11 +6,29 @@ open Limits
 
 variable {C : Type*} [Category C]
 
-lemma Limits.BinaryFan.IsLimit.exists_lift
+namespace Limits.BinaryFan.IsLimit
+
+variable {X₁ X₂ : C} {c : BinaryFan X₁ X₂} (hc : IsLimit c)
+  {T : C} (f₁ : T ⟶ X₁) (f₂ : T ⟶ X₂)
+
+def lift : T ⟶ c.pt :=
+  (Limits.BinaryFan.IsLimit.lift' hc f₁ f₂).1
+
+@[reassoc (attr := simp)]
+lemma lift_fst : lift hc f₁ f₂ ≫ c.fst = f₁ :=
+  (Limits.BinaryFan.IsLimit.lift' hc f₁ f₂).2.1
+
+@[reassoc (attr := simp)]
+lemma lift_snd : lift hc f₁ f₂ ≫ c.snd = f₂ :=
+  (Limits.BinaryFan.IsLimit.lift' hc f₁ f₂).2.2
+
+lemma exists_lift
     {X₁ X₂ : C} {c : BinaryFan X₁ X₂} (hc : IsLimit c)
     {T : C} (f₁ : T ⟶ X₁) (f₂ : T ⟶ X₂) :
     ∃ φ, φ ≫ c.fst = f₁ ∧ φ ≫ c.snd = f₂ :=
-  ⟨(Limits.BinaryFan.IsLimit.lift' hc f₁ f₂).1, by simp⟩
+  ⟨lift hc f₁ f₂, by simp, by simp⟩
+
+end Limits.BinaryFan.IsLimit
 
 namespace MorphismProperty
 
@@ -112,6 +130,32 @@ def ofIso {E' : C} (e : E' ≅ E) {p' : E' ⟶ B} (hp' : e.hom ≫ p = p') :
     TrivialBundleWithFiber F p' where
   r := e.hom ≫ h.r
   isLimit := IsLimit.ofIsoLimit h.isLimit (BinaryFan.ext e (by aesop) (by simp)).symm
+
+lemma isPullback {E' B' : C} {p' : E' ⟶ B'} (h' : TrivialBundleWithFiber F p')
+    (t : E' ⟶ E) (b : B' ⟶ B) (h₁ : t ≫ p = p' ≫ b) (h₂ : t ≫ h.r = h'.r) :
+    IsPullback t p' p b where
+  isLimit' :=
+    ⟨Limits.PullbackCone.IsLimit.mk _
+      (fun s ↦ BinaryFan.IsLimit.lift h'.isLimit s.snd (s.fst ≫ h.r))
+      (fun s ↦ by
+        have h₃ := BinaryFan.IsLimit.lift_fst h'.isLimit s.snd (s.fst ≫ h.r)
+        have h₄ := BinaryFan.IsLimit.lift_snd h'.isLimit s.snd (s.fst ≫ h.r)
+        dsimp at h₃ h₄
+        apply BinaryFan.IsLimit.hom_ext h.isLimit
+        · dsimp
+          rw [Category.assoc, h₁, reassoc_of% h₃, s.condition]
+        · dsimp
+          rw [Category.assoc, h₂, h₄])
+      (fun s ↦ BinaryFan.IsLimit.lift_fst h'.isLimit s.snd (s.fst ≫ h.r))
+      (fun s m hm₁ hm₂ ↦ by
+        have h₃ := BinaryFan.IsLimit.lift_fst h'.isLimit s.snd (s.fst ≫ h.r)
+        have h₄ := BinaryFan.IsLimit.lift_snd h'.isLimit s.snd (s.fst ≫ h.r)
+        dsimp at h₃ h₄
+        apply BinaryFan.IsLimit.hom_ext h'.isLimit
+        · dsimp
+          rw [hm₂, h₃]
+        · dsimp
+          rw [h₄, ← h₂, reassoc_of% hm₁])⟩
 
 end TrivialBundleWithFiber
 
