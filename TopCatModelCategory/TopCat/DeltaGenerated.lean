@@ -1,6 +1,9 @@
 import Mathlib.Topology.Category.DeltaGenerated
 import Mathlib.AlgebraicTopology.SingularSet
 import TopCatModelCategory.ModelCategoryTopCat
+import TopCatModelCategory.DeltaGeneratedSpace
+
+universe u
 
 open CategoryTheory Opposite Simplicial HomotopicalAlgebra Limits DeltaGenerated
 
@@ -250,6 +253,8 @@ noncomputable def SSet.toDeltaGeneratedIso :
 
 namespace DeltaGenerated
 
+section
+
 variable {J : Type*} [Category J] {F : J ⥤ DeltaGenerated.{u}}
   (c : Cone (F ⋙ deltaGeneratedToTop))
 
@@ -293,5 +298,102 @@ def isLimitOfTopCat : IsLimit (coneOfTopCat c) :=
     TopCat.coreflectorAdjunctionUnitIso ≪≫ (Functor.associator _ _ _).symm) _ _
     (Cones.ext (Iso.refl _))).2
     (isLimitTopToDeltaGenerated hc)
+
+end
+
+namespace IsColimit
+
+variable (X : DeltaGenerated.{u})
+
+structure Index where
+  {n : ℕ}
+  f : C(Fin n → ℝ, X)
+
+namespace Index
+
+variable {X}
+
+abbrev toType (i : Index X) : Type := Fin i.n → ℝ
+
+structure Hom (i j : Index X) where
+  τ : C(i.toType, j.toType)
+  fac : j.f.comp τ = i.f := by aesop
+
+attribute [simp] Hom.fac
+
+instance : Category (Index X) where
+  Hom := Hom
+  id i := { τ := .id _ }
+  comp f g := { τ := g.τ.comp f.τ, fac := by simp [← ContinuousMap.comp_assoc] }
+
+@[simp]
+lemma id_τ (i : Index X) : Hom.τ (𝟙 i) = .id _ := rfl
+
+@[simp]
+lemma comp_τ {i j k : Index X} (f : i ⟶ j) (g : j ⟶ k) :
+    (f ≫ g).τ = g.τ.comp f.τ :=
+  rfl
+
+@[simp]
+lemma fac_apply {i j : Index X} (f : i ⟶ j) (x : i.toType) :
+    j.f (f.τ x) = i.f x :=
+  DFunLike.congr_fun f.fac x
+
+end Index
+
+@[simps obj]
+def functor : Index X ⥤ DeltaGenerated.{u} where
+  obj i := .of (ULift.{u} i.toType)
+  map f := TopCat.ofHom (ContinuousMap.comp ⟨_, Homeomorph.ulift.symm.continuous⟩
+    (f.τ.comp ⟨_, Homeomorph.ulift.continuous⟩))
+
+@[simps]
+def cocone : Cocone (functor X) where
+  pt := X
+  ι :=
+    { app i := TopCat.ofHom (ContinuousMap.comp i.f ⟨_, Homeomorph.ulift.continuous⟩)
+      naturality i j f := by ext; apply Index.fac_apply }
+
+instance (i : Index X) : DeltaGeneratedSpace ((functor X).obj i) := by
+  dsimp
+  infer_instance
+
+noncomputable def isColimitForgetCocone : IsColimit ((forget _).mapCocone (cocone X)) := by
+  refine Nonempty.some ((Types.isColimit_iff_coconeTypesIsColimit _).2 ⟨?_, fun x ↦ ?_⟩)
+  · rintro x y h
+    let F := functor X ⋙ forget DeltaGenerated
+    obtain ⟨i, ⟨x⟩, rfl⟩ := F.ιColimitType_jointly_surjective x
+    obtain ⟨j, ⟨y⟩, rfl⟩ := F.ιColimitType_jointly_surjective y
+    change i.f x = j.f y at h
+    let k : Index X :=
+      { n := 0
+        f := ⟨fun _ ↦ i.f x, by continuity⟩ }
+    let φ : k ⟶ i := { τ := ⟨fun _ ↦ x, by continuity⟩ }
+    let ψ : k ⟶ j := { τ := ⟨fun _ ↦ y, by continuity⟩ }
+    let z : F.obj k := ULift.up (fun _ ↦ 0)
+    exact (F.ιColimitType_map φ z).trans (F.ιColimitType_map ψ z).symm
+  · exact ⟨Functor.ιColimitType _ { f := ⟨(fun (i : Fin 0 → _) ↦ x), by continuity⟩}
+      (ULift.up (fun _ ↦ 0)), rfl⟩
+
+noncomputable def isColimitToTopCocone :
+    IsColimit (deltaGeneratedToTop.mapCocone (cocone X)) := by
+  refine Nonempty.some ((TopCat.nonempty_isColimit_iff _).2
+    ⟨⟨isColimitForgetCocone X⟩, ?_⟩)
+  ext U
+  dsimp
+  trans ∀ (i : Index X), IsOpen (i.f ⁻¹' U)
+  · rw [DeltaGeneratedSpace.isOpen_iff]
+    exact ⟨fun h i ↦ h _ _, fun h n p ↦ h { f := p }⟩
+  · rw [isOpen_iSup_iff]
+    refine forall_congr' (fun i ↦ ?_)
+    rw [isOpen_coinduced]
+    conv_rhs => rw [← Homeomorph.ulift.symm.isOpen_preimage]
+    rfl
+
+noncomputable def isColimitCocone :
+    IsColimit (cocone X) :=
+  isColimitOfReflects deltaGeneratedToTop (isColimitToTopCocone X)
+
+end IsColimit
 
 end DeltaGenerated
