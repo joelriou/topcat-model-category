@@ -6,6 +6,9 @@ universe u
 
 open Topology
 
+instance : DeltaGeneratedSpace.{u} PUnit where
+  le_deltaGenerated := by simp
+
 lemma Topology.IsQuotientMap.retraction
     {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
     (r : C(X, Y)) (s : C(Y, X)) (hrs : r.comp s = .id _) :

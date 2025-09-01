@@ -34,7 +34,6 @@ def id (h : TrivialBundleWithFiber F p) :
     TrivialBundleWithFiberOver F p (𝟙 B) :=
   .mk IsPullback.of_id_fst h
 
-
 end TrivialBundleWithFiberOver
 
 lemma nonempty_trivialBundleWithFiberOver_iff_of_isPullback

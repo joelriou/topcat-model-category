@@ -123,6 +123,7 @@ import TopCatModelCategory.SimplicialPresheaves.LocalLiftingProperty
 import TopCatModelCategory.TopCat.Adj
 import TopCatModelCategory.TopCat.AttachCells
 import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
+import TopCatModelCategory.TopCat.CartesianMonoidal
 import TopCatModelCategory.TopCat.ClosedEmbeddings
 import TopCatModelCategory.TopCat.Colimits
 import TopCatModelCategory.TopCat.CompactOpen

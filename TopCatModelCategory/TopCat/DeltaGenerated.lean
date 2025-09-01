@@ -9,6 +9,18 @@ namespace TopCat
 instance : deltaGeneratedToTop.IsLeftAdjoint := inferInstance
 instance : topToDeltaGenerated.IsRightAdjoint := coreflectorAdjunction.isRightAdjoint
 
+lemma asIso_coreflectorAdjunction.unit.app_inv_hom_coe (X : DeltaGenerated.{u}) :
+    (asIso (coreflectorAdjunction.unit.app X)).inv.hom.1 = id := by
+  ext x
+  exact ConcreteCategory.congr_hom (asIso (coreflectorAdjunction.unit.app X)).inv_hom_id x
+
+def coreflectorAdjunctionUnitIso : 𝟭 _ ≅ deltaGeneratedToTop ⋙ topToDeltaGenerated :=
+  NatIso.ofComponents (fun X ↦
+    { hom := TopCat.ofHom ⟨id, (coreflectorAdjunction.unit.app X).hom.continuous⟩
+      inv := TopCat.ofHom ⟨id, by
+        convert (asIso (coreflectorAdjunction.unit.app X)).inv.hom.continuous
+        exact (asIso_coreflectorAdjunction.unit.app_inv_hom_coe _).symm⟩ })
+
 def deltaCoreflection : TopCat.{u} ⥤ TopCat.{u} :=
   topToDeltaGenerated ⋙ DeltaGenerated.deltaGeneratedToTop
 
@@ -235,3 +247,51 @@ noncomputable def SSet.toDeltaGeneratedIso :
     Functor.isoWhiskerLeft _ (asIso coreflectorAdjunction.unit) ≪≫
     (Functor.associator _ _ _).symm ≪≫
     Functor.isoWhiskerRight SSet.toDeltaGeneratedCompIso topToDeltaGenerated
+
+namespace DeltaGenerated
+
+variable {J : Type*} [Category J] {F : J ⥤ DeltaGenerated.{u}}
+  (c : Cone (F ⋙ deltaGeneratedToTop))
+
+@[simps pt]
+def coneOfTopCat : Cone F where
+  pt := topToDeltaGenerated.obj c.pt
+  π :=
+    { app j :=
+        fullyFaithfulDeltaGeneratedToTop.preimage
+          ((coreflectorAdjunction.homEquiv _ _).symm
+            (topToDeltaGenerated.map (c.π.app j)))
+      naturality j₁ j₂ f := by
+        ext x
+        exact ConcreteCategory.congr_hom (c.w f).symm x }
+
+lemma coneOfTopCat_π_app_apply {j : J} (x : DeltaGeneratedSpace.of c.pt) :
+    (coneOfTopCat c).π.app j x = c.π.app j x := rfl
+
+variable {c} (hc : IsLimit c)
+
+def isLimitTopToDeltaGenerated {F : J ⥤ TopCat.{u}} {c : Cone F} (hc : IsLimit c) :
+    IsLimit (topToDeltaGenerated.mapCone c) where
+  lift s :=
+    coreflectorAdjunction.homEquiv _ _
+      (hc.lift ((Cones.postcompose ((Functor.associator _ _ _).hom ≫
+        Functor.whiskerLeft _ (TopCat.fromDeltaCoreflection) ≫ F.rightUnitor.hom)).obj (deltaGeneratedToTop.mapCone s)))
+  fac s j := by
+    apply (coreflectorAdjunction.homEquiv _ _).symm.injective
+    rw [Functor.mapCone_π_app, Adjunction.homEquiv_naturality_right_symm,
+      Equiv.symm_apply_apply, IsLimit.fac]
+    rfl
+  uniq s m hm := by
+    refine (coreflectorAdjunction.homEquiv _ _).symm.injective
+      (hc.hom_ext (fun j ↦ ?_))
+    ext x
+    simpa using congr_fun ((forget _).congr_map (hm j)) x
+
+def isLimitOfTopCat : IsLimit (coneOfTopCat c) :=
+  (IsLimit.equivOfNatIsoOfIso
+    (F.rightUnitor.symm ≪≫ Functor.isoWhiskerLeft _
+    TopCat.coreflectorAdjunctionUnitIso ≪≫ (Functor.associator _ _ _).symm) _ _
+    (Cones.ext (Iso.refl _))).2
+    (isLimitTopToDeltaGenerated hc)
+
+end DeltaGenerated
