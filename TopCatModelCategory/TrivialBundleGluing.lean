@@ -18,24 +18,23 @@ variable {F Y Y' X X' : C} {f : Y ⟶ X} (hf : TrivialBundleWithFiber F f)
   {t : Y' ⟶ Y} {b : X' ⟶ X} (sq : IsPullback t f' f b)
 
 include hf in
-lemma exists_of_splitMono (hb : SplitMono b) :
+lemma exists_of_splitMono [IsSplitMono b] :
     ∃ (h : TrivialBundleWithFiber F f), h.pullback sq = hf' := by
-  have : Mono b := hb.mono
   obtain ⟨u, h₁, h₂, h₃⟩ : ∃ (u : Y ⟶ Y'), u ≫ t ≫ hf.r = hf.r ∧
-      u ≫ t ≫ f = f ≫ hb.retraction ≫ b ∧ u ≫ f' = f ≫ hb.retraction := by
+      u ≫ t ≫ f = f ≫ retraction b ≫ b ∧ u ≫ f' = f ≫ retraction b := by
     obtain ⟨φ, h₁, h₂⟩ :=
-      Limits.BinaryFan.IsLimit.exists_lift hf.isLimit (f ≫ hb.retraction ≫ b) hf.r
+      Limits.BinaryFan.IsLimit.exists_lift hf.isLimit (f ≫ retraction b ≫ b) hf.r
     dsimp at φ h₁ h₂
-    obtain ⟨u, rfl, h₄⟩ := sq.exists_lift φ (f ≫ hb.retraction) (by simpa)
+    obtain ⟨u, rfl, h₄⟩ := sq.exists_lift φ (f ≫ retraction b) (by simpa)
     simp only [Category.assoc] at h₁ h₂
     exact ⟨u, h₂, h₁, h₄⟩
-  have sq' : IsPullback (u ≫ t) f f (hb.retraction ≫ b) :=
+  have sq' : IsPullback (u ≫ t) f f (retraction b ≫ b) :=
     hf.isPullback hf _ _ (by simpa) (by simpa)
-  have sq'' : IsPullback u f f' hb.retraction := IsPullback.of_right sq' h₃ sq
+  have sq'' : IsPullback u f f' (retraction b) := IsPullback.of_right sq' h₃ sq
   have htut : t ≫ u ≫ t = t := by
     apply Limits.BinaryFan.IsLimit.hom_ext hf.isLimit <;> dsimp
     · rw [Category.assoc, Category.assoc, h₂, ← sq''.w_assoc, reassoc_of% h₃,
-        sq.w_assoc, hb.id_assoc, sq.w]
+        sq.w_assoc, IsSplitMono.id_assoc, sq.w]
     · rw [Category.assoc, Category.assoc, h₁]
   have htu : t ≫ u = 𝟙 Y' := by
     apply sq.hom_ext
@@ -118,6 +117,14 @@ lemma exists_gluing (h₁ : h₂.pullback sq₁₂ = h₃.pullback sq₁₃) :
   · apply sq'.hom_ext <;> dsimp [Limits.Fan.proj]
     · simpa [reassoc_of% comm₁]
     · simpa [reassoc_of% comm₂]
+
+include sq sq' sq₁₂ sq₁₃ sq₃₄ h₃ in
+lemma exists_gluing_of_isSplitMono [IsSplitMono l] :
+    ∃ (h₄ : TrivialBundleWithFiber F p₄),
+      h₄.pullback sq₂₄ = h₂ := by
+  obtain ⟨h₃', h⟩ := h₃.exists_of_splitMono (h₂.pullback sq₁₂) sq₁₃
+  obtain ⟨h₄, eq, _⟩ := exists_gluing sq sq' sq₁₂ sq₂₄ sq₁₃ sq₃₄ h₂ h₃' h.symm
+  exact ⟨h₄, eq⟩
 
 end MorphismProperty.TrivialBundleWithFiber
 
