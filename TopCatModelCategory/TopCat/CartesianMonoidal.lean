@@ -54,7 +54,17 @@ instance : CartesianMonoidalCategory DeltaGenerated.{u} :=
   .ofChosenFiniteProducts ⟨_, isTerminalPUnit⟩
     (fun X Y ↦ ⟨_, isLimitBinaryFan X Y⟩)
 
-example {T X Y : DeltaGenerated.{u}} (f : T ⟶ X) (g : T ⟶ Y) (t : T):
+section
+
+variable {T X Y : DeltaGenerated.{u}}
+
+example (f : T ⟶ X) (g : T ⟶ Y) (t : T) :
     lift f g t = ⟨f t, g t⟩ := rfl
+
+example (z) : fst X Y z = z.1 := rfl
+
+example (z) : snd X Y z = z.2 := rfl
+
+end
 
 end DeltaGenerated
