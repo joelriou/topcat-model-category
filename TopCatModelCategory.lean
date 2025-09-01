@@ -151,5 +151,6 @@ import TopCatModelCategory.TopCatIsColimit
 import TopCatModelCategory.TopPackage
 import TopCatModelCategory.TrivialBundle
 import TopCatModelCategory.TrivialBundleGluing
+import TopCatModelCategory.TrivialBundleOver
 import TopCatModelCategory.ULift
 import TopCatModelCategory.WellOrderContinuous

@@ -70,6 +70,19 @@ lemma exists_iso_of_isos :
       hom_inv_id := by apply sq.hom_ext <;> simp
       inv_hom_id := by apply sq'.hom_ext <;> simp}, by simp, by simp⟩
 
+noncomputable def isoOfIsos : X₁ ≅ Y₁ :=
+  (sq.exists_iso_of_isos sq' e₂ e₃ e₄ commr commb).choose
+
+@[reassoc (attr := simp)]
+lemma isoOfIsos_hom_comm₁ :
+    (isoOfIsos sq sq' e₂ e₃ e₄ commr commb).hom ≫ t' = t ≫ e₂.hom :=
+  (sq.exists_iso_of_isos sq' e₂ e₃ e₄ commr commb).choose_spec.1.symm
+
+@[reassoc (attr := simp)]
+lemma isoOfIsos_hom_comm₂ :
+    (isoOfIsos sq sq' e₂ e₃ e₄ commr commb).hom ≫ l' = l ≫ e₃.hom :=
+  (sq.exists_iso_of_isos sq' e₂ e₃ e₄ commr commb).choose_spec.2.symm
+
 end IsPullback
 
 namespace IsPushout
