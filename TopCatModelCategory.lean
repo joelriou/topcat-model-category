@@ -6,6 +6,8 @@ import TopCatModelCategory.CatCommSq
 import TopCatModelCategory.CellComplex
 import TopCatModelCategory.ColimitsType
 import TopCatModelCategory.CommSq
+import TopCatModelCategory.Convenient.Category
+import TopCatModelCategory.Convenient.GeneratedBy
 import TopCatModelCategory.DeltaGeneratedSpace
 import TopCatModelCategory.Factorization
 import TopCatModelCategory.Fin
