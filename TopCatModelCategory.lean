@@ -8,6 +8,8 @@ import TopCatModelCategory.ColimitsType
 import TopCatModelCategory.CommSq
 import TopCatModelCategory.Convenient.Category
 import TopCatModelCategory.Convenient.GeneratedBy
+import TopCatModelCategory.Convenient.IsColimit
+import TopCatModelCategory.Convenient.Limits
 import TopCatModelCategory.DeltaGeneratedSpace
 import TopCatModelCategory.Factorization
 import TopCatModelCategory.Fin

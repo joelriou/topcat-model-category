@@ -3,42 +3,62 @@ import Mathlib.CategoryTheory.ConcreteCategory.Basic
 import Mathlib.CategoryTheory.Adjunction.Basic
 import Mathlib.Topology.Category.TopCat.Basic
 
-universe t u
+universe v t u
 
 open CategoryTheory Topology
 
 variable {ι : Type t} (X : ι → Type u) [∀ i, TopologicalSpace (X i)]
 
+def TopCat.generatedBy : ObjectProperty TopCat.{v} :=
+  fun Y ↦ IsGeneratedBy X Y
+
+lemma TopCat.generatedBy_def (Y : TopCat.{v}) :
+    generatedBy X Y ↔ IsGeneratedBy X Y := Iff.rfl
+
+abbrev GeneratedByTopCat := (TopCat.generatedBy.{v} X).FullSubcategory
+
+namespace GeneratedByTopCat
+
+variable {X} in
+abbrev toTopCat : GeneratedByTopCat.{v} X ⥤ TopCat.{v} := ObjectProperty.ι _
+
+instance (Y : GeneratedByTopCat.{v} X) : IsGeneratedBy X (toTopCat.obj Y) := Y.2
+
+def fullyFaithfulToTopCat : (toTopCat.{v} (X := X)).FullyFaithful :=
+  ObjectProperty.fullyFaithfulι _
+
+end GeneratedByTopCat
+
 structure ContinuousGeneratedByCat
     (X : ι → Type u) [∀ i, TopologicalSpace (X i)] where private mk ::
-    carrier : Type u
+    carrier : Type v
     [str : TopologicalSpace carrier]
 
 namespace ContinuousGeneratedByCat
 
 variable {X}
 
-instance : CoeSort (ContinuousGeneratedByCat X) (Type u) :=
+instance : CoeSort (ContinuousGeneratedByCat.{v} X) (Type v) :=
   ⟨carrier⟩
 
 attribute [coe] carrier
 
 attribute [instance] str
 
-abbrev of (Y : Type u) [TopologicalSpace Y] : ContinuousGeneratedByCat X :=
+abbrev of (Y : Type v) [TopologicalSpace Y] : ContinuousGeneratedByCat.{v} X :=
   ⟨Y⟩
 
-lemma coe_of (Y : Type u) [TopologicalSpace Y] : (of (X := X) Y : Type u) = Y :=
+lemma coe_of (Y : Type v) [TopologicalSpace Y] : (of (X := X) Y : Type v) = Y :=
   rfl
 
-lemma of_carrier (Y : ContinuousGeneratedByCat X) : of (X := X) Y = Y := rfl
+lemma of_carrier (Y : ContinuousGeneratedByCat.{v} X) : of (X := X) Y = Y := rfl
 
-instance : Category (ContinuousGeneratedByCat X) where
+instance : Category (ContinuousGeneratedByCat.{v} X) where
   Hom Y Z := ContinuousMapGeneratedBy X Y Z
   id X := .id
   comp f g := g.comp f
 
-instance : ConcreteCategory.{u} (ContinuousGeneratedByCat X)
+instance : ConcreteCategory.{v} (ContinuousGeneratedByCat.{v} X)
     (fun Y Z => ContinuousMapGeneratedBy X Y Z) where
   hom := id
   ofHom := id
@@ -47,7 +67,7 @@ end ContinuousGeneratedByCat
 
 @[simps obj]
 def TopCat.toContinuousGeneratedByCat :
-    TopCat.{u} ⥤ ContinuousGeneratedByCat X where
+    TopCat.{v} ⥤ ContinuousGeneratedByCat.{v} X where
   obj Y := .of Y
   map f :=
     { toFun := f
@@ -56,29 +76,81 @@ def TopCat.toContinuousGeneratedByCat :
 namespace ContinuousGeneratedByCat
 
 @[simps obj]
-def toTopCat : ContinuousGeneratedByCat X ⥤ TopCat.{u} where
+def toTopCat : ContinuousGeneratedByCat.{v} X ⥤ TopCat where
   obj Y := TopCat.of (WithGeneratedByTopology X Y)
-  map {Y₁ Y₂} f := TopCat.ofHom ⟨f, by
-    have := (continuousGeneratedBy_iff _ _).1 f.prop
-    exact this⟩
+  map {Y₁ Y₂} f := TopCat.ofHom (f.prop.continuousMap)
 
-end ContinuousGeneratedByCat
-
-namespace ContinuousGeneratedByCat
+def fullyFaithfulToTopCat : (toTopCat.{v} X).FullyFaithful where
+  preimage {Y Z} g :=
+    { toFun := WithGeneratedByTopology.equiv (X := X) ∘ g.hom ∘
+          (WithGeneratedByTopology.equiv (X := X)).symm
+      prop := by
+        rw [continuousGeneratedBy_iff]
+        exact g.hom.continuous }
 
 variable {X}
 
 def adjUnitIso :
-    𝟭 (ContinuousGeneratedByCat X) ≅ toTopCat X ⋙ TopCat.toContinuousGeneratedByCat X :=
+    𝟭 (ContinuousGeneratedByCat.{v} X) ≅ toTopCat X ⋙ TopCat.toContinuousGeneratedByCat X :=
   NatIso.ofComponents (fun Y ↦
-    { hom := WithGeneratedByTopology.continuousMapGeneratedByTo X Y
-      inv := WithGeneratedByTopology.continuousMapGeneratedByFrom X Y })
+    { hom := WithGeneratedByTopology.equivSymmAsContinuousMapGeneratedBy X Y
+      inv := WithGeneratedByTopology.equivAsContinuousMapGeneratedBy X Y })
 
-def adjCounit : TopCat.toContinuousGeneratedByCat X ⋙ toTopCat X ⟶ 𝟭 TopCat where
-  app Z := TopCat.ofHom (WithGeneratedByTopology.continuousMapFrom X Z)
+def adjCounit : TopCat.toContinuousGeneratedByCat.{v} X ⋙ toTopCat X ⟶ 𝟭 TopCat where
+  app Z := TopCat.ofHom (⟨_,  WithGeneratedByTopology.continuous_equiv⟩)
 
-def adj : toTopCat X ⊣ TopCat.toContinuousGeneratedByCat X where
+def adj : toTopCat.{v} X ⊣ TopCat.toContinuousGeneratedByCat X where
   unit := adjUnitIso.hom
   counit := adjCounit
 
+def fromGeneratedByTopCat : GeneratedByTopCat.{v} X ⥤ ContinuousGeneratedByCat.{v} X where
+  obj Y := .of Y.1
+  map {Y₁ Y₂} f := ⟨f, f.hom.continuous.continuousGeneratedBy⟩
+
+def toGeneratedByTopCat : ContinuousGeneratedByCat.{v} X ⥤ GeneratedByTopCat.{v} X :=
+  ObjectProperty.lift _ (toTopCat X) (fun Y ↦ by
+    rw [TopCat.generatedBy_def]
+    dsimp
+    infer_instance)
+
+def equivalenceUnitIso :
+    𝟭 (GeneratedByTopCat.{v} X) ≅ fromGeneratedByTopCat ⋙ toGeneratedByTopCat :=
+  NatIso.ofComponents (fun Y ↦
+    (GeneratedByTopCat.fullyFaithfulToTopCat X).preimageIso
+      (TopCat.isoOfHomeo IsGeneratedBy.homeomorph.symm))
+
+abbrev equivalenceCounitIso :
+    toGeneratedByTopCat ⋙ fromGeneratedByTopCat ≅ 𝟭 (ContinuousGeneratedByCat X) :=
+  adjUnitIso.symm
+
+def equivalence : GeneratedByTopCat.{v} X ≌ ContinuousGeneratedByCat.{v} X where
+  functor := fromGeneratedByTopCat
+  inverse := toGeneratedByTopCat
+  unitIso := equivalenceUnitIso
+  counitIso := equivalenceCounitIso
+
+def equivalenceFunctorIso :
+    equivalence.functor ⋙ ContinuousGeneratedByCat.toTopCat X ≅ GeneratedByTopCat.toTopCat :=
+  NatIso.ofComponents (fun Y ↦ TopCat.isoOfHomeo
+    (IsGeneratedBy.homeomorph (Y := GeneratedByTopCat.toTopCat.obj Y)))
+
 end ContinuousGeneratedByCat
+
+variable {X}
+
+def TopCat.toGeneratedByTopCat : TopCat.{v} ⥤ GeneratedByTopCat X :=
+  TopCat.toContinuousGeneratedByCat X ⋙ ContinuousGeneratedByCat.toGeneratedByTopCat
+
+namespace GeneratedByTopCat
+
+def adjUnitIso : 𝟭 (GeneratedByTopCat.{v} X) ≅ toTopCat ⋙ TopCat.toGeneratedByTopCat :=
+  ContinuousGeneratedByCat.equivalenceUnitIso
+
+def adjCounit : TopCat.toGeneratedByTopCat.{v} (X := X) ⋙ toTopCat ⟶ 𝟭 TopCat :=
+  ContinuousGeneratedByCat.adjCounit
+
+def adj : toTopCat.{v} (X := X) ⊣ TopCat.toGeneratedByTopCat where
+  unit := adjUnitIso.hom
+  counit := adjCounit
+
+end GeneratedByTopCat
