@@ -127,7 +127,6 @@ import TopCatModelCategory.SimplicialPresheaves.LocalLiftingProperty
 import TopCatModelCategory.TopCat.Adj
 import TopCatModelCategory.TopCat.AttachCells
 import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
-import TopCatModelCategory.TopCat.CartesianMonoidal
 import TopCatModelCategory.TopCat.ClosedEmbeddings
 import TopCatModelCategory.TopCat.Colimits
 import TopCatModelCategory.TopCat.CompactOpen
@@ -138,6 +137,7 @@ import TopCatModelCategory.TopCat.CosimpIso
 import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
 import TopCatModelCategory.TopCat.DeformationRetract
 import TopCatModelCategory.TopCat.DeltaGenerated
+import TopCatModelCategory.TopCat.DeltaGeneratedMonoidal
 import TopCatModelCategory.TopCat.Gluing
 import TopCatModelCategory.TopCat.HornDeformationRetract
 import TopCatModelCategory.TopCat.IsQuotientMap

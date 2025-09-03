@@ -1,28 +1,11 @@
 import TopCatModelCategory.DeltaGeneratedSpace
 import TopCatModelCategory.TopCat.DeltaGenerated
+import TopCatModelCategory.TopCat.Monoidal
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
 
 universe u
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
-
-namespace TopCat
-
-def binaryFan (X Y : TopCat.{u}) : BinaryFan X Y :=
-  BinaryFan.mk (P := .of (X × Y))
-    (TopCat.ofHom ⟨Prod.fst, by continuity⟩)
-    (TopCat.ofHom ⟨Prod.snd, by continuity⟩)
-
-def isLimitBinaryFan (X Y : TopCat.{u}) : IsLimit (binaryFan X Y) :=
-  BinaryFan.IsLimit.mk _
-    (fun f g ↦ TopCat.ofHom ⟨fun t ↦ ⟨f t, g t⟩, by continuity⟩)
-    (fun _ _ ↦ rfl) (fun _ _ ↦ rfl) (by aesop)
-
-instance : CartesianMonoidalCategory TopCat.{u} :=
-  .ofChosenFiniteProducts ⟨_, isTerminalPUnit⟩
-    (fun X Y ↦ ⟨_, isLimitBinaryFan X Y⟩)
-
-end TopCat
 
 namespace DeltaGenerated
 
@@ -47,7 +30,7 @@ def isLimitBinaryFan (X Y : DeltaGenerated.{u}) :
     mapPairIso (Iso.refl _) (Iso.refl _)
   exact IsLimit.ofIsoLimit
       (isLimitOfTopCat ((IsLimit.postcomposeInvEquiv e _).2
-        (TopCat.isLimitBinaryFan X.toTop Y.toTop)))
+        (TopCat.prodBinaryFanIsLimit X.toTop Y.toTop)))
         (BinaryFan.ext (Iso.refl _) rfl rfl)
 
 instance : CartesianMonoidalCategory DeltaGenerated.{u} :=
