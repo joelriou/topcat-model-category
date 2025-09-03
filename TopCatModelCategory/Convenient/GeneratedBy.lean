@@ -149,6 +149,10 @@ instance : IsGeneratedBy X (WithGeneratedByTopology X Y) where
     rw [Function.comp_assoc, equiv_symm_comp_continuous_iff]
     continuity
 
+instance : IsGeneratedBy X (PUnit.{v + 1}) := by
+  rw [iff_le_generatedBy]
+  exact Eq.le (by subsingleton)
+
 end IsGeneratedBy
 
 lemma IsQuotientMap.isGeneratedBy {f : Y → Z} (hf : IsQuotientMap f) [IsGeneratedBy X Y] :

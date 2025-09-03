@@ -27,6 +27,12 @@ instance (Y : GeneratedByTopCat.{v} X) : IsGeneratedBy X (toTopCat.obj Y) := Y.2
 def fullyFaithfulToTopCat : (toTopCat.{v} (X := X)).FullyFaithful :=
   ObjectProperty.fullyFaithfulι _
 
+variable {X} in
+abbrev of (Y : Type v) [TopologicalSpace Y] [IsGeneratedBy X Y] :
+    GeneratedByTopCat.{v} X where
+  obj := TopCat.of Y
+  property := by assumption
+
 end GeneratedByTopCat
 
 structure ContinuousGeneratedByCat
@@ -146,11 +152,22 @@ namespace GeneratedByTopCat
 def adjUnitIso : 𝟭 (GeneratedByTopCat.{v} X) ≅ toTopCat ⋙ TopCat.toGeneratedByTopCat :=
   ContinuousGeneratedByCat.equivalenceUnitIso
 
+@[reassoc (attr := simp)]
+lemma adjUnitIso_inv_naturality {Y Z : GeneratedByTopCat.{v} X} (f : Y ⟶ Z) :
+    TopCat.toGeneratedByTopCat.map f ≫ adjUnitIso.inv.app Z = adjUnitIso.inv.app Y ≫ f :=
+  adjUnitIso.inv.naturality f
+
 def adjCounit : TopCat.toGeneratedByTopCat.{v} (X := X) ⋙ toTopCat ⟶ 𝟭 TopCat :=
   ContinuousGeneratedByCat.adjCounit
 
 def adj : toTopCat.{v} (X := X) ⊣ TopCat.toGeneratedByTopCat where
   unit := adjUnitIso.hom
   counit := adjCounit
+
+@[reassoc]
+lemma adj_homEquiv_naturality {Y : GeneratedByTopCat.{v} X} {Z Z' : TopCat.{v}}
+    (f : toTopCat.obj Y ⟶ Z) (g : Z ⟶ Z') :
+    adj.homEquiv _ _ (f ≫ g) = adj.homEquiv _ _ f ≫ TopCat.toGeneratedByTopCat.map g :=
+  Adjunction.homEquiv_naturality_right _ _ _
 
 end GeneratedByTopCat
