@@ -49,6 +49,10 @@ def isLimitConeOfConeTopCat (c : Cone (F ⋙ toTopCat)) (hc : IsLimit c) :
 
 end
 
+instance [HasLimitsOfShape J TopCat.{v}] :
+    HasLimitsOfShape J (GeneratedByTopCat.{v} X) where
+  has_limit _ := ⟨_, isLimitConeOfConeTopCat _ (limit.isLimit _)⟩
+
 instance (Y : GeneratedByTopCat.{v} X) : Unique (Y ⟶ of PUnit) where
   default := TopCat.ofHom ⟨fun _ ↦ .unit, continuous_const⟩
   uniq _ := by ext
@@ -68,5 +72,8 @@ def isLimitBinaryFan (Y Z : GeneratedByTopCat.{v} X) : IsLimit (binaryFan Y Z) :
 
 instance : CartesianMonoidalCategory (GeneratedByTopCat.{v} X) :=
   .ofChosenFiniteProducts ⟨_, isTerminal⟩ (fun _ _ ↦ ⟨_, isLimitBinaryFan _ _⟩)
+
+instance : BraidedCategory (GeneratedByTopCat.{v} X) :=
+  CategoryTheory.BraidedCategory.ofCartesianMonoidalCategory
 
 end GeneratedByTopCat

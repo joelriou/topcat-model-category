@@ -26,4 +26,25 @@ def coneOfCompι {F : J ⥤ P.FullSubcategory} (c : Cone (F ⋙ P.ι)) (h : P c.
 
 end Limits
 
+section Colimits
+
+variable {J : Type*} [Category J]
+
+def ιReflectsIsColimit
+    {F : J ⥤ P.FullSubcategory} {c : Cocone F} (h : IsColimit (P.ι.mapCocone c)) :
+    IsColimit c where
+  desc s := h.desc (P.ι.mapCocone s)
+  fac s := h.fac (P.ι.mapCocone s)
+  uniq s _ hm := h.hom_ext (fun j ↦ (hm j).trans (h.fac (P.ι.mapCocone s) j).symm)
+
+@[simps]
+def coconeOfCompι {F : J ⥤ P.FullSubcategory} (c : Cocone (F ⋙ P.ι)) (h : P c.pt) :
+    Cocone F where
+  pt := ⟨c.pt, h⟩
+  ι :=
+    { app j := c.ι.app j
+      naturality _ _ f := c.ι.naturality f }
+
+end Colimits
+
 end CategoryTheory.ObjectProperty

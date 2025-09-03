@@ -7,6 +7,7 @@ import TopCatModelCategory.CellComplex
 import TopCatModelCategory.ColimitsType
 import TopCatModelCategory.CommSq
 import TopCatModelCategory.Convenient.Category
+import TopCatModelCategory.Convenient.Colimits
 import TopCatModelCategory.Convenient.GeneratedBy
 import TopCatModelCategory.Convenient.IsColimit
 import TopCatModelCategory.Convenient.Limits
