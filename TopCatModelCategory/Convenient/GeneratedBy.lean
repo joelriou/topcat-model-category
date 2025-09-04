@@ -1,15 +1,35 @@
+/-
+Copyright (c) 2025 Joël Riou. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Joël Riou
+-/
 import Mathlib.Topology.ContinuousMap.Basic
+
+/-!
+# The `X`-generated topology for a family of topological spaces
+
+Let `X : ι → Type u` be a family of topological spaces.
+Let `Y` be a topological space. We introduce a type synonym
+`WithGeneratedByTopology X Y` for `Y`. This type endowed
+with the `X`-generated topology, which is coinduced by
+all continuous maps `X i → Y`. When the bijection
+`WithGeneratedByTopology X Y ≃ Y` is an homeomorphism,
+we say that `Y` is `X`-generated (typeclass `IsGeneratedBy X Y`).
+
+-/
 
 universe v v' t u
 
 open Topology
 
 variable {ι : Type t} (X : ι → Type u) [∀ i, TopologicalSpace (X i)]
-
-variable {Y : Type v} [tY : TopologicalSpace Y] {Z : Type v'} [TopologicalSpace Z]
+  {Y : Type v} [tY : TopologicalSpace Y] {Z : Type v'} [TopologicalSpace Z]
 
 namespace TopologicalSpace
 
+/-- Given a family of topological spaces `X i`, the `X`-generated topology on
+a topological space `Y` is the topology that is coinduced
+by all continuous maps `X i → Y`. -/
 def generatedBy : TopologicalSpace Y :=
   ⨆ (i : ι) (f : C(X i, Y)), coinduced f inferInstance
 
@@ -19,11 +39,18 @@ variable {X}
 
 namespace Topology
 
+/-- Given a family of topological spaces `X i`, and a topological space `Y`,
+this is a type synonym for `Y` which we endow with `X`-generated topology. -/
+@[nolint unusedArguments]
 def WithGeneratedByTopology (X : ι → Type u) [∀ i, TopologicalSpace (X i)]
     (Y : Type v) [TopologicalSpace Y] := Y
 
 namespace WithGeneratedByTopology
 
+/-- The obvious bijection `WithGeneratedByTopology X Y ≃ Y`, where
+the source is endowed with the `X`-generated topology. See `continuous_equiv`
+for the continuity of `equiv`. The inverse map `equiv.symm` is continuous
+iff `Y` is `X`-generated, see `isGeneratedBy_iff`. -/
 def equiv :
     WithGeneratedByTopology X Y ≃ Y :=
   Equiv.refl _
@@ -65,6 +92,10 @@ lemma TopologicalSpace.generatedBy_le : generatedBy X ≤ tY := by
 namespace Topology
 
 variable (X Y) in
+/-- Given a family of topological spaces `X i`, we say that a topological space is
+`X`-generated (`IsGeneratedBy X Y`) when the topology on `Y` is the `X`-generated
+topology, i.e. when the identity is an homeomorphism
+`WithGeneratedByTopology X Y ≃ₜ Y` (see `IsGeneratedBy.homeomorph`). -/
 @[mk_iff]
 class IsGeneratedBy : Prop where
   continuous_equiv_symm : Continuous (WithGeneratedByTopology.equiv (X := X) (Y := Y)).symm
@@ -87,6 +118,7 @@ section
 
 variable [IsGeneratedBy X Y]
 
+/-- The homeomorphism `WithGeneratedByTopology X Y ≃ₜ Y` when `Y` is `X`-generated. -/
 def homeomorph [IsGeneratedBy X Y] : WithGeneratedByTopology X Y ≃ₜ Y where
   toEquiv := WithGeneratedByTopology.equiv
   continuous_toFun := by continuity
