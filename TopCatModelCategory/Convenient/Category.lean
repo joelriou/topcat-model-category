@@ -1,4 +1,4 @@
-import TopCatModelCategory.Convenient.GeneratedBy
+import TopCatModelCategory.Convenient.ContinuousMapGeneratedBy
 import Mathlib.CategoryTheory.ConcreteCategory.Basic
 import Mathlib.CategoryTheory.Adjunction.Basic
 import Mathlib.Topology.Category.TopCat.Basic

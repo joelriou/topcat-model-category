@@ -9,6 +9,7 @@ import TopCatModelCategory.CommSq
 import TopCatModelCategory.Convenient.CartesianClosed
 import TopCatModelCategory.Convenient.Category
 import TopCatModelCategory.Convenient.Colimits
+import TopCatModelCategory.Convenient.ContinuousMapGeneratedBy
 import TopCatModelCategory.Convenient.GeneratedBy
 import TopCatModelCategory.Convenient.HomSpace
 import TopCatModelCategory.Convenient.IsColimit
