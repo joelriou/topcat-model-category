@@ -6,12 +6,14 @@ import TopCatModelCategory.CatCommSq
 import TopCatModelCategory.CellComplex
 import TopCatModelCategory.ColimitsType
 import TopCatModelCategory.CommSq
+import TopCatModelCategory.Convenient.CartesianClosed
 import TopCatModelCategory.Convenient.Category
 import TopCatModelCategory.Convenient.Colimits
 import TopCatModelCategory.Convenient.GeneratedBy
 import TopCatModelCategory.Convenient.HomSpace
 import TopCatModelCategory.Convenient.IsColimit
 import TopCatModelCategory.Convenient.Limits
+import TopCatModelCategory.Convenient.Open
 import TopCatModelCategory.DeltaGeneratedSpace
 import TopCatModelCategory.Factorization
 import TopCatModelCategory.Fin
