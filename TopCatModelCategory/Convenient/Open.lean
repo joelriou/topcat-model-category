@@ -9,9 +9,9 @@ variable {ι : Type t} {X : ι → Type u} [∀ i, TopologicalSpace (X i)]
   [∀ (i : ι) (U : TopologicalSpace.Opens (X i)), IsGeneratedBy X U]
   (Y : Type v) [TopologicalSpace Y]
 
-namespace Topology.IsGeneratedBy
+open IsGeneratedBy
 
-lemma of_isOpen [IsGeneratedBy X Y] {U : Set Y} (hU : IsOpen U) :
+lemma IsOpen.isGeneratedBy [IsGeneratedBy X Y] {U : Set Y} (hU : IsOpen U) :
     IsGeneratedBy X U := by
   let α := Σ (i : ι), C(X i, Y)
   let W (a : α) : TopologicalSpace.Opens (X a.1) :=
@@ -32,5 +32,3 @@ lemma of_isOpen [IsGeneratedBy X Y] {U : Set Y} (hU : IsOpen U) :
   intro i f
   convert (W ⟨i, f⟩).isOpen.isOpenMap_subtype_val _ (hV ⟨i, f⟩)
   aesop
-
-end Topology.IsGeneratedBy

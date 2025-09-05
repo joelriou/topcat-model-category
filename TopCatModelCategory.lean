@@ -16,6 +16,7 @@ import TopCatModelCategory.Convenient.HomSpace
 import TopCatModelCategory.Convenient.IsColimit
 import TopCatModelCategory.Convenient.Limits
 import TopCatModelCategory.Convenient.Open
+import TopCatModelCategory.Convenient.OpenBall
 import TopCatModelCategory.DeltaGeneratedSpace
 import TopCatModelCategory.Factorization
 import TopCatModelCategory.Fin
