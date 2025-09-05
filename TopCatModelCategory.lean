@@ -165,4 +165,5 @@ import TopCatModelCategory.TrivialBundle
 import TopCatModelCategory.TrivialBundleGluing
 import TopCatModelCategory.TrivialBundleOver
 import TopCatModelCategory.ULift
+import TopCatModelCategory.UnitBallRetract
 import TopCatModelCategory.WellOrderContinuous

@@ -185,6 +185,18 @@ instance : IsGeneratedBy X (PUnit.{v + 1}) := by
   rw [iff_le_generatedBy]
   exact Eq.le (by subsingleton)
 
+lemma mk' {α : Type*} {T : α → Type*} [∀ a, TopologicalSpace (T a)]
+    [∀ a, IsGeneratedBy X (T a)] (f : ∀ a, C(T a, Y))
+    (hf : ∀ (U : Set Y), (∀ a, IsOpen (f a ⁻¹' U)) → IsOpen U) :
+    IsGeneratedBy X Y := by
+  rw [iff_le_generatedBy]
+  intro U hU
+  refine hf _ (fun a ↦ ?_)
+  rw [isOpen_iff X]
+  intro i g
+  simp only [isOpen_iSup_iff, isOpen_coinduced, Set.preimage_id'] at hU
+  exact hU _ ((f a).comp g)
+
 end IsGeneratedBy
 
 lemma IsQuotientMap.isGeneratedBy {f : Y → Z} (hf : IsQuotientMap f) [IsGeneratedBy X Y] :
