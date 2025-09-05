@@ -14,7 +14,7 @@ namespace Topology
 
 namespace IsGeneratedBy
 
-variable (E : Type u) [NormedAddCommGroup E] [NormedSpace ℝ E]
+variable (E : Type v) [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 instance [FiniteDimensional ℝ E] : IsGeneratedBy X E := by
   let e : (Fin (Module.finrank ℝ E) → ℝ) ≃ₜ E :=
