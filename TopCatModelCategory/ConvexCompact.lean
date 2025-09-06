@@ -3,6 +3,22 @@ import Mathlib.Topology.Maps.Basic
 
 open Topology
 
+lemma Real.abs_lt_iff (x y : ℝ) : abs x < y ↔ x < y ∧ - y < x := by
+  refine ⟨fun h ↦ ⟨lt_of_le_of_lt (le_abs_self x) h, ?_⟩, fun ⟨h₁, h₂⟩ ↦ ?_⟩
+  · rw [← neg_lt_neg_iff, neg_neg]
+    exact lt_of_le_of_lt (neg_le_abs x) h
+  · by_cases hx : 0 ≤ x
+    · rwa [abs_of_nonneg hx]
+    · rwa [abs_of_neg (by simpa using hx), ← neg_lt_neg_iff, neg_neg]
+
+lemma Real.abs_le_iff (x y : ℝ) : abs x ≤ y ↔ x ≤ y ∧ - y ≤ x := by
+  refine ⟨fun h ↦ ⟨(le_abs_self x).trans h, ?_⟩, fun ⟨h₁, h₂⟩ ↦ ?_⟩
+  · rw [← neg_le_neg_iff, neg_neg]
+    exact (neg_le_abs x).trans h
+  · by_cases hx : 0 ≤ x
+    · rwa [abs_of_nonneg hx]
+    · rwa [abs_of_neg (by simpa using hx), ← neg_le_neg_iff, neg_neg]
+
 universe u
 
 namespace NormedSpace
@@ -118,12 +134,57 @@ lemma zero_lt_sup {v : E} (hv : v ≠ 0) :
     0 < sup X v :=
   lt_of_le_of_ne (zero_le_sup hX₂ hX₃ v) (sup_ne_zero hX₁ hX₂ hX₃ hv).symm
 
+namespace continuousOn
+
+variable {v : E} (hv : v ≠ 0) (ε : ℝ) (hε₀ : 0 < ε) (hε : ε < sup X v)
+
+include hv hε₀ hε hX₁ hX₂ hX₃
+
+lemma upper_bound : ∃ δ > 0, ∀ (u : E), ‖u‖ < δ → sup X v - ε ≤ sup X (v + u) := by
+  have := hv
+  have := hε₀
+  have := hε
+  have := hX₁
+  have := hX₂
+  have := hX₃
+  have δ : ℝ := sorry
+  refine ⟨δ, sorry, fun u hu ↦ ?_⟩
+  sorry
+
+lemma lower_bound : ∃ δ > 0, ∀ (u : E), ‖u‖ < δ → sup X (v + u) ≤ sup X v + ε := by
+  have := hv
+  have := hε₀
+  have := hε
+  have := hX₁
+  have := hX₂
+  have := hX₃
+  sorry
+
+end continuousOn
+
 include hX₁ hX₂ hX₃ in
 lemma continuousOn : ContinuousOn (sup X) {0}ᶜ := by
   have := hX₁
   have := hX₂
   have := hX₃
-  sorry
+  intro v (hv : v ≠ 0) W hW
+  obtain ⟨ε, hε₀, hε, hW⟩ : ∃ ε > 0, ε < sup X v ∧ Metric.closedBall (sup X v) ε ⊆ W := by
+    rw [Metric.nhds_basis_closedBall.mem_iff] at hW
+    obtain ⟨ε, hε₀, hε⟩ := hW
+    refine ⟨min ε (2⁻¹ * sup X v), ?_, ?_, ?_⟩
+    · simp only [gt_iff_lt, lt_inf_iff, inv_pos, Nat.ofNat_pos, mul_pos_iff_of_pos_left]
+      exact ⟨hε₀, zero_lt_sup hX₁ hX₂ hX₃ hv⟩
+    · exact lt_of_le_of_lt (min_le_right _ _) ((inv_mul_lt_iff₀ (by simp)).2
+        (lt_two_mul_self (zero_lt_sup hX₁ hX₂ hX₃ hv)))
+    · exact subset_trans (Metric.closedBall_subset_closedBall (min_le_left _ _)) hε
+  obtain ⟨δ, hδ₀, hδ⟩ := continuousOn.upper_bound hX₁ hX₂ hX₃ hv ε hε₀ hε
+  obtain ⟨δ', hδ'₀, hδ'⟩ := continuousOn.lower_bound hX₁ hX₂ hX₃ hv ε hε₀ hε
+  rw [Filter.mem_map, Metric.mem_nhdsWithin_iff]
+  refine ⟨min δ δ', by simp; grind, fun w ⟨h₁, h₂⟩ ↦ hW ?_⟩
+  obtain ⟨u, rfl⟩ : ∃ u, w = v + u := ⟨w - v, by simp⟩
+  simp only [Metric.mem_ball, dist_self_add_left, lt_inf_iff] at h₁
+  simp only [Metric.mem_closedBall, dist_eq_norm, Real.norm_eq_abs, Real.abs_le_iff]
+  grind
 
 @[simps -isSimp]
 noncomputable def map : C(unitInterval × Metric.sphere (0 : E) 1, X) :=
