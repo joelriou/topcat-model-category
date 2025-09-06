@@ -192,8 +192,14 @@ lemma lower_bound : ∃ δ > 0, ∀ (u : E), ‖u‖ < δ → sup X (v + u) ≤ 
   obtain ⟨α, hα₀, hα⟩ := hX
   let μ := sup X v
   have hμ₀ : 0 < μ := zero_lt_sup hX₁ hX₂ hX₃ hv
-  obtain ⟨δ, hδ₀, hδ₁⟩ : ∃ δ > 0, δ < ‖v‖ := by
-    sorry
+  let β : ℝ := (μ + ε) * (2 * μ + ε) * ε⁻¹
+  have hβ₀ : 0 < β := by positivity
+  obtain ⟨δ, hδ₀, hδ₁, hδ₂⟩ : ∃ δ > 0, δ < ‖v‖ ∧ β * δ ≤ α := by
+    refine ⟨min (2⁻¹ * ‖v‖) (β⁻¹ * α), by positivity,
+      lt_of_le_of_lt (min_le_left _ _ )
+        ((inv_mul_lt_iff₀ (by simp)).2 (lt_two_mul_self (by simpa))),
+      le_of_le_of_eq (mul_le_mul_of_nonneg_left (min_le_right _ _) hβ₀.le)
+        (mul_inv_cancel_left₀ hβ₀.ne' α)⟩
   refine ⟨δ, hδ₀, fun u hu ↦ ?_⟩
   change _ ≤ μ + ε
   have huv : v + u ≠ 0 := fun huv ↦ by
@@ -207,7 +213,30 @@ lemma lower_bound : ∃ δ > 0, ∀ (u : E), ‖u‖ < δ → sup X (v + u) ≤ 
     exact hu'.le
   apply not_imp_not.2 (le_sup_iff hX₁ hX₂ hX₃ hv (μ + 2⁻¹ * ε) (by positivity)).2
     (by simpa [μ])
-  sorry
+  let m : E := - β • u
+  have hm : m ∈ X := hα (by
+    simp only [Metric.mem_ball, dist_zero_right, m, neg_smul, norm_neg, norm_smul,
+      Real.norm_eq_abs, abs_of_pos hβ₀]
+    exact lt_of_lt_of_le ((mul_lt_mul_left hβ₀).2 hu) hδ₂)
+  convert hX₁ hu' hm (a := (2 * μ + ε) / (2 * (μ + ε))) (b := ε / (2 * (μ + ε)))
+    (by positivity) (by positivity) (by grind) using 1
+  have : (2 * μ + ε) / (2 * (μ + ε)) * (μ + ε) = μ + 2⁻¹ * ε := by
+    apply mul_left_injective₀ (b := 2) (by simp)
+    dsimp
+    rw [mul_assoc, mul_comm (μ + ε) 2, div_mul_cancel₀ _ (by grind)]
+    grind
+  have hβ : β / (2 * (μ + ε)) = μ * ε⁻¹ + 2⁻¹ := by
+    dsimp [β]
+    rw [mul_comm 2 (μ + ε), ← div_div, mul_comm, mul_comm (μ + ε), ← mul_assoc,
+      mul_div_cancel_right₀ _ (by grind), mul_add, add_div, inv_mul_cancel₀ hε₀.ne',
+      one_div, mul_comm 2, ← mul_assoc, mul_div_cancel_right₀ _ (by grind), mul_comm]
+  dsimp [m]
+  rw [smul_smul, smul_smul, smul_add, mul_neg, neg_smul,
+    add_assoc, ← sub_eq_add_neg, ← sub_smul, this,
+    div_mul_comm, left_eq_add, hβ, add_mul, mul_assoc,
+    inv_mul_cancel₀ hε₀.ne', mul_one, smul_eq_zero]
+  left
+  abel
 
 end continuousOn
 
