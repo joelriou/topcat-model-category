@@ -119,9 +119,10 @@ lemma param_isQuotientMap_aux [ProperSpace E]
     exact h₃ ⟨v, h₅⟩ r hr.le (by grind)
   · simpa
 
-variable (E)
+end polarParametrization
 
-lemma param_isQuotientMap [ProperSpace E] :
+open polarParametrization in
+lemma isQuotientMap_polarParametrization [Nontrivial E] [ProperSpace E] :
     IsQuotientMap (polarParametrization E) := by
   rw [isQuotientMap_iff]
   refine ⟨param_surjective,
@@ -184,6 +185,24 @@ lemma param_isQuotientMap [ProperSpace E] :
       · exact hu.1
       · exact h₃ hu
 
-end polarParametrization
+def polarParametrizationPreimageClosedBallHomeo :
+    ((polarParametrization E) ⁻¹' Metric.closedBall (0 : E) 1) ≃ₜ
+      unitInterval × (Metric.sphere (0 : E) 1) where
+  toFun := fun ⟨⟨t, v⟩, h⟩ ↦ ⟨⟨t.1, ⟨t.2, by simpa [norm_smul] using h⟩⟩, v⟩
+  invFun := fun ⟨t, v⟩ ↦ ⟨⟨⟨t, unitInterval.nonneg t⟩, v⟩, by
+    simpa [norm_smul, abs_of_nonneg t.2.1] using t.2.2⟩
+  continuous_toFun := Isometry.continuous (fun _ _ ↦ rfl)
+  continuous_invFun := Isometry.continuous (fun _ _ ↦ rfl)
+
+def polarParametrizationClosedBall :
+    C(unitInterval × Metric.sphere (0 : E) 1, Metric.closedBall (0 : E) 1) :=
+  ((polarParametrization E).restrictPreimage (Metric.closedBall (0 : E) 1)).comp
+    (⟨_, (polarParametrizationPreimageClosedBallHomeo E).symm.continuous⟩)
+
+lemma isQuotientMap_polarParametrizationClosedBall [Nontrivial E] [ProperSpace E] :
+    IsQuotientMap (polarParametrizationClosedBall E) :=
+    ((isQuotientMap_polarParametrization E).restrictPreimage_isClosed
+        Metric.isClosed_closedBall).comp
+      (polarParametrizationPreimageClosedBallHomeo E).symm.isQuotientMap
 
 end NormedSpace

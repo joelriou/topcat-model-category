@@ -41,6 +41,7 @@ import TopCatModelCategory.MonoidalClosed
 import TopCatModelCategory.MorphismProperty
 import TopCatModelCategory.Multiequalizer
 import TopCatModelCategory.ObjectPropertyLimits
+import TopCatModelCategory.Polar
 import TopCatModelCategory.PseudoFunctor.LaxNatTrans
 import TopCatModelCategory.PseudoFunctor.MorphismProperty
 import TopCatModelCategory.PseudoFunctor.Pseudofunctor
@@ -147,7 +148,6 @@ import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
 import TopCatModelCategory.TopCat.DeformationRetract
 import TopCatModelCategory.TopCat.Gluing
 import TopCatModelCategory.TopCat.HornDeformationRetract
-import TopCatModelCategory.TopCat.IsQuotientMap
 import TopCatModelCategory.TopCat.Monoidal
 import TopCatModelCategory.TopCat.RelativeT1CellComplex
 import TopCatModelCategory.TopCat.SdIso
