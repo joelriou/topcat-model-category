@@ -11,13 +11,14 @@ import TopCatModelCategory.Convenient.Category
 import TopCatModelCategory.Convenient.Colimits
 import TopCatModelCategory.Convenient.ContinuousMapGeneratedBy
 import TopCatModelCategory.Convenient.DeltaGenerated
+import TopCatModelCategory.Convenient.Fibrations
 import TopCatModelCategory.Convenient.GeneratedBy
 import TopCatModelCategory.Convenient.HomSpace
 import TopCatModelCategory.Convenient.IsColimit
 import TopCatModelCategory.Convenient.Limits
 import TopCatModelCategory.Convenient.Open
 import TopCatModelCategory.Convenient.OpenBall
-import TopCatModelCategory.DeltaGeneratedSpace
+import TopCatModelCategory.Convenient.SSet
 import TopCatModelCategory.Factorization
 import TopCatModelCategory.Fin
 import TopCatModelCategory.FunctorCategoryColimits
@@ -144,8 +145,6 @@ import TopCatModelCategory.TopCat.CosimpInterior
 import TopCatModelCategory.TopCat.CosimpIso
 import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
 import TopCatModelCategory.TopCat.DeformationRetract
-import TopCatModelCategory.TopCat.DeltaGenerated
-import TopCatModelCategory.TopCat.DeltaGeneratedMonoidal
 import TopCatModelCategory.TopCat.Gluing
 import TopCatModelCategory.TopCat.HornDeformationRetract
 import TopCatModelCategory.TopCat.IsQuotientMap

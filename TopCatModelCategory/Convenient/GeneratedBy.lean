@@ -212,3 +212,14 @@ lemma IsQuotientMap.isGeneratedBy {f : Y → Z} (hf : IsQuotientMap f) [IsGenera
     exact hU ⟨f ∘ g, hf.continuous.comp g.continuous⟩
 
 end Topology
+
+namespace Topology.WithGeneratedByTopology
+
+@[simps]
+def continuousMapEquiv [IsGeneratedBy X Y] :
+    C(Y, WithGeneratedByTopology X Z) ≃ C(Y, Z) where
+  toFun f := ContinuousMap.comp ⟨_, WithGeneratedByTopology.continuous_equiv⟩ f
+  invFun g := ⟨equiv.symm ∘ g, by
+    simpa only [IsGeneratedBy.equiv_symm_comp_continuous_iff] using g.continuous⟩
+
+end Topology.WithGeneratedByTopology

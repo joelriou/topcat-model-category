@@ -1,5 +1,4 @@
-import TopCatModelCategory.TopCat.Adj
-import TopCatModelCategory.ModelCategoryTopCat
+import TopCatModelCategory.Convenient.Fibrations
 import TopCatModelCategory.SSet.MinimalFibrationsFactorization
 import TopCatModelCategory.TopCat.ToTopExact
 
@@ -35,7 +34,7 @@ lemma fibration_toTop_map_of_trivialBundles {E B : SSet.{u}} (p : E ⟶ B)
     infer_instance
   rw [HomotopicalAlgebra.fibration_iff] at hF ⊢
   apply MorphismProperty.of_isPullback
-    (P := ((fibrations _).inverseImage DeltaGenerated.deltaGeneratedToTop))
+    (P := ((fibrations _).inverseImage DeltaGenerated'.toTopCat))
     ((h.isPullback_of_isTerminal stdSimplex.isTerminalObj₀).map SSet.toDeltaGenerated) hF
 
 -- Gabriel-Zisman

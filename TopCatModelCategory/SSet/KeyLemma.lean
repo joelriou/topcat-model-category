@@ -139,7 +139,7 @@ lemma weakEquivalence_of_fibration_of_isPullback {E' E B' B : SSet.{u}}
     (sq : IsPullback t l r b) : WeakEquivalence l := by
   have ⟨hl, _⟩ : trivialFibrations _ (toTop.map l) :=
     MorphismProperty.of_isPullback
-      (P := ((trivialFibrations _).inverseImage DeltaGenerated.deltaGeneratedToTop))
+      (P := ((trivialFibrations _).inverseImage DeltaGenerated'.toTopCat))
       (sq.map SSet.toDeltaGenerated) (by
         change trivialFibrations _ (toTop.map r)
         rw [mem_trivialFibrations_iff]

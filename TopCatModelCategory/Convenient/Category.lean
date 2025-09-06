@@ -170,4 +170,8 @@ lemma adj_homEquiv_naturality {Y : GeneratedByTopCat.{v} X} {Z Z' : TopCat.{v}}
     adj.homEquiv _ _ (f ≫ g) = adj.homEquiv _ _ f ≫ TopCat.toGeneratedByTopCat.map g :=
   Adjunction.homEquiv_naturality_right _ _ _
 
+instance : (toTopCat.{v} (X := X)).IsLeftAdjoint := adj.isLeftAdjoint
+
+instance : (TopCat.toGeneratedByTopCat.{v} (X := X)).IsRightAdjoint := adj.isRightAdjoint
+
 end GeneratedByTopCat

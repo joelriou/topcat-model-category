@@ -1,6 +1,7 @@
 import Mathlib.Data.Finite.Sum
 import Mathlib.Topology.Compactness.LocallyCompact
 import Mathlib.Topology.MetricSpace.ProperSpace.Real
+import Mathlib.CategoryTheory.MorphismProperty.Limits
 import TopCatModelCategory.Convenient.OpenBall
 import TopCatModelCategory.Convenient.CartesianClosed
 
@@ -33,3 +34,23 @@ instance {Y : Type u} [TopologicalSpace Y] [DeltaGeneratedSpace' Y]
   U.isOpen.isGeneratedBy
 
 noncomputable example : CartesianClosed (DeltaGenerated'.{u}) := by infer_instance
+
+abbrev TopCat.toDeltaGenerated' : TopCat.{u} ⥤ DeltaGenerated'.{u} :=
+  TopCat.toGeneratedByTopCat
+
+abbrev DeltaGenerated'.toTopCat : DeltaGenerated'.{u} ⥤ TopCat.{u} :=
+  GeneratedByTopCat.toTopCat
+
+namespace DeltaGenerated'
+
+abbrev adjUnitIso : 𝟭 DeltaGenerated'.{v} ≅ toTopCat ⋙ TopCat.toDeltaGenerated' :=
+  GeneratedByTopCat.adjUnitIso
+
+abbrev adjCounit : TopCat.toDeltaGenerated'.{v} ⋙ toTopCat ⟶ 𝟭 TopCat :=
+  GeneratedByTopCat.adjCounit
+
+abbrev adj : toTopCat.{v} ⊣ TopCat.toDeltaGenerated' where
+  unit := adjUnitIso.hom
+  counit := adjCounit
+
+end DeltaGenerated'

@@ -1,5 +1,7 @@
 import Mathlib.CategoryTheory.MorphismProperty.TransfiniteComposition
 import Mathlib.CategoryTheory.SmallObject.IsCardinalForSmallObjectArgument
+import Mathlib.CategoryTheory.Adjunction.FullyFaithful
+import TopCatModelCategory.CommSq
 
 universe w' w v v' u u'
 
@@ -185,5 +187,31 @@ instance {ι : Type*} (W : ι → MorphismProperty C) [∀ i, (W i).IsStableUnde
     simp only [iSup_iff] at h ⊢
     obtain ⟨_, h⟩ := h
     exact ⟨_, of_isPullback sq h⟩
+
+lemma isStableUnderBaseChange_inverseImage_of_adjunction
+    (W : MorphismProperty D) [W.IsStableUnderBaseChange]
+    [HasPullbacks D] {F : C ⥤ D} {G : D ⥤ C} [F.Full] [F.Faithful] (adj : F ⊣ G)
+    (hW : W.inverseImage (G ⋙ F) = W) :
+    (W.inverseImage F).IsStableUnderBaseChange where
+  of_isPullback := by
+    have := adj.isRightAdjoint
+    intro X₃ X₂ X₁ X₄ b r t l sq hr
+    rw [inverseImage_iff] at hr ⊢
+    have sq' := (IsPullback.of_hasPullback (F.map r) (F.map b))
+    have := of_isPullback sq' hr
+    obtain ⟨e, he⟩ : ∃ (e : G.obj (pullback (F.map r) (F.map b)) ≅ X₁),
+        e.hom ≫ l = G.map (pullback.snd _ _) ≫ inv (adj.unit.app X₃) := by
+      obtain ⟨e', h₁, h₂⟩ :=
+        IsPullback.exists_iso_of_isos sq (sq'.map G) (asIso (adj.unit.app _))
+          (asIso (adj.unit.app _)) (asIso (adj.unit.app _)) (by simp) (by simp)
+      refine ⟨e'.symm, ?_⟩
+      dsimp at h₁ h₂ ⊢
+      rw [← cancel_mono (adj.unit.app X₃), Category.assoc, h₂, Iso.inv_hom_id_assoc,
+        Category.assoc, IsIso.inv_hom_id, Category.comp_id]
+    have := of_isPullback sq' hr
+    rw [← hW] at this
+    refine (W.arrow_mk_iso_iff
+      (Arrow.isoMk (F.mapIso e) (asIso (F.map (adj.unit.app X₃))).symm
+        (by simpa using F.congr_map he))).1 this
 
 end CategoryTheory.MorphismProperty
