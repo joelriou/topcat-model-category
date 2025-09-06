@@ -141,32 +141,78 @@ variable {v : E} (hv : v ≠ 0) (ε : ℝ) (hε₀ : 0 < ε) (hε : ε < sup X v
 include hv hε₀ hε hX₁ hX₂ hX₃
 
 lemma upper_bound : ∃ δ > 0, ∀ (u : E), ‖u‖ < δ → sup X v - ε ≤ sup X (v + u) := by
-  have := hv
-  have := hε₀
-  have := hε
-  have := hX₁
-  have := hX₂
-  have := hX₃
-  have δ : ℝ := sorry
-  refine ⟨δ, sorry, fun u hu ↦ ?_⟩
-  sorry
+  have hX := hX₃
+  rw [mem_interior_iff_mem_nhds, Metric.mem_nhds_iff] at hX
+  obtain ⟨α, hα₀, hα⟩ := hX
+  let μ := sup X v
+  have hμ₀ : 0 < μ := zero_lt_sup hX₁ hX₂ hX₃ hv
+  have h : 0 < μ * (μ - ε) / ε := div_pos (mul_pos hμ₀ (by grind)) hε₀
+  obtain ⟨δ, hδ₀, hδ₁, hδ₂⟩ : ∃ δ > 0, δ < ‖v‖ ∧ μ * (μ - ε) / ε * δ < α := by
+    refine ⟨min (2⁻¹ * ‖v‖) (2⁻¹ * ((μ * (μ - ε) / ε)⁻¹ * α)), ?_, ?_, ?_⟩
+    · rw [gt_iff_lt, lt_inf_iff]
+      constructor
+      · exact mul_pos (by simp) (by simpa)
+      · exact mul_pos (by simp) (mul_pos (inv_pos.2 h) hα₀)
+    · simp only [inv_div, inf_lt_iff]
+      left
+      rw [inv_mul_lt_iff₀ (by grind)]
+      exact lt_two_mul_self (by simpa)
+    · refine lt_of_le_of_lt
+        (le_of_le_of_eq (mul_le_mul_of_nonneg_left (min_le_right _ _) h.le) ?_)
+        ((inv_mul_lt_iff₀ (by simp)).2 (lt_two_mul_self hα₀))
+      rw [← mul_assoc, ← mul_assoc, mul_comm _ 2⁻¹]
+      nth_rw 2 [mul_assoc]
+      rw [mul_inv_cancel₀ h.ne', mul_one]
+  refine ⟨δ, hδ₀, fun u hu ↦ ?_⟩
+  change μ - ε ≤ _
+  have huv : v + u ≠ 0 := fun huv ↦ by
+    rw [add_eq_zero_iff_eq_neg'] at huv
+    subst huv
+    simp only [norm_neg] at hu
+    grind
+  rw [le_sup_iff hX₁ hX₂ hX₃ huv _ (by grind)]
+  let m : E := ((μ * (μ - ε)) / ε) • u
+  have hm : m ∈ X := hα (by
+    simp only [Metric.mem_ball, dist_zero_right, m, norm_smul,
+      norm_div, norm_mul, Real.norm_eq_abs]
+    rw [abs_of_nonneg hμ₀.le, abs_of_nonneg hε₀.le, abs_of_nonneg (by grind)]
+    exact ((mul_lt_mul_left h).2 hu).trans hδ₂)
+  convert hX₁ (sup_mem_set hX₂ hX₃ v).2 hm
+    (a := (μ - ε) / μ) (div_nonneg (by grind) hμ₀.le)
+    (div_nonneg hε₀.le hμ₀.le) (by grind) using 1
+  have : ε / μ * (μ * (μ - ε) / ε) = μ - ε := by
+    rw [mul_div_assoc, ← mul_assoc, div_mul_cancel₀ _ hμ₀.ne',
+      mul_div_cancel₀ _ hε₀.ne']
+  rw [smul_smul, smul_smul, div_mul_cancel₀ _ hμ₀.ne', this, smul_add]
 
 lemma lower_bound : ∃ δ > 0, ∀ (u : E), ‖u‖ < δ → sup X (v + u) ≤ sup X v + ε := by
-  have := hv
-  have := hε₀
   have := hε
-  have := hX₁
-  have := hX₂
-  have := hX₃
+  have hX := hX₃
+  rw [mem_interior_iff_mem_nhds, Metric.mem_nhds_iff] at hX
+  obtain ⟨α, hα₀, hα⟩ := hX
+  let μ := sup X v
+  have hμ₀ : 0 < μ := zero_lt_sup hX₁ hX₂ hX₃ hv
+  obtain ⟨δ, hδ₀, hδ₁⟩ : ∃ δ > 0, δ < ‖v‖ := by
+    sorry
+  refine ⟨δ, hδ₀, fun u hu ↦ ?_⟩
+  change _ ≤ μ + ε
+  have huv : v + u ≠ 0 := fun huv ↦ by
+    rw [add_eq_zero_iff_eq_neg'] at huv
+    subst huv
+    simp only [norm_neg] at hu
+    grind
+  by_contra! hu'
+  replace hu' : (μ + ε) • (v + u) ∈ X := by
+    rw [← le_sup_iff hX₁ hX₂ hX₃ huv _ (by positivity)]
+    exact hu'.le
+  apply not_imp_not.2 (le_sup_iff hX₁ hX₂ hX₃ hv (μ + 2⁻¹ * ε) (by positivity)).2
+    (by simpa [μ])
   sorry
 
 end continuousOn
 
 include hX₁ hX₂ hX₃ in
 lemma continuousOn : ContinuousOn (sup X) {0}ᶜ := by
-  have := hX₁
-  have := hX₂
-  have := hX₃
   intro v (hv : v ≠ 0) W hW
   obtain ⟨ε, hε₀, hε, hW⟩ : ∃ ε > 0, ε < sup X v ∧ Metric.closedBall (sup X v) ε ⊆ W := by
     rw [Metric.nhds_basis_closedBall.mem_iff] at hW
