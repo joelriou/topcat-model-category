@@ -19,6 +19,7 @@ import TopCatModelCategory.Convenient.Limits
 import TopCatModelCategory.Convenient.Open
 import TopCatModelCategory.Convenient.OpenBall
 import TopCatModelCategory.Convenient.SSet
+import TopCatModelCategory.ConvexCompact
 import TopCatModelCategory.Factorization
 import TopCatModelCategory.Fin
 import TopCatModelCategory.FunctorCategoryColimits
@@ -134,6 +135,7 @@ import TopCatModelCategory.SSet.ULift
 import TopCatModelCategory.SemiSimplexCategory
 import TopCatModelCategory.Set
 import TopCatModelCategory.SimplicialPresheaves.LocalLiftingProperty
+import TopCatModelCategory.ToTopObjHomeo
 import TopCatModelCategory.TopCat.Adj
 import TopCatModelCategory.TopCat.AttachCells
 import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings

@@ -1,0 +1,138 @@
+import Mathlib.AlgebraicTopology.TopologicalSimplex
+import Mathlib.Analysis.Normed.Module.FiniteDimension
+import TopCatModelCategory.TopCat.Adj
+
+open Simplicial
+
+namespace SimplexCategory
+
+@[simp]
+lemma toTopObj_sum_coe {n : ℕ} (x : ⦋n⦌.toTopObj) :
+    ∑ i, (x.1 i : ℝ) = 1 := by
+  simpa using congr_arg (fun a ↦ a.1) x.2
+
+@[continuity]
+lemma toTopObj.continuous_apply {n : SimplexCategory} (i : Fin (n.len + 1)) :
+    Continuous (fun (x : n.toTopObj) ↦ x.1 i) :=
+  (_root_.continuous_apply _ ).comp continuous_subtype_val
+
+variable (n : ℕ)
+
+@[simps]
+def sumCoordinates : (Fin (n + 1) → ℝ) →ₗ[ℝ] ℝ where
+  toFun x := ∑ i, x i
+  map_add' x y := by simp [Finset.sum_add_distrib]
+  map_smul' a x := by simp [Finset.mul_sum]
+
+noncomputable abbrev hyperplane : Submodule ℝ (Fin (n + 1) → ℝ) :=
+  LinearMap.ker (sumCoordinates n)
+
+abbrev Hyperplane : Type _ := hyperplane n
+
+namespace Hyperplane
+
+variable {n} in
+@[simp]
+lemma sum_eq_zero (x : Hyperplane n) : ∑ i, x.1 i = 0 := by
+  simpa only [LinearMap.mem_ker, sumCoordinates_apply] using x.2
+
+def stdSimplex : Set (Hyperplane n) :=
+  setOf (fun x ↦ ∀ (i : Fin (n + 1)), 0 ≤ (n + 1) • x.1 i + 1)
+
+variable {n} in
+lemma mem_stdSimplex_iff (x : Hyperplane n) :
+    x ∈ stdSimplex n ↔ ∀ (i : Fin (n + 1)), 0 ≤ (n + 1) • x.1 i + 1 := Iff.rfl
+
+variable {n} in
+@[continuity]
+lemma continuous_apply (i : Fin (n + 1)) :
+    Continuous (fun (x : Hyperplane n) ↦ x.1 i) :=
+  (_root_.continuous_apply _ ).comp continuous_subtype_val
+
+namespace stdSimplex
+
+variable {n}
+
+lemma zero_le (x : stdSimplex n) (i : Fin (n + 1)) :
+    0 ≤ (n + 1) • x.1.1 i + 1 :=
+  (mem_stdSimplex_iff _).1 x.2 i
+
+@[continuity]
+lemma continuous_apply (i : Fin (n + 1)) :
+    Continuous (fun (x : stdSimplex n) ↦ x.1.1 i) :=
+  (Hyperplane.continuous_apply i).comp continuous_subtype_val
+
+end stdSimplex
+
+noncomputable def stdSimplexHomeo : stdSimplex n ≃ₜ ⦋n⦌.toTopObj where
+  toFun x := ⟨fun i ↦ ⟨x.1.1 i + 1 / (n + 1), by
+    rw [← mul_nonneg_iff_of_pos_right (c := (n + 1 : ℝ)) (by positivity)]
+    convert stdSimplex.zero_le x i using 1
+    rw [mul_comm, mul_add, nsmul_eq_mul, one_div, Nat.cast_add, Nat.cast_one, add_right_inj,
+      mul_inv_cancel₀ (by positivity)]⟩, by
+      ext
+      simp only [one_div, NNReal.coe_sum, NNReal.coe_mk, NNReal.coe_one, Finset.sum_add_distrib,
+        sum_eq_zero, zero_add, Finset.sum_const, Finset.card_univ, Fintype.card_fin, len_mk,
+        nsmul_eq_mul, Nat.cast_add, Nat.cast_one, ]
+      rw [mul_inv_cancel₀ (by positivity)]⟩
+  invFun x := ⟨⟨fun i ↦ x i - 1 / (n + 1), by
+    simp only [one_div, LinearMap.mem_ker, sumCoordinates_apply, Finset.sum_sub_distrib,
+      Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, Nat.cast_add,
+      Nat.cast_one]
+    erw [toTopObj_sum_coe x]
+    rw [mul_inv_cancel₀ (by positivity), sub_eq_zero]⟩, by
+    rw [mem_stdSimplex_iff]
+    intro i
+    simp only [one_div, nsmul_eq_mul, Nat.cast_add, Nat.cast_one, mul_sub]
+    rw [mul_inv_cancel₀ (by positivity), sub_add_cancel,
+      mul_nonneg_iff_of_pos_left (by positivity)]
+    simp only [NNReal.zero_le_coe]⟩
+  left_inv _ := by aesop
+  right_inv _ := by aesop
+  continuous_toFun := by
+    continuity
+  continuous_invFun := by
+    continuity
+
+instance : CompactSpace (stdSimplex n) := (stdSimplexHomeo n).symm.compactSpace
+
+lemma isCompact_stdSimplex : IsCompact (stdSimplex n) := by
+  rw [isCompact_iff_compactSpace]
+  infer_instance
+
+lemma convex_stdSimplex : Convex ℝ (stdSimplex n) := by
+  intro x hx y hy a b ha hb h
+  rw [mem_stdSimplex_iff] at hx hy ⊢
+  intro i
+  refine le_of_eq_of_le (by simp)
+    (le_of_le_of_eq ((add_le_add (mul_nonneg ha (hx i)) (mul_nonneg hb (hy i)))) ?_)
+  simp only [mul_add, mul_one, nsmul_eq_mul, Submodule.coe_add, SetLike.val_smul,
+    Pi.add_apply, Pi.smul_apply, smul_eq_mul, ← mul_assoc]
+  rw [← mul_comm a, ← mul_comm b, ← h]
+  abel
+
+lemma zero_mem_interior_stdSimplex : 0 ∈ interior (stdSimplex n) := by
+  let ε : ℝ := 1 / (n + 1)
+  have hε : ((n : ℝ) + 1) * ε = 1 := by
+    dsimp [ε]
+    rw [one_div, mul_inv_cancel₀ (by positivity)]
+  have hε₀ : 0 < ε := by
+    simp [ε]
+    positivity
+  rw [mem_interior]
+  refine ⟨Metric.ball 0 ε, fun p hp ↦ ?_, Metric.isOpen_ball, by aesop⟩
+  simp only [Metric.mem_ball, dist_zero_right, AddSubgroupClass.coe_norm] at hp
+  rw [mem_stdSimplex_iff]
+  intro i
+  have : - ε ≤ p.1 i := by
+    simp only [pi_norm_lt_iff hε₀, Real.norm_eq_abs] at hp
+    exact (neg_le_neg_iff.2 ((hp i).le)).trans (neg_abs_le (p.1 i))
+  rw [← mul_le_mul_iff_of_pos_left (a := (n + 1 : ℝ)) (by positivity),
+    ← add_le_add_iff_right 1] at this
+  simp only [nsmul_eq_mul, Nat.cast_add, Nat.cast_one]
+  refine le_trans ?_ this
+  simp only [mul_neg, le_neg_add_iff_add_le, add_zero, le_refl, hε]
+
+end Hyperplane
+
+end SimplexCategory
