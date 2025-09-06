@@ -183,6 +183,8 @@ instance : IsGeneratedBy X (WithGeneratedByTopology X Y) where
 
 instance [IsEmpty Y] : IsGeneratedBy X Y := by simp [iff_le_generatedBy]
 
+instance [Unique Y] : IsGeneratedBy X Y := by simp [iff_le_generatedBy]
+
 instance : IsGeneratedBy X (PUnit.{v + 1}) := by
   rw [iff_le_generatedBy]
   exact Eq.le (by subsingleton)

@@ -14,9 +14,11 @@ section
 open NormedSpace SimplexCategory
 
 instance (n : ℕ) : DeltaGeneratedSpace' (Hyperplane.stdSimplex n) := by
-  let e := homeoClosedBallOfConvexCompact (Hyperplane.convex_stdSimplex n)
-    (Hyperplane.isCompact_stdSimplex n) (Hyperplane.zero_mem_interior_stdSimplex n)
-  exact e.symm.isQuotientMap.isGeneratedBy
+  obtain _ | n := n
+  · infer_instance
+  · let e := homeoClosedBallOfConvexCompact (Hyperplane.convex_stdSimplex (n + 1))
+      (Hyperplane.isCompact_stdSimplex _) (Hyperplane.zero_mem_interior_stdSimplex _)
+    exact e.symm.isQuotientMap.isGeneratedBy
 
 instance (n : SimplexCategory) : DeltaGeneratedSpace' n.toTopObj := by
   induction' n using SimplexCategory.rec with n

@@ -36,6 +36,14 @@ variable {n} in
 lemma sum_eq_zero (x : Hyperplane n) : ∑ i, x.1 i = 0 := by
   simpa only [LinearMap.mem_ker, sumCoordinates_apply] using x.2
 
+instance (n : ℕ) : Nontrivial (Hyperplane (n + 1)) where
+  exists_pair_ne := ⟨0, ⟨Fin.cases (- (n + 1)) (fun _ ↦ 1), by
+    simp [Fin.sum_univ_succ]
+    abel⟩, fun h ↦ by
+      rw [Subtype.ext_iff] at h
+      have : (1 : ℝ) ≤ 0 := le_of_le_of_eq (by simp) (neg_eq_zero.1 (congr_fun h.symm 0))
+      grind⟩
+
 def stdSimplex : Set (Hyperplane n) :=
   setOf (fun x ↦ ∀ (i : Fin (n + 1)), 0 ≤ (n + 1) • x.1 i + 1)
 
@@ -50,6 +58,14 @@ lemma continuous_apply (i : Fin (n + 1)) :
   (_root_.continuous_apply _ ).comp continuous_subtype_val
 
 namespace stdSimplex
+
+instance : Unique (stdSimplex 0) where
+  default := ⟨0, by simp [mem_stdSimplex_iff]⟩
+  uniq := by
+    rintro ⟨x, hx⟩
+    ext i
+    fin_cases i
+    simpa using sum_eq_zero x
 
 variable {n}
 

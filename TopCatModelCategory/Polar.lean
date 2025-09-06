@@ -17,6 +17,21 @@ namespace NormedSpace
 
 variable (E : Type u) [NormedAddCommGroup E] [NormedSpace ℝ E]
 
+variable {E} in
+lemma smul_sphere_eq_iff {r₁ r₂ : ℝ} (hr₁ : 0 < r₁) (hr₂ : 0 < r₂)
+    (v₁ v₂ : Metric.sphere (0 : E) 1) :
+    r₁ • v₁.1 = r₂ • v₂.1 ↔ r₁ = r₂ ∧ v₁ = v₂ := by
+  constructor
+  · intro h
+    have := congr_arg norm h
+    simp only [norm_smul, Real.norm_eq_abs, norm_eq_of_mem_sphere, mul_one,
+      abs_of_nonneg hr₁.le, abs_of_nonneg hr₂.le] at this
+    subst this
+    refine ⟨rfl, by simpa [Subtype.ext_iff, smul_smul, inv_mul_cancel₀ hr₁.ne', one_smul]
+      using congr_arg (fun v ↦ r₁⁻¹ • v) h⟩
+  · rintro ⟨rfl, rfl⟩
+    rfl
+
 @[simps]
 def polarParametrization : C(ℝ≥0 × Metric.sphere (0 : E) 1, E) where
   toFun := fun ⟨t, u⟩ ↦ (t : ℝ) • u
@@ -199,10 +214,39 @@ def polarParametrizationClosedBall :
   ((polarParametrization E).restrictPreimage (Metric.closedBall (0 : E) 1)).comp
     (⟨_, (polarParametrizationPreimageClosedBallHomeo E).symm.continuous⟩)
 
+@[simp]
+lemma polarParametrizationClosedBall_apply_coe (x : unitInterval × Metric.sphere (0 : E) 1) :
+    (polarParametrizationClosedBall E x).1 = x.1.1 • x.2.1 := rfl
+
+@[simp]
+lemma polarParametrizationClosedBall_zero (v : Metric.sphere (0 : E) 1) :
+    polarParametrizationClosedBall E ⟨0, v⟩ = ⟨0, by simp⟩ := by
+  aesop
+
 lemma isQuotientMap_polarParametrizationClosedBall [Nontrivial E] [ProperSpace E] :
     IsQuotientMap (polarParametrizationClosedBall E) :=
     ((isQuotientMap_polarParametrization E).restrictPreimage_isClosed
         Metric.isClosed_closedBall).comp
       (polarParametrizationPreimageClosedBallHomeo E).symm.isQuotientMap
+
+lemma factorThrough_polarParametrizationClosedBall_iff
+    {T : Type*} (f : unitInterval × Metric.sphere (0 : E) 1 → T) :
+    Function.FactorsThrough f (polarParametrizationClosedBall E) ↔
+      ∀ (v₁ v₂ : Metric.sphere (0 : E) 1),
+        f ⟨0, v₁⟩ = f ⟨0, v₂⟩ := by
+  refine ⟨fun h v₁ v₂ ↦ h (by simp), fun h ↦ ?_⟩
+  intro ⟨⟨r₁, h₁⟩, v₁⟩ ⟨⟨r₂, h₂⟩, v₂⟩ hv
+  simp only [Subtype.ext_iff, polarParametrizationClosedBall_apply_coe] at hv
+  by_cases hr₁ : r₁ = 0
+  · subst hr₁
+    obtain rfl : r₂ = 0 := by simpa [norm_smul] using congr_arg norm hv.symm
+    apply h
+  · by_cases hr₂ : r₂ = 0
+    · subst hr₂
+      obtain rfl : r₁ = 0 := by simpa [norm_smul] using congr_arg norm hv
+      apply h
+    · rw [smul_sphere_eq_iff (by grind) (by grind)] at hv
+      obtain ⟨rfl, rfl⟩ := hv
+      rfl
 
 end NormedSpace
