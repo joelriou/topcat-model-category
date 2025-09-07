@@ -25,6 +25,10 @@ namespace cosimp
 abbrev obj (n : SimplexCategory) : Type u :=
   { f : Fin (n.len + 2) →o I // f 0 = ⊥ ∧ f (Fin.last _) = ⊤ }
 
+instance : Unique (obj I ⦋0⦌) where
+  default := ⟨⟨![⊥, ⊤], by aesop⟩, rfl, rfl⟩
+  uniq f := by ext i; fin_cases i <;> aesop
+
 variable {I} in
 @[simps]
 def obj₁OrderIso : I ≃o obj I ⦋1⦌ where

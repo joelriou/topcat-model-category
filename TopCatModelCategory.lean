@@ -22,6 +22,7 @@ import TopCatModelCategory.Convenient.SSet
 import TopCatModelCategory.ConvexCompact
 import TopCatModelCategory.Factorization
 import TopCatModelCategory.Fin
+import TopCatModelCategory.Flat
 import TopCatModelCategory.FunctorCategoryColimits
 import TopCatModelCategory.FunctorIterate
 import TopCatModelCategory.Homotopy.Basic
