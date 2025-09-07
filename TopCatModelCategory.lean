@@ -27,6 +27,7 @@ import TopCatModelCategory.FunctorCategoryColimits
 import TopCatModelCategory.FunctorIterate
 import TopCatModelCategory.Homotopy.Basic
 import TopCatModelCategory.II
+import TopCatModelCategory.Interval.Basic
 import TopCatModelCategory.IsFibrant
 import TopCatModelCategory.IsTerminal
 import TopCatModelCategory.Iso
