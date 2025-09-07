@@ -27,7 +27,7 @@ def OrderIso.toIntervalHom {X Y : Type*} [PartialOrder X] [PartialOrder Y]
     IntervalHom X Y where
   orderHom := e.toOrderEmbedding.toOrderHom
 
-def Fintype.exists_orderIso_fin_add_two_of_nontrivial
+lemma Fintype.exists_orderIso_fin_add_two_of_nontrivial
     (J : Type u) [Fintype J] [LinearOrder J] [Nontrivial J] :
     ∃ (n : ℕ), Nonempty (Fin (n + 2) ≃o J) := by
   generalize hn : Fintype.card J = n
@@ -46,47 +46,92 @@ def toCosimplicialObjectFunctor :
     Interval.{u} ⥤ CosimplicialObject (Type u) :=
   (SimplexCategory.toInterval.{u} ⋙ coyoneda).flip
 
-variable (X : Interval.{u})
+variable {X : Interval.{u}}
 
+variable (X) in
 abbrev toCosimplicialObject : CosimplicialObject (Type u) :=
   toCosimplicialObjectFunctor.obj X
 
-variable {X} in
 def toCosimplicialObjectObjEquiv {n : SimplexCategory} :
     X.toCosimplicialObject.obj n ≃ IntervalHom (Fin (n.len + 2)) X where
   toFun f := f.hom.comp .toULift
   invFun g := homMk (g.comp .fromULift)
 
+lemma toCosimplicialObjectObjEquiv_naturality {n m : SimplexCategory}
+    (x : X.toCosimplicialObject.obj n) (f : n ⟶ m) :
+    toCosimplicialObjectObjEquiv (X.toCosimplicialObject.map f x) =
+      (toCosimplicialObjectObjEquiv x).comp f.toIntervalHom := rfl
+
+lemma toCosimplicialObjectObjEquiv_symm_naturality {n m : SimplexCategory} (f : n ⟶ m)
+    (g : IntervalHom (Fin (n.len + 2)) X) :
+  X.toCosimplicialObject.map f (toCosimplicialObjectObjEquiv.symm g) =
+    toCosimplicialObjectObjEquiv.symm (g.comp f.toIntervalHom) := rfl
+
 instance : Nonempty X.toCosimplicialObject.Elements :=
   ⟨⟨⦋0⦌, toCosimplicialObjectObjEquiv.symm (default : IntervalHom (Fin 2) X)⟩⟩
 
-instance [Nontrivial X] :
-    IsCofiltered X.toCosimplicialObject.Elements where
+instance [Nontrivial X] : IsCofiltered X.toCosimplicialObject.Elements where
   cone_objs := by
-    rintro ⟨x, f⟩ ⟨y, g⟩
-    obtain ⟨f, rfl⟩ := toCosimplicialObjectObjEquiv.symm.surjective f
-    obtain ⟨g, rfl⟩ := toCosimplicialObjectObjEquiv.symm.surjective g
+    rintro ⟨n, x⟩ ⟨m, y⟩
+    obtain ⟨f, rfl⟩ := toCosimplicialObjectObjEquiv.symm.surjective x
+    obtain ⟨g, rfl⟩ := toCosimplicialObjectObjEquiv.symm.surjective y
     obtain ⟨J, hf, hg⟩ : ∃ (J : Finset X), (∀ i, f i ∈ J) ∧ (∀ i, g i ∈ J) :=
       ⟨Finset.image f .univ ⊔ Finset.image g .univ, by aesop⟩
     let _ : OrderBot J := Subtype.orderBot (by simpa using hf ⊥)
     let _ : OrderTop J := Subtype.orderTop (by simpa using hf ⊤)
     have : Nontrivial J := nontrivial_subtype_of_orderBot_of_orderTop _ rfl rfl
-    obtain ⟨n, ⟨e⟩⟩ := Fintype.exists_orderIso_fin_add_two_of_nontrivial J
+    obtain ⟨d, ⟨e⟩⟩ := Fintype.exists_orderIso_fin_add_two_of_nontrivial J
     let ι : IntervalHom J X := { orderHom := OrderHom.Subtype.val _ }
-    let f' : IntervalHom (Fin (x.len + 2)) J :=
+    let f' : IntervalHom (Fin (n.len + 2)) J :=
       { orderHom := ⟨fun i ↦ ⟨_, hf i⟩, fun _ _ h ↦ f.orderHom.monotone h ⟩ }
-    let g' : IntervalHom (Fin (y.len + 2)) J :=
+    let g' : IntervalHom (Fin (m.len + 2)) J :=
       { orderHom := ⟨fun i ↦ ⟨_, hg i⟩, fun _ _ h ↦ g.orderHom.monotone h ⟩ }
     obtain ⟨φ, hφ⟩ := (e.symm.toIntervalHom.comp f').exists_simplexCategoryHom
     obtain ⟨φ', hφ'⟩ := (e.symm.toIntervalHom.comp g').exists_simplexCategoryHom
-    refine ⟨.mk ⦋n⦌ (toCosimplicialObjectObjEquiv.symm (ι.comp e.toIntervalHom)),
-      CategoryOfElements.homMk _ _ φ ?_,
-      CategoryOfElements.homMk _ _ φ' ?_, ⟨⟩⟩
+    refine ⟨.mk ⦋d⦌ (toCosimplicialObjectObjEquiv.symm (ι.comp e.toIntervalHom)),
+      CategoryOfElements.homMk _ _ φ (toCosimplicialObjectObjEquiv.injective ?_),
+      CategoryOfElements.homMk _ _ φ' (toCosimplicialObjectObjEquiv.injective ?_), ⟨⟩⟩
     · dsimp
-      sorry
+      rw [toCosimplicialObjectObjEquiv_naturality, Equiv.apply_symm_apply, hφ]
+      erw [Equiv.apply_symm_apply]
+      aesop
     · dsimp
-      sorry
-  cone_maps := sorry
+      rw [toCosimplicialObjectObjEquiv_naturality, Equiv.apply_symm_apply, hφ']
+      erw [Equiv.apply_symm_apply]
+      aesop
+  cone_maps := by
+    rintro ⟨n, x⟩ ⟨n', x'⟩ ⟨g, hg⟩ ⟨g', hg'⟩
+    obtain ⟨f, rfl⟩ := toCosimplicialObjectObjEquiv.symm.surjective x
+    obtain ⟨f', rfl⟩ := toCosimplicialObjectObjEquiv.symm.surjective x'
+    dsimp at g g' hg hg'
+    rw [toCosimplicialObjectObjEquiv_symm_naturality,
+      EmbeddingLike.apply_eq_iff_eq] at hg hg'
+    obtain ⟨J, hJ⟩ : ∃ (J : Finset X), (∀ i, f i ∈ J) :=
+      ⟨Finset.image f .univ, by aesop⟩
+    let _ : OrderBot J := Subtype.orderBot (by simpa using hJ ⊥)
+    let _ : OrderTop J := Subtype.orderTop (by simpa using hJ ⊤)
+    have : Nontrivial J := nontrivial_subtype_of_orderBot_of_orderTop _ rfl rfl
+    obtain ⟨d, ⟨e⟩⟩ := Fintype.exists_orderIso_fin_add_two_of_nontrivial J
+    let ι : IntervalHom J X := { orderHom := OrderHom.Subtype.val _ }
+    let f'' : IntervalHom (Fin (n.len + 2)) J :=
+      { orderHom := ⟨fun i ↦ ⟨_, hJ i⟩, fun _ _ h ↦ f.orderHom.monotone h ⟩ }
+    obtain ⟨φ, hφ⟩ := (e.symm.toIntervalHom.comp f'').exists_simplexCategoryHom
+    refine ⟨.mk ⦋d⦌ (toCosimplicialObjectObjEquiv.symm (ι.comp e.toIntervalHom)),
+      CategoryOfElements.homMk _ _ φ (toCosimplicialObjectObjEquiv.injective ?_), ?_⟩
+    · dsimp
+      rw [toCosimplicialObjectObjEquiv_naturality, Equiv.apply_symm_apply, hφ]
+      dsimp
+      erw [Equiv.apply_symm_apply]
+      aesop
+    · ext : 1
+      apply SimplexCategory.Hom.toIntervalHom_injective
+      dsimp
+      rw [SimplexCategory.Hom.toIntervalHom_comp, SimplexCategory.Hom.toIntervalHom_comp, hφ]
+      ext i : 3
+      dsimp
+      congr 1
+      ext : 1
+      exact DFunLike.congr_fun (hg.trans hg'.symm) i
 
 end Interval
 

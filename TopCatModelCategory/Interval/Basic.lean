@@ -241,6 +241,13 @@ instance : toInterval₀.Full where
 def toInterval : SimplexCategory ⥤ Interval.{u}ᵒᵖ :=
   toInterval₀ ⋙ Interval.uliftFunctor.op
 
+lemma Hom.toIntervalHom_injective {n m : SimplexCategory} :
+    Function.Injective (Hom.toIntervalHom : (n ⟶  m) → _) := by
+  intro f₁ f₂ h
+  refine II.map_injective (Quiver.Hom.unop_inj ?_)
+  ext i : 3
+  exact DFunLike.congr_fun h i
+
 end SimplexCategory
 
 namespace IntervalHom
