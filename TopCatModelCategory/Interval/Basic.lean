@@ -1,6 +1,69 @@
 import TopCatModelCategory.II
+import Mathlib.Data.Fin.VecNotation
 
-universe u
+open CategoryTheory Simplicial
+
+universe v u u₁ u₂ u₃
+
+section
+
+variable {I₁ : Type u₁} [Preorder I₁] [OrderBot I₁] [OrderTop I₁]
+  {I₂ : Type u₂} [Preorder I₂] [OrderBot I₂] [OrderTop I₂]
+  {I₃ : Type u₃} [Preorder I₃] [OrderBot I₃] [OrderTop I₃]
+
+variable (I₁ I₂) in
+@[ext]
+structure IntervalHom where
+  orderHom : I₁ →o I₂
+  map_bot' : orderHom ⊥ = ⊥ := by aesop
+  map_top' : orderHom ⊤ = ⊤ := by aesop
+
+namespace IntervalHom
+
+attribute [simp] map_bot' map_top'
+
+variable (I₁) in
+@[simps]
+def id : IntervalHom I₁ I₁ where
+  orderHom := .id
+
+@[simps]
+def comp (g : IntervalHom I₂ I₃) (f : IntervalHom I₁ I₂) : IntervalHom I₁ I₃ where
+  orderHom := g.orderHom.comp f.orderHom
+
+instance : FunLike (IntervalHom I₁ I₂) I₁ I₂ where
+  coe f := f.orderHom
+  coe_injective' _ _ _ := by aesop
+
+@[simp]
+lemma map_bot (f : IntervalHom I₁ I₂) : f ⊥ = ⊥ := f.map_bot'
+
+@[simp]
+lemma map_top (f : IntervalHom I₁ I₂) : f ⊤ = ⊤ := f.map_top'
+
+@[simps]
+def toULift : IntervalHom I₁ (ULift.{v} I₁) where
+  orderHom := ⟨ULift.up, fun _ _ h ↦ h⟩
+
+@[simps]
+def fromULift : IntervalHom (ULift.{v} I₁) I₁ where
+  orderHom := ⟨ULift.down, fun _ _ h ↦ h⟩
+
+open Simplicial Vector
+instance : Unique (IntervalHom (Fin 2) I₁) where
+  default :=
+    { orderHom := ⟨![⊥, ⊤], by
+        rw [Fin.monotone_iff_le_succ]
+        aesop⟩ }
+  uniq f := by
+    ext i
+    fin_cases i
+    · exact f.map_bot
+    · exact f.map_top
+
+end IntervalHom
+
+end
 
 open CategoryTheory Opposite
 
@@ -8,30 +71,28 @@ namespace CategoryTheory
 
 structure Interval where private mk ::
   I : Type u
-  [partialOrder : PartialOrder I]
+  [linearOrder : LinearOrder I]
   [orderBot : OrderBot I]
   [orderTop : OrderTop I]
 
 namespace Interval
 
-abbrev of (I : Type u) [PartialOrder I] [OrderBot I] [OrderTop I] : Interval.{u} := mk I
+abbrev of (I : Type u) [LinearOrder I] [OrderBot I] [OrderTop I] : Interval.{u} := mk I
 
 variable (X Y : Interval.{u})
 
 instance : CoeSort Interval.{u} (Type u) where
   coe := I
 
-instance : PartialOrder X := X.partialOrder
+instance : LinearOrder X := X.linearOrder
 instance : OrderBot X := X.orderBot
 instance : OrderTop X := X.orderTop
 
 @[ext]
 structure Hom where
-  hom : X →o Y
-  hom_bot : hom ⊥ = ⊥ := by aesop
-  hom_top : hom ⊤ = ⊤ := by aesop
+  hom : IntervalHom X Y
 
-attribute [simp] Hom.hom_bot Hom.hom_top
+variable {X Y}
 
 instance : FunLike (Hom X Y) X Y where
   coe f := f.hom
@@ -39,19 +100,24 @@ instance : FunLike (Hom X Y) X Y where
 
 instance : Category Interval.{u} where
   Hom := Hom
-  id X := { hom := .id }
+  id X := { hom := .id _ }
   comp f g := { hom := g.hom.comp f.hom}
 
 instance : ConcreteCategory Interval.{u} Hom where
   hom := id
   ofHom := id
 
-variable {X Y}
+abbrev homMk (f : IntervalHom X Y) : X ⟶ Y where
+  hom := f
+
 @[ext]
 lemma hom_ext {f g : X ⟶ Y} (h : f.hom = g.hom) : f = g := Hom.ext h
 
-@[simp]
-lemma apply (f : X ⟶ Y) (x : X) : ConcreteCategory.hom f x = f.hom x := by rfl
+def uliftFunctor : Interval.{u} ⥤ Interval.{max u v} where
+  obj X := .of (ULift X)
+  map f := homMk
+    { orderHom := OrderHom.comp ⟨ULift.up, fun _ _ h ↦ by exact h⟩
+        (OrderHom.comp f.hom.orderHom ⟨ULift.down, fun _ _ h ↦ by exact h⟩) }
 
 end Interval
 
@@ -59,12 +125,32 @@ end CategoryTheory
 
 namespace SimplexCategory
 
+namespace Hom
+
+def toIntervalHom {n m : SimplexCategory} (f : n ⟶ m) :
+    IntervalHom (Fin (m.len + 2)) (Fin (n.len + 2)) where
+  orderHom := (II.map f).unop.toOrderHom
+  map_bot' := II.map'_zero _
+  map_top' := II.map'_last _
+
+@[simp]
+lemma toIntervalHom_id (n : SimplexCategory) :
+    toIntervalHom (𝟙 n) = .id _ := by
+  dsimp [toIntervalHom]
+  aesop
+
+@[simp]
+lemma toIntervalHom_comp {n m p : SimplexCategory} (f : n ⟶ m) (g : m ⟶ p) :
+    toIntervalHom (f ≫ g) = f.toIntervalHom.comp g.toIntervalHom := by
+  dsimp [toIntervalHom]
+  aesop
+
+end Hom
+
+@[simps]
 def toInterval₀ : SimplexCategory ⥤ Interval.{0}ᵒᵖ where
   obj n := op (Interval.of (Fin (n.len + 2)))
-  map f := Quiver.Hom.op
-    { hom := (II.map f).unop.toOrderHom
-      hom_bot := II.map'_zero _
-      hom_top := II.map'_last _ }
+  map f := Quiver.Hom.op (Interval.homMk (f.toIntervalHom))
 
 instance : toInterval₀.Faithful where
   map_injective {n m f₁ f₂} h :=
@@ -91,11 +177,11 @@ lemma mem_finset_iff (j : Fin (m + 1)) :
 lemma mem_finset_of_le {j₁ j₂ : Fin (m + 1)} (hj : j₁ ≤ j₂) (hj₂ : j₂ ∈ finset g i) :
     j₁ ∈ finset g i := by
   rw [mem_finset_iff] at hj₂ ⊢
-  exact le_trans (g.hom.monotone (by simpa)) hj₂
+  exact le_trans (g.hom.orderHom.monotone (by simpa)) hj₂
 
 lemma zero_mem_finset : 0 ∈ finset g i := by
   rw [mem_finset_iff]
-  exact le_of_eq_of_le (Interval.Hom.hom_bot _) (Fin.zero_le _)
+  exact le_of_eq_of_le (IntervalHom.map_bot _) (Fin.zero_le _)
 
 lemma nonempty_finset : (finset g i).Nonempty := ⟨_, zero_mem_finset _ _⟩
 
@@ -142,7 +228,8 @@ lemma map'_f_apply (j : Fin (m + 2)) :
           simpa only [II.castSucc_mem_finset_iff, OrderHom.coe_mk,
             Fin.castSucc_le_castSucc_iff, le_iff] using h'
         · simpa using Fin.le_last _
-  · simpa using g.hom_top.symm
+  · dsimp
+    simpa only [II.map'_last] using g.hom.map_top.symm
 
 end toInterval₀Full
 
@@ -151,4 +238,18 @@ instance : toInterval₀.Full where
   map_surjective g := ⟨Hom.mk ⟨f g.unop, monotone_f g.unop⟩,
     Quiver.Hom.unop_inj (by ext; apply map'_f_apply)⟩
 
+def toInterval : SimplexCategory ⥤ Interval.{u}ᵒᵖ :=
+  toInterval₀ ⋙ Interval.uliftFunctor.op
+
 end SimplexCategory
+
+namespace IntervalHom
+
+open SimplexCategory.toInterval₀Full in
+lemma exists_simplexCategoryHom {n m : ℕ} (g : IntervalHom (Fin (m + 2)) (Fin (n + 2))) :
+    ∃ (f : ⦋n⦌ ⟶ ⦋m⦌), f.toIntervalHom = g :=
+  ⟨.mk ⟨_, monotone_f ⟨g⟩⟩, by
+    ext i : 3
+    exact map'_f_apply ⟨g⟩ i⟩
+
+end IntervalHom
