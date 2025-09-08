@@ -32,7 +32,14 @@ lemma closedUnderColimitsOfShape_preservesLimitsOfShape (K' : Type*) [Category K
     [HasColimitsOfShape K' C] [HasLimitsOfShape K C]
     [PreservesLimitsOfShape K (colim (J := K') (C := C))] :
     ClosedUnderColimitsOfShape K' (preservesLimitsOfShape K : ObjectProperty (J ⥤ C)) := by
-  sorry
+  intro F c hc h
+  simp only [preservesLimitsOfShape_iff] at h ⊢
+  have : PreservesLimitsOfShape K F.flip := ⟨fun {G} ↦ ⟨fun {c} hc ↦
+    ⟨evaluationJointlyReflectsLimits _ (fun k' ↦ isLimitOfPreserves (F.obj k') hc)⟩⟩⟩
+  let e : F.flip ⋙ colim ≅ c.pt :=
+    NatIso.ofComponents (fun j ↦ (colimit.isColimit (F.flip.obj j)).coconePointUniqueUpToIso
+      (isColimitOfPreserves ((evaluation _ _).obj j) hc))
+  exact preservesLimitsOfShape_of_natIso e
 
 variable (J C) in
 lemma closedUnderColimitsOfShape_preservesFiniteLimits (K' : Type*) [Category K']

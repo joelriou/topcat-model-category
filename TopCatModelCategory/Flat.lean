@@ -44,12 +44,23 @@ def coconeExtensionAlongUliftYoneda :
 
 variable [G.IsLeftKanExtension τ]
 
-def isColimitCoconeExtensionAlongUliftYoneda :
+namespace isColimitCoconeExtensionAlongUliftYoneda
+
+variable (P : Cᵒᵖ ⥤ Type (max w u v))
+
+def bifunctor : F.Elementsᵒᵖ ⥤ P.Elementsᵒᵖ ⥤ Type max w u v :=
+  (CategoryOfElements.π F).op ⋙
+    ((CategoryOfElements.π P).leftOp ⋙ uliftYoneda.{max u w}).flip
+
+end isColimitCoconeExtensionAlongUliftYoneda
+
+noncomputable def isColimitCoconeExtensionAlongUliftYoneda :
     IsColimit (coconeExtensionAlongUliftYoneda τ) :=
   evaluationJointlyReflectsColimits _ (fun P ↦ by
     obtain ⟨h₁, h₂⟩ := (isLeftKanExtension_along_uliftYoneda_iff' G τ).1 inferInstance
-    have := isColimitOfPreserves G (colimitOfRepresentable.{max w u} P)
-    sorry)
+    let hP := isColimitOfPreserves G (colimitOfRepresentable.{max w u} P)
+    sorry
+    )
 
 variable [IsCofiltered F.Elements]
 
