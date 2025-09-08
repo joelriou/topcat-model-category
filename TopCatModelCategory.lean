@@ -24,6 +24,7 @@ import TopCatModelCategory.Factorization
 import TopCatModelCategory.Fin
 import TopCatModelCategory.Flat
 import TopCatModelCategory.FunctorCategoryColimits
+import TopCatModelCategory.FunctorCategoryLimits
 import TopCatModelCategory.FunctorIterate
 import TopCatModelCategory.Homotopy.Basic
 import TopCatModelCategory.II
