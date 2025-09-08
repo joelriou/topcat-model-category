@@ -20,6 +20,7 @@ import TopCatModelCategory.Convenient.Open
 import TopCatModelCategory.Convenient.OpenBall
 import TopCatModelCategory.Convenient.SSet
 import TopCatModelCategory.ConvexCompact
+import TopCatModelCategory.Elements
 import TopCatModelCategory.Factorization
 import TopCatModelCategory.Fin
 import TopCatModelCategory.Flat
