@@ -1,4 +1,5 @@
 import Mathlib.AlgebraicTopology.ModelCategory.CategoryWithCofibrations
+import Mathlib.AlgebraicTopology.ModelCategory.IsCofibrant
 import Mathlib.CategoryTheory.Limits.Shapes.Terminal
 
 open CategoryTheory Limits
@@ -7,7 +8,7 @@ namespace HomotopicalAlgebra
 
 variable {C : Type*} [Category C]
 
-section
+/-section
 
 variable [CategoryWithCofibrations C] [HasInitial C]
 
@@ -24,25 +25,25 @@ lemma isCofibrant_iff_of_isInitial {A X : C} (i : A ⟶ X) (hA : IsInitial A) :
   apply (cofibrations C).arrow_mk_iso_iff
   exact Arrow.isoMk (IsInitial.uniqueUpToIso initialIsInitial hA) (Iso.refl _)
 
-end
+end-/
 
 section
 
 variable [CategoryWithFibrations C] [HasTerminal C]
 
-abbrev IsFibrant (X : C) : Prop := Fibration (terminal.from X)
+/-abbrev IsFibrant (X : C) : Prop := Fibration (terminal.from X)
 
 lemma isFibrant_iff (X : C) :
-    IsFibrant X ↔ Fibration (terminal.from X) := Iff.rfl
+    IsFibrant X ↔ Fibration (terminal.from X) := Iff.rfl-/
 
 variable [(fibrations C).RespectsIso]
 
-lemma isFibrant_iff_of_isTerminal {X Y : C} (p : X ⟶ Y) (hY : IsTerminal Y) :
+/-lemma isFibrant_iff_of_isTerminal {X Y : C} (p : X ⟶ Y) (hY : IsTerminal Y) :
     IsFibrant X ↔ Fibration p := by
   simp only [fibration_iff]
   symm
   apply (fibrations C).arrow_mk_iso_iff
-  exact Arrow.isoMk (Iso.refl _) (IsTerminal.uniqueUpToIso hY terminalIsTerminal)
+  exact Arrow.isoMk (Iso.refl _) (IsTerminal.uniqueUpToIso hY terminalIsTerminal)-/
 
 lemma isFibrant_of_iso {X Y : C} (e : X ≅ Y)
     [hX : IsFibrant X] :

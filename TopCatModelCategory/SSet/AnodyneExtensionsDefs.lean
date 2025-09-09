@@ -3,11 +3,11 @@ import TopCatModelCategory.SSet.CategoryWithFibrations
 import TopCatModelCategory.SSet.ChosenFiniteProducts
 import TopCatModelCategory.SSet.SimplexCategory
 import TopCatModelCategory.SSet.NonDegenerateProdSimplex
-import TopCatModelCategory.IsFibrant
 import Mathlib.CategoryTheory.MorphismProperty.Limits
 import Mathlib.CategoryTheory.MorphismProperty.Retract
 import Mathlib.CategoryTheory.MorphismProperty.TransfiniteComposition
 import Mathlib.CategoryTheory.SmallObject.TransfiniteCompositionLifting
+import Mathlib.AlgebraicTopology.ModelCategory.IsCofibrant
 
 open HomotopicalAlgebra CategoryTheory Limits SSet.modelCategoryQuillen MonoidalCategory
   Simplicial Opposite
