@@ -11,7 +11,8 @@ variable {C D : Type*} [Category C] [Category D] [ModelCategory C] [ModelCategor
 namespace Functor
 
 class PreservesCofibrations : Prop where
-  cofibration_map {A B : C} (i : A ⟶ B) [Cofibration i] : Cofibration (F.map i)
+  cofibration_map {A B : C} (i : A ⟶ B) [Cofibration i] : Cofibration (F.map i) :=
+    by intros; infer_instance
 
 lemma preservesCofibrations_iff :
     F.PreservesCofibrations ↔ cofibrations C ≤ (cofibrations D).inverseImage F := by
@@ -24,7 +25,8 @@ lemma preservesCofibrations_iff :
 attribute [instance] PreservesCofibrations.cofibration_map
 
 class PreservesFibrations : Prop where
-  fibration_map {X Y : C} (p : X ⟶ Y) [Fibration p] : Fibration (F.map p)
+  fibration_map {X Y : C} (p : X ⟶ Y) [Fibration p] : Fibration (F.map p) :=
+    by intros; infer_instance
 
 lemma preservesFibrations_iff :
     F.PreservesFibrations ↔ fibrations C ≤ (fibrations D).inverseImage F := by
