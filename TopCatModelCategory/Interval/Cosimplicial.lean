@@ -1,6 +1,6 @@
 import TopCatModelCategory.Interval.Basic
 
-universe u
+universe v u
 
 open CategoryTheory Simplicial
 
@@ -66,6 +66,14 @@ lemma toCosimplicialObjectObjEquiv_symm_naturality {n m : SimplexCategory} (f : 
     (g : IntervalHom (Fin (n.len + 2)) X) :
   X.toCosimplicialObject.map f (toCosimplicialObjectObjEquiv.symm g) =
     toCosimplicialObjectObjEquiv.symm (g.comp f.toIntervalHom) := rfl
+
+def toCosimplicialObjectUliftFunctorObj (X : Interval.{u}) :
+    (uliftFunctor.{v}.obj X).toCosimplicialObject ≅
+      X.toCosimplicialObject ⋙ CategoryTheory.uliftFunctor.{v, u} :=
+  NatIso.ofComponents (fun n ↦ Equiv.toIso (toCosimplicialObjectObjEquiv.trans
+    (Equiv.trans
+      { toFun f := IntervalHom.fromULift.comp f, invFun g := IntervalHom.toULift.comp g }
+      ((toCosimplicialObjectObjEquiv.symm).trans Equiv.ulift.symm))))
 
 instance : Nonempty X.toCosimplicialObject.Elements :=
   ⟨⟨⦋0⦌, toCosimplicialObjectObjEquiv.symm (default : IntervalHom (Fin 2) X)⟩⟩

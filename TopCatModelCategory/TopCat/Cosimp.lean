@@ -20,6 +20,8 @@ section
 variable (I : Type u) [Preorder I] [TopologicalSpace I]
   [OrderBot I] [OrderTop I]
 
+-- this is redone in `TopCatModelCategory.Interval.Cosimplicial`
+
 namespace cosimp
 
 abbrev obj (n : SimplexCategory) : Type u :=

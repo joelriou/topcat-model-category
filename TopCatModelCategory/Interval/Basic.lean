@@ -35,6 +35,9 @@ instance : FunLike (IntervalHom I₁ I₂) I₁ I₂ where
   coe f := f.orderHom
   coe_injective' _ _ _ := by aesop
 
+lemma ext_iff' {f g : IntervalHom I₁ I₂} : f = g ↔ ∀ x, f x = g x := by
+  aesop
+
 @[simp]
 lemma map_bot (f : IntervalHom I₁ I₂) : f ⊥ = ⊥ := f.map_bot'
 

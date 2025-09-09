@@ -10,6 +10,8 @@ open NNReal CategoryTheory
 
 namespace TopCat
 
+-- this is redone in `TopCatModelCategory.Interval.Iso`
+
 namespace cosimp
 
 section

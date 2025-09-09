@@ -32,6 +32,7 @@ import TopCatModelCategory.Homotopy.Basic
 import TopCatModelCategory.II
 import TopCatModelCategory.Interval.Basic
 import TopCatModelCategory.Interval.Cosimplicial
+import TopCatModelCategory.Interval.Iso
 import TopCatModelCategory.IsFibrant
 import TopCatModelCategory.IsTerminal
 import TopCatModelCategory.Iso
