@@ -428,8 +428,6 @@ lemma boundary.closedEmbeddings_toTop_map_ι (n : ℕ) :
     · simp only [stdSimplex.toTopSet_obj_face_compl]
       aesop
 
-instance (n : ℕ) : T2Space |Δ[n]| := ⦋n⦌.toTopHomeo.symm.t2Space
-
 lemma boundary.t₁Inclusions_toTop_map_ι (n : ℕ) :
     TopCat.t₁Inclusions (toTop.map ∂Δ[n].ι) :=
   ⟨closedEmbeddings_toTop_map_ι n, fun _ _ ↦ isClosed_singleton⟩

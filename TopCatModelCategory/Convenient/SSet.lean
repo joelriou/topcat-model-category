@@ -50,4 +50,13 @@ noncomputable def toDeltaGeneratedIso :
     (Functor.associator _ _ _).symm ≪≫
     Functor.isoWhiskerRight SSet.toDeltaGeneratedCompIso TopCat.toDeltaGenerated'
 
+instance (J : Type*) [Category J] :
+    ReflectsColimitsOfShape J DeltaGenerated'.toTopCat.{u} where
+  reflectsColimit := ⟨fun hc ↦ ⟨ObjectProperty.ιReflectsIsColimit _ hc⟩⟩
+
+instance (J : Type*) [Category J] :
+    PreservesColimitsOfShape J toDeltaGenerated.{u} where
+  preservesColimit :=
+    ⟨fun hc ↦ ⟨isColimitOfReflects DeltaGenerated'.toTopCat (isColimitOfPreserves toTop hc)⟩⟩
+
 end SSet

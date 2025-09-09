@@ -1,16 +1,12 @@
-import Mathlib.CategoryTheory.Limits.Constructions.FiniteProductsOfBinaryProducts
 import Mathlib.CategoryTheory.Limits.Constructions.LimitsOfProductsAndEqualizers
 import TopCatModelCategory.IsTerminal
-import TopCatModelCategory.TopCat.Adj
 import TopCatModelCategory.TopCat.ToTopEqualizers
+import TopCatModelCategory.TopCat.ToTopProducts
 import TopCatModelCategory.Convenient.Fibrations
 
 open CategoryTheory Limits Simplicial HomotopicalAlgebra TopCat.modelCategory
 
 namespace SSet
-
-instance : PreservesLimitsOfShape (Discrete WalkingPair) toDeltaGenerated.{u} := by
-  sorry
 
 instance : PreservesLimitsOfShape (Discrete PEmpty.{1}) toTop.{u} :=
   IsTerminal.preservesTerminal stdSimplex.isTerminalObj₀

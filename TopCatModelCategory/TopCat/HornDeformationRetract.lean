@@ -222,8 +222,6 @@ end TopCat
 
 namespace SSet
 
-instance (n : ℕ) : T2Space |Δ[n]| := ⦋n⦌.toTopHomeo.symm.t2Space
-
 def horn.deformationRetracts_toTopMap {n : ℕ} (i : Fin (n + 2)) :
     TopCat.deformationRetracts (toTop.{u}.map (horn (n + 1) i).ι) := by
   refine (deformationRetracts.arrow_mk_iso_iff

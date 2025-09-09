@@ -39,6 +39,8 @@ noncomputable def toTopHomeo (n : SimplexCategory) :
     |stdSimplex.{u}.obj n| ≃ₜ n.toTopObj :=
   (TopCat.homeoOfIso (toTopSimplex.{u}.app n)).trans Homeomorph.ulift
 
+instance (n : SimplexCategory) : T2Space |stdSimplex.{u}.obj n| := n.toTopHomeo.symm.t2Space
+
 lemma toTopHomeo_naturality {n m : SimplexCategory} (f : n ⟶ m) :
     (toTopHomeo m).toFun.comp (SSet.toTop.{u}.map (stdSimplex.map f)) =
     (toTopMap f).comp n.toTopHomeo := by
