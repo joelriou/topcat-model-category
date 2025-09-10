@@ -148,6 +148,7 @@ import TopCatModelCategory.TopCat.Adj
 import TopCatModelCategory.TopCat.AttachCells
 import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
 import TopCatModelCategory.TopCat.ClosedEmbeddings
+import TopCatModelCategory.TopCat.CoconeTop
 import TopCatModelCategory.TopCat.Colimits
 import TopCatModelCategory.TopCat.CompactOpen
 import TopCatModelCategory.TopCat.Cosimp

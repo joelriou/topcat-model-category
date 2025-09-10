@@ -1,4 +1,5 @@
 import TopCatModelCategory.TopCat.Adj
+import TopCatModelCategory.TopCat.CoconeTop
 
 universe v u
 
@@ -14,10 +15,29 @@ instance {J : Type v} (X : Type u) [TopologicalSpace X] [PathConnectedSpace X]
     PreservesColimit (Discrete.functor F) (coyoneda.obj (op (TopCat.of X))) where
   preserves {c : Cofan _} hc :=
     ⟨(isColimitMapCoconeCofanMkEquiv (g := c.inj) _).2 (by
-      dsimp
-      sorry)⟩
+      refine ((Types.isColimit_iff_coconeTypesIsColimit ..).2 ?_).some
+      have hc' := (isColimitMapCoconeCofanMkEquiv (forget _) (g := c.inj)).1
+          (isColimitOfPreserves (forget _) hc)
+      let x₀ : X := Classical.arbitrary _
+      apply Functor.CofanTypes.isColimit_mk
+      · intro f
+        dsimp at f ⊢
+        replace hc := (TopCat.isColimit_iff_coconeTopIsColimit _).1 ⟨hc⟩
+        obtain ⟨⟨i, g⟩, hg⟩ :=
+          (Functor.CofanTop.bijective_continuousMap_of_isColimit_of_connectedSpace hc X).2 f.hom
+        refine ⟨i, TopCat.ofHom g, ?_⟩
+        ext x
+        exact DFunLike.congr_fun hg x
+      · intro j f g h
+        apply (forget _).map_injective
+        dsimp at f g h ⊢
+        ext x
+        exact Types.cofanInj_injective_of_isColimit hc' j (ConcreteCategory.congr_hom h x)
+      · intro i j f g h
+        exact Types.eq_cofanInj_apply_eq_of_isColimit
+          hc' _ _ (ConcreteCategory.congr_hom h x₀))⟩
 
-instance test (J : Type v) (X : Type u) [TopologicalSpace X] [PathConnectedSpace X] :
+instance (J : Type v) (X : Type u) [TopologicalSpace X] [PathConnectedSpace X] :
     PreservesColimitsOfShape (Discrete J) (coyoneda.obj (op (TopCat.of X))) where
   preservesColimit := preservesColimit_of_iso_diagram _ Discrete.natIsoFunctor.symm
 

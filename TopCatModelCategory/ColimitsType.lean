@@ -744,4 +744,97 @@ end
 
 end Types
 
-end CategoryTheory.Limits
+end Limits
+
+namespace Functor
+
+variable {C : Type*} (F : Discrete C ⥤ Type*)
+
+abbrev CofanTypes := F.CoconeTypes
+
+variable {F}
+
+namespace CofanTypes
+
+abbrev inj (c : F.CofanTypes) (i : C) : F.obj ⟨i⟩ → c.pt := c.ι ⟨i⟩
+
+variable (F) in
+@[simps]
+def sigma : F.CofanTypes where
+  pt := Σ (i : C), F.obj ⟨i⟩
+  ι := fun ⟨i⟩ x ↦ ⟨i, x⟩
+  ι_naturality := by
+    rintro ⟨i⟩ ⟨j⟩ f
+    obtain rfl : i = j := by simpa using Discrete.eq_of_hom f
+    aesop
+
+@[simp]
+lemma sigma_inj (i : C) (x : F.obj ⟨i⟩) :
+    (sigma F).inj i x = ⟨i, x⟩ := rfl
+
+lemma isColimit_mk (c : F.CofanTypes)
+    (h₁ : ∀ (x : c.pt), ∃ (i : C) (y : F.obj ⟨i⟩), c.inj i y = x)
+    (h₂ : ∀ (i : C), Function.Injective (c.inj i))
+    (h₃ : ∀ (i j : C) (x : F.obj ⟨i⟩) (y : F.obj ⟨j⟩), c.inj i x = c.inj j y → i = j) :
+    CoconeTypes.IsColimit c where
+  bijective := by
+    constructor
+    · intro x y h
+      obtain ⟨⟨i⟩, x, rfl⟩ := F.ιColimitType_jointly_surjective x
+      obtain ⟨⟨j⟩, y, rfl⟩ := F.ιColimitType_jointly_surjective y
+      obtain rfl := h₃ _ _ _ _ h
+      obtain rfl := h₂ _ h
+      rfl
+    · intro x
+      obtain ⟨i, y, rfl⟩ := h₁ x
+      exact ⟨F.ιColimitType ⟨i⟩ y, rfl⟩
+
+variable (F) in
+lemma isColimit_sigma : CoconeTypes.IsColimit (sigma F) :=
+  isColimit_mk _ (by aesop)
+    (fun _ _ _ h ↦ by rw [Sigma.ext_iff] at h; simpa using h)
+    (fun _ _ _ _ h ↦ congr_arg Sigma.fst h)
+
+variable (F) in
+@[simp]
+def fromSigma (c : F.CofanTypes) (x : Σ (i : C), F.obj ⟨i⟩) : c.pt :=
+  c.inj x.1 x.2
+
+section
+
+variable {c : F.CofanTypes} (hc : CoconeTypes.IsColimit c)
+
+include hc
+
+lemma bijective_fromSigma_of_isColimit :
+    Function.Bijective c.fromSigma := by
+  rw [← Function.Bijective.of_comp_iff _ (isColimit_sigma F).bijective]
+  convert hc.bijective
+  ext ⟨⟨i⟩, x⟩
+  rfl
+
+noncomputable def equivOfIsColimit :
+    (Σ (i : C), F.obj ⟨i⟩) ≃ c.pt :=
+  Equiv.ofBijective _ (bijective_fromSigma_of_isColimit hc)
+
+@[simp]
+lemma equivOfIsColimit_apply (i : C) (x : F.obj ⟨i⟩) :
+    equivOfIsColimit hc ⟨i, x⟩ = c.inj i x := rfl
+
+@[simp]
+lemma equivOfIsColimit_symm_apply (i : C) (x : F.obj ⟨i⟩) :
+    (equivOfIsColimit hc).symm (c.inj i x) = ⟨i, x⟩ :=
+  (equivOfIsColimit hc).injective (by simp)
+
+lemma inj_jointly_surjective_of_isColimit (x : c.pt) :
+    ∃ (i : C) (y : F.obj ⟨i⟩), c.inj i y = x := by
+  obtain ⟨⟨i⟩, y, rfl⟩ := hc.ι_jointly_surjective x
+  exact ⟨i, y, rfl⟩
+
+end
+
+end CofanTypes
+
+end Functor
+
+end CategoryTheory
