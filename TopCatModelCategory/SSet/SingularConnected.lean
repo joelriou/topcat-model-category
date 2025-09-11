@@ -1,9 +1,42 @@
+import TopCatModelCategory.SSet.ConnectedComponents
 import TopCatModelCategory.SSet.PiZero
 import TopCatModelCategory.TopCat.Adj
+import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
 
 universe u
 
 open Simplicial CategoryTheory Limits Opposite NNReal
+
+namespace CategoryTheory
+
+namespace ObjectProperty
+
+variable {C D : Type*} [Category C] [Category D] {F G : C ⥤ D} (τ : F ⟶ G)
+
+def isIsoNatTransApp : ObjectProperty C :=
+  fun X ↦ IsIso (τ.app X)
+
+lemma closedUnderCoproducts_isIsoNatTransApp (J : Type*) [Category J]
+    [PreservesColimitsOfShape J F] [PreservesColimitsOfShape J G] :
+    ClosedUnderColimitsOfShape J (isIsoNatTransApp τ) := by
+  intro K c hc hK
+  have (j : J) : IsIso (τ.app (K.obj j)) := by simpa [isIsoNatTransApp] using hK j
+  let e (j : J) : F.obj (K.obj j) ≅ G.obj (K.obj j) := asIso (τ.app (K.obj j))
+  obtain ⟨φ, hφ⟩ : ∃ (φ : G.obj c.pt ⟶ F.obj c.pt),
+      ∀ (j : J), G.map (c.ι.app j) ≫ φ = (e j).inv ≫ F.map (c.ι.app j) :=
+    ⟨(isColimitOfPreserves G hc).desc (Cocone.mk _
+      { app j := (e j).inv ≫ F.map (c.ι.app j)
+        naturality j₁ j₂ f := by
+          dsimp [e]
+          rw [Category.comp_id, IsIso.eq_inv_comp, NatIso.naturality_2'_assoc, ← c.w f,
+            Functor.map_comp] }),
+      (isColimitOfPreserves G hc).fac _⟩
+  exact ⟨φ, (isColimitOfPreserves F hc).hom_ext (fun j ↦ by simp [hφ, e]),
+    (isColimitOfPreserves G hc).hom_ext (fun j ↦ by simp [reassoc_of% hφ, e])⟩
+
+end ObjectProperty
+
+end CategoryTheory
 
 @[simp]
 lemma NNReal.sum_coe {α : Type*} [Fintype α] (f : α → ℝ≥0) :
@@ -96,13 +129,32 @@ lemma surjective_mapπ₀_sSetTopAdj_unit_app :
   rw [this, Subsingleton.elim default (⦋0⦌.toTopHomeo default)]
   rfl
 
+def isIsoWhiskerRightSSetTopAdjUnitπ₀FunctorApp : ObjectProperty SSet.{u} :=
+  fun X ↦ IsIso ((Functor.whiskerRight sSetTopAdj.{u}.unit π₀Functor).app X)
+
+lemma isIsoWhiskerRightSSetTopAdjUnitπ₀FunctorApp_of_connected (X : SSet.{u})
+    (hX : Subsingleton (π₀ X)) :
+    isIsoWhiskerRightSSetTopAdjUnitπ₀FunctorApp X := by
+  simp only [isIsoWhiskerRightSSetTopAdjUnitπ₀FunctorApp, Functor.comp_obj, Functor.id_obj,
+    π₀Functor_obj, Functor.whiskerRight_app, isIso_iff_bijective]
+  exact ⟨Function.injective_of_subsingleton (α := π₀ X) _,
+      surjective_mapπ₀_sSetTopAdj_unit_app X⟩
+
+lemma isIsoWhiskerRightSSetTopAdjUnitπ₀FunctorApp_eq_top :
+    isIsoWhiskerRightSSetTopAdjUnitπ₀FunctorApp.{u} = ⊤ := by
+  change ObjectProperty.isIsoNatTransApp _ = ⊤
+  ext X
+  simp only [Pi.top_apply, «Prop».top_eq_true, iff_true]
+  apply ObjectProperty.closedUnderCoproducts_isIsoNatTransApp
+    (Functor.whiskerRight sSetTopAdj.unit π₀Functor) (Discrete X.π₀) (π₀.isColimitCofan X)
+  rintro ⟨c⟩
+  apply isIsoWhiskerRightSSetTopAdjUnitπ₀FunctorApp_of_connected
+  dsimp
+  infer_instance
+
 lemma bijective_mapπ₀_sSetTopAdj_unit_app :
     Function.Bijective (mapπ₀ (sSetTopAdj.unit.app X)) := by
-  have (Y : SSet.{u}) (hY : Subsingleton (π₀ Y)) :
-      Function.Bijective (mapπ₀ (sSetTopAdj.unit.app Y)) :=
-    ⟨Function.injective_of_subsingleton (α := π₀ Y) _,
-      surjective_mapπ₀_sSetTopAdj_unit_app Y⟩
-  simp only [← isIso_iff_bijective] at this ⊢
-  sorry
+  simp only [← isIso_iff_bijective]
+  exact isIsoWhiskerRightSSetTopAdjUnitπ₀FunctorApp_eq_top.ge _ (by simp)
 
 end SSet

@@ -41,6 +41,74 @@ def component (c : X.π₀) : X.Subcomplex where
   obj n := setOf (fun s ↦ ∀ (α : ⦋0⦌ ⟶ n.unop), π₀.mk (X.map α.op s) = c)
   map {n m} f s hs α := by simpa using hs (α ≫ f.unop)
 
+lemma subsingleton_π₀_of_subcomplex (S : X.Subcomplex)
+    (hS₀ : ∀ (x : X _⦋1⦌), X.δ 1 x ∈ S.obj _ ↔ X.δ 0 x ∈ S.obj _)
+    (hS : ∀ (x : X _⦋1⦌), X.δ 1 x ∈ S.obj _ → X.δ 0 x ∈ S.obj _ → x ∈ S.obj _) :
+    Function.Injective (mapπ₀ S.ι) := by
+  have h₁ {x y : X _⦋0⦌} (h : Relation.EqvGen π₀Rel x y) :
+      x ∈ S.obj _ ↔ y ∈ S.obj _ := by
+    induction h with
+    | rel x y h =>
+      obtain ⟨s, rfl, rfl⟩ := h
+      rw [hS₀]
+    | refl => tauto
+    | symm y x h hyx => rw [hyx]
+    | trans x y z hxy hyz hxy' hyz' => rw [hxy', hyz']
+  have h₂ {x y : X _⦋0⦌} (h : Relation.EqvGen π₀Rel x y) :
+      ∀ (hx : x ∈ S.obj _),
+        Relation.EqvGen (π₀Rel (X := S)) ⟨x, hx⟩ ⟨y, (h₁ h).1 hx⟩ := by
+    intro hx
+    induction h with
+    | rel x y h =>
+      have hy := (h₁ (.rel _ _ h)).1 hx
+      obtain ⟨s, rfl, rfl⟩ := h
+      exact .rel _ _ ⟨⟨s, hS _ hx hy⟩, rfl, rfl⟩
+    | refl =>
+      exact .refl _
+    | symm y x h hyx =>
+      exact (hyx _).symm
+    | trans x y z hxy hyz hxy' hyz' =>
+      apply (hxy' hx).trans
+      apply hyz' ((h₁ hxy).1 hx)
+  intro x y h
+  obtain ⟨⟨x, hx⟩, rfl⟩ := x.mk_surjective
+  obtain ⟨⟨y, hy⟩, rfl⟩ := y.mk_surjective
+  simp only [mapπ₀_mk, Subpresheaf.ι_app, π₀.mk_eq_mk_iff] at h ⊢
+  exact h₂ h hx
+
+instance (c : X.π₀) : Subsingleton (c.component.toSSet.π₀) := by
+  obtain ⟨x₀, rfl⟩ := c.mk_surjective
+  constructor
+  intro p₁ p₂
+  apply subsingleton_π₀_of_subcomplex
+  · intro s
+    have hs := π₀.sound s rfl rfl
+    simp only [component, Opposite.op_unop, Fin.isValue, Set.mem_setOf_eq]
+    refine ⟨fun h α ↦ ?_, fun h α ↦ ?_⟩
+    all_goals
+      obtain rfl := Subsingleton.elim α (𝟙 _)
+      simpa [← hs] using h (𝟙 _)
+  · intro s hs₁ hs₀
+    simp [component] at hs₀ hs₁ ⊢
+    intro α
+    have : Mono α := by
+      rw [SimplexCategory.mono_iff_injective]
+      rintro x y h
+      fin_cases x
+      fin_cases y
+      rfl
+    obtain ⟨i, rfl⟩ := SimplexCategory.eq_δ_of_mono α
+    fin_cases i
+    · simpa using hs₀ (𝟙 _)
+    · simpa using hs₁ (𝟙 _)
+  · obtain ⟨⟨x₁, hx₁⟩, rfl⟩ := p₁.mk_surjective
+    obtain ⟨⟨x₂, hx₂⟩, rfl⟩ := p₂.mk_surjective
+    simp [component] at hx₁ hx₂
+    replace hx₁ := hx₁ (𝟙 _)
+    replace hx₂ := hx₂ (𝟙 _)
+    simp only [op_id, FunctorToTypes.map_id_apply] at hx₁ hx₂
+    simp [hx₁, hx₂]
+
 lemma min_component (c₁ c₂ : X.π₀) (h : c₁ ≠ c₂) :
     c₁.component ⊓ c₂.component = ⊥ := by
   ext ⟨n⟩ x
