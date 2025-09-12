@@ -158,6 +158,7 @@ import TopCatModelCategory.TopCat.CosimpIso
 import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
 import TopCatModelCategory.TopCat.DeformationRetract
 import TopCatModelCategory.TopCat.Gluing
+import TopCatModelCategory.TopCat.Homotopy
 import TopCatModelCategory.TopCat.HornDeformationRetract
 import TopCatModelCategory.TopCat.Monoidal
 import TopCatModelCategory.TopCat.RelativeT1CellComplex

@@ -1,6 +1,7 @@
 import Mathlib.AlgebraicTopology.SimplicialSet.Boundary
 import Mathlib.AlgebraicTopology.SimplicialSet.Horn
 import Mathlib.Topology.Category.TopCat.Limits.Basic
+import Mathlib.Topology.MetricSpace.Isometry
 import Mathlib.AlgebraicTopology.SingularSet
 import TopCatModelCategory.TopCat.W
 import TopCatModelCategory.TopCat.T1Inclusion
@@ -405,3 +406,95 @@ lemma toSSetObj₀Equiv_toSSet_obj_δ_zero (X : TopCat.{u}) (x : toSSet.obj X _�
   apply sub_zero
 
 end TopCat
+
+open Topology
+
+namespace SimplexCategory
+
+@[simp]
+lemma const_apply' (x y : SimplexCategory)
+    (i : Fin (y.len + 1)) (j : Fin (x.len + 1)) :
+    const x y i j = i :=
+  rfl
+
+section
+
+variable {n : ℕ}
+
+def toTopObjι (f : ⦋n⦌.toTopObj) (i : Fin (n + 1)) : ℝ := (f.1 i).1
+
+@[simp]
+lemma toTopObjι_apply (f : ⦋n⦌.toTopObj) (i : Fin (n + 1)) :
+    toTopObjι f i = f i := rfl
+
+lemma isClosedEmbedding_toTopObjι :
+    IsClosedEmbedding (toTopObjι (n := n)) :=
+  Isometry.isClosedEmbedding (fun _ _ ↦ rfl)
+
+end
+
+namespace toTopObj
+
+variable {n m : SimplexCategory}
+
+def vertex (i : Fin (n.len + 1)) : n.toTopObj :=
+  ⟨fun j ↦ if j = i then 1 else 0, by simp [toTopObj]⟩
+
+@[simp]
+lemma toTopMap_vertex (f : n ⟶ m) (i : Fin (n.len + 1)) :
+    toTopMap f (vertex i) = vertex (f i) := by
+  dsimp [toTopMap, vertex]
+  aesop
+
+end toTopObj
+
+end SimplexCategory
+
+namespace SSet
+
+variable {X Y : SSet.{u}}
+
+noncomputable def toTopObjMk (x : X _⦋0⦌) : toTop.obj X :=
+  toTop.map (yonedaEquiv.symm x) default
+
+@[simp]
+lemma toTop_map_toTopObjMk (f : X ⟶ Y) (x : X _⦋0⦌) :
+    toTop.map f (toTopObjMk x) = toTopObjMk (f.app _ x) := by
+  dsimp [toTopObjMk]
+  rw [← ConcreteCategory.comp_apply, ← Functor.map_comp, yonedaEquiv_symm_comp]
+
+variable (X) in
+@[simp]
+lemma toTop_map_const_apply (y : Y _⦋0⦌) (x : toTop.obj X) :
+    toTop.map (SSet.const (X := X) y) x = toTopObjMk y := by
+  let p : X ⟶ Δ[0] := stdSimplex.isTerminalObj₀.from _
+  have : (TopCat.Hom.hom (toTop.map p)) x = toTopObjMk (stdSimplex.const _ 0 _) :=
+    Subsingleton.elim _ _
+  rw [← SSet.comp_const (f := p), Functor.map_comp]
+  simp [this]
+
+@[simp]
+lemma _root_.SimplexCategory.toTopHomeo_toTopObjMk {n : ℕ} (i : Fin (n + 1)):
+    ⦋n⦌.toTopHomeo (toTopObjMk (stdSimplex.const _ i _))=
+      SimplexCategory.toTopObj.vertex (n := ⦋n⦌) i := by
+  sorry
+
+namespace stdSimplex
+
+@[simp]
+lemma toTopObjHomeoUnitInterval_zero :
+    toTopObjHomeoUnitInterval (toTopObjMk (stdSimplex.const _ 0 _)) = 0 := by
+  dsimp [toTopObjHomeoUnitInterval]
+  simp
+  sorry
+
+@[simp]
+lemma toTopObjHomeoUnitInterval_one :
+    toTopObjHomeoUnitInterval (toTopObjMk (stdSimplex.const _ 1 _)) = 1 := by
+  dsimp [toTopObjHomeoUnitInterval]
+  simp
+  sorry
+
+end stdSimplex
+
+end SSet

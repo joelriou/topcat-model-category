@@ -10,15 +10,7 @@ namespace SimplexCategory
 
 section
 
-variable {n : ℕ}
-
-def toTopObjι (f : ⦋n⦌.toTopObj) (i : Fin (n + 1)) : ℝ := (f.1 i).1
-
-lemma isClosedEmbedding_toTopObjι :
-    IsClosedEmbedding (toTopObjι (n := n)) :=
-  Isometry.isClosedEmbedding (fun _ _ ↦ rfl)
-
-variable (n)
+variable (n : ℕ)
 
 lemma isAffineMap_aux :
     (IsAffineAt.φ (fun s i ↦ ((⦋n⦌.toTopHomeo s).1 i).1)
@@ -30,10 +22,6 @@ lemma isAffineMap_aux :
     ContinuousMap.id_apply, coe_inj]
   exact congr_fun (congr_arg Subtype.val (congr_arg ULift.down
     (congr_fun ((forget _).congr_map ((toTopSimplex.{u}.app ⦋n⦌).inv_hom_id)) (ULift.up x)))) i
-
-@[simp]
-lemma toTopObjι_apply (f : ⦋n⦌.toTopObj) (i : Fin (n + 1)) :
-    toTopObjι f i = f i := rfl
 
 noncomputable def affineMap : AffineMap.{_, u} Δ[n] (Fin (n + 1) → ℝ) where
   f s i := ((⦋n⦌.toTopHomeo s).1 i).1

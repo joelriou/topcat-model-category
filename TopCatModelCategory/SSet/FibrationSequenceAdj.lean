@@ -2,6 +2,7 @@ import TopCatModelCategory.SSet.FibrationSequence
 import TopCatModelCategory.ModelCategoryTopCat
 import TopCatModelCategory.SSet.ToTopFibration
 import TopCatModelCategory.TopCat.ToTopExact
+import TopCatModelCategory.TopCat.Homotopy
 
 universe u
 
@@ -51,9 +52,6 @@ noncomputable def ιtoTopToSSet : seq ⟶ seq.toTopToSSet where
   mor₃ := sSetTopAdj.unit.app _
 
 open KanComplex
-
-instance (X : SSet.{u}) [X.IsContractible] :
-    (TopCat.toSSet.obj (SSet.toTop.obj X)).IsContractible := sorry
 
 instance (X : SSet.{u}) [IsFibrant X] (x : X _⦋0⦌) :
     (loop X x).toTopToSSet.E.IsContractible := by

@@ -8,12 +8,6 @@ open CategoryTheory Simplicial Opposite NNReal Limits
 
 universe v u
 
-@[simp]
-lemma SimplexCategory.const_apply' (x y : SimplexCategory)
-    (i : Fin (y.len + 1)) (j : Fin (x.len + 1)) :
-    const x y i j = i :=
-  rfl
-
 namespace SSet
 
 def vertexOfSimplex {X : SSet.{u}} {n : SimplexCategory}
@@ -59,9 +53,6 @@ def barycenter {α : Type*} [Fintype α] (p : α → n.toTopObj) (w : α → ℝ
     simp only [coe_sum, NNReal.coe_mul]
     rw [← Finset.mul_sum, this, mul_one]⟩
 
-def vertex (i : Fin (n.len + 1)) : n.toTopObj :=
-  ⟨fun j ↦ if j = i then 1 else 0, by simp [toTopObj]⟩
-
 lemma eq_barycenter_vertex (x : n.toTopObj) :
     x = barycenter vertex x.1 x.2 := by
   ext
@@ -75,12 +66,6 @@ lemma exists_barycenter_vertex (x : n.toTopObj) :
 variable (n) in
 noncomputable def isobarycenter : n.toTopObj :=
   barycenter vertex (fun _ ↦ 1 / (n.len + 1)) (by simp)
-
-@[simp]
-lemma toTopMap_vertex (f : n ⟶ m) (i : Fin (n.len + 1)) :
-    toTopMap f (vertex i) = vertex (f i) := by
-  dsimp [toTopMap, vertex]
-  aesop
 
 @[simp]
 lemma toTopMap_barycenter (g : n ⟶ m)
