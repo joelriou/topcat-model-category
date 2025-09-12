@@ -11,8 +11,8 @@ namespace IsQuotientMap
 
 variable {X₁ X₂ : Type*} {f : X₁ → X₂}
   [TopologicalSpace X₁] [TopologicalSpace X₂]
-  (hf : IsQuotientMap f) (Y : Type*) [TopologicalSpace Y]
-  [LocallyCompactSpace Y]
+  (hf : IsQuotientMap f)
+  (Y : Type*) [TopologicalSpace Y] [LocallyCompactSpace Y]
 
 include hf
 
@@ -21,16 +21,13 @@ lemma prod_locallyCompactSpace_aux
     (g : X₂ × Y → T) :
     Continuous g ↔ Continuous (g ∘ Prod.map f id) :=
   ⟨fun hg ↦ hg.comp (hf.continuous.prodMap continuous_id), fun hg ↦ by
-    let φ (x₂ : X₂) : C(Y, T) :=
-      ⟨fun y ↦ g (x₂, y), by
-        obtain ⟨x₁, rfl⟩ := hf.surjective x₂
-        exact hg.comp (.prodMk_right x₁)⟩
-    have hφ : Continuous φ := by
-      rw [hf.continuous_iff]
-      exact ContinuousMap.continuous_of_continuous_uncurry _ hg
-    exact (ContinuousMap.uncurry ⟨φ, hφ⟩).continuous⟩
+    refine (ContinuousMap.uncurry ⟨fun x₂ ↦ ⟨fun y ↦ g (x₂, y), ?_⟩, ?_⟩).continuous
+    · obtain ⟨x₁, rfl⟩ := hf.surjective x₂
+      exact hg.comp (.prodMk_right x₁)
+    · rw [hf.continuous_iff]
+      exact ContinuousMap.continuous_of_continuous_uncurry _ hg⟩
 
-lemma prod_locallyCompactSpace :
+lemma prodMap_id_right_of_locallyCompactSpace :
     IsQuotientMap (Prod.map f (id : Y → Y)) where
   surjective := hf.surjective.prodMap Function.surjective_id
   eq_coinduced := by
@@ -42,10 +39,11 @@ lemma prod_locallyCompactSpace :
     · rw [← continuous_iff_coinduced_le]
       exact (hf.continuous.prodMap continuous_id)
 
-lemma locallyCompactSpace_prod :
+lemma prodMap_id_left_of_locallyCompactSpace :
     IsQuotientMap (Prod.map (id : Y → Y) f) :=
-  (Homeomorph.prodComm _ _).isQuotientMap.comp ((hf.prod_locallyCompactSpace _).comp
-    (Homeomorph.prodComm _ _).isQuotientMap)
+  (Homeomorph.prodComm _ _).isQuotientMap.comp
+    ((hf.prodMap_id_right_of_locallyCompactSpace _).comp
+      (Homeomorph.prodComm _ _).isQuotientMap)
 
 end IsQuotientMap
 
