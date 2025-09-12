@@ -146,4 +146,48 @@ instance preservesLimit_pair_toDeltaGenerated (X Y : SSet.{u}) :
 instance : PreservesLimitsOfShape (Discrete WalkingPair) toDeltaGenerated.{u} where
   preservesLimit := preservesLimit_of_iso_diagram _ (diagramIsoPair _).symm
 
+section
+
+open DeltaGenerated' in
+instance preservesLimit_pair_deltaGeneratedToTopCat (X Y : DeltaGenerated'.{u})
+    [DeltaGeneratedSpace' ((DeltaGenerated'.toTopCat.obj X) × (DeltaGenerated'.toTopCat.obj Y))] :
+    PreservesLimit (pair X Y) DeltaGenerated'.toTopCat := by
+  let c : BinaryFan X Y := BinaryFan.mk
+    (P := .of (toTopCat.obj X × toTopCat.obj Y)) (fst (C := TopCat) _ _) (snd (C := TopCat) _ _)
+  let hc : IsLimit c := BinaryFan.IsLimit.mk _
+    (fun f₁ f₂ ↦ lift (C := TopCat) f₁ f₂) (fun _ _ ↦ rfl) (fun _ _ ↦ rfl) (by
+      intro _ f₁ f₂ m h₁ h₂
+      ext t : 2
+      apply Prod.ext
+      · exact ConcreteCategory.congr_hom h₁ t
+      · exact ConcreteCategory.congr_hom h₂ t)
+  exact preservesLimit_of_preserves_limit_cone hc
+    ((isLimitMapConeBinaryFanEquiv _ _ _).2
+    (tensorProductIsBinaryProduct (toTopCat.obj X) (toTopCat.obj Y)))
+
+variable (X Y : SSet.{u})
+
+instance [DeltaGeneratedSpace' (|X| × |Y|)] :
+    PreservesLimit (pair X Y) toTop :=
+  preservesLimit_of_preserves_limit_cone (tensorProductIsBinaryProduct X Y) (by
+    have : PreservesLimit (pair (GeneratedByTopCat.of ↑(toTop.obj X)) (GeneratedByTopCat.of ↑(toTop.obj Y)))
+      DeltaGenerated'.toTopCat := by
+        apply (config := { allowSynthFailures := true })
+          preservesLimit_pair_deltaGeneratedToTopCat
+        assumption
+    have : PreservesLimit (pair X Y ⋙ toDeltaGenerated) DeltaGenerated'.toTopCat := by
+      let e : pair X Y ⋙ toDeltaGenerated ≅
+        pair (.of |X|) (.of |Y|) := mapPairIso (Iso.refl _) (Iso.refl _)
+      exact preservesLimit_of_iso_diagram _ e.symm
+    change IsLimit (DeltaGenerated'.toTopCat.mapCone
+      (toDeltaGenerated.mapCone (BinaryFan.mk (fst X Y) (snd X Y))))
+    apply isLimitOfPreserves
+    apply isLimitOfPreserves
+    apply tensorProductIsBinaryProduct)
+
+instance (n : SimplexCategory) : DeltaGeneratedSpace' (|X| × |stdSimplex.obj n|) := by
+  sorry
+
+end
+
 end SSet

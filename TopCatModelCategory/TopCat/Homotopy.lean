@@ -69,9 +69,17 @@ noncomputable def toTopTensorComparison :
     toTop.obj (X ⊗ Y) ⟶ toTop.obj X ⊗ toTop.obj Y :=
   CartesianMonoidalCategory.lift (toTop.map (fst _ _)) (toTop.map (snd _ _))
 
+lemma isIso_toTopTensorComparison_of_preservesLimit_pair
+    [PreservesLimit (pair X Y) toTop] :
+    IsIso (toTopTensorComparison X Y) :=
+  (IsLimit.conePointUniqueUpToIso
+    (mapIsLimitOfPreservesOfIsLimit toTop _ _ (tensorProductIsBinaryProduct X Y))
+    (tensorProductIsBinaryProduct (toTop.obj X) (toTop.obj Y))).isIso_hom
+
 variable (n : SimplexCategory)
 
-instance : IsIso (toTopTensorComparison X (stdSimplex.obj n)) := sorry
+instance : IsIso (toTopTensorComparison X (stdSimplex.obj n)) :=
+  isIso_toTopTensorComparison_of_preservesLimit_pair _ _
 
 noncomputable def toTopTensorIso :
     toTop.obj (X ⊗ stdSimplex.obj n) ≅ toTop.obj X ⊗ toTop.obj (stdSimplex.obj n) :=
