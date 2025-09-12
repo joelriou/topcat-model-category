@@ -185,8 +185,18 @@ instance [DeltaGeneratedSpace' (|X| × |Y|)] :
     apply isLimitOfPreserves
     apply tensorProductIsBinaryProduct)
 
-instance (n : SimplexCategory) : DeltaGeneratedSpace' (|X| × |stdSimplex.obj n|) := by
+instance deltaGeneratedSpace'_stdSimplex_prod_stdSimplex (p q : SimplexCategory) :
+    DeltaGeneratedSpace' (|stdSimplex.{u}.obj p| × |stdSimplex.{u}.obj q|) := by
   sorry
+
+instance (n : SimplexCategory) : DeltaGeneratedSpace' (|X| × |stdSimplex.{u}.obj n|) := by
+  have h := isColimitOfPreserves (toTop ⋙ tensorRight |stdSimplex.obj n|)
+    X.isColimitCoconeFromElementsOp
+  apply Topology.isGeneratedBy.of_isColimit (X := fun n ↦ (Fin n → ℝ))
+    (isColimitOfPreserves (toTop ⋙ tensorRight |stdSimplex.obj n|)
+    X.isColimitCoconeFromElementsOp)
+  intro j
+  apply deltaGeneratedSpace'_stdSimplex_prod_stdSimplex
 
 end
 

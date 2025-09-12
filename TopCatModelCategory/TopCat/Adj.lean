@@ -188,6 +188,9 @@ instance (n : SimplexCategory) : CompactSpace n.toTopObj := by
   rw [← isCompact_iff_compactSpace]
   apply isCompact_toTopObj
 
+instance (n : SimplexCategory) : CompactSpace |stdSimplex.{u}.obj n| :=
+  n.toTopHomeo.symm.compactSpace
+
 end
 
 example (X : SSet) [X.IsFinite] :
