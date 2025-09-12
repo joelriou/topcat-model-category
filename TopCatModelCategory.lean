@@ -18,6 +18,7 @@ import TopCatModelCategory.Convenient.IsColimit
 import TopCatModelCategory.Convenient.Limits
 import TopCatModelCategory.Convenient.Open
 import TopCatModelCategory.Convenient.OpenBall
+import TopCatModelCategory.Convenient.Product
 import TopCatModelCategory.Convenient.SSet
 import TopCatModelCategory.ConvexCompact
 import TopCatModelCategory.Elements
