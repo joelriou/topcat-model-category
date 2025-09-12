@@ -7,18 +7,37 @@ universe u
 
 open CategoryTheory Limits Topology
 
+namespace SimplexCategory
+
+namespace Hyperplane
+
+open NormedSpace
+
+noncomputable def stdSimplexHomeoClosedBall (n : ℕ) :
+    stdSimplex n ≃ₜ (Metric.closedBall (0 : Hyperplane n) 1) := by
+  obtain _ | n := n
+  · exact
+      { toFun _ := ⟨0, by simp⟩
+        invFun _ := default
+        left_inv _ := by subsingleton
+        right_inv _ := by subsingleton }
+  · exact homeoClosedBallOfConvexCompact (Hyperplane.convex_stdSimplex (n + 1))
+      (Hyperplane.isCompact_stdSimplex _) (Hyperplane.zero_mem_interior_stdSimplex _)
+
+end Hyperplane
+
+end SimplexCategory
+
 namespace SSet
 
 section
 
 open NormedSpace SimplexCategory
 
-instance (n : ℕ) : DeltaGeneratedSpace' (Hyperplane.stdSimplex n) := by
-  obtain _ | n := n
-  · infer_instance
-  · let e := homeoClosedBallOfConvexCompact (Hyperplane.convex_stdSimplex (n + 1))
-      (Hyperplane.isCompact_stdSimplex _) (Hyperplane.zero_mem_interior_stdSimplex _)
-    exact e.symm.isQuotientMap.isGeneratedBy
+
+
+instance (n : ℕ) : DeltaGeneratedSpace' (Hyperplane.stdSimplex n) :=
+  (Hyperplane.stdSimplexHomeoClosedBall n).symm.isQuotientMap.isGeneratedBy
 
 instance (n : SimplexCategory) : DeltaGeneratedSpace' n.toTopObj := by
   induction' n using SimplexCategory.rec with n

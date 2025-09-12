@@ -36,6 +36,12 @@ variable {n} in
 lemma sum_eq_zero (x : Hyperplane n) : ∑ i, x.1 i = 0 := by
   simpa only [LinearMap.mem_ker, sumCoordinates_apply] using x.2
 
+noncomputable instance : Unique (Hyperplane 0) where
+  uniq x := by
+    ext i
+    fin_cases i
+    simpa using sum_eq_zero x
+
 instance (n : ℕ) : Nontrivial (Hyperplane (n + 1)) where
   exists_pair_ne := ⟨0, ⟨Fin.cases (- (n + 1)) (fun _ ↦ 1), by
     simp [Fin.sum_univ_succ]
