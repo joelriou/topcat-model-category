@@ -19,12 +19,6 @@ scoped [Simplicial] notation "|" X "|" => SSet.toTop.obj X
 
 namespace SSet
 
---def uliftFunctor₀IsoId : uliftFunctor.{0, 0} ≅ 𝟭 _ :=
---  NatIso.ofComponents (fun X ↦
---    NatIso.ofComponents (fun n ↦ Equiv.ulift.toIso))
-
---alias stdSimplexCompToTopIso := toTopSimplex
-
 instance : toTop.IsLeftAdjoint := sSetTopAdj.isLeftAdjoint
 
 instance {J : Type*} [LinearOrder J] :
@@ -475,9 +469,20 @@ lemma toTop_map_const_apply (y : Y _⦋0⦌) (x : toTop.obj X) :
 
 @[simp]
 lemma _root_.SimplexCategory.toTopHomeo_toTopObjMk {n : ℕ} (i : Fin (n + 1)):
-    ⦋n⦌.toTopHomeo (toTopObjMk (stdSimplex.const _ i _))=
+    ⦋n⦌.toTopHomeo (toTopObjMk.{u} (stdSimplex.const _ i _))=
       SimplexCategory.toTopObj.vertex (n := ⦋n⦌) i := by
-  sorry
+  apply (SimplexCategory.toTopHomeo_naturality_apply.{u}
+    (SimplexCategory.const ⦋0⦌ ⦋n⦌ i) _).trans
+  rw [show ⦋0⦌.toTopHomeo default = default by subsingleton]
+  ext j
+  simp
+  by_cases hij : i = j
+  · subst hij
+    rw [Finset.sum_eq_single (a := 0) (by simp) (by simp; rfl)]
+    simp [SimplexCategory.toTopObj.vertex]
+  · rw [Finset.sum_eq_zero (fun _ ↦ by simp; tauto)]
+    simp [SimplexCategory.toTopObj.vertex]
+    tauto
 
 namespace stdSimplex
 
@@ -486,14 +491,18 @@ lemma toTopObjHomeoUnitInterval_zero :
     toTopObjHomeoUnitInterval (toTopObjMk (stdSimplex.const _ 0 _)) = 0 := by
   dsimp [toTopObjHomeoUnitInterval]
   simp
-  sorry
+  have : SimplexCategory.toTopObjOneHomeo (SimplexCategory.toTopObj.vertex 0) = 1 := rfl
+  simp [simplexCategoryToTopObjHomeoUnitInterval, this]
+  rfl
 
 @[simp]
 lemma toTopObjHomeoUnitInterval_one :
     toTopObjHomeoUnitInterval (toTopObjMk (stdSimplex.const _ 1 _)) = 1 := by
   dsimp [toTopObjHomeoUnitInterval]
   simp
-  sorry
+  have : SimplexCategory.toTopObjOneHomeo (SimplexCategory.toTopObj.vertex 1) = 0 := rfl
+  simp [simplexCategoryToTopObjHomeoUnitInterval, this]
+  rfl
 
 end stdSimplex
 
