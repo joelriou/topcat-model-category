@@ -1,5 +1,6 @@
-import TopCatModelCategory.Convenient.GeneratedBy
+import TopCatModelCategory.Convenient.Sigma
 import Mathlib.Topology.CompactOpen
+import Mathlib.Topology.Homeomorph.Lemmas
 
 universe v v' t u
 
@@ -46,5 +47,34 @@ lemma prodMap_id_left_of_locallyCompactSpace :
       (Homeomorph.prodComm _ _).isQuotientMap)
 
 end IsQuotientMap
+
+namespace IsGeneratedBy
+
+variable {ι : Type t} (X : ι → Type u) [∀ i, TopologicalSpace (X i)]
+  (T : Type v') [TopologicalSpace T]
+  (Y : Type v) [TopologicalSpace Y]
+
+variable [Inhabited ι] [Nonempty (X default)]
+
+instance [∀ i, IsGeneratedBy X (X i × Y)] [LocallyCompactSpace Y]
+     [IsGeneratedBy X T] : IsGeneratedBy X (T × Y) := by
+  have hT := (iff_isQuotientMap_fromSigma X T).1 inferInstance
+  replace hT := hT.prodMap_id_right_of_locallyCompactSpace Y
+  replace hT := hT.comp Homeomorph.sigmaProdDistrib.symm.isQuotientMap
+  exact hT.isGeneratedBy
+
+variable [∀ i, LocallyCompactSpace (X i)] [∀ i j, IsGeneratedBy X (X i × X j)]
+
+instance [IsGeneratedBy X T] [IsGeneratedBy X Y] [LocallyCompactSpace Y] :
+    IsGeneratedBy X (T × Y) := by
+  have (i : ι) : IsGeneratedBy X (X i × Y) :=
+    (Homeomorph.prodComm _ _).isQuotientMap.isGeneratedBy
+  infer_instance
+
+instance [IsGeneratedBy X T] [IsGeneratedBy X Y] [LocallyCompactSpace T] :
+    IsGeneratedBy X (T × Y) :=
+  (Homeomorph.prodComm _ _).isQuotientMap.isGeneratedBy
+
+end IsGeneratedBy
 
 end Topology
