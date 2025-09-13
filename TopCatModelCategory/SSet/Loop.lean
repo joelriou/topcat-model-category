@@ -148,6 +148,22 @@ noncomputable abbrev path₀ : Subcomplex X.path := Subcomplex.fiber X.pathEv₀
 lemma path₀_ι_pathEv₀ : (X.path₀ x).ι ≫ X.pathEv₀ = const x := by
   simp [path₀]
 
+@[reassoc (attr := simp)]
+lemma const_whiskerRight_comp_uncurry_path₀_ι (Z : SSet.{u}) :
+    const (X := Z) (stdSimplex.const 1 0 (op ⦋0⦌)) ▷ (X.path₀ x).toSSet ≫
+      uncurry (X.path₀ x).ι = const x := by
+  wlog hZ : Z = Δ[0]
+  · let p : Z ⟶ Δ[0] := stdSimplex.isTerminalObj₀.from Z
+    rw [← comp_const p, comp_whiskerRight, Category.assoc, this _ _ _ rfl, comp_const]
+  subst hZ
+  have := X.path₀_ι_pathEv₀ x
+  rw [← cancel_mono (stdSimplex.ihom₀.inv.app _)] at this
+  dsimp [pathEv₀, ihomEv] at this
+  simp only [Category.assoc, Iso.hom_inv_id_app, Category.comp_id,
+    const_comp, yonedaEquiv_symm_zero] at this
+  rw [whiskerRight_comp_uncurry, this]
+  rfl
+
 def loop : Subcomplex X.path := X.path₀ x ⊓ Subcomplex.fiber X.pathEv₁ x
 
 lemma loop_le_path₀ : X.loop x ≤ X.path₀ x := inf_le_left
@@ -320,10 +336,11 @@ lemma path₀_ι_whiskerLeft_pathHomotopy_h_pathEv₀ :
     curry_pre_app_assoc, ← curry_natural_left_assoc,
     whiskerRight_tensor_assoc, Iso.hom_inv_id_assoc,
     ← comp_whiskerRight_assoc, stdSimplex.obj₀Equiv_symm_apply,
-    yonedaEquiv_symm_zero, stdSimplex.const_zero_whiskerRight_comp_hDelta₁]
-  rw [associator_inv_naturality_right_assoc]
-  rw [whisker_exchange_assoc]
-  sorry
+    yonedaEquiv_symm_zero, stdSimplex.const_zero_whiskerRight_comp_hDelta₁,
+    associator_inv_naturality_right_assoc, whisker_exchange_assoc,
+    ← uncurry_id_eq_ev, ← uncurry_natural_left, Category.comp_id,
+    const_whiskerRight_comp_uncurry_path₀_ι, comp_const]
+  rfl
 
 noncomputable def contractiblePath₀ : Contractible (X.path₀ x) where
   pt := X.path₀BasePoint x
