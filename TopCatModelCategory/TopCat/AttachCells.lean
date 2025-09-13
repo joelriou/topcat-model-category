@@ -117,6 +117,10 @@ noncomputable def equivComplRangeM :
         rw [Set.mem_compl_iff, cofan₂_inj_mem_range_m_iff] at hx
         exact ⟨⟨i, ⟨x, by rwa [Set.mem_compl_iff]⟩⟩, rfl⟩)
 
+@[simp]
+lemma equivComplRangeM_apply_coe (x) :
+    (hf.equivComplRangeM x).1 = hf.cofan₂.inj x.1 x.2 := rfl
+
 noncomputable def equiv :
     (Σ (i : hf.ι), ((Set.range (g (hf.π i)))ᶜ : Set _)) ≃ ((Set.range f)ᶜ : Set _) :=
   hf.equivComplRangeM.trans
@@ -125,7 +129,14 @@ noncomputable def equiv :
 lemma equiv_apply {i : hf.ι} (x : ((Set.range (g (hf.π i)))ᶜ : Set _)) :
     hf.equiv hg ⟨i, x⟩ = ⟨hf.cell i x, (hf.equiv hg ⟨i, x⟩).2⟩ := rfl
 
-include hg in
+@[simp]
+lemma equiv_apply_coe {i : hf.ι} (x : ((Set.range (g (hf.π i)))ᶜ : Set _)) :
+    ↑(hf.equiv hg ⟨i, x⟩) = hf.cell i x := rfl
+
+section
+
+include hg
+
 lemma interiorCell_eq_range (i : hf.ι) :
     hf.interiorCell i = Set.image (hf.cell i) (Set.range (g (hf.π i)))ᶜ := by
   ext x
@@ -139,6 +150,26 @@ lemma interiorCell_eq_range (i : hf.ι) :
     simp only [Set.mem_image, Set.mem_compl_iff, Set.mem_range, not_exists] at hx
     obtain ⟨a, ha, rfl⟩ := hx
     simpa [interiorCell, fullCell, hf.cell_mem_boundaryCell_iff hg a]
+
+lemma cell_injective_on {i : hf.ι} {b₁ b₂ : B (hf.π i)}
+    (hb : hf.cell i b₁ = hf.cell i b₂)
+    (hb₁ : b₁ ∉ Set.range (g (hf.π i))) (hb₂ : b₂ ∉ Set.range (g (hf.π i))) :
+    b₁ = b₂ := by
+  simpa using (equiv hf hg).injective (a₁ := ⟨i, ⟨b₁, hb₁⟩⟩) (a₂ := ⟨i, ⟨b₂, hb₂⟩⟩)
+    (by rwa [Subtype.ext_iff])
+
+lemma disjoint_interiorCell {i i' : hf.ι} (hi : i ≠ i') :
+    Disjoint (hf.interiorCell i) (hf.interiorCell i') := by
+  rw [Set.disjoint_iff_forall_ne]
+  rintro x hx _ hx' rfl
+  rw [interiorCell_eq_range _ hg] at hx hx'
+  obtain ⟨b, hb₁, hb₂⟩ := hx
+  obtain ⟨b', hb'₁, hb'₂⟩ := hx'
+  exact hi (congr_arg Sigma.fst ((equiv hf hg).injective
+    (a₁ := ⟨i, b, hb₁⟩) (a₂ := ⟨i', b', hb'₁⟩)
+    (by simp_rw [Subtype.ext_iff, equiv_apply_coe, hb₂, hb'₂])))
+
+end
 
 end AttachCells
 
