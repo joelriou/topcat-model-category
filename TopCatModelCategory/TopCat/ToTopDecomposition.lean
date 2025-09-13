@@ -5,7 +5,7 @@ import TopCatModelCategory.TopCat.CosimpIso
 import TopCatModelCategory.TopCat.RelativeT1CellComplex
 import TopCatModelCategory.CellComplex
 
-open Simplicial CategoryTheory HomotopicalAlgebra
+open Simplicial CategoryTheory HomotopicalAlgebra Limits
 
 namespace stdSimplex
 
@@ -21,8 +21,112 @@ def toTopMap_mem_interior {n m : SimplexCategory} (x : n.toTopObj)
   dsimp
   exact lt_of_lt_of_le (hx j) (Finset.single_le_sum (a := j) (by simp) (by simpa))
 
+lemma range_toTop_map_face_singleton_compl {n : ℕ} (i : Fin (n + 2)) :
+    Set.range (SSet.toTop.{u}.map (SSet.stdSimplex.face {i}ᶜ).ι) =
+      Set.range (SSet.toTop.map (SSet.stdSimplex.δ i)) := by
+  rw [← SSet.stdSimplex.faceSingletonComplIso_hom_ι, Functor.map_comp]
+  dsimp
+  ext x
+  constructor
+  · rintro ⟨x, rfl⟩
+    obtain ⟨y, rfl⟩ := ((SSet.toTop ⋙ forget _).mapIso
+      (SSet.stdSimplex.faceSingletonComplIso i)).toEquiv.surjective x
+    exact ⟨_, rfl⟩
+  · rintro ⟨x, rfl⟩
+    exact ⟨_, rfl⟩
+
+open SimplexCategory NNReal in
+lemma toTopHomeo_apply_eq_zero_iff {n : ℕ} (x : (|Δ[n]| : Type u)) (i : Fin (n + 1)) :
+    (⦋n⦌.toTopHomeo x) i = 0 ↔
+      x ∈ Set.range (ConcreteCategory.hom (SSet.toTop.map (SSet.stdSimplex.face {i}ᶜ).ι)) := by
+  obtain _ | n := n
+  · refine ⟨fun hx ↦ ?_, fun hx ↦ ?_⟩
+    · fin_cases i
+      simp at hx
+    · have : SSet.stdSimplex.face.{u} {i}ᶜ = ⊥ := by
+        fin_cases i
+        ext ⟨n⟩ x
+        induction n using SimplexCategory.rec with | _ n
+        rw [SSet.stdSimplex.mem_face_iff]
+        simpa using ⟨0, by subsingleton⟩
+      rw [this] at hx
+      simp at hx
+  · rw [range_toTop_map_face_singleton_compl]
+    obtain ⟨x, rfl⟩ := ⦋n + 1⦌.toTopHomeo.symm.surjective x
+    simp only [Homeomorph.apply_symm_apply, Set.mem_range]
+    trans ∃ (y : ⦋n⦌.toTopObj), toTopMap (δ i) y = x
+    · constructor
+      · intro hx
+        let y (j : Fin (n + 1)) : ℝ≥0 := x (Fin.succAbove i j)
+        refine ⟨⟨y, ?_⟩, ?_⟩
+        · simp [toTopObj, y]
+          trans ∑ (j ∈ {i}ᶜ), x j
+          · exact Finset.sum_of_injOn i.succAbove (by simp) (by simp)
+              (by simp; tauto) (by simp)
+          · have := x.2
+            simp only [toTopObj, Set.mem_setOf_eq] at this
+            rw [← this]
+            convert Finset.sum_compl_add_sum (s := {i}) (f := x)
+            simpa
+        · ext j : 2
+          dsimp [ToType] at j ⊢
+          by_cases hj : j < i
+          · obtain ⟨j, rfl⟩ := Fin.eq_castSucc_of_ne_last (Fin.ne_last_of_lt hj)
+            dsimp [y]
+            rw [Finset.sum_eq_single (a := j), Fin.succAbove_of_castSucc_lt i j hj]
+            · simp
+              intro b hb hb'
+              exact (hb' (Fin.succAbove_right_injective
+                (hb.trans (Fin.succAbove_of_castSucc_lt i j hj).symm))).elim
+            · simp
+              intro h
+              change Fin.succAbove _ _ ≠ _ at h
+              rw [Fin.succAbove_of_castSucc_lt _ _ hj] at h
+              tauto
+          · simp only [not_lt] at hj
+            obtain hj | hj := hj.lt_or_eq
+            · obtain ⟨j, rfl⟩ := Fin.eq_succ_of_ne_zero (Fin.ne_zero_of_lt hj)
+              simp [y]
+              rw [Finset.sum_eq_single (a := j), Fin.succAbove_of_lt_succ _ _ hj]
+              · simp
+                intro b hb hb'
+                exact (hb' (Fin.succAbove_right_injective
+                  (hb.trans (Fin.succAbove_of_lt_succ i j hj).symm))).elim
+              · simp
+                intro h
+                change Fin.succAbove _ _ ≠ _ at h
+                rw [Fin.succAbove_of_lt_succ _ _ hj] at h
+                tauto
+            · subst hj
+              simp [y]
+              rw [hx, Finset.sum_eq_zero]
+              simp
+              intro x hx
+              exact (Fin.succAbove_ne _ _ hx).elim
+      · rintro ⟨x, rfl⟩
+        simp only [toTopMap, len_mk, Finset.sum_eq_zero_iff, Finset.mem_filter, Finset.mem_univ,
+          true_and]
+        rintro j hj
+        exact (Fin.succAbove_ne _ _ hj).elim
+    · constructor
+      · rintro ⟨y, rfl⟩
+        exact ⟨⦋n⦌.toTopHomeo.symm y,
+          (toTopHomeo_symm_naturality_apply _ _).symm⟩
+      · rintro ⟨y, hy⟩
+        obtain ⟨y, rfl⟩ := ⦋n⦌.toTopHomeo.symm.surjective y
+        refine ⟨y, ?_⟩
+        apply ⦋n + 1⦌.toTopHomeo.symm.injective
+        rw [← hy]
+        exact toTopHomeo_symm_naturality_apply _ _
+
 lemma toTopHomeo_mem_interior_iff {n : ℕ} (x : |Δ[n]|) :
-    ⦋n⦌.toTopHomeo x ∈ interior _ ↔ x ∈ (Set.range (SSet.toTop.map ∂Δ[n].ι))ᶜ := sorry
+    ⦋n⦌.toTopHomeo x ∈ interior _ ↔ x ∈ (Set.range (SSet.toTop.map ∂Δ[n].ι))ᶜ := by
+  dsimp [interior]
+  rw [← not_iff_not]
+  simp only [Set.mem_compl_iff, not_not, not_forall, not_lt, nonpos_iff_eq_zero]
+  rw [SSet.boundary_eq_iSup]
+  simp only [SSet.Subcomplex.range_toTop_map_iSup_ι, Set.mem_iUnion, toTopHomeo_apply_eq_zero_iff ]
+  rfl
 
 open TopCat in
 lemma toTopMap_apply_injective_of_epi_of_mem_interior
@@ -101,8 +205,11 @@ lemma sigmaToTop_bijective : Function.Bijective X.sigmaToTop := by
   ext ⟨s, x, hx⟩
   dsimp [e, e₁, e₂, mapCellsEquiv, relativeCellComplexCellsEquiv, sigmaToTop, Cells.ι,
     relativeCellComplex]
-  dsimp [hX, map, AttachCells.map, AttachCells.cell]
-  sorry
+  dsimp [hX, map, AttachCells.map, AttachCells.cell, toTopObjToTop]
+  rw [← TopCat.comp_app, ← TopCat.comp_app, ← Functor.map_comp,
+    ← Functor.map_comp]
+  congr 3
+  exact (X.relativeCellComplexι_eq ((relativeCellComplexCellsEquiv X).symm s)).symm
 
 lemma sigmaToTop_naturality (s : X.N) (p : stdSimplex.interior ⦋s.dim⦌)
     (t : Y.N) (g : ⦋s.dim⦌ ⟶ ⦋t.dim⦌) [Epi g] (hg : f.app _ s.simplex = Y.map g.op t.simplex) :

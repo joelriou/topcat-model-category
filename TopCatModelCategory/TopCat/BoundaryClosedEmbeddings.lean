@@ -460,6 +460,26 @@ noncomputable def arrowMkToTopMapιIso :
       Arrow.mk (Set.functorToTopCat.map (CategoryTheory.homOfLE (toTopSet_obj_subset ι A))) :=
   Arrow.isoMk (asIso ((toTopNatTrans hι).app A)) (isoOfHomeo hι.homeomorphRange)
 
+@[simp]
+lemma range_toTop_map_iSup_ι {α : Type*} (U : α → X.Subcomplex) :
+    Set.range (toTop.map (⨆ i, U i).ι) =
+      ⋃ (i : α), Set.range (toTop.map (U i).ι) := by
+  ext x
+  simp only [Set.mem_range, Set.mem_iUnion]
+  constructor
+  · rintro ⟨y, rfl⟩
+    obtain ⟨⟨⟨n, ⟨s, hs⟩, hs'⟩, y⟩, rfl⟩ := surjective_sigmaToTopObj _ y
+    dsimp at y
+    simp only [Subpresheaf.iSup_obj, Set.mem_iUnion] at hs
+    obtain ⟨i, hi⟩ := hs
+    refine ⟨i, toTop.map (by exact yonedaEquiv.symm ⟨s, hi⟩) (⦋n⦌.toTopHomeo.symm y), ?_⟩
+    dsimp [sigmaToTopObj]
+    simp only [← ConcreteCategory.comp_apply, ← Functor.map_comp]
+    rfl
+  · rintro ⟨i, y, rfl⟩
+    exact ⟨toTop.map (Subcomplex.homOfLE (le_iSup U i)) y,
+      by rw [← ConcreteCategory.comp_apply, ← Functor.map_comp, homOfLE_ι]⟩
+
 end Subcomplex
 
 end SSet
