@@ -294,7 +294,7 @@ lemma ι_injective_on_compl {b₁ b₂ : B c.j c.i} (hb : c.ι b₁ = c.ι b₂)
     (fun a ↦ (h _ a).injective)
     ((isT₁Inclusion_incl_app hf h (Order.succ c.j)).injective hb) hb₁ hb₂
 
-noncomputable def equivinteriorCell :
+noncomputable def equivInteriorCell :
     ((Set.range (basicCell c.j c.i))ᶜ : Set _) ≃ interiorCell c := by
   refine Equiv.ofBijective (fun ⟨b, hb⟩ ↦ ⟨c.ι b, ?_⟩) ⟨?_, ?_⟩
   · rwa [ι_mem_interiorCell_iff h]
@@ -303,6 +303,10 @@ noncomputable def equivinteriorCell :
     exact ι_injective_on_compl h _ hb hb₁ hb₂
   · rintro ⟨_, b, hb, rfl⟩
     exact ⟨⟨b, hb⟩, rfl⟩
+
+@[simp]
+lemma equivInteriorCell_apply_coe (b : ((Set.range (basicCell c.j c.i))ᶜ : Set _)) :
+    (equivInteriorCell h c b).1 = c.ι b.1 := rfl
 
 lemma disjoint_interiorCell_range :
     Disjoint (interiorCell c) (Set.range f) := by
@@ -348,6 +352,48 @@ lemma disjoint_interiorCell {c' : hf.Cells} (hcc' : c ≠ c') :
     refine Set.disjoint_of_subset_right ?_ (disjoint_interiorCell_range_incl h c)
     exact (interiorCell_subset_range_incl_app_succ c').trans
       (range_incl_app_monotone _ (Order.succ_le_of_lt hj'))
+
+variable (hf) in
+lemma iUnion_eq_range_compl :
+    ⋃ (c : hf.Cells), interiorCell c = (Set.range f)ᶜ := by
+  ext x
+  simp only [Set.mem_iUnion, Set.mem_compl_iff, Set.mem_range, not_exists]
+  constructor
+  · rintro ⟨c, hc⟩ x₀ rfl
+    simpa using (Set.disjoint_iff.1 (disjoint_interiorCell_range h c)) ⟨hc, by simp⟩
+  · intro hx
+    have := (range_union_iUnion_eq_univ hf h).symm.le (Set.mem_univ x)
+    simp only [Set.mem_union, Set.mem_range, Set.mem_iUnion] at this
+    tauto
+
+variable (hf) in
+noncomputable def sigmaEquiv :
+    (Σ (c : hf.Cells), ((Set.range (basicCell c.j c.i))ᶜ : Set _)) ≃ ((Set.range f)ᶜ : Set _) := by
+  refine Equiv.ofBijective (fun ⟨c, b, hb⟩ ↦ ⟨c.ι b, ?_⟩) ⟨?_, ?_⟩
+  · rw [← iUnion_eq_range_compl hf h]
+    simp only [Set.mem_iUnion]
+    exact ⟨c, b, hb, rfl⟩
+  · rintro ⟨c, b, hb⟩ ⟨c', b', hb'⟩ hcc'
+    rw [Subtype.ext_iff] at hcc'
+    dsimp at hcc'
+    generalize hx₀ : c.ι b = x
+    have hx : x ∈ interiorCell c := by rwa [← hx₀, ι_mem_interiorCell_iff h]
+    have hx' : x ∈ interiorCell c' := by rwa [← hx₀, hcc', ι_mem_interiorCell_iff h]
+    obtain rfl : c = c' := by
+      by_contra!
+      simpa using Set.disjoint_iff.1 (disjoint_interiorCell h this) ⟨hx, hx'⟩
+    obtain rfl : b = b' := by
+      simpa using (equivInteriorCell h c).injective (a₁ := ⟨b, hb⟩) (a₂ := ⟨b', hb'⟩) (by
+        rwa [Subtype.ext_iff])
+    rfl
+  · rintro ⟨x, hx⟩
+    rw [← iUnion_eq_range_compl hf h, Set.mem_iUnion] at hx
+    obtain ⟨c, b, hb, rfl⟩ := hx
+    exact ⟨⟨c, b, hb⟩, rfl⟩
+
+@[simp]
+lemma sigmaEquiv_apply_coe (x) :
+    (sigmaEquiv hf h x).1 = x.1.ι x.2.1 := rfl
 
 end
 

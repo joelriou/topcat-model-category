@@ -395,6 +395,7 @@ noncomputable def relativeCellComplex :
   relativeCellComplexOfMono _
 
 variable (X) in
+@[simps]
 def relativeCellComplexCellsEquiv :
     (relativeCellComplex X).Cells ≃ X.N where
   toFun c := N.mk _ c.k.1.2

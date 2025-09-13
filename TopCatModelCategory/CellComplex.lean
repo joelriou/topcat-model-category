@@ -125,15 +125,31 @@ def ofOrderIso (hf : RelativeCellComplex.{w} basicCell f) (e : J' ≃o J) :
           rw [id_comp, ← Functor.map_comp]
           rfl))
 
-@[simps!]
-noncomputable def map (hf : RelativeCellComplex.{w} basicCell f)
+section
+variable (hf : RelativeCellComplex.{w} basicCell f)
     {D : Type*} [Category D] (F : C ⥤ D)
     [PreservesWellOrderContinuousOfShape J F] [PreservesColimitsOfShape J F]
     [∀ (T : Type w), PreservesColimitsOfShape (Discrete T) F]
-    [PreservesColimitsOfShape WalkingSpan F] :
+    [PreservesColimitsOfShape WalkingSpan F]
+
+@[simps!]
+noncomputable def map :
     RelativeCellComplex.{w} (fun j i ↦ F.map (basicCell j i)) (F.map f) where
   toTransfiniteCompositionOfShape := hf.toTransfiniteCompositionOfShape.map F
   attachCells j hj := (hf.attachCells j hj).map F
+
+@[simps]
+def mapCellsEquiv : (hf.map F).Cells ≃ hf.Cells where
+  toFun c :=
+    { j := c.j
+      hj := c.hj
+      k := c.k }
+  invFun c :=
+    { j := c.j
+      hj := c.hj
+      k := c.k }
+
+end
 
 end RelativeCellComplex
 

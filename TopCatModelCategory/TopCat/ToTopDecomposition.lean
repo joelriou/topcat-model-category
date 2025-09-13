@@ -1,8 +1,11 @@
 import TopCatModelCategory.TopCat.Adj
+import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
 import TopCatModelCategory.TopCat.CosimpInterior
 import TopCatModelCategory.TopCat.CosimpIso
+import TopCatModelCategory.TopCat.RelativeT1CellComplex
+import TopCatModelCategory.CellComplex
 
-open Simplicial CategoryTheory
+open Simplicial CategoryTheory HomotopicalAlgebra
 
 namespace stdSimplex
 
@@ -17,6 +20,9 @@ def toTopMap_mem_interior {n m : SimplexCategory} (x : n.toTopObj)
   obtain ⟨j, hj⟩ := hf i
   dsimp
   exact lt_of_lt_of_le (hx j) (Finset.single_le_sum (a := j) (by simp) (by simpa))
+
+lemma toTopHomeo_mem_interior_iff {n : ℕ} (x : |Δ[n]|) :
+    ⦋n⦌.toTopHomeo x ∈ interior _ ↔ x ∈ (Set.range (SSet.toTop.map ∂Δ[n].ι))ᶜ := sorry
 
 open TopCat in
 lemma toTopMap_apply_injective_of_epi_of_mem_interior
@@ -65,7 +71,38 @@ lemma toTopObjToTop_naturality' {n m : ℕ} (x : X _⦋n⦌) (p : ⦋m⦌.toTopO
 noncomputable def sigmaToTop : (Σ (s : X.N), stdSimplex.interior ⦋s.dim⦌) → |X| :=
   fun ⟨s, p⟩ ↦ toTopObjToTop s.simplex p
 
-lemma sigmaToTop_bijective : Function.Bijective X.sigmaToTop := sorry
+open RelativeCellComplex in
+lemma sigmaToTop_bijective : Function.Bijective X.sigmaToTop := by
+  let hX := X.relativeCellComplex.map (SSet.toTop)
+  let e₁ : (Σ (s : X.N), (stdSimplex.interior ⦋s.dim⦌)) ≃
+    (Σ (c : hX.Cells), ((Set.range (ConcreteCategory.hom
+      (toTop.{u}.map ∂Δ[c.j].ι)))ᶜ : Set _)) :=
+    { toFun := fun ⟨s, x, hx⟩ ↦
+        ⟨(mapCellsEquiv _ _).symm
+          ((relativeCellComplexCellsEquiv X).symm s), ⟨⦋s.dim⦌.toTopHomeo.symm x, by
+            obtain ⟨y, rfl⟩ := (SimplexCategory.toTopHomeo.{u} _).surjective x
+            rw [stdSimplex.toTopHomeo_mem_interior_iff] at hx
+            rwa [Homeomorph.symm_apply_apply]⟩⟩
+      invFun := fun ⟨s, y, hy⟩ ↦
+        ⟨relativeCellComplexCellsEquiv X (mapCellsEquiv _ _ s), ⟨⦋s.j⦌.toTopHomeo y, by
+            dsimp
+            rwa [stdSimplex.toTopHomeo_mem_interior_iff]⟩⟩
+      left_inv := by
+        rintro ⟨s, x, hx⟩
+        aesop
+      right_inv := by
+        rintro ⟨s, y, hy⟩
+        aesop }
+  let e₂ := TopCat.RelativeT₁CellComplex.sigmaEquiv hX
+    (fun _ _ ↦ boundary.t₁Inclusions_toTop_map_ι _)
+  let e : (Σ (s : X.N), stdSimplex.interior ⦋s.dim⦌) ≃ |X| :=
+    (e₁.trans e₂).trans (Equiv.subtypeUnivEquiv (by simp))
+  convert e.bijective
+  ext ⟨s, x, hx⟩
+  dsimp [e, e₁, e₂, mapCellsEquiv, relativeCellComplexCellsEquiv, sigmaToTop, Cells.ι,
+    relativeCellComplex]
+  dsimp [hX, map, AttachCells.map, AttachCells.cell]
+  sorry
 
 lemma sigmaToTop_naturality (s : X.N) (p : stdSimplex.interior ⦋s.dim⦌)
     (t : Y.N) (g : ⦋s.dim⦌ ⟶ ⦋t.dim⦌) [Epi g] (hg : f.app _ s.simplex = Y.map g.op t.simplex) :

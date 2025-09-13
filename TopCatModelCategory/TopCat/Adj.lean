@@ -509,4 +509,9 @@ lemma toTopObjHomeoUnitInterval_one :
 
 end stdSimplex
 
+instance : IsEmpty (toTop.obj (⊥ : Subcomplex X).toSSet) := by
+  have : IsEmpty (asEmptyCocone PEmpty.{u + 1}).pt := by dsimp; infer_instance
+  exact (Iso.toEquiv (((Subcomplex.isInitialBot X).isInitialObj
+    (toTop ⋙ forget _)).coconePointUniqueUpToIso Types.isInitialPunit)).isEmpty
+
 end SSet
