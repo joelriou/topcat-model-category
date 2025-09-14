@@ -1,5 +1,6 @@
 import TopCatModelCategory.SSet.AnodyneExtensions
 import TopCatModelCategory.SSet.SmallObject
+import TopCatModelCategory.SSet.Mesh
 import TopCatModelCategory.TopCat.ToTopSdIso
 import TopCatModelCategory.ModelCategoryTopCat
 import TopCatModelCategory.SmallObject
@@ -237,7 +238,12 @@ lemma exists_iter :
           ((toTopSdIterIso Δ[n + 1] r).hom ≫ b) := by
   let b' : C(⦋n + 1⦌.toTopObj, B) :=
     ⟨b ∘ ⦋n + 1⦌.toTopHomeo.symm, by continuity⟩
-  have hV := hU.comap b'
+  obtain ⟨ε, hε₀, hε⟩ := lebesgue_number_lemma_of_metric (α := ⦋n + 1⦌.toTopObj)
+    (hs := CompactSpace.isCompact_univ) (c := fun i ↦ b' ⁻¹' (U i))
+      (fun i ↦ IsOpen.preimage (by continuity) (Opens.isOpen _))
+      ((hU.comap b').iSup_set_eq_univ.symm.subset)
+  obtain ⟨r, hr⟩ := (AffineMap.stdSimplex.{u} (n + 1)).exists_mesh_sdIter_le (n + 1) ε hε₀
+  refine ⟨r, ?_⟩
   have := hp
   sorry
 
