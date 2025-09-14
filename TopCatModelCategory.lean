@@ -145,6 +145,7 @@ import TopCatModelCategory.SSet.ULift
 import TopCatModelCategory.SemiSimplexCategory
 import TopCatModelCategory.Set
 import TopCatModelCategory.SimplicialPresheaves.LocalLiftingProperty
+import TopCatModelCategory.SmallObject
 import TopCatModelCategory.ToTopObjHomeo
 import TopCatModelCategory.TopCat.Adj
 import TopCatModelCategory.TopCat.AttachCells
@@ -165,6 +166,7 @@ import TopCatModelCategory.TopCat.HornDeformationRetract
 import TopCatModelCategory.TopCat.Monoidal
 import TopCatModelCategory.TopCat.RelativeT1CellComplex
 import TopCatModelCategory.TopCat.SdIso
+import TopCatModelCategory.TopCat.SerreFibrationLocal
 import TopCatModelCategory.TopCat.T1Inclusion
 import TopCatModelCategory.TopCat.ToTopDecomposition
 import TopCatModelCategory.TopCat.ToTopEqualizers
