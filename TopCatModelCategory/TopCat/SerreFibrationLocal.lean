@@ -235,7 +235,9 @@ lemma exists_iter :
     ∃ (r : ℕ), HasLiftingPropertyFixedBot
         (toTop.map ((sd.iter r).map (horn _ i).ι)) p
           ((toTopSdIterIso Δ[n + 1] r).hom ≫ b) := by
-  have := hU
+  let b' : C(⦋n + 1⦌.toTopObj, B) :=
+    ⟨b ∘ ⦋n + 1⦌.toTopHomeo.symm, by continuity⟩
+  have hV := hU.comap b'
   have := hp
   sorry
 
