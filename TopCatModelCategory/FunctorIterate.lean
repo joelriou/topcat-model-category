@@ -15,11 +15,8 @@ def iter : ℕ → C ⥤ C
 @[simp]
 lemma iter_zero : F.iter 0 = 𝟭 C := rfl
 
-lemma iter_succ (n : ℕ) : F.iter (n + 1) = F.iter n ⋙ F := rfl
-
 @[simp]
-lemma iter_succ_obj (n : ℕ) (X : C) :
-    (F.iter (n + 1)).obj X = F.obj ((F.iter n).obj X) := rfl
+lemma iter_succ (n : ℕ) : F.iter (n + 1) = F.iter n ⋙ F := rfl
 
 end Functor
 

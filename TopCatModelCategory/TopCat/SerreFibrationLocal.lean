@@ -227,14 +227,22 @@ namespace fibration_of_isOpenCover
 
 variable {p} {ι : Type*} {U : ι → Opens B} (hU : IsOpenCover U)
   (hp : ∀ i, IsSerreFibrationOver p (U i))
+  {n : ℕ} (b : |Δ[n + 1]| ⟶ B) (i : Fin (n + 2))
 
 include hU hp
 
-lemma hasLiftingPropertyFixedBot {n : ℕ} (b : |Δ[n + 1]| ⟶ B) (i : Fin (n + 2)) :
-    HasLiftingPropertyFixedBot (toTop.map (horn _ i).ι) p b := by
+lemma exists_iter :
+    ∃ (r : ℕ), HasLiftingPropertyFixedBot
+        (toTop.map ((sd.iter r).map (horn _ i).ι)) p
+          ((toTopSdIterIso Δ[n + 1] r).hom ≫ b) := by
   have := hU
   have := hp
   sorry
+
+lemma hasLiftingPropertyFixedBot  :
+    HasLiftingPropertyFixedBot (toTop.map (horn _ i).ι) p b := by
+  obtain ⟨r, hr⟩ := exists_iter hU hp b i
+  exact .ofArrowIso (toTopSdIterArrowIso.{u} (horn _ i).ι r).symm hr
 
 end fibration_of_isOpenCover
 

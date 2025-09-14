@@ -175,6 +175,9 @@ lemma diam_le_mesh [X.IsFinite] (x : X.S) : f.diam x ≤ f.mesh := by
   refine le_trans ?_ (le_ciSup (Set.finite_range _).bddAbove x.toN)
   exact f.monotone_diam x.self_le_toS_toN
 
+lemma zero_le_mesh : 0 ≤ f.mesh :=
+  Real.iSup_nonneg (fun _ ↦ zero_le_diam _ _)
+
 variable [X.IsFinite]
 
 lemma mesh_le_iff [X.Nonempty] (r : ℝ) :
@@ -206,6 +209,41 @@ lemma mesh_sd_le_mesh_b [X.Nonempty] : f.sd.mesh ≤ f.b.mesh :=
 lemma mesh_sd_le [X.Nonempty] (d : ℕ) [X.HasDimensionLE d] :
     f.sd.mesh ≤ d / (d + 1) * f.mesh :=
   f.mesh_sd_le_mesh_b.trans (f.mesh_b_le d)
+
+instance (n : ℕ) : ((sd.iter n).obj X).IsFinite := by
+  induction n
+  all_goals dsimp; infer_instance
+
+instance [X.Nonempty] (n : ℕ) : ((sd.iter n).obj X).Nonempty := by
+  induction n
+  all_goals dsimp; infer_instance
+
+instance (d : ℕ) [X.HasDimensionLE d] (n : ℕ) : ((sd.iter n).obj X).HasDimensionLE d := by
+  induction n
+  all_goals dsimp; infer_instance
+
+lemma mesh_sdIter_le [X.Nonempty] (d : ℕ) [X.HasDimensionLE d] (n : ℕ):
+    (f.sdIter n).mesh ≤ (d / (d + 1)) ^ n * f.mesh := by
+  induction n with
+  | zero => simp
+  | succ n hn =>
+    dsimp
+    rw [add_comm n 1, pow_add, pow_one, mul_assoc]
+    exact ((f.sdIter n).mesh_sd_le d).trans (mul_le_mul_of_nonneg_left hn (by positivity))
+
+lemma exists_mesh_sdIter_le [X.Nonempty] (d : ℕ) [X.HasDimensionLE d]
+    (ε : ℝ) (hε : 0 < ε) :
+    ∃ (n : ℕ), (f.sdIter n).mesh < ε := by
+  obtain hf | hf := f.zero_le_mesh.lt_or_eq
+  · have hε' : 0 < ε / (2 * f.mesh) := div_pos hε (mul_pos (by positivity) hf)
+    obtain ⟨n, hn⟩ := exists_pow_lt_of_lt_one hε' (y := (d / (d + 1) : ℝ)) (by
+      rw [div_lt_one (by positivity)]
+      simp)
+    refine ⟨n, lt_of_le_of_lt ((f.mesh_sdIter_le d n).trans
+      (mul_le_mul_of_nonneg_right hn.le f.zero_le_mesh))
+      (lt_of_eq_of_lt ?_ (show ε / 2 < ε by simpa))⟩
+    rw [div_mul, mul_div_cancel_right₀ _ hf.ne']
+  · exact ⟨0, by aesop⟩
 
 end AffineMap
 

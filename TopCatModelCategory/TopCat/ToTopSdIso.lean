@@ -1,5 +1,6 @@
 import TopCatModelCategory.TopCat.SdIso
 import TopCatModelCategory.SSet.CoconeNPrime
+import TopCatModelCategory.FunctorIterate
 
 universe u
 
@@ -55,6 +56,22 @@ lemma toTop_map_sd_map_yonedaEquiv_symm_comp_toTopSdIso_hom
       toTopSimplex.inv.app ⦋n⦌ ≫ toTop.map (yonedaEquiv.symm x) :=
   (N.mk _ hx).toTop_map_sd_map_yonedaEquiv_symm_simplex_comp_toTopSdIso_hom
 
+instance (n : ℕ) : ((sd.iter n).obj X).IsWeaklyPolyhedralLike := by
+  induction n
+  all_goals dsimp; infer_instance
+
+noncomputable def toTopSdIterIso (n : ℕ) : |(sd.iter n).obj X| ≅ |X| := by
+  induction n with
+  | zero => rfl
+  | succ n hn => exact toTopSdIso _ ≪≫ hn
+
+@[simp]
+lemma toTopSdIterIso_zero : X.toTopSdIterIso 0 = Iso.refl _ := rfl
+
+@[simp]
+lemma toTopSdIterIso_succ (n : ℕ) : X.toTopSdIterIso (n + 1) =
+    toTopSdIso _ ≪≫ X.toTopSdIterIso n := rfl
+
 variable {X} (f : X ⟶ Y)
 
 @[reassoc]
@@ -76,10 +93,29 @@ lemma toTopSdIso_hom_naturality
     ← yonedaEquiv_symm_comp, Functor.map_comp]
 
 @[reassoc (attr := simp)]
+lemma toTopSdIso_hom_naturality_of_mono [Mono f]:
+    toTop.map (sd.map f) ≫ Y.toTopSdIso.hom =
+      X.toTopSdIso.hom ≫ toTop.map f :=
+  SSet.toTopSdIso_hom_naturality f (by simp [nonDegenerate_iff_of_mono])
+
+@[reassoc]
 lemma Subcomplex.toTopSdIso_hom_naturality (A : X.Subcomplex) :
     toTop.map (sd.map A.ι) ≫ X.toTopSdIso.hom =
-      A.toSSet.toTopSdIso.hom ≫ toTop.map A.ι :=
-  SSet.toTopSdIso_hom_naturality A.ι (fun _ _ ↦ by
-    simp [← nonDegenerate_iff_of_mono A.ι])
+      A.toSSet.toTopSdIso.hom ≫ toTop.map A.ι := by
+  simp
+
+instance (n : ℕ) [Mono f] : Mono ((sd.iter n).map f) := by
+  induction n
+  all_goals dsimp; infer_instance
+
+@[reassoc (attr := simp)]
+lemma toTopSdIterIso_hom_naturality_of_mono [Mono f] (n : ℕ) :
+    toTop.map ((sd.iter n).map f) ≫ (Y.toTopSdIterIso n).hom =
+    (X.toTopSdIterIso n).hom ≫ toTop.map f := by
+  induction n <;> aesop
+
+noncomputable def toTopSdIterArrowIso [Mono f] (n : ℕ) :
+    Arrow.mk (toTop.map ((sd.iter n).map f)) ≅ Arrow.mk (toTop.map f) :=
+  Arrow.isoMk (X.toTopSdIterIso n) (Y.toTopSdIterIso n)
 
 end SSet

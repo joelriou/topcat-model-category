@@ -1,5 +1,6 @@
 import TopCatModelCategory.TopCat.Adj
 import TopCatModelCategory.SSet.CoconeNPrime
+import TopCatModelCategory.FunctorIterate
 import Mathlib.Analysis.Normed.Module.Basic
 import Mathlib.Analysis.Convex.Combination
 import Mathlib.Algebra.Module.BigOperators
@@ -474,6 +475,39 @@ lemma isobarycenter_eq_centerMass (s : X.S) :
   · positivity
 
 protected noncomputable def sd : (sd.obj X).AffineMap E := f.b.precomp (sdToB.app X)
+
+noncomputable def sdIter (n : ℕ) : ((sd.iter n).obj X).AffineMap E := by
+  induction n with
+  | zero => exact f
+  | succ n hn => exact hn.sd
+
+@[simp]
+lemma sdIter_zero : f.sdIter 0 = f := rfl
+
+@[simp]
+lemma sdIter_succ (n : ℕ) : f.sdIter (n + 1) = (f.sdIter n).sd := rfl
+
+noncomputable def stdSimplex (n : ℕ) :
+    (Δ[n] : SSet.{u}).AffineMap (Fin (n + 1) → ℝ) where
+  f x i := ⦋n⦌.toTopHomeo x i
+  isAffine := by
+    rw [isAffine_iff_eq_top, stdSimplex.subcomplex_eq_top_iff, mem_isAffine_iff]
+    dsimp only [IsAffineAt]
+    let φ (x : ⦋n⦌.toTopObj) (i : (Fin (n + 1))) : ℝ := x i
+    convert_to SimplexCategory.toTopObj.IsAffine φ using 1
+    · ext x i
+      dsimp [IsAffineAt.φ]
+      simp only [Equiv.symm_apply_apply, CategoryTheory.Functor.map_id, TopCat.hom_id,
+        ContinuousMap.id_apply]
+      exact congr_fun (congr_arg φ (⦋n⦌.toTopHomeo.right_inv x)) i
+    · intro x
+      ext i
+      simp [SimplexCategory.toTopObj.vertex, φ]
+      rw [Finset.sum_eq_single (a := i)]
+      · simp
+      · intro b _ hb
+        simp [if_neg hb.symm]
+      · simp
 
 end AffineMap
 
