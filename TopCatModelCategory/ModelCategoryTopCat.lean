@@ -197,11 +197,25 @@ open Simplicial
 
 instance (X : TopCat.{u}) : IsFibrant X := by
   rw [isFibrant_iff_of_isTerminal (isTerminalToTopObjStdSimplex₀.from X)
-    isTerminalToTopObjStdSimplex₀,
-    ← fibration_toSSet_map_iff]
+    isTerminalToTopObjStdSimplex₀, ← fibration_toSSet_map_iff]
   rw [← isFibrant_iff_of_isTerminal _
     (IsTerminal.isTerminalObj _ _ isTerminalToTopObjStdSimplex₀)]
   infer_instance
+
+instance {E B : TopCat} (p : E ⟶ B) [Fibration p] {n : ℕ} (i : Fin (n + 2)) :
+    HasLiftingProperty (toTop.map (SSet.horn _ i).ι) p := by
+  rw [sSetTopAdj.hasLiftingProperty_iff]
+  infer_instance
+
+lemma fibration_iff_rlp {E B : TopCat} (p : E ⟶ B) :
+    Fibration p ↔ ∀ (n : ℕ) (i : Fin (n + 2)),
+      HasLiftingProperty (toTop.map (SSet.horn _ i).ι) p := by
+  refine ⟨fun _ ↦ inferInstance, fun hp ↦ ?_⟩
+  constructor
+  intro _ _ i (hi : J i)
+  simp only [J, iSup_iff] at hi
+  obtain ⟨n, ⟨j⟩⟩ := hi
+  apply hp
 
 end modelCategory
 

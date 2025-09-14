@@ -1,8 +1,10 @@
 import TopCatModelCategory.SSet.AnodyneExtensions
 import TopCatModelCategory.SSet.SmallObject
 import TopCatModelCategory.TopCat.ToTopSdIso
+import TopCatModelCategory.ModelCategoryTopCat
 import TopCatModelCategory.SmallObject
 import Mathlib.CategoryTheory.SmallObject.TransfiniteCompositionLifting
+import Mathlib.Topology.Sets.OpenCover
 
 open CategoryTheory Simplicial HomotopicalAlgebra Limits
 
@@ -135,3 +137,116 @@ lemma hasLiftingPropertyFixedBot_of_simplices
 end anodyneExtensions
 
 end SSet
+
+namespace TopCat
+
+open Topology TopologicalSpace modelCategory SSet
+
+variable {E B : TopCat.{u}} (p : E ⟶ B)
+
+lemma isPullbackRestrictPreimage (U : Set B) :
+    IsPullback (ofHom ⟨_, continuous_subtype_val⟩) (ofHom (p.hom.restrictPreimage U)) p
+      (ofHom ⟨_, continuous_subtype_val⟩) where
+  isLimit' := ⟨PullbackCone.IsLimit.mk _
+    (fun s ↦ ofHom ⟨fun x ↦ ⟨s.fst x, by
+      simp only [Set.mem_preimage]
+      have := ConcreteCategory.congr_hom s.condition x
+      convert (s.snd x).2⟩, by continuity⟩)
+    (fun s ↦ rfl)
+    (fun s ↦ by
+      ext x
+      exact ConcreteCategory.congr_hom s.condition x)
+    (fun s m hm₁ hm₂ ↦ by
+      ext x
+      exact ConcreteCategory.congr_hom hm₁ x)⟩
+
+def IsSerreFibrationOver (U : Set B) : Prop :=
+  ∀ ⦃n : ℕ⦄ (i : Fin (n + 2)) (f : |Δ[n + 1]| ⟶ B),
+    Set.range f ⊆ U → HasLiftingPropertyFixedBot (toTop.map (horn _ i).ι) p f
+
+lemma IsSerreFibrationOver.iff_fibration (U : Set B) :
+    IsSerreFibrationOver p U ↔ Fibration (ofHom (p.hom.restrictPreimage U)) := by
+  let p' := ofHom (p.hom.restrictPreimage U)
+  let ι : of U ⟶ B := ofHom ⟨_, continuous_subtype_val⟩
+  let ι' : of (p ⁻¹' U) ⟶ E := ofHom ⟨_, continuous_subtype_val⟩
+  change _ ↔ Fibration p'
+  constructor
+  · intro hp
+    rw [fibration_iff_rlp]
+    intro n i
+    constructor
+    intro t b sq
+    have sq' : CommSq (t ≫ ι') (toTop.map Λ[n + 1, i].ι) p (b ≫ ι) := ⟨by
+      ext x
+      exact Subtype.ext_iff.1 (ConcreteCategory.congr_hom sq.w x)⟩
+    have := hp i _ (by dsimp [ι]; grind) _ sq'
+    exact ⟨⟨{
+      l := ofHom ⟨fun x ↦ ⟨sq'.lift x, by
+        simp only [Set.mem_preimage]
+        convert (b x).2
+        exact ConcreteCategory.congr_hom sq'.fac_right x⟩, by continuity⟩
+      fac_left := by
+        ext x
+        exact ConcreteCategory.congr_hom sq'.fac_left x
+      fac_right := by
+        ext x
+        exact ConcreteCategory.congr_hom sq'.fac_right x
+    }⟩⟩
+  · intro _ n i f hf t sq
+    let f' : toTop.obj Δ[n + 1] ⟶ of U :=
+      ofHom ⟨fun x ↦ ⟨f x, hf (by simp)⟩, by continuity⟩
+    let t' : toTop.obj Λ[n + 1, i].toSSet ⟶ of (p ⁻¹' U) :=
+      ofHom ⟨fun y ↦ ⟨t y, by
+        simp
+        erw [ConcreteCategory.congr_hom sq.w y]
+        apply hf
+        simp
+        tauto⟩, by continuity⟩
+    have sq' : CommSq t' (toTop.map Λ[n + 1, i].ι) p' f' := ⟨by
+      ext
+      apply ConcreteCategory.congr_hom sq.w⟩
+    have := sq'.lift
+    exact ⟨⟨{
+      l := sq'.lift ≫ ι'
+      fac_left := by rw [sq'.fac_left_assoc]; rfl
+      fac_right := by
+        ext y
+        exact Subtype.ext_iff.1 (ConcreteCategory.congr_hom sq'.fac_right y)
+    }⟩⟩
+
+variable {p} in
+lemma fibration_of_isSerreFibrationOver_univ
+    (hp : IsSerreFibrationOver p .univ) : Fibration p := by
+  rw [fibration_iff_rlp]
+  intro n i
+  constructor
+  intro t b sq
+  exact hp _ _ (by simp) _ _
+
+namespace fibration_of_isOpenCover
+
+variable {p} {ι : Type*} {U : ι → Opens B} (hU : IsOpenCover U)
+  (hp : ∀ i, IsSerreFibrationOver p (U i))
+
+include hU hp
+
+lemma hasLiftingPropertyFixedBot {n : ℕ} (b : |Δ[n + 1]| ⟶ B) (i : Fin (n + 2)) :
+    HasLiftingPropertyFixedBot (toTop.map (horn _ i).ι) p b := by
+  have := hU
+  have := hp
+  sorry
+
+end fibration_of_isOpenCover
+
+variable {p}
+
+lemma fibration_of_isOpenCover
+    {ι : Type*} {U : ι → Opens B} (hU : IsOpenCover U)
+    (hp : ∀ i, IsSerreFibrationOver p (U i)) : Fibration p := by
+  rw [fibration_iff_rlp]
+  intro n i
+  constructor
+  intro t b sq
+  exact fibration_of_isOpenCover.hasLiftingPropertyFixedBot hU hp b i _ sq
+
+end TopCat
