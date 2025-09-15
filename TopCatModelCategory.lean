@@ -165,6 +165,7 @@ import TopCatModelCategory.TopCat.Homotopy
 import TopCatModelCategory.TopCat.HornDeformationRetract
 import TopCatModelCategory.TopCat.Monoidal
 import TopCatModelCategory.TopCat.RelativeT1CellComplex
+import TopCatModelCategory.TopCat.SdCompatibility
 import TopCatModelCategory.TopCat.SdIso
 import TopCatModelCategory.TopCat.SerreFibrationLocal
 import TopCatModelCategory.TopCat.T1Inclusion

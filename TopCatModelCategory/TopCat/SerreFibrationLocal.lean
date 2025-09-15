@@ -1,7 +1,7 @@
-import TopCatModelCategory.SSet.AnodyneExtensions
+import TopCatModelCategory.SSet.SubdivisionAnodyneExtensions
 import TopCatModelCategory.SSet.SmallObject
 import TopCatModelCategory.SSet.Mesh
-import TopCatModelCategory.TopCat.ToTopSdIso
+import TopCatModelCategory.TopCat.SdCompatibility
 import TopCatModelCategory.ModelCategoryTopCat
 import TopCatModelCategory.SmallObject
 import Mathlib.CategoryTheory.SmallObject.TransfiniteCompositionLifting
@@ -60,6 +60,28 @@ lemma IsPushout.hasLiftingPropertyFixedBot
     l := sq.desc θ s'.lift (by simp)
     fac_right := sq.hom_ext (by simp [s.w]) (by simp) }⟩⟩
 
+lemma Adjunction.hasLiftingPropertyFixedBot_iff {D : Type*} [Category D]
+    {F : C ⥤ D} {G : D ⥤ C} (adj : F ⊣ G)
+    {A B : C} (f : A ⟶ B) {X Y : D} (g : X ⟶ Y)
+    (b : F.obj B ⟶ Y) :
+    HasLiftingPropertyFixedBot (F.map f) g b ↔
+      HasLiftingPropertyFixedBot f (G.map g) (adj.homEquiv _ _ b) := by
+  constructor
+  · intro h t sq
+    simp only [← sq.left_adjoint_hasLift_iff adj, Equiv.symm_apply_apply]
+    apply h
+  · intro h t sq
+    simp only [← sq.right_adjoint_hasLift_iff adj]
+    apply h
+
+lemma Adjunction.hasLiftingPropertyFixedBot_iff' {D : Type*} [Category D]
+    {F : C ⥤ D} {G : D ⥤ C} (adj : F ⊣ G)
+    {A B : C} (f : A ⟶ B) {X Y : D} (g : X ⟶ Y)
+    (b : B ⟶ G.obj Y) :
+    HasLiftingPropertyFixedBot (F.map f) g ((adj.homEquiv _ _).symm b) ↔
+      HasLiftingPropertyFixedBot f (G.map g) b := by
+  rw [adj.hasLiftingPropertyFixedBot_iff, Equiv.apply_symm_apply]
+
 end CategoryTheory
 
 namespace SSet
@@ -67,6 +89,13 @@ namespace SSet
 open modelCategoryQuillen SmallObject
 
 namespace anodyneExtensions
+
+lemma sd_iter_map {X Y : SSet.{u}} {i : X ⟶ Y}
+    (hi : anodyneExtensions i) (n : ℕ) :
+    anodyneExtensions ((sd.iter n).map i) := by
+  induction n with
+  | zero => exact hi
+  | succ n hn => exact sd_map hn
 
 attribute [local instance] Cardinal.aleph0_isRegular
   Cardinal.orderbot_aleph0_ord_to_type
@@ -244,8 +273,21 @@ lemma exists_iter :
       ((hU.comap b').iSup_set_eq_univ.symm.subset)
   obtain ⟨r, hr⟩ := (AffineMap.stdSimplex.{u} (n + 1)).exists_mesh_sdIter_le (n + 1) ε hε₀
   refine ⟨r, ?_⟩
-  have := hp
-  sorry
+  rw [sSetTopAdj.hasLiftingPropertyFixedBot_iff]
+  refine anodyneExtensions.hasLiftingPropertyFixedBot_of_simplices
+    ((anodyneExtensions.horn_ι_mem n i).sd_iter_map r) _ _ (fun d σ i ↦ ?_)
+  have : b ∘ (toTopSdIterIso.{u} Δ[n + 1] r).hom ∘ toTop.map σ =
+    (sSetTopAdj.homEquiv _ _).symm
+      (σ ≫ (sSetTopAdj.homEquiv _ _) ((toTopSdIterIso Δ[n + 1] r).hom ≫ b)) := by
+    rw [Adjunction.homEquiv_naturality_left_symm]
+    simp
+  obtain ⟨x₀, a, ha⟩ : ∃ (x₀ : ⦋n + 1⦌.toTopObj) (a : ι),
+      Set.range (b ∘ (toTopSdIterIso.{u} Δ[n + 1] r).hom ∘ toTop.map σ) ⊆ U a := by
+    sorry
+  rw [← sSetTopAdj.hasLiftingPropertyFixedBot_iff']
+  refine hp a i _ (fun y hy ↦ ?_)
+  erw [← this] at hy
+  exact ha hy
 
 lemma hasLiftingPropertyFixedBot  :
     HasLiftingPropertyFixedBot (toTop.map (horn _ i).ι) p b := by
