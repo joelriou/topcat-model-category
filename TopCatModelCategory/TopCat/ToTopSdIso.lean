@@ -18,8 +18,7 @@ noncomputable def functorN'CompSdCompToTopIso :
   associator _ _ _ ≪≫ isoWhiskerLeft _ (associator _ _ _ ≪≫
     isoWhiskerLeft _ ((associator _ _ _).symm ≪≫
     isoWhiskerRight stdSimplex.sdIso.{u} toTop) ≪≫
-    SemiSimplexCategory.sdIso ≪≫
-    (isoWhiskerLeft _ toTopSimplex.symm ≪≫ (associator _ _ _).symm)) ≪≫
+    SemiSimplexCategory.sdIso ≪≫ (associator _ _ _).symm) ≪≫
     (associator _ _ _).symm
 
 @[simps! pt ι_app]
@@ -40,12 +39,12 @@ variable {X} in
 lemma N.toTop_map_sd_map_yonedaEquiv_symm_simplex_comp_toTopSdIso_hom (x : X.N) :
     toTop.map (sd.map (yonedaEquiv.symm x.simplex)) ≫ X.toTopSdIso.hom =
     toTop.map (stdSimplex.sdIso.hom.app _) ≫ SemiSimplexCategory.sdIso.hom.app ⦋x.dim⦌ₛ ≫
-      toTopSimplex.inv.app ⦋x.dim⦌ ≫ toTop.map (yonedaEquiv.symm x.simplex) := by
+      toTop.map (yonedaEquiv.symm x.simplex) := by
   have := IsColimit.comp_coconePointUniqueUpToIso_hom X.isColimitToTopSdIsoCocone
     (isColimitOfPreserves toTop X.isColimitCoconeN') x
   dsimp at this ⊢
   simp only [toTopSdIsoCocone_ι_app, Category.assoc] at this
-  simp only [toTopSdIso, ← this, Iso.inv_hom_id_app_assoc, Iso.hom_inv_id_app_assoc,
+  simp only [toTopSdIso, ← this, Iso.hom_inv_id_app_assoc,
     ← Functor.map_comp_assoc]
 
 @[reassoc]
@@ -53,7 +52,7 @@ lemma toTop_map_sd_map_yonedaEquiv_symm_comp_toTopSdIso_hom
     {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenerate _) :
     toTop.map (sd.map (yonedaEquiv.symm x)) ≫ X.toTopSdIso.hom =
     toTop.map (stdSimplex.sdIso.hom.app _) ≫ SemiSimplexCategory.sdIso.hom.app ⦋n⦌ₛ ≫
-      toTopSimplex.inv.app ⦋n⦌ ≫ toTop.map (yonedaEquiv.symm x) :=
+      toTop.map (yonedaEquiv.symm x) :=
   (N.mk _ hx).toTop_map_sd_map_yonedaEquiv_symm_simplex_comp_toTopSdIso_hom
 
 instance (n : ℕ) : ((sd.iter n).obj X).IsWeaklyPolyhedralLike := by
@@ -89,8 +88,9 @@ lemma toTopSdIso_hom_naturality
   rw [toTop_map_sd_map_yonedaEquiv_symm_comp_toTopSdIso_hom_assoc _ _ hx]
   nth_rw 2 [← toTop.map_comp_assoc]
   rw [← sd.map_comp, yonedaEquiv_symm_comp,
-    toTop_map_sd_map_yonedaEquiv_symm_comp_toTopSdIso_hom _ _ (hf _ hx),
-    ← yonedaEquiv_symm_comp, Functor.map_comp]
+    toTop_map_sd_map_yonedaEquiv_symm_comp_toTopSdIso_hom _ _ (hf _ hx)]
+  dsimp
+  rw [← yonedaEquiv_symm_comp, Functor.map_comp]
 
 @[reassoc (attr := simp)]
 lemma toTopSdIso_hom_naturality_of_mono [Mono f]:

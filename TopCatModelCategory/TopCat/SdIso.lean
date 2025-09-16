@@ -55,12 +55,17 @@ end SimplexCategory
 namespace SemiSimplexCategory
 
 @[simps!]
-def toTop : SemiCosimplicialObject TopCat.{u} :=
-  CosimplicialObject.toSemiCosimplicialObject SimplexCategory.toTop.{u}
+noncomputable def toTop : SemiCosimplicialObject TopCat.{u} :=
+  CosimplicialObject.toSemiCosimplicialObject (stdSimplex ⋙ SSet.toTop)
 
 noncomputable def sdToTop : SemiCosimplicialObject TopCat.{u} :=
   SimplexCategory.sdToTop.toSemiCosimplicialObject
 
-def sdIso : sdToTop.{u} ≅ toTop := sorry
+def BIso : toSSet ⋙ B ⋙ SSet.toTop ≅ toTop := sorry
+
+open Functor in
+noncomputable def sdIso : sdToTop.{u} ≅ toTop :=
+  isoWhiskerLeft _ (isoWhiskerRight stdSimplexCompBIso.symm _ ≪≫ (associator _ _ _)) ≪≫
+    (associator _ _ _).symm ≪≫ BIso
 
 end SemiSimplexCategory
