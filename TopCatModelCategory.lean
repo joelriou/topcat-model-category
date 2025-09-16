@@ -49,6 +49,7 @@ import TopCatModelCategory.ModelCategoryTopCat
 import TopCatModelCategory.MonoCoprod
 import TopCatModelCategory.MonoidalClosed
 import TopCatModelCategory.MorphismProperty
+import TopCatModelCategory.MorphismPropertyLocally
 import TopCatModelCategory.Multiequalizer
 import TopCatModelCategory.ObjectPropertyLimits
 import TopCatModelCategory.Polar
