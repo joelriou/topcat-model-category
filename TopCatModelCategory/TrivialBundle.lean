@@ -184,6 +184,11 @@ lemma trivialBundles.of_isPullback_of_fac {E E' B B' : C} {p' : E' ⟶ B'} {p : 
   simp only [trivialBundles, iSup_iff]
   exact ⟨_, ⟨TrivialBundleWithFiber.ofIsTerminal (pullback.snd p b) hT⟩⟩
 
+instance (F : C) : (trivialBundlesWithFiber F).IsStableUnderBaseChange where
+  of_isPullback {X₁ X₂ X₃ X₄ t f' f b} sq := by
+    rintro ⟨hf⟩
+    exact ⟨hf.pullback sq⟩
+
 end MorphismProperty
 
 end CategoryTheory
