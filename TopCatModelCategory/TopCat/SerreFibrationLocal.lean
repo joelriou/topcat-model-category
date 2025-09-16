@@ -2,6 +2,7 @@ import TopCatModelCategory.SSet.SubdivisionAnodyneExtensions
 import TopCatModelCategory.SSet.SmallObject
 import TopCatModelCategory.SSet.Mesh
 import TopCatModelCategory.TopCat.SdCompatibility
+import TopCatModelCategory.TopCat.Limits
 import TopCatModelCategory.ModelCategoryTopCat
 import TopCatModelCategory.SmallObject
 import Mathlib.CategoryTheory.SmallObject.TransfiniteCompositionLifting
@@ -173,22 +174,6 @@ namespace TopCat
 open Topology TopologicalSpace modelCategory SSet
 
 variable {E B : TopCat.{u}} (p : E ⟶ B)
-
-lemma isPullbackRestrictPreimage (U : Set B) :
-    IsPullback (ofHom ⟨_, continuous_subtype_val⟩) (ofHom (p.hom.restrictPreimage U)) p
-      (ofHom ⟨_, continuous_subtype_val⟩) where
-  isLimit' := ⟨PullbackCone.IsLimit.mk _
-    (fun s ↦ ofHom ⟨fun x ↦ ⟨s.fst x, by
-      simp only [Set.mem_preimage]
-      have := ConcreteCategory.congr_hom s.condition x
-      convert (s.snd x).2⟩, by continuity⟩)
-    (fun s ↦ rfl)
-    (fun s ↦ by
-      ext x
-      exact ConcreteCategory.congr_hom s.condition x)
-    (fun s m hm₁ hm₂ ↦ by
-      ext x
-      exact ConcreteCategory.congr_hom hm₁ x)⟩
 
 def IsSerreFibrationOver (U : Set B) : Prop :=
   ∀ ⦃n : ℕ⦄ (i : Fin (n + 2)) (f : |Δ[n + 1]| ⟶ B),

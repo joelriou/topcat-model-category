@@ -1,5 +1,5 @@
 import Mathlib.CategoryTheory.ObjectProperty.FullSubcategory
-import Mathlib.CategoryTheory.Limits.IsLimit
+import Mathlib.CategoryTheory.Limits.Preserves.Basic
 
 open CategoryTheory Limits
 
@@ -23,6 +23,16 @@ def coneOfCompι {F : J ⥤ P.FullSubcategory} (c : Cone (F ⋙ P.ι)) (h : P c.
   π :=
     { app j := c.π.app j
       naturality _ _ f := c.π.naturality f }
+
+def isLimitConeOfCompι {F : J ⥤ P.FullSubcategory} (c : Cone (F ⋙ P.ι))
+    (hc : IsLimit c) (h : P c.pt) : IsLimit (P.coneOfCompι c h) :=
+  ιReflectsIsLimit _ hc
+
+lemma preservesLimit_of_limit_cone_comp_ι
+    {F : J ⥤ P.FullSubcategory} (c : Cone (F ⋙ P.ι))
+    (hc : IsLimit c) (h : P c.pt) :
+    PreservesLimit F P.ι :=
+  preservesLimit_of_preserves_limit_cone (P.isLimitConeOfCompι c hc h) hc
 
 end Limits
 

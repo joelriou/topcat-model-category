@@ -146,4 +146,14 @@ instance : CartesianMonoidalCategory (GeneratedByTopCat.{v} X) :=
 instance : BraidedCategory (GeneratedByTopCat.{v} X) :=
   CategoryTheory.BraidedCategory.ofCartesianMonoidalCategory
 
+instance (J : Type*) [Category J] [HasLimitsOfShape J (Type v)] :
+    PreservesLimitsOfShape J (forget (GeneratedByTopCat.{v} X)) where
+  preservesLimit {F} := by
+    have : HasLimit (F ⋙ toTopCat) := by
+      rw [TopCat.hasLimit_iff_small_sections, ← Types.hasLimit_iff_small_sections]
+      infer_instance
+    apply preservesLimit_of_preserves_limit_cone
+      (isLimitConeOfConeTopCat _ (limit.isLimit _))
+      (isLimitOfPreserves (forget TopCat) (limit.isLimit _))
+
 end GeneratedByTopCat

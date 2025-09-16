@@ -1,5 +1,6 @@
 import TopCatModelCategory.Convenient.GeneratedBy
 import Mathlib.Topology.Sets.Opens
+import Mathlib.Topology.Homeomorph.Lemmas
 
 universe v v' t u
 
@@ -10,6 +11,17 @@ variable {ι : Type t} {X : ι → Type u} [∀ i, TopologicalSpace (X i)]
   (Y : Type v) [TopologicalSpace Y]
 
 open IsGeneratedBy
+
+noncomputable def Topology.IsOpenEmbedding.homeoRange {X Y : Type*} [TopologicalSpace X]
+    [TopologicalSpace Y] {f : X → Y} (hf : IsOpenEmbedding f) :
+    X ≃ₜ Set.range f :=
+  IsHomeomorph.homeomorph (f := fun x ↦ ⟨f x, Set.mem_range_self x⟩)
+    { continuous := hf.continuous.subtype_mk _
+      isOpenMap := by
+        rw [hf.isOpen_range.isOpenEmbedding_subtypeVal.isOpenMap_iff]
+        exact hf.isOpenMap
+      bijective :=
+        ⟨fun _ _ h ↦ hf.injective (by rwa [Subtype.ext_iff] at h), fun x ↦ by aesop⟩ }
 
 lemma IsOpen.isGeneratedBy [IsGeneratedBy X Y] {U : Set Y} (hU : IsOpen U) :
     IsGeneratedBy X U := by
@@ -32,3 +44,10 @@ lemma IsOpen.isGeneratedBy [IsGeneratedBy X Y] {U : Set Y} (hU : IsOpen U) :
   intro i f
   convert (W ⟨i, f⟩).isOpen.isOpenMap_subtype_val _ (hV ⟨i, f⟩)
   aesop
+
+lemma Topology.IsOpenEmbedding.isGeneratedBy [IsGeneratedBy X Y]
+    {U : Type*} [TopologicalSpace U] {f : U → Y}
+    {hf : IsOpenEmbedding f} :
+    IsGeneratedBy X U := by
+  have := hf.isOpen_range.isGeneratedBy (X := X)
+  exact hf.homeoRange.symm.isQuotientMap.isGeneratedBy

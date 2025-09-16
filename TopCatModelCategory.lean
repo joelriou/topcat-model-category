@@ -13,6 +13,7 @@ import TopCatModelCategory.Convenient.ContinuousMapGeneratedBy
 import TopCatModelCategory.Convenient.DeltaGenerated
 import TopCatModelCategory.Convenient.Fibrations
 import TopCatModelCategory.Convenient.GeneratedBy
+import TopCatModelCategory.Convenient.GrothendieckTopology
 import TopCatModelCategory.Convenient.HomSpace
 import TopCatModelCategory.Convenient.IsColimit
 import TopCatModelCategory.Convenient.Limits
@@ -164,6 +165,7 @@ import TopCatModelCategory.TopCat.DeformationRetract
 import TopCatModelCategory.TopCat.Gluing
 import TopCatModelCategory.TopCat.Homotopy
 import TopCatModelCategory.TopCat.HornDeformationRetract
+import TopCatModelCategory.TopCat.Limits
 import TopCatModelCategory.TopCat.Monoidal
 import TopCatModelCategory.TopCat.RelativeT1CellComplex
 import TopCatModelCategory.TopCat.SdCompatibility
