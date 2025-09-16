@@ -327,6 +327,11 @@ noncomputable def precomp (g : Y ⟶ X) : AffineMap Y E where
   f := Function.comp f.f (toTop.map g).hom
   isAffine _ y := (f.isAffine (g.app _ y)).precomp
 
+lemma range_precomp_f_subset_range_f (g : Y ⟶ X) :
+    Set.range (f.precomp g).f ⊆ Set.range f.f := by
+  dsimp [precomp]
+  apply Set.range_comp_subset_range
+
 @[simp]
 lemma precomp_φ (g : Y ⟶ X) {d : SimplexCategory} (y : Y.obj (op d)) :
     (f.precomp g).φ y = f.φ (g.app _ y) :=
@@ -476,6 +481,9 @@ lemma isobarycenter_eq_centerMass (s : X.S) :
 
 protected noncomputable def sd : (sd.obj X).AffineMap E := f.b.precomp (sdToB.app X)
 
+lemma range_sd_f_subset_range_f : Set.range f.sd.f ⊆ Set.range f.f :=
+  (f.b.range_precomp_f_subset_range_f _).trans f.range_b_f_subset_range_f
+
 noncomputable def sdIter (n : ℕ) : ((sd.iter n).obj X).AffineMap E := by
   induction n with
   | zero => exact f
@@ -486,6 +494,11 @@ lemma sdIter_zero : f.sdIter 0 = f := rfl
 
 @[simp]
 lemma sdIter_succ (n : ℕ) : f.sdIter (n + 1) = (f.sdIter n).sd := rfl
+
+lemma range_sdIter_f_subset_range_f (n : ℕ) : Set.range (f.sdIter n).f ⊆ Set.range f.f := by
+  induction n with
+  | zero => rfl
+  | succ n hn => exact (range_sd_f_subset_range_f _).trans hn
 
 noncomputable def stdSimplex (n : ℕ) :
     (Δ[n] : SSet.{u}).AffineMap (Fin (n + 1) → ℝ) where

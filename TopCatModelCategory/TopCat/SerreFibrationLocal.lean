@@ -276,14 +276,42 @@ lemma exists_iter :
   rw [sSetTopAdj.hasLiftingPropertyFixedBot_iff]
   refine anodyneExtensions.hasLiftingPropertyFixedBot_of_simplices
     ((anodyneExtensions.horn_ι_mem n i).sd_iter_map r) _ _ (fun d σ i ↦ ?_)
+  obtain ⟨x₀, a, ha⟩ : ∃ (x₀ : ⦋n + 1⦌.toTopObj) (a : ι),
+      Set.range (b ∘ (toTopSdIterIso.{u} Δ[n + 1] r).hom ∘ toTop.map σ) ⊆ U a := by
+    let α₀ := AffineMap.stdSimplex.{u} (n + 1)
+    let α := α₀.sdIter r
+    have hα : Metric.diam (Set.range (α.φ (yonedaEquiv σ))) < ε :=
+      lt_of_le_of_lt (AffineMap.diam_le_mesh _ (S.mk (yonedaEquiv σ))) hr
+    replace hα {x y} (hx : x ∈ Set.range (α.φ (yonedaEquiv σ)))
+        (hy : y ∈ Set.range (α.φ (yonedaEquiv σ))) : dist x y < ε :=
+      lt_of_le_of_lt
+        (Metric.dist_le_diam_of_mem (s := Set.range (α.φ (yonedaEquiv σ)))
+        (AffineMap.isBounded _ _) hx hy) hα
+    let x₀ : Set.range (α.φ (yonedaEquiv σ)) :=
+      ⟨α.φ (yonedaEquiv σ) (SimplexCategory.toTopObj.vertex 0), by simp⟩
+    obtain ⟨z, hz⟩ := (α₀.range_sdIter_f_subset_range_f r)
+      ((α.range_φ_subset_range_f (S.mk (yonedaEquiv σ))) x₀.2)
+    obtain ⟨i, hi⟩ := hε (⦋n + 1⦌.toTopHomeo z) (by simp)
+    refine ⟨⦋n + 1⦌.toTopHomeo z, i, ?_⟩
+    rintro _ ⟨y, rfl⟩
+    have isom (x₁ x₂ : toTop.{u}.obj Δ[n + 1]) :
+        dist (⦋n + 1⦌.toTopHomeo x₁) (⦋n + 1⦌.toTopHomeo x₂) =
+          dist (α₀.f x₁) (α₀.f x₂) := rfl
+    have hy' : (⦋n + 1⦌.toTopHomeo ((toTopSdIterIso Δ[n + 1] r).hom
+        (toTop.map σ y))) ∈ Metric.ball (⦋n + 1⦌.toTopHomeo z) ε := by
+      have := congr_fun (α₀.f_comp_toTopSdIterIso_hom r) (toTop.map σ y)
+      dsimp at this
+      rw [Metric.mem_ball, isom, hz, this]
+      refine hα ?_ x₀.2
+      simp only [Set.mem_range, Subtype.exists]
+      obtain ⟨⟨y, hy⟩, rfl⟩ := ⦋d + 1⦌.toTopHomeo.symm.surjective y
+      exact ⟨y, hy, by simp [AffineMap.φ, IsAffineAt.φ]; rfl⟩
+    simpa [b'] using hi hy'
   have : b ∘ (toTopSdIterIso.{u} Δ[n + 1] r).hom ∘ toTop.map σ =
     (sSetTopAdj.homEquiv _ _).symm
       (σ ≫ (sSetTopAdj.homEquiv _ _) ((toTopSdIterIso Δ[n + 1] r).hom ≫ b)) := by
     rw [Adjunction.homEquiv_naturality_left_symm]
     simp
-  obtain ⟨x₀, a, ha⟩ : ∃ (x₀ : ⦋n + 1⦌.toTopObj) (a : ι),
-      Set.range (b ∘ (toTopSdIterIso.{u} Δ[n + 1] r).hom ∘ toTop.map σ) ⊆ U a := by
-    sorry
   rw [← sSetTopAdj.hasLiftingPropertyFixedBot_iff']
   refine hp a i _ (fun y hy ↦ ?_)
   erw [← this] at hy
