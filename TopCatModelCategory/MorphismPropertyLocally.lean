@@ -43,6 +43,17 @@ lemma mem_sieveLocally_iff {X S : C} (f : X ⟶ S) {S' : C} (i : S' ⟶ S):
 
 def locally : MorphismProperty C := fun _ S f ↦ W.sieveLocally f ∈ J S
 
+lemma locally_monotone {W₁ W₂ : MorphismProperty C}
+    [W₁.IsStableUnderBaseChange] [W₂.IsStableUnderBaseChange] (hW : W₁ ≤ W₂)
+    (J : GrothendieckTopology C) : W₁.locally J ≤ W₂.locally J := by
+  rintro X Y f hf
+  refine J.superset_covering ?_ hf
+  rintro S' i ⟨h⟩
+  exact ⟨{
+    sq := h.sq
+    hl := hW _ h.hl
+  }⟩
+
 end MorphismProperty
 
 end CategoryTheory

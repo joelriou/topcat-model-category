@@ -168,6 +168,11 @@ instance (F : C) : (trivialBundlesWithFiber F).IsStableUnderBaseChange where
 def trivialBundles : MorphismProperty C :=
   ⨆ F, trivialBundlesWithFiber F
 
+lemma mem_trivialBundles_iff {X Y : C} (p : X ⟶ Y) :
+    trivialBundles p ↔ ∃ F, Nonempty (TrivialBundleWithFiber F p) := by
+  simp [trivialBundles]
+  rfl
+
 instance : (trivialBundles (C := C)).IsStableUnderBaseChange := by
   dsimp only [trivialBundles]
   infer_instance

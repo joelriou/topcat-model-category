@@ -2,10 +2,12 @@ import TopCatModelCategory.TopCat.SerreFibrationLocal
 import TopCatModelCategory.Convenient.GrothendieckTopology
 import TopCatModelCategory.Convenient.Fibrations
 import TopCatModelCategory.MorphismPropertyLocally
+import TopCatModelCategory.TrivialBundleGluing
 
 universe u
 
 open CategoryTheory HomotopicalAlgebra TopCat.modelCategory Limits
+  MorphismProperty MonoidalCategory CartesianMonoidalCategory
 
 namespace DeltaGenerated'
 
@@ -35,7 +37,7 @@ lemma fibration_toTopCat_map_of_locally
     rw [← cancel_epi e'.hom, e'.hom_inv_id_assoc]
     exact fac i
   replace hπ := hc _ hπ
-  rw [MorphismProperty.mem_sieveLocally_iff] at hπ
+  rw [mem_sieveLocally_iff] at hπ
   obtain ⟨hπ⟩ := hπ
   have : Limits.PreservesLimit (Limits.cospan j p) toTopCat :=
     GeneratedByTopCat.openImmersions.preservesLimit_cospan
@@ -47,6 +49,46 @@ lemma fibration_toTopCat_map_of_locally
   rw [Category.comp_id] at h₁ h₂
   have := hπ.hl
   rw [fibration_iff]
-  exact (MorphismProperty.arrow_mk_iso_iff _ (Arrow.isoMk iso (Iso.refl _))).1 hπ.hl
+  exact (arrow_mk_iso_iff _ (Arrow.isoMk iso (Iso.refl _))).1 hπ.hl
+
+open MorphismProperty
+
+instance (F : TopCat.{u}) (p : F ⟶ 𝟙_ TopCat) : Fibration p := by
+  rw [← isFibrant_iff_of_isTerminal _ isTerminalTensorUnit]
+  infer_instance
+
+instance (S F : TopCat.{u}) : Fibration (fst S F) := by
+  rw [fibration_iff]
+  refine of_isPullback (IsPullback.of_isLimit_binaryFan_of_isTerminal
+    (tensorProductIsBinaryProduct S F) isTerminalTensorUnit).flip ?_
+  rw [← fibration_iff]
+  infer_instance
+
+def arrowIsoToTopCatFst (S F : DeltaGenerated'.{u}) :
+    Arrow.mk (TopCat.toDeltaGenerated'.map (fst (toTopCat.obj S) (toTopCat.obj F))) ≅
+      Arrow.mk (fst S F) :=
+  Iso.symm (Arrow.isoMk (Iso.refl _) (adjUnitIso.app _))
+
+instance (S F : DeltaGenerated'.{u}) :
+    Fibration (toTopCat.map (fst S F)) := by
+  have h : Fibration (fst (toTopCat.obj S) (toTopCat.obj F)) := inferInstance
+  rw [← fibration_toTopCat_map_toDeltaGenerated'_map_iff] at h
+  rw [fibration_iff] at h ⊢
+  refine (((fibrations TopCat).inverseImage toTopCat).arrow_mk_iso_iff ?_).2 h
+  exact Arrow.isoMk (Iso.refl _) (adjUnitIso.app _)
+
+lemma fibration_toTopCat_map_of_locally_trivialBundle
+    (hp : (trivialBundles.locally GeneratedByTopCat.grothendieckTopology p)) :
+      Fibration (toTopCat.map p) := by
+  apply fibration_toTopCat_map_of_locally
+  refine locally_monotone ?_ _ _ hp
+  intro X S f hf
+  rw [mem_trivialBundles_iff] at hf
+  obtain ⟨F, ⟨hf⟩⟩ := hf
+  let e : Arrow.mk f ≅ Arrow.mk (fst S F) := Arrow.isoMk hf.isoTensor (Iso.refl _)
+  refine (((fibrations TopCat).inverseImage toTopCat).arrow_iso_iff e).2 ?_
+  dsimp
+  simp only [inverseImage_iff, ← fibration_iff]
+  infer_instance
 
 end DeltaGenerated'
