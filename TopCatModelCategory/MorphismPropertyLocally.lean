@@ -38,6 +38,9 @@ def sieveLocally {X S : C} (f : X ⟶ S) : Sieve S where
     rintro S' S'' i ⟨h⟩ l
     exact ⟨h.pullback  l (IsPullback.of_hasPullback _ _)⟩
 
+lemma mem_sieveLocally_iff {X S : C} (f : X ⟶ S) {S' : C} (i : S' ⟶ S):
+    W.sieveLocally f i ↔ Nonempty (W.Over f i) := Iff.rfl
+
 def locally : MorphismProperty C := fun _ S f ↦ W.sieveLocally f ∈ J S
 
 end MorphismProperty

@@ -41,6 +41,9 @@ abbrev TopCat.toDeltaGenerated' : TopCat.{u} ⥤ DeltaGenerated'.{u} :=
 abbrev DeltaGenerated'.toTopCat : DeltaGenerated'.{u} ⥤ TopCat.{u} :=
   GeneratedByTopCat.toTopCat
 
+abbrev DeltaGenerated'.fullyFaithfulToTopCat :
+    toTopCat.{u}.FullyFaithful := GeneratedByTopCat.fullyFaithfulToTopCat _
+
 namespace DeltaGenerated'
 
 abbrev adjUnitIso : 𝟭 DeltaGenerated'.{v} ≅ toTopCat ⋙ TopCat.toDeltaGenerated' :=
