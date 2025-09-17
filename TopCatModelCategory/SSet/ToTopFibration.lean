@@ -1,6 +1,8 @@
 import TopCatModelCategory.Convenient.Fibrations
 import TopCatModelCategory.SSet.MinimalFibrationsFactorization
 import TopCatModelCategory.TopCat.ToTopExact
+import TopCatModelCategory.SSet.FactorThruFinite
+import TopCatModelCategory.SSet.SingularConnected
 
 universe u
 open CategoryTheory HomotopicalAlgebra SSet.modelCategoryQuillen
@@ -39,7 +41,26 @@ lemma fibration_toTop_map_of_trivialBundles {E B : SSet.{u}} (p : E ⟶ B)
 
 -- Gabriel-Zisman
 instance {E B : SSet.{u}} (p : E ⟶ B) [MinimalFibration p] :
-    Fibration (toTop.map p) := sorry
+    Fibration (toTop.map p) := by
+  wlog hB : IsFinite B ∧ IsConnected B
+  · rw [TopCat.modelCategory.fibration_iff_rlp]
+    intro n i
+    constructor
+    intro t b sq
+    obtain ⟨B', _, _, s, _, j, rfl⟩ := exists_factor_thru_finite_connected_of_topCatHom b
+    have := this (pullback.fst s p) ⟨inferInstance, inferInstance⟩
+    obtain ⟨t', h₁ , h₂⟩ := ((IsPullback.of_hasPullback s p).map toTop).exists_lift
+      (toTop.map Λ[n + 1, i].ι ≫ j) t (by simp [sq.w])
+    have sq' : CommSq t' (toTop.map Λ[n + 1, i].ι) (toTop.map (pullback.fst s p)) j := ⟨h₁⟩
+    exact ⟨⟨{
+      l := sq'.lift ≫ toTop.map (pullback.snd _ _)
+      fac_left := by rw [sq'.fac_left_assoc, h₂]
+      fac_right := by
+        rw [Category.assoc, ← Functor.map_comp, ← pullback.condition,
+          Functor.map_comp, sq'.fac_right_assoc]
+    }⟩⟩
+  obtain ⟨_, _⟩ := hB
+  sorry
 
 lemma fibration_toTop_map_of_rlp_I {E B : SSet.{u}} {p : E ⟶ B} (hp : I.rlp p) :
     Fibration (toTop.map p) := by

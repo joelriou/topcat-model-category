@@ -108,4 +108,35 @@ lemma exists_iso_of_isos :
 
 end IsPushout
 
+namespace IsPullback
+
+variable {D : Type*} [Category D]
+  {P X₁ X₂ S : C} {t : P ⟶ X₁} {l : P ⟶ X₂} {f₁ : X₁ ⟶ S} {f₂ : X₂ ⟶ S}
+  (sq : IsPullback t l f₁ f₂)
+  (F : C ⥤ D)
+  {Q : D} {t' : Q ⟶ F.obj X₁} {l' : Q ⟶ F.obj X₂}
+  (sq' : IsPullback t' l' (F.map f₁) (F.map f₂))
+
+include sq sq' in
+lemma preservesLimit_of_iso (e : F.obj P ≅ Q) (he₁ : e.hom ≫ t' = F.map t)
+    (he₂ : e.hom ≫ l' = F.map l) :
+    PreservesLimit (cospan f₁ f₂) F :=
+  preservesLimit_of_preserves_limit_cone sq.isLimit
+    ((PullbackCone.isLimitMapConeEquiv _ _).2
+      (IsLimit.ofIsoLimit sq'.isLimit
+        (PullbackCone.ext e he₁.symm he₂.symm).symm))
+
+include sq sq' in
+lemma isIso_of_preservesLimit (φ : F.obj P ⟶ Q) (he₁ : φ ≫ t' = F.map t)
+    (he₂ : φ ≫ l' = F.map l) [PreservesLimit (cospan f₁ f₂) F] : IsIso φ := by
+  let e := (sq.map F).isLimit.conePointUniqueUpToIso sq'.isLimit
+  suffices e.hom = φ by rw [← this]; infer_instance
+  apply sq'.hom_ext
+  · rw [he₁]
+    exact (sq.map F).isLimit.conePointUniqueUpToIso_hom_comp sq'.isLimit .left
+  · rw [he₂]
+    exact (sq.map F).isLimit.conePointUniqueUpToIso_hom_comp sq'.isLimit .right
+
+end IsPullback
+
 end CategoryTheory

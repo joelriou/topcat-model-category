@@ -1,6 +1,6 @@
 import Mathlib.AlgebraicTopology.SimplicialSet.Basic
 import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Equalizers
-import TopCatModelCategory.SSet.Basic
+import TopCatModelCategory.SSet.Nonempty
 import TopCatModelCategory.FunctorCategoryColimits
 
 universe u
@@ -83,5 +83,14 @@ instance {J : Type*} [Category J] [Small.{u} J] :
   ObjectProperty.closedUnderColimitsOfShape_preservesColimitsOfShape
     J SSet.{u} (Type u) WalkingParallelPair isColimitCoforkπ₀Functor.{u} (by
       rintro (_ | _) <;> apply evaluation_preservesColimitsOfShape)
+
+
+variable (X)
+abbrev IsPreconnected : Prop := Subsingleton (π₀ X)
+
+class IsConnected : Prop extends IsPreconnected X where
+  nonempty : X.Nonempty := by infer_instance
+
+attribute [instance] IsConnected.nonempty
 
 end SSet

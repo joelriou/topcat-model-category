@@ -446,6 +446,10 @@ lemma t₁Inclusions_toObj_map_of_mono {X Y : SSet.{u}} (i : X ⟶ Y) [Mono i] :
   exact t₁Inclusions.isT₁Inclusion_of_transfiniteCompositionOfShape
     ((transfiniteCompositionOfMono i).ofLE this).map
 
+lemma closedEmbeddings_toObj_map_of_mono {X Y : SSet.{u}} (i : X ⟶ Y) [Mono i] :
+    closedEmbeddings (SSet.toTop.map i) :=
+  (t₁Inclusions_toObj_map_of_mono i).toIsClosedEmbedding
+
 namespace Subcomplex
 
 variable {X : SSet.{u}} {Ω : Type u} {ι : |X| → Ω}

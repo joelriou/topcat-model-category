@@ -4,6 +4,7 @@ import Mathlib.CategoryTheory.MorphismProperty.Composition
 import TopCatModelCategory.SSet.Monomorphisms
 import TopCatModelCategory.ColimitsType
 import TopCatModelCategory.TopCat.Colimits
+import TopCatModelCategory.TopCat.Limits
 
 universe u
 
@@ -74,6 +75,18 @@ lemma closedEmbeddings.isOpen {X Y : TopCat.{u}} {f : X ⟶ Y}
 lemma closedEmbedding_le_inverseImage_monomorphisms :
     closedEmbeddings.{u} ≤ (monomorphisms (Type u)).inverseImage (forget _) :=
   fun _ _ _ hf ↦ by simpa [CategoryTheory.mono_iff_injective] using hf.injective
+
+lemma closedEmbeddings.isIso {X Y : TopCat.{u}} {f : X ⟶ Y} (hf : closedEmbeddings f)
+    (hf' : Function.Surjective (⇑f)) :
+    IsIso f := by
+  suffices IsHomeomorph f from (isoOfHomeo this.homeomorph).isIso_hom
+  rw [isHomeomorph_iff_isEmbedding_surjective]
+  exact ⟨hf.isEmbedding, hf'⟩
+
+lemma closedEmbeddings.precomp_iff {X Y Z : TopCat.{u}}
+    {g : Y ⟶ Z} (hg : closedEmbeddings g) (f : X ⟶ Y) :
+    closedEmbeddings (f ≫ g) ↔ closedEmbeddings f :=
+  IsClosedEmbedding.of_comp_iff hg
 
 instance : closedEmbeddings.{u}.IsMultiplicative where
   id_mem _ := IsClosedEmbedding.id
@@ -323,6 +336,16 @@ lemma isClosedEmbedding_of_transfiniteCompositionOfShape
       (hf.F.isColimitOfIsWellOrderContinuous j hj) (fun ⟨i, hi⟩ ↦ hj' i hi) (fun _ _ _ ↦ inj _)
 
 end
+
+instance : closedEmbeddings.{u}.IsStableUnderBaseChange where
+  of_isPullback {X' Z Z' X b r t l} sq hr := by
+    obtain ⟨e, he₁, he₂⟩ :=
+      sq.exists_iso_of_isos (TopCat.isPullbackRestrictPreimage b (Set.range r)).flip
+        (isoOfHomeo hr.homeomorphRange) (Iso.refl _) (Iso.refl _) rfl (by simp)
+    let l' : TopCat.of (b ⁻¹' (Set.range r)) ⟶ X' := TopCat.ofHom ⟨Subtype.val, by continuity⟩
+    have hl' : closedEmbeddings l' := (IsClosed.preimage b.hom.continuous
+      (hr.isClosed_range)).isClosedEmbedding_subtypeVal
+    exact (closedEmbeddings.arrow_mk_iso_iff (Arrow.isoMk e (Iso.refl _))).2 hl'
 
 instance : closedEmbeddings.{u}.IsStableUnderCobaseChange where
   of_isPushout sq hl := isClosedEmbedding_of_isPushout sq.flip hl
