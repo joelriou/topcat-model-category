@@ -56,6 +56,17 @@ lemma ext {h₁ h₂ : TrivialBundleWithFiber F p} (eq : h₁.r = h₂.r) : h₁
   rwa [ext_iff]
 
 @[simps]
+def chg {F' : C} (e : F' ≅ F) : TrivialBundleWithFiber F' p where
+  r := h.r ≫ e.inv
+  isLimit := by
+    let e' : pair B F' ≅ pair B F := mapPairIso (Iso.refl _) e
+    refine (IsLimit.equivOfNatIsoOfIso e' _ _ ?_).2 h.isLimit
+    refine BinaryFan.ext (Iso.refl _) ?_ ?_
+    all_goals
+      dsimp [Cones.postcompose, BinaryFan.fst, BinaryFan.snd, e']
+      simp
+
+@[simps]
 noncomputable def pullback {E' B' : C} {p' : E' ⟶ B'} {f : B' ⟶ B} {f' : E' ⟶ E}
     (sq : IsPullback f' p' p f) :
     TrivialBundleWithFiber F p' where

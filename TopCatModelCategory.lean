@@ -177,6 +177,7 @@ import TopCatModelCategory.TopCat.T1Inclusion
 import TopCatModelCategory.TopCat.ToTopDecomposition
 import TopCatModelCategory.TopCat.ToTopEqualizers
 import TopCatModelCategory.TopCat.ToTopExact
+import TopCatModelCategory.TopCat.ToTopLocTrivial
 import TopCatModelCategory.TopCat.ToTopProducts
 import TopCatModelCategory.TopCat.ToTopSdIso
 import TopCatModelCategory.TopCat.ToTopULift
