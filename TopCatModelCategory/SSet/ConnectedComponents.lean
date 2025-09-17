@@ -109,6 +109,16 @@ instance (c : X.π₀) : Subsingleton (c.component.toSSet.π₀) := by
     simp only [op_id, FunctorToTypes.map_id_apply] at hx₁ hx₂
     simp [hx₁, hx₂]
 
+instance (c : X.π₀) : (c.component.toSSet).Nonempty := by
+  obtain ⟨x, rfl⟩ := c.mk_surjective
+  refine ⟨⟨x, ?_⟩⟩
+  simp [component]
+  intro f
+  obtain rfl := Subsingleton.elim f (𝟙 _)
+  simp
+
+instance (c : X.π₀) : IsConnected (c.component.toSSet) where
+
 lemma min_component (c₁ c₂ : X.π₀) (h : c₁ ≠ c₂) :
     c₁.component ⊓ c₂.component = ⊥ := by
   ext ⟨n⟩ x
