@@ -34,7 +34,7 @@ variable (J : GrothendieckTopology C) [HasPullbacks C]
 
 def sieveLocally {X S : C} (f : X ⟶ S) : Sieve S where
   arrows S' i := Nonempty (W.Over f i)
-  downward_closed  := by
+  downward_closed := by
     rintro S' S'' i ⟨h⟩ l
     exact ⟨h.pullback  l (IsPullback.of_hasPullback _ _)⟩
 
@@ -42,6 +42,23 @@ lemma mem_sieveLocally_iff {X S : C} (f : X ⟶ S) {S' : C} (i : S' ⟶ S):
     W.sieveLocally f i ↔ Nonempty (W.Over f i) := Iff.rfl
 
 def locally : MorphismProperty C := fun _ S f ↦ W.sieveLocally f ∈ J S
+
+instance : (W.locally J).RespectsIso := by
+  apply MorphismProperty.RespectsIso.of_respects_arrow_iso
+  intro f g e hf
+  refine J.superset_covering ?_ (J.pullback_stable (f := e.inv.right) hf)
+  intro Z a h
+  rw [Sieve.pullback_apply, mem_sieveLocally_iff] at h
+  obtain ⟨h⟩ := h
+  rw [mem_sieveLocally_iff]
+  exact ⟨{
+    obj := h.obj
+    t := h.t ≫ e.hom.left
+    l := h.l
+    sq := IsPullback.of_iso h.sq (Iso.refl _) (Arrow.leftFunc.mapIso e) (Iso.refl _)
+        (Arrow.rightFunc.mapIso e) (by simp) (by simp) (by simp) (by simp)
+    hl := h.hl
+  }⟩
 
 lemma locally_monotone {W₁ W₂ : MorphismProperty C}
     [W₁.IsStableUnderBaseChange] [W₂.IsStableUnderBaseChange] (hW : W₁ ≤ W₂)
