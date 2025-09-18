@@ -43,6 +43,19 @@ lemma mem_sieveLocally_iff {X S : C} (f : X ⟶ S) {S' : C} (i : S' ⟶ S):
 
 def locally : MorphismProperty C := fun _ S f ↦ W.sieveLocally f ∈ J S
 
+lemma le_locally : W ≤ W.locally J := by
+  intro S' S f hf
+  refine J.superset_covering ?_ (J.top_mem S)
+  dsimp [locally]
+  rw [top_le_iff, ← Sieve.id_mem_iff_eq_top, mem_sieveLocally_iff]
+  exact ⟨{
+    obj := S'
+    t := 𝟙 _
+    l := f
+    sq := IsPullback.of_id_fst
+    hl := hf
+  }⟩
+
 instance : (W.locally J).RespectsIso := by
   apply MorphismProperty.RespectsIso.of_respects_arrow_iso
   intro f g e hf
