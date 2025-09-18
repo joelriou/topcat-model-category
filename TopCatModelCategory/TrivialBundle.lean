@@ -1,4 +1,5 @@
 import TopCatModelCategory.MorphismProperty
+import Mathlib.CategoryTheory.Limits.Preserves.Shapes.BinaryProducts
 
 namespace CategoryTheory
 
@@ -167,6 +168,11 @@ lemma isPullback {E' B' : C} {p' : E' ⟶ B'} (h' : TrivialBundleWithFiber F p')
           rw [hm₂, h₃]
         · dsimp
           rw [h₄, ← h₂, reassoc_of% hm₁])⟩
+
+noncomputable def map {D : Type*} [Category D] (G : C ⥤ D) [PreservesLimit (pair B F) G] :
+    TrivialBundleWithFiber (G.obj F) (G.map p) where
+  r := G.map h.r
+  isLimit := mapIsLimitOfPreservesOfIsLimit _ _ _ h.isLimit
 
 end TrivialBundleWithFiber
 

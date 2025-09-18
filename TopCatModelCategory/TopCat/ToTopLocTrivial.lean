@@ -2,12 +2,64 @@ import TopCatModelCategory.SSet.MinimalFibrationsLemmas
 import TopCatModelCategory.SSet.FiniteInduction
 import TopCatModelCategory.TrivialBundleOver
 import TopCatModelCategory.TopCat.SerreFibrationBundle
+import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
+import TopCatModelCategory.TopCat.ToTopExact
 import TopCatModelCategory.ModelCategoryTopCat
 
 universe u
 
 open Simplicial CategoryTheory MorphismProperty HomotopicalAlgebra
   TopCat.modelCategory Limits
+
+namespace CategoryTheory
+
+lemma Limits.PushoutCocone.isPushout_iff_nonempty_isColimit
+    {C : Type*} [Category C]
+    {S T₁ T₂ : C} {f₁ : S ⟶ T₁} {f₂ : S ⟶ T₂}
+    (c : PushoutCocone f₁ f₂) :
+    IsPushout f₁ f₂ c.inl c.inr ↔ Nonempty (IsColimit c) :=
+  ⟨fun sq ↦ ⟨IsColimit.ofIsoColimit sq.isColimit (PushoutCocone.ext (Iso.refl _))⟩, fun h ↦
+    { w := c.condition
+      isColimit' := ⟨IsColimit.ofIsoColimit h.some (PushoutCocone.ext (Iso.refl _))⟩ }⟩
+
+namespace Over
+
+variable {C : Type*} [Category C] {B : C} {X₁ X₂ X₃ X₄ : Over B}
+  {t : X₁ ⟶ X₂} {l : X₁ ⟶ X₃} {r : X₂ ⟶ X₄} {b : X₃ ⟶ X₄}
+
+lemma isPushout_iff_forget [HasPushouts C] :
+    IsPushout t l r b ↔ IsPushout t.left l.left r.left b.left :=
+  ⟨fun sq ↦ sq.map (Over.forget _), fun sq ↦
+    { w := by ext; exact sq.w
+      isColimit' := ⟨by
+        refine PushoutCocone.IsColimit.mk _
+          (fun s ↦ Over.homMk (sq.desc s.inl.left s.inr.left
+            ((Over.forget _).congr_map s.condition)) (by apply sq.hom_ext <;> simp))
+          (by aesop) (by aesop) (fun s m h₁ h₂ ↦ ?_)
+        ext
+        apply sq.hom_ext
+        · simp [← h₁]
+        · simp [← h₂]⟩ }⟩
+
+instance {D : Type*} [Category D] [HasPushouts C] [HasPushouts D]
+    (F : C ⥤ D) [PreservesColimitsOfShape WalkingSpan F] (X : C) :
+    PreservesColimitsOfShape WalkingSpan (Over.post (X := X) F) := by
+  suffices ∀ {S T₁ T₂ : Over X} (f₁ : S ⟶ T₁) (f₂ : S ⟶ T₂),
+      PreservesColimit (span f₁ f₂) (Over.post (X := X) F) from
+    ⟨fun {K} ↦ preservesColimit_of_iso_diagram _ (diagramIsoSpan K).symm⟩
+  intro S T₁ T₂ f₁ f₂
+  constructor
+  intro c hc
+  refine ⟨(PushoutCocone.isColimitMapCoconeEquiv _ _).2
+    (((PushoutCocone.isPushout_iff_nonempty_isColimit _).1 ?_).some)⟩
+  rw [isPushout_iff_forget]
+  exact (PushoutCocone.isPushout_iff_nonempty_isColimit _).2
+    ⟨(PushoutCocone.isColimitMapCoconeEquiv _ _).1
+      (isColimitOfPreserves (Over.forget _ ⋙ F) hc)⟩
+
+end Over
+
+end CategoryTheory
 
 def DeltaGenerated'.isLimitBinaryFanOfIsEmpty
     {X Y : DeltaGenerated'.{u}} {c : BinaryFan X Y}
@@ -107,6 +159,27 @@ end
 
 end
 
+section
+
+variable {A} {K₀ A₀ K : Over (toDeltaGenerated.obj B)}
+  {t : K₀ ⟶ A₀} {l : K₀ ⟶ K} {r : A₀ ⟶ A} {b : K ⟶ A}
+  (sq : IsPushout t l r b)
+
+include sq
+
+lemma isLocTrivial_of_isPushout
+    (hl : TopCat.closedEmbeddings (DeltaGenerated'.toTopCat.map l.left))
+    (hK : IsTrivial τ K) (hA₀ : IsLocTrivial τ A₀)
+    (hsq : PreservesColimit (span t l) (CategoryTheory.Over.pullback (toDeltaGenerated.map p)))
+    {U : DeltaGenerated'.{u}} (i : U ⟶ K.left) (hi : GeneratedByTopCat.openImmersions i)
+    (l' : K₀.left ⟶ U) (fac : l' ≫ i = l.left) (ρ : U ⟶ K₀.left) (fac' : l' ≫ ρ = 𝟙 _) :
+    IsLocTrivial τ A := by
+  -- TODO: add suitable additional assumptions
+  have := sq
+  sorry
+
+end
+
 lemma isLocTrivial {Z : SSet.{u}} [IsFinite Z] (a : Z ⟶ B) :
     IsLocTrivial τ (Over.mk (toDeltaGenerated.map a)) := by
   induction Z using SSet.finite_induction with
@@ -117,7 +190,28 @@ lemma isLocTrivial {Z : SSet.{u}} [IsFinite Z] (a : Z ⟶ B) :
     exact IsInitial.isInitialObj _ _ (SSet.isInitialOfNotNonempty
       (by rwa [SSet.notNonempty_iff_hasDimensionLT_zero]))
   | @hP Z₀ Z i n j j₀ sq _ h₀ =>
-    sorry
+    let t : Over.mk (j ≫ i ≫ a) ⟶ Over.mk (i ≫ a) := Over.homMk j
+    let b : Over.mk (j₀ ≫ a) ⟶ Over.mk a := Over.homMk j₀
+    have sq' : IsPushout (Over.homMk j : Over.mk (j ≫ i ≫ a) ⟶ Over.mk (i ≫ a))
+        (Over.homMk (Subcomplex.ι _) (by simp [sq.w_assoc]))
+        (Over.homMk (by exact i)) (Over.homMk j₀ : Over.mk (j₀ ≫ a) ⟶ Over.mk a) := by
+      rwa [Over.isPushout_iff_forget ]
+    refine isLocTrivial_of_isPushout τ (sq'.map (Over.post (SSet.toDeltaGenerated)))
+      ?_ ?_ (h₀ _) ?_ (U := ?_) ?_ ?_ ?_ ?_ ?_ ?_
+    · dsimp
+      apply closedEmbeddings_toObj_map_of_mono
+    · exact ⟨((τ (j₀ ≫ a)).map toDeltaGenerated).trivialBundleWithFiber
+        (IsPullback.of_hasPullback _ _).flip⟩
+    · dsimp
+      sorry
+    -- the next goals are about taking the complement of the isobarycenter in the simplex
+    · sorry
+    · sorry
+    · sorry
+    · sorry
+    · sorry
+    · sorry
+    · sorry
 
 end MinimalFibrationLocTrivial
 

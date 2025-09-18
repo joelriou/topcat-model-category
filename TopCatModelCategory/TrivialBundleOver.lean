@@ -34,6 +34,12 @@ def id (h : TrivialBundleWithFiber F p) :
     TrivialBundleWithFiberOver F p (𝟙 B) :=
   .mk IsPullback.of_id_fst h
 
+noncomputable def map {D : Type*} [Category D] (G : C ⥤ D) [PreservesLimit (cospan p f) G]
+    [PreservesLimit (pair B' F) G] :
+    TrivialBundleWithFiberOver (G.obj F) (G.map p) (G.map f) where
+  sq := hp.sq.map G
+  h := hp.h.map G
+
 end TrivialBundleWithFiberOver
 
 lemma nonempty_trivialBundleWithFiberOver_iff_of_isPullback
