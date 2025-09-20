@@ -120,6 +120,11 @@ noncomputable def π : pullObj τ A ⟶ A.left := pullback.fst _ _
 lemma isPullback : IsPullback (ι τ A) (π τ A) (toDeltaGenerated.map p) A.hom :=
   (IsPullback.of_hasPullback _ _).flip
 
+def IsTrivial' : Prop :=
+  Nonempty (TrivialBundleWithFiberOver (toDeltaGenerated.obj F) (toDeltaGenerated.map p) A.hom)
+
+-- TODO: Replace `IsTrivial` by `IsTrivial'`
+
 def IsTrivial : Prop := trivialBundlesWithFiber (toDeltaGenerated.obj F) (π τ A)
 
 lemma isTrivial_of_isEmpty (h : IsEmpty ((forget _).obj A.left)) :
