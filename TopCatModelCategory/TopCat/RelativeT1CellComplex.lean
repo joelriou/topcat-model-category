@@ -6,6 +6,18 @@ universe w w' t v u
 
 open CategoryTheory HomotopicalAlgebra Topology Limits
 
+namespace TopologicalSpace
+
+@[simp]
+lemma isOpen_bot {X : Type*} (U : Set X) : IsOpen[⊥] U := by constructor
+
+@[simp]
+lemma isClosed_bot {X : Type*} (F : Set X) : IsClosed[⊥] F := by
+  letI : TopologicalSpace X := ⊥
+  simp [← isOpen_compl_iff]
+
+end TopologicalSpace
+
 namespace TopCat
 
 variable {X₁ X₂ X₃ X₄ : TopCat.{u}} {t : X₁ ⟶ X₂} {l : X₁ ⟶ X₃} {r : X₂ ⟶ X₄}
@@ -394,6 +406,63 @@ noncomputable def sigmaEquiv :
 @[simp]
 lemma sigmaEquiv_apply_coe (x) :
     (sigmaEquiv hf h x).1 = x.1.ι x.2.1 := rfl
+
+end
+
+section
+
+variable (hf) in
+include h in
+lemma isClosed_of_subsingleton_inter_interiorCell_finite
+    {Z : Set X} (hZ₀ : IsClosed (f ⁻¹' Z))
+    (hZ : ∀ (c : hf.Cells), Subsingleton (interiorCell c ∩ Z : Set _)) :
+    IsClosed Z := by
+  sorry
+
+include h in
+lemma finite_inter_interiorCell_of_isCompact {F : Set X} (hF₀ : Set.range f ∩ F = ∅)
+    (hF : IsCompact F) :
+    Finite { c : hf.Cells // (interiorCell c ∩ F).Nonempty } := by
+  let ι := { c : hf.Cells // (interiorCell c ∩ F).Nonempty }
+  let p (i : ι) : X := i.2.choose
+  have hp₁ (i : ι) : p i ∈ interiorCell i.1 := i.2.choose_spec.1
+  have hp₂ (i : ι) : p i ∈ F := i.2.choose_spec.2
+  have hp₃ (i : ι) (c : hf.Cells) (hc : p i ∈ interiorCell c) : c = i.1 := by
+    by_contra!
+    exact Set.disjoint_iff_forall_ne.1 (disjoint_interiorCell h this) hc (hp₁ i) rfl
+  have hp₄ : Function.Injective p := fun i₁ i₂ hi ↦ by
+    ext
+    exact hp₃ i₂ i₁.1 (by simpa only [← hi] using hp₁ i₁)
+  suffices Finite (Set.range p) from
+    Finite.of_injective (fun i ↦ (⟨_, by exact Set.mem_range_self i⟩ : Set.range p))
+      (fun i₁ i₂ hi ↦ hp₄ (Subtype.ext_iff.1 hi))
+  suffices ∀ (Z : Set X) (hZ : Z ⊆ Set.range p), IsClosed Z by
+    refine (IsCompact.finite (hF.of_isClosed_subset (this _ subset_rfl) ?_) ⟨?_⟩).to_subtype
+    · rintro _ ⟨i, rfl⟩
+      exact hp₂ i
+    · rw [TopologicalSpace.ext_iff_isClosed]
+      intro T
+      simp only [TopologicalSpace.isClosed_bot, iff_true]
+      rw [(this _ subset_rfl).isClosedEmbedding_subtypeVal.isClosed_iff_image_isClosed]
+      exact this _ (by simp)
+  intro Z hZ
+  apply isClosed_of_subsingleton_inter_interiorCell_finite hf h
+  · convert isClosed_empty
+    ext x₀
+    simp only [Set.mem_preimage, Set.mem_empty_iff_false, iff_false]
+    intro hx₀
+    refine hF₀.subset (show f x₀ ∈ _ from ⟨by simp, ?_⟩)
+    obtain ⟨i, hi⟩ := hZ hx₀
+    rw [← hi]
+    apply hp₂
+  · intro c
+    constructor
+    rintro ⟨x, hx₁, hx₂⟩ ⟨y, hy₁, hy₂⟩
+    obtain ⟨i, rfl⟩ := hZ hx₂
+    obtain ⟨i', rfl⟩ := hZ hy₂
+    obtain rfl := hp₃ _ _ hx₁
+    obtain rfl := Subtype.ext_iff.2 (hp₃ _ _ hy₁)
+    rfl
 
 end
 
