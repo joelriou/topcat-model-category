@@ -130,6 +130,28 @@ lemma sup_ne_zero {v : E} (hv : v ≠ 0) :
   grind
 
 include hX₁ hX₂ hX₃ in
+lemma sup_smul {a : ℝ} (ha : 0 ≤ a) (v : E) :
+    sup X (a • v) = a⁻¹ • sup X v := by
+  by_cases hv : v = 0
+  · subst hv
+    simp [sup_zero hX₃]
+  · by_cases ha₀ : a = 0
+    · subst ha₀
+      simp [sup_zero hX₃]
+    · refine le_antisymm ?_ ?_
+      · rw [smul_eq_mul, le_inv_mul_iff₀ (lt_of_le_of_ne ha (Ne.symm ha₀)),
+          le_sup_iff hX₁ hX₂ hX₃ hv _ (mul_nonneg ha (zero_le_sup hX₂ hX₃ _))]
+        have := sup_mem_set hX₂ hX₃ (a • v)
+        rw [mem_set_iff, smul_smul, mul_comm] at this
+        exact this.2
+      · rw [le_sup_iff hX₁ hX₂ hX₃ (by simp; tauto)]
+        · rw [smul_smul, smul_eq_mul, mul_comm, ← mul_assoc, mul_inv_cancel₀ ha₀, one_mul]
+          have := sup_mem_set hX₂ hX₃ v
+          rw [mem_set_iff] at this
+          exact this.2
+        · exact mul_nonneg (by positivity) (zero_le_sup hX₂ hX₃ v)
+
+include hX₁ hX₂ hX₃ in
 lemma zero_lt_sup {v : E} (hv : v ≠ 0) :
     0 < sup X v :=
   lt_of_le_of_ne (zero_le_sup hX₂ hX₃ v) (sup_ne_zero hX₁ hX₂ hX₃ hv).symm
@@ -384,8 +406,16 @@ lemma sup_homeoClosedBallOfConvexCompact_symm
     sup X ((homeoClosedBallOfConvexCompact hX₁ hX₂ hX₃).symm x) = ‖x.1‖⁻¹ := by
   obtain ⟨⟨r, x⟩, rfl⟩ := (isQuotientMap_polarParametrizationClosedBall E).surjective x
   simp only [homeoClosedBallOfConvexCompact_apply, polarParametrizationClosedBall_apply_coe,
-    norm_smul, Real.norm_eq_abs, norm_eq_of_mem_sphere, mul_one]
-  sorry
+    norm_smul, Real.norm_eq_abs, norm_eq_of_mem_sphere, mul_one, map_apply_coe]
+  rw [sup_smul hX₁ hX₂ hX₃ (mul_nonneg r.2.1 (zero_le_sup hX₂ hX₃ _)), smul_eq_mul]
+  by_cases hr : r = 0
+  · subst hr
+    simp
+  · refine (inv_mul_eq_iff_eq_mul₀ ?_).mpr ?_
+    · simp only [ne_eq, mul_eq_zero, Set.Icc.coe_eq_zero, not_or]
+      exact ⟨hr, sup_ne_zero hX₁ hX₂ hX₃ (by simp)⟩
+    · rw [abs_of_nonneg r.2.1, mul_comm, ← mul_assoc,
+        inv_mul_cancel₀ (by simpa), one_mul]
 
 end
 
@@ -437,7 +467,20 @@ lemma continuous_retraction : Continuous (retraction hX₁ hX₂ hX₃) :=
 lemma retraction_boundaryι_apply (x : boundary X) :
     retraction hX₁ hX₂ hX₃ (boundaryι hX₃ x) = x := by
   obtain ⟨x, hx⟩ := x
-  sorry
+  obtain ⟨⟨r, x⟩, rfl⟩ := (isQuotientMap_polarParametrization E).surjective x
+  ext
+  dsimp [retraction, boundaryι, homeoClosedBallOfConvexCompact]
+  by_cases hr : r = 0
+  · subst hr
+    simp
+  · have h₁ := inducedMap_apply hX₁ hX₂ hX₃ ⟨1, x⟩
+    rw [Subtype.ext_iff] at h₁
+    convert h₁
+    · simp [norm_smul, smul_smul, inv_mul_cancel₀ (a := (r : ℝ)) (by simpa)]
+    · simp only [polarParametrization_apply, mem_boundary_iff] at hx
+      rw [sup_smul hX₁ hX₂ hX₃ (by simp), smul_eq_mul,
+        inv_mul_eq_one₀ (a := (r : ℝ)) (by simpa)] at hx
+      simp [map_apply_coe, hx]
 
 @[simp]
 lemma retraction_comp_boundaryι :
