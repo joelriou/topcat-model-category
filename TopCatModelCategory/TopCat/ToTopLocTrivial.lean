@@ -120,29 +120,31 @@ noncomputable def π : pullObj τ A ⟶ A.left := pullback.fst _ _
 lemma isPullback : IsPullback (ι τ A) (π τ A) (toDeltaGenerated.map p) A.hom :=
   (IsPullback.of_hasPullback _ _).flip
 
-def IsTrivial' : Prop :=
+variable (p F) in
+def IsTrivial : Prop :=
   Nonempty (TrivialBundleWithFiberOver (toDeltaGenerated.obj F) (toDeltaGenerated.map p) A.hom)
 
--- TODO: Replace `IsTrivial` by `IsTrivial'`
-
-def IsTrivial : Prop := trivialBundlesWithFiber (toDeltaGenerated.obj F) (π τ A)
+instance (X : Type u) [IsEmpty X] [TopologicalSpace X] [DeltaGeneratedSpace' X] :
+    IsEmpty ((forget DeltaGenerated').obj (.of X)) := by assumption
 
 lemma isTrivial_of_isEmpty (h : IsEmpty ((forget _).obj A.left)) :
-    IsTrivial τ A := by
-  have := Function.isEmpty ((forget _).map (π τ A))
-  exact ⟨{
-    r := (DeltaGenerated'.isInitialOfIsEmpty _).to _
-    isLimit := DeltaGenerated'.isLimitBinaryFanOfIsEmpty h
-      (Function.isEmpty ((forget _).map (π τ A)))
-  }⟩
+    IsTrivial p F A := by
+  let φ := ((forget _).map (pullback.fst (X := A.left) A.hom (toDeltaGenerated.map p)))
+  have := Function.isEmpty φ
+  exact
+    ⟨{sq := (IsPullback.of_hasPullback _ _).flip
+      h :=
+      { r := (DeltaGenerated'.isInitialOfIsEmpty _).to _
+        isLimit :=DeltaGenerated'.isLimitBinaryFanOfIsEmpty h (by assumption) } }⟩
 
 def IsLocTrivial : Prop :=
   (trivialBundlesWithFiber (toDeltaGenerated.obj F)).locally
     GeneratedByTopCat.grothendieckTopology (π τ A)
 
 variable {τ A} in
-lemma IsTrivial.isLocTrivial (hA : IsTrivial τ A) : IsLocTrivial τ A :=
-  MorphismProperty.le_locally _ _ _ hA
+lemma IsTrivial.isLocTrivial (hA : IsTrivial p F A) : IsLocTrivial τ A :=
+  MorphismProperty.le_locally _ _ _
+    ⟨hA.some.trivialBundleWithFiber (IsPullback.of_hasPullback _ _).flip⟩
 
 section
 
@@ -174,12 +176,11 @@ include sq
 
 lemma isLocTrivial_of_isPushout
     (hl : TopCat.closedEmbeddings (DeltaGenerated'.toTopCat.map l.left))
-    (hK : IsTrivial τ K) (hA₀ : IsLocTrivial τ A₀)
+    (hK : IsTrivial p F K) (hA₀ : IsLocTrivial τ A₀)
     (hsq : PreservesColimit (span t l) (CategoryTheory.Over.pullback (toDeltaGenerated.map p)))
     {U : DeltaGenerated'.{u}} (i : U ⟶ K.left) (hi : GeneratedByTopCat.openImmersions i)
     (l' : K₀.left ⟶ U) (fac : l' ≫ i = l.left) (ρ : U ⟶ K₀.left) (fac' : l' ≫ ρ = 𝟙 _) :
     IsLocTrivial τ A := by
-  -- TODO: add suitable additional assumptions
   have := sq
   sorry
 
@@ -189,7 +190,7 @@ lemma isLocTrivial {Z : SSet.{u}} [IsFinite Z] (a : Z ⟶ B) :
     IsLocTrivial τ (Over.mk (toDeltaGenerated.map a)) := by
   induction Z using SSet.finite_induction with
   | hP₀ X =>
-    refine (isTrivial_of_isEmpty _ _
+    refine (isTrivial_of_isEmpty _
       (DeltaGenerated'.isEmpty_of_isInitial ?_)).isLocTrivial
     dsimp
     exact IsInitial.isInitialObj _ _ (SSet.isInitialOfNotNonempty
@@ -202,11 +203,9 @@ lemma isLocTrivial {Z : SSet.{u}} [IsFinite Z] (a : Z ⟶ B) :
         (Over.homMk (by exact i)) (Over.homMk j₀ : Over.mk (j₀ ≫ a) ⟶ Over.mk a) := by
       rwa [Over.isPushout_iff_forget ]
     refine isLocTrivial_of_isPushout τ (sq'.map (Over.post (SSet.toDeltaGenerated)))
-      ?_ ?_ (h₀ _) ?_ (U := ?_) ?_ ?_ ?_ ?_ ?_ ?_
+      ?_ ⟨(τ (j₀ ≫ a)).map toDeltaGenerated⟩ (h₀ _) ?_ (U := ?_) ?_ ?_ ?_ ?_ ?_ ?_
     · dsimp
       apply closedEmbeddings_toObj_map_of_mono
-    · exact ⟨((τ (j₀ ≫ a)).map toDeltaGenerated).trivialBundleWithFiber
-        (IsPullback.of_hasPullback _ _).flip⟩
     · dsimp
       sorry
     -- the next goals are about taking the complement of the isobarycenter in the simplex
