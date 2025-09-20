@@ -362,11 +362,88 @@ lemma isHomeomorph_inducedMap : IsHomeomorph (inducedMap hX₁ hX₂ hX₃) := b
 
 end homeoClosedBallOfConvexCompact
 
+section
+
+open homeoClosedBallOfConvexCompact
+
 variable [Nontrivial E] [ProperSpace E]
 
-open homeoClosedBallOfConvexCompact in
 noncomputable def homeoClosedBallOfConvexCompact :
     X ≃ₜ Metric.closedBall (0 : E) 1 :=
   (isHomeomorph_inducedMap hX₁ hX₂ hX₃).homeomorph.symm
+
+@[simp]
+lemma homeoClosedBallOfConvexCompact_apply (x : unitInterval × (Metric.sphere 0 1)) :
+    (homeoClosedBallOfConvexCompact hX₁ hX₂ hX₃).symm
+      (polarParametrizationClosedBall E x) = map hX₁ hX₂ hX₃ x := by
+  simp [homeoClosedBallOfConvexCompact]
+
+@[simp]
+lemma sup_homeoClosedBallOfConvexCompact_symm
+    (x : Metric.closedBall (0 : E) 1) :
+    sup X ((homeoClosedBallOfConvexCompact hX₁ hX₂ hX₃).symm x) = ‖x.1‖⁻¹ := by
+  obtain ⟨⟨r, x⟩, rfl⟩ := (isQuotientMap_polarParametrizationClosedBall E).surjective x
+  simp only [homeoClosedBallOfConvexCompact_apply, polarParametrizationClosedBall_apply_coe,
+    norm_smul, Real.norm_eq_abs, norm_eq_of_mem_sphere, mul_one]
+  sorry
+
+end
+
+namespace retractionBoundaryOfConvexCompact
+
+open homeoClosedBallOfConvexCompact
+
+variable (X)
+
+def boundary : Set E := sup X ⁻¹' {1}
+
+@[simp]
+lemma mem_boundary_iff (x : E) : x ∈ boundary X ↔ sup X x = 1 := Iff.rfl
+
+variable {X}
+
+def boundaryι (x : (boundary X : Type _)) : (({0}ᶜ : Set E) : Type _) :=
+  ⟨x.1, by
+    obtain ⟨x, hx⟩ := x
+    simp only [mem_boundary_iff] at hx
+    simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
+    rintro rfl
+    simp [sup_zero hX₃] at hx⟩
+
+lemma continuous_boundaryι : Continuous (boundaryι hX₃) :=
+  Continuous.subtype_mk continuous_subtype_val _
+
+variable [Nontrivial E] [ProperSpace E]
+
+@[simp]
+lemma homeoClosedBallOfConvexCompact_symm_mem_boundary_iff
+    (x : Metric.closedBall (0 : E) 1) :
+    ((homeoClosedBallOfConvexCompact hX₁ hX₂ hX₃).symm x).1 ∈ boundary X ↔
+      ‖x.1‖ = 1 := by
+  simp
+
+noncomputable def retraction (x : (({0}ᶜ : Set E) : Type _)) : boundary X :=
+  ⟨(homeoClosedBallOfConvexCompact hX₁ hX₂ hX₃).symm ⟨‖x.1‖⁻¹ • x.1, by
+      simpa [norm_smul] using inv_mul_le_one⟩, by
+    obtain ⟨x, hx⟩ := x
+    simp [norm_smul, inv_mul_cancel₀ (a := ‖x‖) (by simpa using hx)]⟩
+
+lemma continuous_retraction : Continuous (retraction hX₁ hX₂ hX₃) :=
+  Continuous.subtype_mk (continuous_subtype_val.comp
+    ((Homeomorph.continuous_symm _).comp (Continuous.subtype_mk
+      ((Continuous.inv₀ (by continuity) (by simp)).smul continuous_subtype_val) _))) _
+
+@[simp]
+lemma retraction_boundaryι_apply (x : boundary X) :
+    retraction hX₁ hX₂ hX₃ (boundaryι hX₃ x) = x := by
+  obtain ⟨x, hx⟩ := x
+  sorry
+
+@[simp]
+lemma retraction_comp_boundaryι :
+    retraction hX₁ hX₂ hX₃ ∘ boundaryι hX₃ = id := by
+  aesop
+
+end retractionBoundaryOfConvexCompact
 
 end NormedSpace
