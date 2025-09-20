@@ -186,6 +186,19 @@ instance : IsStableUnderTransfiniteComposition.{u'} t₁Inclusions.{u} where
   isStableUnderTransfiniteCompositionOfShape _ _ _ _ _ :=
     ⟨fun _ _ _ ⟨hf⟩ ↦ isT₁Inclusion_of_transfiniteCompositionOfShape hf⟩
 
+lemma isClosed_of_subsingleton_compl {X Y : TopCat.{u}} {f : X ⟶ Y}
+    (hf : t₁Inclusions f) {Z : Set Y} (hZ : IsClosed (f ⁻¹' Z))
+    (hZ' : Subsingleton ((Set.range f)ᶜ ∩ Z : Set _)) : IsClosed Z := by
+  rw [show Z = f '' (f ⁻¹' Z) ∪ ((Set.range f)ᶜ ∩ Z) by grind]
+  refine IsClosed.union (hf.1.isClosedMap _ hZ) ?_
+  by_cases h : ((Set.range ⇑(ConcreteCategory.hom f))ᶜ ∩ Z).Nonempty
+  · obtain ⟨x, hx, hx'⟩ := h
+    convert hf.isClosed_singleton _ hx
+    aesop
+  · rw [Set.not_nonempty_iff_eq_empty] at h
+    rw [h]
+    exact isClosed_empty
+
 section
 
 variable {J : Type*} [LinearOrder J] [OrderBot J] [SuccOrder J]

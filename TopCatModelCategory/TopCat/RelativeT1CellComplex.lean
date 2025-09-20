@@ -417,7 +417,60 @@ lemma isClosed_of_subsingleton_inter_interiorCell_finite
     {Z : Set X} (hZ₀ : IsClosed (f ⁻¹' Z))
     (hZ : ∀ (c : hf.Cells), Subsingleton (interiorCell c ∩ Z : Set _)) :
     IsClosed Z := by
-  sorry
+  rw [isClosed_iff_of_isColimit _ hf.isColimit]
+  intro j
+  induction j using SuccOrder.limitRecOn with
+  | isMin j hj =>
+    obtain rfl := hj.eq_bot
+    rw [← hf.fac] at hZ₀
+    rwa [← Homeomorph.isClosed_preimage (homeoOfIso hf.isoBot).symm]
+  | succ j hj hj' =>
+    let H := hf.attachCells j hj
+    rw [isClosed_iff_of_isPushout H.isPushout]
+    constructor
+    · dsimp
+      rw [← Set.preimage_comp, ← CategoryTheory.hom_comp]
+      simpa
+    · dsimp
+      rw [isClosed_iff_of_isColimit _ H.isColimit₂, ← Set.preimage_comp,
+        ← CategoryTheory.hom_comp]
+      rintro ⟨i⟩
+      rw [← Set.preimage_comp]
+      dsimp
+      rw [← CategoryTheory.hom_comp, ← CategoryTheory.hom_comp]
+      apply (h j (H.π i)).isClosed_of_subsingleton_compl
+      · have := IsClosed.preimage (f := H.cofan₁.inj i ≫ H.g₁) (by continuity) hj'
+        rw [← Set.preimage_comp, ← CategoryTheory.hom_comp, Category.assoc] at this
+        rw [← Set.preimage_comp, ← CategoryTheory.hom_comp]
+        convert this using 4
+        dsimp
+        erw [← H.hm_assoc]
+        rw [← H.isPushout.w_assoc]
+        simp
+      · constructor
+        rintro ⟨x₁, hx₁, hx₁'⟩ ⟨x₂, hx₂, hx₂'⟩
+        ext
+        dsimp
+        let c : hf.Cells :=
+          { j := j
+            hj := hj
+            k := i }
+        let y₁ : (interiorCell c ∩ Z : Set _) :=
+          ⟨_, ⟨(equivInteriorCell h c ⟨x₁, hx₁⟩).2, hx₁'⟩⟩
+        let y₂ : (interiorCell c ∩ Z : Set _) :=
+          ⟨_, ⟨(equivInteriorCell h c ⟨x₂, hx₂⟩).2, hx₂'⟩⟩
+        have := (equivInteriorCell h c).injective (a₁ := ⟨x₁, hx₁⟩) (a₂ := ⟨x₂, hx₂⟩) (by
+          have hy := Subsingleton.elim y₁ y₂
+          rwa [Subtype.ext_iff] at hy ⊢)
+        rwa [Subtype.ext_iff] at this
+  | isSuccLimit j hj hj' =>
+    rw [isClosed_iff_of_isColimit _ (Functor.isColimitOfIsWellOrderContinuous hf.F j hj)]
+    rintro ⟨b, hb⟩
+    simp only [Set.mem_Iio] at hb
+    have := hj' b hb
+    dsimp
+    rw [← Set.preimage_comp, ← CategoryTheory.hom_comp]
+    simpa
 
 include h in
 lemma finite_inter_interiorCell_of_isCompact {F : Set X} (hF₀ : Set.range f ∩ F = ∅)
