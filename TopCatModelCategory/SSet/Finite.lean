@@ -113,4 +113,9 @@ instance isFinite_range {Y : SSet.{u}} (f : Y ⟶ X) [Y.IsFinite]:
     IsFinite (Subcomplex.range f) :=
   isFinite_of_epi (toRangeSubcomplex f)
 
+instance {X : SSet.{u}} {n : ℕ} (x : X _⦋n⦌) :
+    (Subcomplex.ofSimplex x : SSet).IsFinite := by
+  rw [Subcomplex.ofSimplex_eq_range]
+  infer_instance
+
 end SSet

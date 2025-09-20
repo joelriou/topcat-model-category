@@ -225,4 +225,19 @@ lemma sigmaToTop_naturality (s : X.N) (p : stdSimplex.interior ⦋s.dim⦌)
 noncomputable def sigmaEquivToTop : (Σ (s : X.N), stdSimplex.interior ⦋s.dim⦌) ≃ |X| :=
   Equiv.ofBijective _ sigmaToTop_bijective
 
+@[simp]
+lemma sigmaEquivToTop_symm_apply (x : (Σ (s : X.N), stdSimplex.interior ⦋s.dim⦌)) :
+    sigmaEquivToTop.symm (X.sigmaToTop x) = x :=
+  sigmaEquivToTop.symm_apply_apply x
+
+lemma sigmaToTop_mem_interiorCell (x : (Σ (s : X.N), stdSimplex.interior ⦋s.dim⦌)) :
+    sigmaToTop x ∈ TopCat.RelativeT₁CellComplex.interiorCell
+    ((X.relativeCellComplex.mapCellsEquiv toTop).symm
+      (X.relativeCellComplexCellsEquiv.symm x.1)) := by
+  obtain ⟨s, x⟩ := x
+  refine ⟨⦋s.dim⦌.toTopHomeo.symm x.1, ?_, by aesop⟩
+  · dsimp
+    simp only [← stdSimplex.toTopHomeo_mem_interior_iff,
+      Homeomorph.apply_symm_apply, Subtype.coe_prop]
+
 end SSet

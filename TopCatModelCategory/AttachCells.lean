@@ -154,6 +154,11 @@ noncomputable def map : AttachCells (g := fun a ↦ F.map (g a)) (F.map f) where
   g₂ := F.map hf.g₂
   isPushout := hf.isPushout.map F
 
+@[simp]
+lemma cell_map (i : hf.ι) :
+    (hf.map F).cell i = F.map (hf.cell i) := by
+  simp [cell]
+
 end AttachCells
 
 end HomotopicalAlgebra

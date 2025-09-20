@@ -149,6 +149,14 @@ def mapCellsEquiv : (hf.map F).Cells ≃ hf.Cells where
       hj := c.hj
       k := c.k }
 
+@[simp]
+lemma ι_mapCellEquiv_symm (c : hf.Cells) :
+    ((hf.mapCellsEquiv F).symm c).ι = F.map c.ι := by
+  dsimp [Cells.ι]
+  simp only [homOfLE_leOfHom, map_incl_app, Functor.map_comp]
+  congr
+  apply AttachCells.cell_map
+
 end
 
 end RelativeCellComplex

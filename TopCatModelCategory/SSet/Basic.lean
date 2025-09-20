@@ -2,7 +2,7 @@ import Mathlib.AlgebraicTopology.SimplicialSet.StdSimplex
 
 universe u
 
-open CategoryTheory Simplicial Opposite
+open CategoryTheory Simplicial Opposite Limits
 
 namespace SSet
 
@@ -59,8 +59,14 @@ lemma yonedaEquiv_symm_zero {X : SSet.{u}} (x : X _⦋0⦌) :
   apply yonedaEquiv.injective
   simp [yonedaEquiv_const]
 
+
 protected abbrev evaluation : SimplexCategoryᵒᵖ ⥤ SSet.{u} ⥤ Type u :=
   evaluation _ _
+
+instance {J : Type*} [Category J] [HasColimitsOfShape J (Type u)] (n : SimplexCategoryᵒᵖ) :
+    PreservesColimitsOfShape J (SSet.evaluation.{u}.obj n) := by
+  change PreservesColimitsOfShape J ((evaluation _ _).obj n)
+  infer_instance
 
 @[simps!]
 def stdSimplex.coyonedaObjIsoEvaluation (n : ℕ) :

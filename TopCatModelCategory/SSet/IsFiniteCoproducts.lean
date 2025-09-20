@@ -57,4 +57,27 @@ instance (X Y : SSet.{u}) [X.IsFinite] [Y.IsFinite] : (X ⨿ Y).IsFinite := by
   have : ∀ j, ((pair X Y).obj j).IsFinite := by rintro ⟨_ | _⟩ <;> assumption
   infer_instance
 
+instance {X : SSet.{u}} {ι : Type*} [Finite ι] (A : ι → X.Subcomplex)
+    [∀ i, (A i : SSet).IsFinite] : (((⨆ (i : ι), A i) : X.Subcomplex) : SSet).IsFinite := by
+  let S (i : ι) : SSet.{u} := A i
+  let p : ∐ S ⟶ X := Sigma.desc (fun i ↦ (A i).ι)
+  have : ((⨆ (i : ι), A i) : X.Subcomplex) = Subcomplex.range p := by
+    ext n x
+    simp only [Subpresheaf.iSup_obj, Set.mem_iUnion, Subpresheaf.range_obj, Set.mem_range]
+    constructor
+    · rintro ⟨i, hi⟩
+      refine ⟨(Sigma.ι S i).app n ⟨x, hi⟩, ?_⟩
+      rw [← FunctorToTypes.comp, Sigma.ι_desc]
+      rfl
+    · rintro ⟨y, rfl⟩
+      obtain ⟨⟨i⟩, y, rfl⟩ := Types.jointly_surjective_of_isColimit
+        (isColimitOfPreserves (SSet.evaluation.obj n)
+          (colimit.isColimit (Discrete.functor S))) y
+      refine ⟨i, ?_⟩
+      dsimp
+      rw [← FunctorToTypes.comp, colimit.ι_desc]
+      simp
+  rw [this]
+  infer_instance
+
 end SSet

@@ -473,6 +473,7 @@ lemma isClosed_of_subsingleton_inter_interiorCell_finite
     simpa
 
 include h in
+variable (hf) in
 lemma finite_inter_interiorCell_of_isCompact {F : Set X} (hF₀ : Set.range f ∩ F = ∅)
     (hF : IsCompact F) :
     Finite { c : hf.Cells // (interiorCell c ∩ F).Nonempty } := by

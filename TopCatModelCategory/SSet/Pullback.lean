@@ -52,11 +52,6 @@ section
 
 variable {J : Type*} [Category J] [HasColimitsOfShape J (Type u)]
 
-instance (n : SimplexCategoryᵒᵖ) :
-    PreservesColimitsOfShape J (SSet.evaluation.{u}.obj n) := by
-  change PreservesColimitsOfShape J ((evaluation _ _).obj n)
-  infer_instance
-
 instance (n : SimplexCategoryᵒᵖ) (X : SSet.{u}) :
     PreservesColimitsOfShape J (Over.post (X := X) (SSet.evaluation.obj n)) where
   preservesColimit := ⟨fun hc ↦ ⟨isColimitOfReflects (Over.forget _)
