@@ -237,6 +237,7 @@ lemma isLocTrivial_of_isPushout
   obtain (⟨a₀, rfl⟩ | ⟨k, rfl, hk⟩) := Types.eq_or_eq_of_isPushout'
     (sq.map (Over.forget _ ⋙ DeltaGenerated'.toTopCat ⋙ forget _)) a
   · dsimp at a₀
+    dsimp
     sorry
   · dsimp at k hk ⊢
     let e : ((Set.range l.left)ᶜ : Set _) ≃ₜ ((Set.range r.left)ᶜ : Set _) :=
