@@ -33,6 +33,12 @@ abbrev of (Y : Type v) [TopologicalSpace Y] [IsGeneratedBy X Y] :
   obj := TopCat.of Y
   property := by assumption
 
+instance : CoeSort (GeneratedByTopCat.{v} X) (Type v) where
+  coe Y := (Y.obj : Type v)
+
+instance (Y : GeneratedByTopCat.{v} X) :
+    IsGeneratedBy X Y := Y.2
+
 end GeneratedByTopCat
 
 structure ContinuousGeneratedByCat

@@ -40,6 +40,19 @@ noncomputable def map {D : Type*} [Category D] (G : C ⥤ D) [PreservesLimit (co
   sq := hp.sq.map G
   h := hp.h.map G
 
+noncomputable def pullback {B'' E'' : C} {t : E'' ⟶ hp.E'} {p'' : E'' ⟶ B''} {g : B'' ⟶ B'}
+    (sq : IsPullback t p'' hp.p' g) :
+    TrivialBundleWithFiberOver F p (g ≫ f) where
+  E' := E''
+  p' := p''
+  t := t ≫ hp.t
+  sq := sq.paste_horiz hp.sq
+  h := hp.h.pullback sq
+
+noncomputable def pullback' {B'' : C} (g : B'' ⟶ B') [HasPullback hp.p' g] :
+    TrivialBundleWithFiberOver F p (g ≫ f) :=
+  hp.pullback (IsPullback.of_hasPullback _ _)
+
 end TrivialBundleWithFiberOver
 
 lemma nonempty_trivialBundleWithFiberOver_iff_of_isPullback

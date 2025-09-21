@@ -143,6 +143,37 @@ lemma isClosedEmbedding_of_isPushout (sq : IsPushout t l r b)
       exact IsClosed.preimage (by continuity) hG
   isClosed_range := by simpa using isClosed_image_iff_of_isPushout sq ht (b ⁻¹' ⊤)
 
+noncomputable def homeoComplOfIsPushoutOfIsClosedEmbedding (sq : IsPushout t l r b)
+    (ht : IsClosedEmbedding t) :
+    ((Set.range t)ᶜ : Set _) ≃ₜ ((Set.range b)ᶜ : Set _) where
+  toEquiv := Types.equivOfIsPushoutOfInjective (sq.map (forget _)) ht.injective
+  continuous_toFun := Continuous.subtype_mk (by continuity) _
+  continuous_invFun := by
+    let e : ((Set.range t)ᶜ : Set _) ≃ ((Set.range b)ᶜ : Set _) :=
+      Types.equivOfIsPushoutOfInjective (sq.map (forget _)) ht.injective
+    rw [continuous_def]
+    intro U hU
+    rw [(closedEmbeddings.isOpen ht).isOpenEmbedding_subtypeVal.isOpen_iff_image_isOpen] at hU
+    change IsOpen (e.symm ⁻¹' U)
+    rw [(closedEmbeddings.isOpen (isClosedEmbedding_of_isPushout
+      sq ht)).isOpenEmbedding_subtypeVal.isOpen_iff_image_isOpen, isOpen_iff_of_isPushout sq]
+    constructor
+    · convert hU
+      ext x
+      have : r x ∉ Set.range b ↔ x ∉ Set.range t := by
+        have := Types.preimage_range_eq_of_isPushout (sq.map (forget _)) ht.injective
+        dsimp at this
+        rw [← this]
+        rfl
+      simp only [Set.mem_preimage, Set.mem_image, Subtype.exists, Set.mem_compl_iff,
+        exists_and_right, exists_eq_right, this]
+      apply exists_congr
+      intro hx
+      rw [← (e.symm_apply_apply ⟨x, hx⟩)]
+      rfl
+    · convert isOpen_empty
+      aesop
+
 end
 
 section
