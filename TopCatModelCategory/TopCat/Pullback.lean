@@ -1,0 +1,131 @@
+import TopCatModelCategory.Pullback
+import TopCatModelCategory.Convenient.GrothendieckTopology
+import TopCatModelCategory.Convenient.Open
+import TopCatModelCategory.TopCat.Colimits
+import Mathlib.CategoryTheory.Limits.Over
+
+universe w t u
+
+open CategoryTheory Topology Limits
+
+namespace CategoryTheory
+
+namespace Over
+
+variable {C : Type t} [Category.{w} C] [HasPullbacks C]
+    {X S X' S' : C} {f : X ⟶ S} {f' : X' ⟶ S'}
+    (e : Arrow.mk f ≅ Arrow.mk f')
+
+instance [IsIso f] : (Over.pullback f).IsEquivalence :=
+  (Equivalence.mk (Over.pullback f) (Over.pullback (inv f))
+    (pullbackId.symm ≪≫ eqToIso (by simp) ≪≫ pullbackComp (inv f) f)
+    ((pullbackComp f (inv f)).symm ≪≫ eqToIso (by simp) ≪≫ pullbackId)).isEquivalence_functor
+
+noncomputable def pullbackIsoOfArrowIso :
+    Over.pullback f' ≅ Over.pullback e.hom.right ⋙ Over.pullback f ⋙
+      Over.pullback e.inv.left :=
+  eqToIso (by simp) ≪≫ pullbackComp _ _ ≪≫ Functor.isoWhiskerLeft _ (pullbackComp _ _)
+
+end Over
+
+end CategoryTheory
+
+namespace TopCat
+
+variable {X : Type u} [TopologicalSpace X]
+
+section
+
+variable (U : Set X)
+
+@[simps]
+def overPullbackSet : Over (of X) ⥤ Over (of U) where
+  obj Z := Over.mk (Y := of (Z.hom ⁻¹' U)) (ofHom ⟨fun z ↦ ⟨Z.hom z, z.2⟩, by continuity⟩)
+  map {Z₁ Z₂} f :=
+    Over.homMk (ofHom ⟨fun z ↦ ⟨f.left z.1, by simpa only [← Over.w f] using z.2⟩,
+      by continuity⟩) (by
+        ext
+        dsimp
+        simp only [← Over.w f]
+        rfl)
+
+@[simps]
+def overPullbackSetι : overPullbackSet U ⋙ Over.forget _ ⟶ Over.forget _ where
+  app Z := ofHom ⟨fun z ↦ z.1, by continuity⟩
+
+lemma overPullbackSet_isPullback (Z : Over (of X)) :
+    IsPullback ((overPullbackSetι U).app Z) ((overPullbackSet U).obj Z).hom
+      Z.hom (ofHom ⟨fun u ↦ u.1, by continuity⟩) :=
+  isPullbackRestrictPreimage _ _
+
+noncomputable def overPullbackSetIso :
+    overPullbackSet U ≅ Over.pullback (ofHom ⟨fun u ↦ u.1, by continuity⟩) :=
+  NatIso.ofComponents (fun Z ↦
+    Over.isoMk (IsPullback.isoIsPullback _ _ (overPullbackSet_isPullback U Z)
+      (IsPullback.of_hasPullback _ _))) (fun {Z₁ Z₂} f ↦ by
+        ext : 1
+        dsimp
+        ext : 1
+        · aesop
+        · simp only [Category.assoc, IsPullback.isoIsPullback_hom_snd, limit.lift_π,
+            PullbackCone.mk_pt, PullbackCone.mk_π_app, ← Over.w f]
+          rfl)
+
+def overPullbackSetForgetIso :
+    overPullbackSet U ⋙ Over.forget _ ⋙ forget _ ≅
+      Over.post (forget _) ⋙
+        Types.overPullback (fun u => u.1) ⋙ Over.forget (U : Type _) :=
+  Iso.symm (NatIso.ofComponents (fun Z ↦ Equiv.toIso
+    { toFun x := ⟨x.1.1, by
+        have := x.2
+        dsimp at this
+        simp [this]⟩
+      invFun x := ⟨⟨x.1, Z.hom x.1, x.2⟩, rfl⟩
+      left_inv x := by
+        dsimp
+        ext
+        · rfl
+        · exact x.2
+      right_inv _ := rfl }))
+
+end
+
+variable (U : TopologicalSpace.Opens X)
+
+instance {J : Type t} [Category.{w} J] :
+    PreservesColimitsOfShape J (overPullbackSet U.1) where
+  preservesColimit {K} := ⟨fun {c} hc ↦ ⟨by
+    apply isColimitOfReflects (Over.forget _)
+    apply Nonempty.some
+    rw [TopCat.nonempty_isColimit_iff]
+    refine ⟨⟨?_⟩, ?_⟩
+    · refine (IsColimit.equivOfNatIsoOfIso
+        (Functor.isoWhiskerLeft K (overPullbackSetForgetIso U.1)) _ _ ?_).2
+        (isColimitOfPreserves (Over.post (forget _) ⋙
+          Types.overPullback (fun (u : U.1) ↦ u.1) ⋙ Over.forget _) hc)
+      exact Iso.symm (Cocones.ext ((overPullbackSetForgetIso U.1).symm.app c.pt))
+    · dsimp
+      ext V
+      let ι : (c.pt.hom) ⁻¹' U.1 → c.pt.left := Subtype.val
+      obtain ⟨W, hW, rfl⟩ :
+          ∃ (W : Set c.pt.left) (hW : W ⊆ (c.pt.hom) ⁻¹' U.1), V = ι ⁻¹' W :=
+        ⟨ι '' V, by simp [ι], Set.preimage_val_image_val_eq_self.symm⟩
+      have hU' : IsOpen ((c.pt.hom) ⁻¹' U.1) := IsOpen.preimage (by continuity) U.2
+      rw [isOpen_iSup_iff, hU'.isOpenEmbedding_subtypeVal.isOpen_iff_image_isOpen,
+        isOpen_iff_of_isColimit _ (isColimitOfPreserves (Over.forget _) hc)]
+      refine forall_congr' (fun j ↦ ?_)
+      dsimp
+      conv_rhs => rw [isOpen_coinduced]
+      rw [(IsOpen.preimage (by continuity) U.2).isOpenEmbedding_subtypeVal.isOpen_iff_image_isOpen]
+      convert Iff.rfl
+      ext x
+      have := Over.w (c.ι.app j)
+      dsimp at this
+      simp [← ConcreteCategory.comp_apply, this]⟩⟩
+
+instance {J : Type t} [Category.{w} J] :
+    PreservesColimitsOfShape J (Over.pullback (ofHom ⟨fun (u : U) ↦ u.1, by continuity⟩)) := by
+  have : PreservesColimitsOfShape J (overPullbackSet U.1) := inferInstance
+  exact preservesColimitsOfShape_of_natIso (overPullbackSetIso U.1)
+
+end TopCat
