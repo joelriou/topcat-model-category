@@ -1,4 +1,4 @@
-import TopCatModelCategory.Pullback
+import TopCatModelCategory.PullbackTypes
 import TopCatModelCategory.SSet.Monoidal
 import Mathlib.CategoryTheory.Limits.FunctorCategory.Basic
 import Mathlib.CategoryTheory.Limits.Over

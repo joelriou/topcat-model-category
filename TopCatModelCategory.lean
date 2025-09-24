@@ -58,6 +58,7 @@ import TopCatModelCategory.PseudoFunctor.LaxNatTrans
 import TopCatModelCategory.PseudoFunctor.MorphismProperty
 import TopCatModelCategory.PseudoFunctor.Pseudofunctor
 import TopCatModelCategory.Pullback
+import TopCatModelCategory.PullbackTypes
 import TopCatModelCategory.QuillenAdjunction
 import TopCatModelCategory.SSet.AffineMap
 import TopCatModelCategory.SSet.AnodyneExtensions
