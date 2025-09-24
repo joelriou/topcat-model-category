@@ -3,6 +3,7 @@ import TopCatModelCategory.Convenient.Open
 import TopCatModelCategory.TopCat.Limits
 import TopCatModelCategory.ColimitsType
 import TopCatModelCategory.CommSq
+import TopCatModelCategory.MorphismPropertyLocally
 import Mathlib.CategoryTheory.MorphismProperty.Limits
 import Mathlib.CategoryTheory.Sites.Pretopology
 import Mathlib.Topology.Sets.Opens
@@ -192,5 +193,26 @@ def grothendieckTopology :
     dsimp
     rintro ⟨i, i'⟩
     exact hc' i _ (Sieve.ofArrows_mk _ _ _)
+
+lemma locallyTarget_grothendieckTopology_iff (W : MorphismProperty (GeneratedByTopCat.{v} X))
+    [W.IsStableUnderBaseChange]
+    {Y Z : GeneratedByTopCat.{v} X} (f : Y ⟶ Z) :
+    W.locallyTarget grothendieckTopology f ↔
+      ∀ (z : Z), ∃ (U : GeneratedByTopCat.{v} X) (i : U ⟶ Z)
+        (_ : openImmersions i) (_ : z ∈ Set.range i), Nonempty (W.Over f i) := by
+  constructor
+  · rintro ⟨U, hU⟩ z
+    have := Set.mem_univ z
+    rw [← U.union_range_eq_univ] at this
+    simp only [ObjectProperty.ι_obj, ObjectProperty.ι_map, Set.mem_iUnion, Set.mem_range] at this
+    obtain ⟨i, y, rfl⟩ := this
+    exact ⟨U.U i, U.p i, U.hp i, Set.mem_range_self y, hU _ (Sieve.ofArrows_mk _ _ _)⟩
+  · rintro h
+    choose U p h₁ h₂ h₃ using h
+    exact ⟨{
+        ι := Z.obj
+        U := U
+        p := p
+        hp := h₁ }, by rwa [Sieve.ofArrows_le_iff]⟩
 
 end GeneratedByTopCat

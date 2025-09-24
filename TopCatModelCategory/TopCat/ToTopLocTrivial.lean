@@ -146,7 +146,7 @@ lemma isTrivial_of_fac {A' A : DeltaGenerated'} {f : A ⟶ toDeltaGenerated.obj 
   exact ⟨h.some.pullback' _⟩
 
 def IsLocTrivial : Prop :=
-  (trivialBundlesWithFiber (toDeltaGenerated.obj F)).locally
+  (trivialBundlesWithFiber (toDeltaGenerated.obj F)).locallyTarget
     GeneratedByTopCat.grothendieckTopology (π τ A)
 
 variable (p F) in
@@ -164,7 +164,7 @@ lemma isLocTrivial_iff :
     obtain ⟨i, u, rfl⟩ := C.exists_eq a
     refine ⟨C.U i, C.p i, C.hp i, ⟨_, rfl⟩, ?_⟩
     have hi := hC (C.p i) (Sieve.ofArrows_mk _ _ _)
-    rw [mem_sieveLocally_iff] at hi
+    rw [mem_sieveLocallyTarget_iff] at hi
     obtain ⟨hi⟩ := hi
     exact ⟨{
       E' := _
@@ -181,7 +181,7 @@ lemma isLocTrivial_iff :
       hp := hi }, ?_⟩
     simp only [Sieve.ofArrows_le_iff]
     intro a
-    rw [mem_sieveLocally_iff]
+    rw [mem_sieveLocallyTarget_iff]
     refine ⟨?_⟩
     have ip := (t a).some
     exact {
@@ -194,7 +194,7 @@ lemma isLocTrivial_iff :
 
 variable {τ A} in
 lemma IsTrivial.isLocTrivial (hA : IsTrivial p F A.hom) : IsLocTrivial τ A :=
-  MorphismProperty.le_locally _ _ _
+  MorphismProperty.le_locallyTarget _ _ _
     ⟨hA.some.trivialBundleWithFiber (IsPullback.of_hasPullback _ _).flip⟩
 
 section
@@ -301,8 +301,8 @@ lemma fibration_toTop_map_of_trivialBundle_over_simplices [IsFinite B] :
         (toDeltaGenerated.map p) (toDeltaGenerated.map (𝟙 B)) := by
       simpa using IsPullback.id_horiz (toDeltaGenerated.map p)
     exact Arrow.isoMk (objIso τ _ this) (Iso.refl _)
-  exact DeltaGenerated'.fibration_toTopCat_map_of_locally_trivialBundle
+  exact DeltaGenerated'.fibration_toTopCat_map_of_locallyTarget_trivialBundle
     ((arrow_mk_iso_iff _ e).1
-      (locally_monotone (trivialBundlesWithFiber_le_trivialBundles _) _ _ (isLocTrivial τ (𝟙 B))))
+      (locallyTarget_monotone (trivialBundlesWithFiber_le_trivialBundles _) _ _ (isLocTrivial τ (𝟙 B))))
 
 end SSet

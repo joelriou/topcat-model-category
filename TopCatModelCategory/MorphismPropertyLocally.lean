@@ -32,22 +32,22 @@ end Over
 
 variable (J : GrothendieckTopology C) [HasPullbacks C]
 
-def sieveLocally {X S : C} (f : X ⟶ S) : Sieve S where
+def sieveLocallyTarget {X S : C} (f : X ⟶ S) : Sieve S where
   arrows S' i := Nonempty (W.Over f i)
   downward_closed := by
     rintro S' S'' i ⟨h⟩ l
     exact ⟨h.pullback  l (IsPullback.of_hasPullback _ _)⟩
 
-lemma mem_sieveLocally_iff {X S : C} (f : X ⟶ S) {S' : C} (i : S' ⟶ S):
-    W.sieveLocally f i ↔ Nonempty (W.Over f i) := Iff.rfl
+lemma mem_sieveLocallyTarget_iff {X S : C} (f : X ⟶ S) {S' : C} (i : S' ⟶ S):
+    W.sieveLocallyTarget f i ↔ Nonempty (W.Over f i) := Iff.rfl
 
-def locally : MorphismProperty C := fun _ S f ↦ W.sieveLocally f ∈ J S
+def locallyTarget : MorphismProperty C := fun _ S f ↦ W.sieveLocallyTarget f ∈ J S
 
-lemma le_locally : W ≤ W.locally J := by
+lemma le_locallyTarget : W ≤ W.locallyTarget J := by
   intro S' S f hf
   refine J.superset_covering ?_ (J.top_mem S)
-  dsimp [locally]
-  rw [top_le_iff, ← Sieve.id_mem_iff_eq_top, mem_sieveLocally_iff]
+  dsimp [locallyTarget]
+  rw [top_le_iff, ← Sieve.id_mem_iff_eq_top, mem_sieveLocallyTarget_iff]
   exact ⟨{
     obj := S'
     t := 𝟙 _
@@ -56,14 +56,14 @@ lemma le_locally : W ≤ W.locally J := by
     hl := hf
   }⟩
 
-instance : (W.locally J).RespectsIso := by
+instance : (W.locallyTarget J).RespectsIso := by
   apply MorphismProperty.RespectsIso.of_respects_arrow_iso
   intro f g e hf
   refine J.superset_covering ?_ (J.pullback_stable (f := e.inv.right) hf)
   intro Z a h
-  rw [Sieve.pullback_apply, mem_sieveLocally_iff] at h
+  rw [Sieve.pullback_apply, mem_sieveLocallyTarget_iff] at h
   obtain ⟨h⟩ := h
-  rw [mem_sieveLocally_iff]
+  rw [mem_sieveLocallyTarget_iff]
   exact ⟨{
     obj := h.obj
     t := h.t ≫ e.hom.left
@@ -73,9 +73,9 @@ instance : (W.locally J).RespectsIso := by
     hl := h.hl
   }⟩
 
-lemma locally_monotone {W₁ W₂ : MorphismProperty C}
+lemma locallyTarget_monotone {W₁ W₂ : MorphismProperty C}
     [W₁.IsStableUnderBaseChange] [W₂.IsStableUnderBaseChange] (hW : W₁ ≤ W₂)
-    (J : GrothendieckTopology C) : W₁.locally J ≤ W₂.locally J := by
+    (J : GrothendieckTopology C) : W₁.locallyTarget J ≤ W₂.locallyTarget J := by
   rintro X Y f hf
   refine J.superset_covering ?_ hf
   rintro S' i ⟨h⟩

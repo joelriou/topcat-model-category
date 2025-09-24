@@ -13,8 +13,8 @@ namespace DeltaGenerated'
 
 variable {E B : DeltaGenerated'.{u}} {p : E ⟶ B}
 
-lemma fibration_toTopCat_map_of_locally
-    (hp : ((fibrations TopCat).inverseImage toTopCat).locally
+lemma fibration_toTopCat_map_of_locallyTarget
+    (hp : ((fibrations TopCat).inverseImage toTopCat).locallyTarget
       GeneratedByTopCat.grothendieckTopology p) : Fibration (toTopCat.map p) := by
   obtain ⟨c, hc⟩ := hp
   have h (i : c.ι) := (c.hp i).exists_iso
@@ -37,7 +37,7 @@ lemma fibration_toTopCat_map_of_locally
     rw [← cancel_epi e'.hom, e'.hom_inv_id_assoc]
     exact fac i
   replace hπ := hc _ hπ
-  rw [mem_sieveLocally_iff] at hπ
+  rw [mem_sieveLocallyTarget_iff] at hπ
   obtain ⟨hπ⟩ := hπ
   have : Limits.PreservesLimit (Limits.cospan j p) toTopCat :=
     GeneratedByTopCat.openImmersions.preservesLimit_cospan
@@ -77,11 +77,11 @@ instance (S F : DeltaGenerated'.{u}) :
   refine (((fibrations TopCat).inverseImage toTopCat).arrow_mk_iso_iff ?_).2 h
   exact Arrow.isoMk (Iso.refl _) (adjUnitIso.app _)
 
-lemma fibration_toTopCat_map_of_locally_trivialBundle
-    (hp : (trivialBundles.locally GeneratedByTopCat.grothendieckTopology p)) :
+lemma fibration_toTopCat_map_of_locallyTarget_trivialBundle
+    (hp : (trivialBundles.locallyTarget GeneratedByTopCat.grothendieckTopology p)) :
       Fibration (toTopCat.map p) := by
-  apply fibration_toTopCat_map_of_locally
-  refine locally_monotone ?_ _ _ hp
+  apply fibration_toTopCat_map_of_locallyTarget
+  refine locallyTarget_monotone ?_ _ _ hp
   intro X S f hf
   rw [mem_trivialBundles_iff] at hf
   obtain ⟨F, ⟨hf⟩⟩ := hf
