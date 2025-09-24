@@ -1,3 +1,4 @@
+import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 import Mathlib.CategoryTheory.Limits.Over
 import Mathlib.CategoryTheory.Comma.Over.Pullback
 
@@ -8,8 +9,11 @@ open Limits
 namespace Over
 
 variable {C : Type t} [Category.{w} C] [HasPullbacks C]
-    {X S X' S' : C} {f : X ⟶ S} {f' : X' ⟶ S'}
-    (e : Arrow.mk f ≅ Arrow.mk f')
+
+section
+
+variable {X S X' S' : C} {f : X ⟶ S} {f' : X' ⟶ S'}
+  (e : Arrow.mk f ≅ Arrow.mk f')
 
 instance [IsIso f] : (Over.pullback f).IsEquivalence :=
   (Equivalence.mk (Over.pullback f) (Over.pullback (inv f))
@@ -27,6 +31,21 @@ variable {D : Type t'} [Category.{w'} D] (F : C ⥤ D) {S T : C} (f : S ⟶ T)
 noncomputable def pullbackPostIso :
     Over.pullback f ⋙ Over.post F ≅ Over.post F ⋙ Over.pullback (F.map f) :=
   NatIso.ofComponents (fun Z ↦  isoMk (asIso (pullbackComparison _ _ _)))
+
+end
+
+section
+
+variable {E' E B' B : C} {t : E' ⟶ E} {l : E' ⟶ B'} {r : E ⟶ B} {b : B' ⟶ B}
+  (sq : IsPullback t l r b)
+
+noncomputable def pullbabkCompForgetOfIsPullback :
+    Over.pullback l ⋙ Over.forget _ ≅
+      Over.map b ⋙ Over.pullback r ⋙ Over.forget _ :=
+  NatIso.ofComponents (fun Z ↦
+    ((IsPullback.of_hasPullback Z.hom l).paste_vert sq.flip).isoPullback)
+
+end
 
 end Over
 
