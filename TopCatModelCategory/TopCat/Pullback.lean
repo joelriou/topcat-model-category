@@ -1,10 +1,11 @@
 import TopCatModelCategory.Pullback
 import TopCatModelCategory.Convenient.GrothendieckTopology
 import TopCatModelCategory.Convenient.Open
+import TopCatModelCategory.Convenient.Colimits
 import TopCatModelCategory.TopCat.Colimits
 import Mathlib.CategoryTheory.Limits.Over
 
-universe w t u
+universe w' w t' t v u
 
 open CategoryTheory Topology Limits
 
@@ -25,6 +26,13 @@ noncomputable def pullbackIsoOfArrowIso :
     Over.pullback f' ≅ Over.pullback e.hom.right ⋙ Over.pullback f ⋙
       Over.pullback e.inv.left :=
   eqToIso (by simp) ≪≫ pullbackComp _ _ ≪≫ Functor.isoWhiskerLeft _ (pullbackComp _ _)
+
+variable {D : Type t'} [Category.{w'} D] (F : C ⥤ D) {S T : C} (f : S ⟶ T)
+  [HasPullbacks D] [∀ {A : C} (g : A ⟶ T), PreservesLimit (cospan g f) F]
+
+noncomputable def pullbackPostIso :
+    Over.pullback f ⋙ Over.post F ≅ Over.post F ⋙ Over.pullback (F.map f) :=
+  NatIso.ofComponents (fun Z ↦  isoMk (asIso (pullbackComparison _ _ _)))
 
 end Over
 
@@ -90,9 +98,7 @@ def overPullbackSetForgetIso :
 
 end
 
-variable (U : TopologicalSpace.Opens X)
-
-instance {J : Type t} [Category.{w} J] :
+instance {J : Type t} [Category.{w} J] (U : TopologicalSpace.Opens X) :
     PreservesColimitsOfShape J (overPullbackSet U.1) where
   preservesColimit {K} := ⟨fun {c} hc ↦ ⟨by
     apply isColimitOfReflects (Over.forget _)
@@ -123,9 +129,42 @@ instance {J : Type t} [Category.{w} J] :
       dsimp at this
       simp [← ConcreteCategory.comp_apply, this]⟩⟩
 
-instance {J : Type t} [Category.{w} J] :
-    PreservesColimitsOfShape J (Over.pullback (ofHom ⟨fun (u : U) ↦ u.1, by continuity⟩)) := by
+instance {J : Type t} [Category.{w} J] (U : TopologicalSpace.Opens X) :
+    PreservesColimitsOfShape J
+      (Over.pullback (ofHom ⟨fun (u : U) ↦ u.1, by continuity⟩)) := by
   have : PreservesColimitsOfShape J (overPullbackSet U.1) := inferInstance
   exact preservesColimitsOfShape_of_natIso (overPullbackSetIso U.1)
 
+lemma openImmersions.preservesColimitsOfShape_overPullback
+    {X Y : TopCat.{u}} {f : X ⟶ Y} (hf : openImmersions f) (J : Type t) [Category.{w} J] :
+    PreservesColimitsOfShape J (Over.pullback f) := by
+  obtain ⟨U, e, he⟩ := hf.exists_iso
+  let e' : Arrow.mk f ≅ Arrow.mk (ofHom ⟨fun (u : U) ↦ u.1, by continuity⟩) :=
+    Arrow.isoMk e (Iso.refl _)
+  have : PreservesColimitsOfShape J
+    (Over.pullback (ofHom ⟨fun (u : U) ↦ u.1, by continuity⟩)) := inferInstance
+  exact preservesColimitsOfShape_of_natIso (Over.pullbackIsoOfArrowIso e'.symm).symm
+
 end TopCat
+
+namespace GeneratedByTopCat
+
+variable {J : Type t} [Category.{v} J]
+  {ι : Type w} {X : ι → Type t} [∀ i, TopologicalSpace (X i)]
+  {Y Z : GeneratedByTopCat.{v} X} {f : Y ⟶ Z}
+  [PreservesLimitsOfShape WalkingCospan (GeneratedByTopCat.toTopCat.{v} (X := X))]
+
+lemma openImmersions.preservesColimitsOfShape_overPullback (hf : openImmersions f) :
+    PreservesColimitsOfShape J (Over.pullback f) where
+  preservesColimit {K} := ⟨fun {c} hc ↦ ⟨isColimitOfReflects (Over.post toTopCat) (by
+    have := TopCat.openImmersions.preservesColimitsOfShape_overPullback hf J
+    let e := Over.pullbackPostIso toTopCat f
+    refine (IsColimit.equivOfNatIsoOfIso
+      (Functor.associator _ _ _ ≪≫ Functor.isoWhiskerLeft K e) _ _ ?_).2
+      (isColimitOfPreserves (Over.post toTopCat ⋙ Over.pullback (toTopCat.map f)) hc)
+    refine Cocones.ext (e.app _) (fun j ↦ ?_)
+    have := e.hom.naturality (c.ι.app j)
+    dsimp at this
+    simp [this])⟩⟩
+
+end GeneratedByTopCat
