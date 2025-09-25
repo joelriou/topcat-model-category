@@ -59,6 +59,7 @@ end Over
 
 variable (J : GrothendieckTopology C) [HasPullbacks C]
 
+@[simps]
 def sieveLocallyTarget {X S : C} (f : X ⟶ S) : Sieve S where
   arrows S' i := Nonempty (W.Over f i)
   downward_closed := by
@@ -153,6 +154,7 @@ export IsStableByPrecomp (of_precomp)
 
 variable {B : C} (P : ObjectProperty (Over B)) [P.IsStableByPrecomp] (J : GrothendieckTopology C)
 
+@[simps]
 def sieveOverLocally (X : Over B) : Sieve X.left where
   arrows {Y} g := P (Over.mk (g ≫ X.hom))
   downward_closed {Y Z f} hZ g := P.of_precomp (Over.homMk (by exact g) (by simp)) hZ
@@ -161,5 +163,35 @@ def overLocally : ObjectProperty (Over B) :=
   fun X ↦ P.sieveOverLocally X ∈ J X.left
 
 end ObjectProperty
+
+namespace MorphismProperty
+
+variable (W : MorphismProperty C) {E B : C} (p : E ⟶ B)
+
+instance [HasPullbacks C] [W.IsStableUnderBaseChange] :
+    (W.objectPropertyOver p).IsStableByPrecomp where
+  of_precomp := by
+    rintro X Y f ⟨hY⟩
+    constructor
+    rw [← Over.w f]
+    exact hY.pullback _ (IsPullback.of_hasPullback _ _)
+
+variable [HasPullbacks C] [W.IsStableUnderBaseChange]
+
+lemma sieveOverLocally_objectPropertyOver_of_isPullback (X : CategoryTheory.Over B)
+    {Y : C} {t : Y ⟶ E} {l : Y ⟶ X.left} (sq : IsPullback t l p X.hom) :
+    (W.objectPropertyOver p).sieveOverLocally X = W.sieveLocallyTarget l := by
+  ext Z f
+  exact Equiv.nonempty_congr (Over.equivOfIsPullback W sq f)
+
+variable (J : GrothendieckTopology C)
+
+lemma overLocally_objectPropertyOver (X : CategoryTheory.Over B)
+    {Y : C} {t : Y ⟶ E} {l : Y ⟶ X.left} (sq : IsPullback t l p X.hom) :
+    ((W.objectPropertyOver p).overLocally J) X ↔ W.locallyTarget J l := by
+  dsimp [locallyTarget, ObjectProperty.overLocally]
+  rw [sieveOverLocally_objectPropertyOver_of_isPullback _ _ _ sq]
+
+end MorphismProperty
 
 end CategoryTheory

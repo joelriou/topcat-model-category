@@ -9,7 +9,7 @@ import TopCatModelCategory.ModelCategoryTopCat
 universe u
 
 open Simplicial CategoryTheory MorphismProperty HomotopicalAlgebra
-  TopCat.modelCategory Limits Topology
+  TopCat.modelCategory Limits Topology GeneratedByTopCat
 
 namespace CategoryTheory
 
@@ -99,8 +99,30 @@ lemma DeltaGenerated'.isEmpty_of_isInitial {X : DeltaGenerated'.{u}}
 
 namespace DeltaGenerated'
 
---example {B : DeltaGenerated'.{u}} {X₁ X₂ X₃ X₄ : Over B} {t : X₁ ⟶ X₂}
---    {l : X₁ ⟶ X₃} {r : X₂ ⟶ X₄} {b : X₃ ⟶ X₄} (sq : IsPushout t l r b) : 0 = 1 := sorry
+lemma trivialBundlesWithFiber_overLocally_of_isPushout'
+    {E B F : DeltaGenerated'.{u}} {X₁ X₂ X₃ : Over B} {t : X₁ ⟶ X₂}
+    {l : X₁ ⟶ X₃} (sq : IsPushout t.left l.left X₂.hom X₃.hom)
+    (hl : TopCat.closedEmbeddings (toTopCat.map l.left)) (p : E ⟶ B)
+    [PreservesColimit (span t l) (Over.pullback p)]
+    (h₂ : ((trivialBundlesWithFiber F).objectPropertyOver p).overLocally grothendieckTopology X₂)
+    (h₃ : (trivialBundlesWithFiber F).objectPropertyOver p X₃)
+    {U : DeltaGenerated'.{u}} (j : U ⟶ X₃.left) (hj : openImmersions j)
+    (l' : X₁.left ⟶ U) (fac : l' ≫ j = l.left) (ρ : U ⟶ X₁.left) (fac' : l' ≫ ρ = 𝟙 _) :
+    ((trivialBundlesWithFiber F).objectPropertyOver p).overLocally grothendieckTopology
+      (Over.mk (𝟙 B)) := by
+  sorry
+
+lemma trivialBundlesWithFiber_overLocally_of_isPushout
+    {E B F : DeltaGenerated'.{u}} {X₁ X₂ X₃ X₄ : Over B} {t : X₁ ⟶ X₂}
+    {l : X₁ ⟶ X₃} {r : X₂ ⟶ X₄} {b : X₃ ⟶ X₄} (sq : IsPushout t l r b)
+    (hl : TopCat.closedEmbeddings (toTopCat.map l.left)) (p : E ⟶ B)
+    [PreservesColimit (span t l) (Over.pullback p)]
+    (h₂ : ((trivialBundlesWithFiber F).objectPropertyOver p).overLocally grothendieckTopology X₂)
+    (h₃ : (trivialBundlesWithFiber F).objectPropertyOver p X₃)
+    {U : DeltaGenerated'.{u}} (j : U ⟶ X₃.left) (hj : openImmersions j)
+    (l' : X₁.left ⟶ U) (fac : l' ≫ j = l.left) (ρ : U ⟶ X₁.left) (fac' : l' ≫ ρ = 𝟙 _) :
+    ((trivialBundlesWithFiber F).objectPropertyOver p).overLocally grothendieckTopology X₄ := by
+  sorry
 
 end DeltaGenerated'
 
@@ -265,7 +287,7 @@ lemma isLocTrivial_of_isPushout
 
 end
 
-lemma isLocTrivial {Z : SSet.{u}} [IsFinite Z] (a : Z ⟶ B) :
+lemma isLocTrivial' {Z : SSet.{u}} [IsFinite Z] (a : Z ⟶ B) :
     IsLocTrivial τ (Over.mk (toDeltaGenerated.map a)) := by
   induction Z using SSet.finite_induction with
   | hP₀ X =>
@@ -296,6 +318,14 @@ lemma isLocTrivial {Z : SSet.{u}} [IsFinite Z] (a : Z ⟶ B) :
     · sorry
     · sorry
 
+include τ  in
+lemma isLocTrivial {Z : SSet.{u}} [IsFinite Z] (a : Z ⟶ B) :
+   ((trivialBundlesWithFiber (toDeltaGenerated.obj F)).objectPropertyOver
+    (toDeltaGenerated.map p)).overLocally grothendieckTopology
+    (Over.mk (toDeltaGenerated.map a)) := by
+  have := τ
+  sorry
+
 end MinimalFibrationLocTrivial
 
 variable (p) in
@@ -303,13 +333,11 @@ open MinimalFibrationLocTrivial MorphismProperty in
 include τ in
 lemma fibration_toTop_map_of_trivialBundle_over_simplices [IsFinite B] :
     Fibration (toTop.map p) := by
-  let e : Arrow.mk (π τ (Over.mk (toDeltaGenerated.map (𝟙 B)))) ≅ Arrow.mk (toDeltaGenerated.map p) := by
-    have : IsPullback (𝟙 (toDeltaGenerated.obj E)) (toDeltaGenerated.map p)
-        (toDeltaGenerated.map p) (toDeltaGenerated.map (𝟙 B)) := by
-      simpa using IsPullback.id_horiz (toDeltaGenerated.map p)
-    exact Arrow.isoMk (objIso τ _ this) (Iso.refl _)
-  exact DeltaGenerated'.fibration_toTopCat_map_of_locallyTarget_trivialBundle
-    ((arrow_mk_iso_iff _ e).1
-      (locallyTarget_monotone (trivialBundlesWithFiber_le_trivialBundles _) _ _ (isLocTrivial τ (𝟙 B))))
+  apply DeltaGenerated'.fibration_toTopCat_map_of_locallyTarget_trivialBundle
+    (p := toDeltaGenerated.map p)
+  apply locallyTarget_monotone (trivialBundlesWithFiber_le_trivialBundles (toDeltaGenerated.obj F))
+  rw [← MorphismProperty.overLocally_objectPropertyOver _ _ _
+    (Over.mk (𝟙 (toDeltaGenerated.obj B))) IsPullback.of_id_fst]
+  simpa using isLocTrivial τ (𝟙 B)
 
 end SSet
