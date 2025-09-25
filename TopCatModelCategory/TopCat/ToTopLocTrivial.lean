@@ -97,6 +97,13 @@ lemma DeltaGenerated'.isEmpty_of_isInitial {X : DeltaGenerated'.{u}}
   let f : X ⟶ GeneratedByTopCat.of PEmpty := hX.to _
   exact Function.isEmpty f
 
+namespace DeltaGenerated'
+
+--example {B : DeltaGenerated'.{u}} {X₁ X₂ X₃ X₄ : Over B} {t : X₁ ⟶ X₂}
+--    {l : X₁ ⟶ X₃} {r : X₂ ⟶ X₄} {b : X₃ ⟶ X₄} (sq : IsPushout t l r b) : 0 = 1 := sorry
+
+end DeltaGenerated'
+
 namespace SSet
 
 variable {E B : SSet.{u}} {p : E ⟶ B} {F : SSet.{u}}
