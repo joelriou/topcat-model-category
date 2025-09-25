@@ -152,6 +152,10 @@ class IsStableByPrecomp (P : ObjectProperty C) where
 
 export IsStableByPrecomp (of_precomp)
 
+instance (P : ObjectProperty C) [P.IsStableByPrecomp] :
+    P.IsClosedUnderIsomorphisms where
+  of_iso e hX := P.of_precomp e.inv hX
+
 variable {B : C} (P : ObjectProperty (Over B)) [P.IsStableByPrecomp] (J : GrothendieckTopology C)
 
 @[simps]
@@ -161,6 +165,12 @@ def sieveOverLocally (X : Over B) : Sieve X.left where
 
 def overLocally : ObjectProperty (Over B) :=
   fun X ↦ P.sieveOverLocally X ∈ J X.left
+
+instance : (P.overLocally J).IsStableByPrecomp where
+  of_precomp {X Y} f hY := by
+    refine J.superset_covering ?_ (J.pullback_stable f.left hY)
+    intro Z g hg
+    simpa using hg
 
 end ObjectProperty
 
@@ -186,11 +196,20 @@ lemma sieveOverLocally_objectPropertyOver_of_isPullback (X : CategoryTheory.Over
 
 variable (J : GrothendieckTopology C)
 
-lemma overLocally_objectPropertyOver (X : CategoryTheory.Over B)
+lemma overLocally_objectPropertyOver_iff_locallyTarget (X : CategoryTheory.Over B)
     {Y : C} {t : Y ⟶ E} {l : Y ⟶ X.left} (sq : IsPullback t l p X.hom) :
     ((W.objectPropertyOver p).overLocally J) X ↔ W.locallyTarget J l := by
   dsimp [locallyTarget, ObjectProperty.overLocally]
   rw [sieveOverLocally_objectPropertyOver_of_isPullback _ _ _ sq]
+
+variable {p} in
+lemma overLocally_objectPropertyOver_over_map_obj_iff {E' B' : C} {t : E' ⟶ E}
+    {p' : E' ⟶ B'} {b : B' ⟶ B} (sq : IsPullback t p' p b) (X' : CategoryTheory.Over B') :
+  ((W.objectPropertyOver p).overLocally J) ((Over.map b).obj X') ↔
+    ((W.objectPropertyOver p').overLocally J) X' := by
+  have sq' := IsPullback.of_hasPullback p' X'.hom
+  rw [overLocally_objectPropertyOver_iff_locallyTarget _ _ _ _ (sq'.paste_horiz sq),
+    overLocally_objectPropertyOver_iff_locallyTarget _ _ _ _ sq']
 
 end MorphismProperty
 

@@ -120,9 +120,27 @@ lemma trivialBundlesWithFiber_overLocally_of_isPushout
     (h₂ : ((trivialBundlesWithFiber F).objectPropertyOver p).overLocally grothendieckTopology X₂)
     (h₃ : (trivialBundlesWithFiber F).objectPropertyOver p X₃)
     {U : DeltaGenerated'.{u}} (j : U ⟶ X₃.left) (hj : openImmersions j)
-    (l' : X₁.left ⟶ U) (fac : l' ≫ j = l.left) (ρ : U ⟶ X₁.left) (fac' : l' ≫ ρ = 𝟙 _) :
+    (l'' : X₁.left ⟶ U) (fac : l'' ≫ j = l.left) (ρ : U ⟶ X₁.left) (fac' : l'' ≫ ρ = 𝟙 _) :
     ((trivialBundlesWithFiber F).objectPropertyOver p).overLocally grothendieckTopology X₄ := by
-  sorry
+  rw [Over.isPushout_iff_forget] at sq
+  let Y₁ := Over.mk (t.left ≫ r.left)
+  let Y₂ := Over.mk (r.left)
+  let Y₃ := Over.mk (b.left)
+  let t' : Y₁ ⟶ Y₂ := Over.homMk t.left
+  let l' : Y₁ ⟶ Y₃ := Over.homMk l.left sq.w.symm
+  let Z₄ := pullback p X₄.hom
+  let p' : Z₄ ⟶ X₄.left := pullback.snd _ _
+  have sq' : IsPullback (pullback.fst _ _) p' p X₄.hom := IsPullback.of_hasPullback _ _
+  replace sq : IsPushout t'.left l'.left Y₂.hom Y₃.hom := sq
+  have : PreservesColimit (span t' l') (CategoryTheory.Over.pullback p') := sorry
+  have := trivialBundlesWithFiber_overLocally_of_isPushout' sq hl p' (F := F) (by
+    rw [← overLocally_objectPropertyOver_over_map_obj_iff _ _ sq']
+    exact ObjectProperty.prop_of_iso _ (by exact Over.isoMk (Iso.refl _)) h₂) (by
+    rw [objectPropertyOver_iff_map_of_isPullback _ sq']
+    exact ObjectProperty.prop_of_iso _ (by exact Over.isoMk (Iso.refl _)) h₃)
+    j hj l'' fac ρ fac'
+  rw [← overLocally_objectPropertyOver_over_map_obj_iff _ _ sq'] at this
+  exact ObjectProperty.prop_of_iso _ (Over.isoMk (Iso.refl _)) this
 
 end DeltaGenerated'
 
@@ -336,7 +354,7 @@ lemma fibration_toTop_map_of_trivialBundle_over_simplices [IsFinite B] :
   apply DeltaGenerated'.fibration_toTopCat_map_of_locallyTarget_trivialBundle
     (p := toDeltaGenerated.map p)
   apply locallyTarget_monotone (trivialBundlesWithFiber_le_trivialBundles (toDeltaGenerated.obj F))
-  rw [← MorphismProperty.overLocally_objectPropertyOver _ _ _
+  rw [← MorphismProperty.overLocally_objectPropertyOver_iff_locallyTarget _ _ _
     (Over.mk (𝟙 (toDeltaGenerated.obj B))) IsPullback.of_id_fst]
   simpa using isLocTrivial τ (𝟙 B)
 
