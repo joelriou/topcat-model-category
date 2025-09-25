@@ -5,6 +5,7 @@ import TopCatModelCategory.TopCat.SerreFibrationBundle
 import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
 import TopCatModelCategory.TopCat.ToTopExact
 import TopCatModelCategory.ModelCategoryTopCat
+import TopCatModelCategory.Pullback
 
 universe u
 
@@ -56,6 +57,13 @@ instance {D : Type*} [Category D] [HasPushouts C] [HasPushouts D]
   exact (PushoutCocone.isPushout_iff_nonempty_isColimit _).2
     ⟨(PushoutCocone.isColimitMapCoconeEquiv _ _).1
       (isColimitOfPreserves (Over.forget _ ⋙ F) hc)⟩
+
+instance {X Y : C} (f : X ⟶ Y) [HasPushouts C] :
+    PreservesColimitsOfShape WalkingSpan (Over.map f) where
+  preservesColimit {K} := ⟨fun {c} hc ↦ ⟨by
+    have := isColimitOfPreserves (Over.forget _ ) hc
+    exact isColimitOfReflects (Over.forget _) this
+    ⟩⟩
 
 end Over
 
@@ -132,7 +140,17 @@ lemma trivialBundlesWithFiber_overLocally_of_isPushout
   let p' : Z₄ ⟶ X₄.left := pullback.snd _ _
   have sq' : IsPullback (pullback.fst _ _) p' p X₄.hom := IsPullback.of_hasPullback _ _
   replace sq : IsPushout t'.left l'.left Y₂.hom Y₃.hom := sq
-  have : PreservesColimit (span t' l') (CategoryTheory.Over.pullback p') := sorry
+  have : PreservesColimit (span t' l' ⋙ Over.map X₄.hom)
+      (CategoryTheory.Over.pullback p ⋙ Over.forget E) := by
+    have e : (span t' l' ⋙ Over.map X₄.hom) ≅ span t l :=
+      spanCompIso _ _ _ ≪≫ spanExt (by exact Over.isoMk (Iso.refl _))
+        (by exact Over.isoMk (Iso.refl _)) (by exact Over.isoMk (Iso.refl _))
+        (by ext : 1; simp [t']) (by ext : 1; simp [l'])
+    apply preservesColimit_of_iso_diagram _ e.symm
+  have : PreservesColimit (span t' l') (CategoryTheory.Over.pullback p' ⋙ Over.forget _) :=
+    preservesColimit_of_natIso _ (Over.pullbackCompForgetOfIsPullback sq').symm
+  have : PreservesColimit (span t' l') (CategoryTheory.Over.pullback p') :=
+    preservesColimit_of_reflects_of_preserves _ (Over.forget _)
   have := trivialBundlesWithFiber_overLocally_of_isPushout' sq hl p' (F := F) (by
     rw [← overLocally_objectPropertyOver_over_map_obj_iff _ _ sq']
     exact ObjectProperty.prop_of_iso _ (by exact Over.isoMk (Iso.refl _)) h₂) (by

@@ -39,7 +39,7 @@ section
 variable {E' E B' B : C} {t : E' ⟶ E} {l : E' ⟶ B'} {r : E ⟶ B} {b : B' ⟶ B}
   (sq : IsPullback t l r b)
 
-noncomputable def pullbabkCompForgetOfIsPullback :
+noncomputable def pullbackCompForgetOfIsPullback :
     Over.pullback l ⋙ Over.forget _ ≅
       Over.map b ⋙ Over.pullback r ⋙ Over.forget _ :=
   NatIso.ofComponents (fun Z ↦
