@@ -1,6 +1,7 @@
 import Mathlib.CategoryTheory.MorphismProperty.Limits
 import Mathlib.CategoryTheory.Sites.Grothendieck
 import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+import TopCatModelCategory.TrivialBundleOver
 
 namespace CategoryTheory
 
@@ -54,6 +55,22 @@ noncomputable def equivOfIsPullback
     simp only [mk.injEq, heq_eq_eq, and_true, true_and]
     apply sq.hom_ext <;> simp [sq'.w]
 
+variable (F : C) {X S : C} (f : X ⟶ S) {S' : C} (i : S' ⟶ S) in
+lemma nonempty_over_trivialBundlesWithFiber_iff
+    (F : C) {X S : C} (f : X ⟶ S) {S' : C} (i : S' ⟶ S) :
+    Nonempty ((trivialBundlesWithFiber F).Over f i) ↔
+      Nonempty (TrivialBundleWithFiberOver F f i) :=
+  ⟨fun ⟨h⟩ ↦
+   ⟨{ E' := h.obj
+      p' := h.l
+      t := h.t
+      sq := h.sq
+      h := h.hl.some }⟩, fun ⟨h⟩ ↦
+   ⟨{ obj := h.E'
+      t := h.t
+      l := h.p'
+      sq := h.sq
+      hl := ⟨h.h⟩ }⟩⟩
 
 end Over
 
@@ -119,6 +136,10 @@ variable {E B : C} (p : E ⟶ B)
 def objectPropertyOver :
     ObjectProperty (CategoryTheory.Over B) :=
   fun X ↦ Nonempty (W.Over p X.hom)
+
+omit [W.IsStableUnderBaseChange] [HasPullbacks C] in
+lemma objectPropertyOver_iff (X : CategoryTheory.Over B) :
+    W.objectPropertyOver p X ↔ Nonempty (W.Over p X.hom) := Iff.rfl
 
 variable {W p}
 

@@ -354,11 +354,18 @@ lemma isLocTrivial {Z : SSet.{u}} [IsFinite Z] (a : Z ⟶ B) :
       rw [Over.isPushout_iff_forget]
       exact sq.map (toDeltaGenerated)
     have : PreservesColimit (span t l)
-      (CategoryTheory.Over.pullback (toDeltaGenerated.map p)) := sorry
+      (CategoryTheory.Over.pullback (toDeltaGenerated.map p) ⋙
+        Over.forget (toDeltaGenerated.obj E)) := by
+          sorry
+    have : PreservesColimit (span t l)
+      (CategoryTheory.Over.pullback (toDeltaGenerated.map p)) :=
+        preservesColimit_of_reflects_of_preserves _ (Over.forget _)
     refine DeltaGenerated'.trivialBundlesWithFiber_overLocally_of_isPushout
-      sq' (closedEmbeddings_toObj_map_of_mono _) _
-      (h₀ _) ?_ (U := sorry) sorry sorry sorry sorry sorry sorry
-    · sorry
+      sq' (closedEmbeddings_toObj_map_of_mono _) _ (h₀ _) ?_
+      (U := sorry) sorry sorry sorry sorry sorry sorry
+    · rw [objectPropertyOver_iff,
+        Over.nonempty_over_trivialBundlesWithFiber_iff]
+      exact ⟨(τ (j ≫ a)).map (SSet.toDeltaGenerated)⟩
 
 end MinimalFibrationLocTrivial
 
