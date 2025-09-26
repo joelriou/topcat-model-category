@@ -101,7 +101,7 @@ def DeltaGenerated'.isInitialOfIsEmpty (X : DeltaGenerated'.{u})
       exact isEmptyElim x)
 
 lemma DeltaGenerated'.isEmpty_of_isInitial {X : DeltaGenerated'.{u}}
-    (hX : IsInitial X) : IsEmpty ((forget _).obj X) := by
+    (hX : IsInitial X) : IsEmpty X := by
   let f : X ⟶ GeneratedByTopCat.of PEmpty := hX.to _
   exact Function.isEmpty f
 
@@ -323,44 +323,42 @@ lemma isLocTrivial_of_isPushout
 
 end
 
-lemma isLocTrivial' {Z : SSet.{u}} [IsFinite Z] (a : Z ⟶ B) :
-    IsLocTrivial τ (Over.mk (toDeltaGenerated.map a)) := by
-  induction Z using SSet.finite_induction with
-  | hP₀ X =>
-    refine (isTrivial_of_isEmpty _
-      (DeltaGenerated'.isEmpty_of_isInitial ?_)).isLocTrivial
-    dsimp
-    exact IsInitial.isInitialObj _ _ (SSet.isInitialOfNotNonempty
-      (by rwa [SSet.notNonempty_iff_hasDimensionLT_zero]))
-  | @hP Z₀ Z i n j j₀ sq _ h₀ =>
-    let t : Over.mk (j ≫ i ≫ a) ⟶ Over.mk (i ≫ a) := Over.homMk j
-    let b : Over.mk (j₀ ≫ a) ⟶ Over.mk a := Over.homMk j₀
-    have sq' : IsPushout (Over.homMk j : Over.mk (j ≫ i ≫ a) ⟶ Over.mk (i ≫ a))
-        (Over.homMk (Subcomplex.ι _) (by simp [sq.w_assoc]))
-        (Over.homMk (by exact i)) (Over.homMk j₀ : Over.mk (j₀ ≫ a) ⟶ Over.mk a) := by
-      rwa [Over.isPushout_iff_forget ]
-    refine isLocTrivial_of_isPushout τ (sq'.map (Over.post (SSet.toDeltaGenerated)))
-      ?_ ⟨(τ (j₀ ≫ a)).map toDeltaGenerated⟩ (h₀ _) ?_ (U := ?_) ?_ ?_ ?_ ?_ ?_ ?_
-    · dsimp
-      apply closedEmbeddings_toObj_map_of_mono
-    · dsimp
-      sorry
-    -- the next goals are about taking the complement of the isobarycenter in the simplex
-    · sorry
-    · sorry
-    · sorry
-    · sorry
-    · sorry
-    · sorry
-    · sorry
-
 include τ  in
 lemma isLocTrivial {Z : SSet.{u}} [IsFinite Z] (a : Z ⟶ B) :
    ((trivialBundlesWithFiber (toDeltaGenerated.obj F)).objectPropertyOver
     (toDeltaGenerated.map p)).overLocally grothendieckTopology
     (Over.mk (toDeltaGenerated.map a)) := by
-  have := τ
-  sorry
+  induction Z using SSet.finite_induction with
+  | hP₀ X =>
+    rw [objectProprertyOverLocally_iff]
+    have : IsEmpty (toDeltaGenerated.obj X) :=
+      DeltaGenerated'.isEmpty_of_isInitial
+        (IsInitial.isInitialObj _ _ (SSet.isInitialOfNotNonempty
+            (by rwa [SSet.notNonempty_iff_hasDimensionLT_zero])))
+    dsimp
+    intro x
+    exact (IsEmpty.false x).elim
+  | @hP Z₀ Z i n j₀ j sq _ h₀ =>
+    have := τ
+    let X₁ := Over.mk (toDeltaGenerated.map (j₀ ≫ i ≫ a))
+    let X₂ := Over.mk (toDeltaGenerated.map (i ≫ a))
+    let X₃ := Over.mk (toDeltaGenerated.map (j ≫ a))
+    let X₄ := Over.mk (toDeltaGenerated.map a)
+    let t : X₁ ⟶ X₂ := Over.homMk (toDeltaGenerated.map j₀)
+    let l : X₁ ⟶ X₃ := Over.homMk (toDeltaGenerated.map ∂Δ[n].ι) (by
+      dsimp [X₁, X₃]
+      simp only [← Functor.map_comp, sq.w_assoc])
+    let r : X₂ ⟶ X₄ := Over.homMk (toDeltaGenerated.map i)
+    let b : X₃ ⟶ X₄ := Over.homMk (toDeltaGenerated.map j)
+    have sq' : IsPushout t l r b := by
+      rw [Over.isPushout_iff_forget]
+      exact sq.map (toDeltaGenerated)
+    have : PreservesColimit (span t l)
+      (CategoryTheory.Over.pullback (toDeltaGenerated.map p)) := sorry
+    refine DeltaGenerated'.trivialBundlesWithFiber_overLocally_of_isPushout
+      sq' (closedEmbeddings_toObj_map_of_mono _) _
+      (h₀ _) ?_ (U := sorry) sorry sorry sorry sorry sorry sorry
+    · sorry
 
 end MinimalFibrationLocTrivial
 

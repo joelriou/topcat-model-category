@@ -215,4 +215,25 @@ lemma locallyTarget_grothendieckTopology_iff (W : MorphismProperty (GeneratedByT
         p := p
         hp := h₁ }, by rwa [Sieve.ofArrows_le_iff]⟩
 
+lemma objectProprertyOverLocally_iff {B : (GeneratedByTopCat.{v} X)}
+    (P : ObjectProperty (Over B)) [P.IsStableByPrecomp] (X : Over (B)) :
+    P.overLocally grothendieckTopology X ↔ ∀ (x : X.left),
+      ∃ (U : Over B) (i : U ⟶ X) (_ : openImmersions i.left)
+        (_ : x ∈ Set.range i.left), P U := by
+  constructor
+  · rintro ⟨U, hU⟩ x
+    have := Set.mem_univ x
+    rw [← U.union_range_eq_univ] at this
+    simp only [ObjectProperty.ι_obj, ObjectProperty.ι_map, Set.mem_iUnion, Set.mem_range] at this
+    obtain ⟨i, u, rfl⟩ := this
+    exact ⟨Over.mk (U.p i ≫ X.hom), Over.homMk (U.p i), U.hp i, by aesop,
+      hU _ (Sieve.ofArrows_mk _ _ _)⟩
+  · rintro h
+    choose U p h₁ h₂ h₃ using h
+    exact ⟨{
+        ι := X.left
+        U x := (U x).left
+        p x := (p x).left
+        hp := h₁ }, by simpa [Sieve.ofArrows_le_iff] using h₃⟩
+
 end GeneratedByTopCat
