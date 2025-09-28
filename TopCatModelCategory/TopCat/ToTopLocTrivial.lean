@@ -130,7 +130,7 @@ lemma trivialBundlesWithFiber_overLocally_of_isPushout'
   intro a
   obtain (⟨a₀, rfl⟩ | ⟨k, rfl, hk⟩) := Types.eq_or_eq_of_isPushout'
     (sq.map (DeltaGenerated'.toTopCat ⋙ forget _)) a
-  · obtain ⟨U, i, hi, ha₀, hi'⟩ := h₂ a₀
+  · obtain ⟨V, i, hi, ha₀, hi'⟩ := h₂ a₀
     refine ⟨sorry, sorry, sorry, sorry, ?_⟩
     rw [objectPropertyOver_iff, Over.nonempty_over_trivialBundlesWithFiber_iff] at hi' ⊢
     sorry
