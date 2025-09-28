@@ -1,5 +1,6 @@
 import TopCatModelCategory.SSet.MinimalFibrationsLemmas
 import TopCatModelCategory.SSet.FiniteInduction
+import TopCatModelCategory.SSet.Pullback
 import TopCatModelCategory.TrivialBundleOver
 import TopCatModelCategory.TopCat.SerreFibrationBundle
 import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
@@ -13,6 +14,13 @@ open Simplicial CategoryTheory MorphismProperty HomotopicalAlgebra
   TopCat.modelCategory Limits Topology GeneratedByTopCat
 
 namespace CategoryTheory
+
+lemma Limits.preservesColimits_comp_of_hasColimit {J C D E : Type*} [Category J] [Category C]
+    [Category D] [Category E] (F : J ⥤ C) (G : C ⥤ D) (K : D ⥤ E)
+    [PreservesColimit F (G ⋙ K)] [HasColimit F] [PreservesColimit F G] :
+    PreservesColimit (F ⋙ G) K :=
+  preservesColimit_of_preserves_colimit_cocone (isColimitOfPreserves G (colimit.isColimit F))
+    (isColimitOfPreserves (G ⋙ K) (colimit.isColimit F))
 
 lemma Limits.PushoutCocone.isPushout_iff_nonempty_isColimit
     {C : Type*} [Category C]
@@ -339,29 +347,35 @@ lemma isLocTrivial {Z : SSet.{u}} [IsFinite Z] (a : Z ⟶ B) :
     intro x
     exact (IsEmpty.false x).elim
   | @hP Z₀ Z i n j₀ j sq _ h₀ =>
-    have := τ
-    let X₁ := Over.mk (toDeltaGenerated.map (j₀ ≫ i ≫ a))
-    let X₂ := Over.mk (toDeltaGenerated.map (i ≫ a))
-    let X₃ := Over.mk (toDeltaGenerated.map (j ≫ a))
-    let X₄ := Over.mk (toDeltaGenerated.map a)
-    let t : X₁ ⟶ X₂ := Over.homMk (toDeltaGenerated.map j₀)
-    let l : X₁ ⟶ X₃ := Over.homMk (toDeltaGenerated.map ∂Δ[n].ι) (by
-      dsimp [X₁, X₃]
-      simp only [← Functor.map_comp, sq.w_assoc])
-    let r : X₂ ⟶ X₄ := Over.homMk (toDeltaGenerated.map i)
-    let b : X₃ ⟶ X₄ := Over.homMk (toDeltaGenerated.map j)
-    have sq' : IsPushout t l r b := by
-      rw [Over.isPushout_iff_forget]
-      exact sq.map (toDeltaGenerated)
-    have : PreservesColimit (span t l)
+    let Y₁ := Over.mk (j₀ ≫ i ≫ a)
+    let Y₂ := Over.mk (i ≫ a)
+    let Y₃ := Over.mk (j ≫ a)
+    let Y₄ := Over.mk a
+    let t' : Y₁ ⟶ Y₂ := Over.homMk j₀
+    let l' : Y₁ ⟶ Y₃ := Over.homMk ∂Δ[n].ι (by simp [Y₁, Y₃, sq.w_assoc])
+    let r' : Y₂ ⟶ Y₄ := Over.homMk i
+    let b' : Y₃ ⟶ Y₄ := Over.homMk j
+    have : Mono l'.left := by dsimp [l']; infer_instance
+    have sq' : IsPushout t' l' r' b' := by rwa [Over.isPushout_iff_forget]
+    have : PreservesColimit (span t' l') (Over.post toDeltaGenerated ⋙
+      CategoryTheory.Over.pullback (toDeltaGenerated.map p) ⋙
+        Over.forget (toDeltaGenerated.obj E)) :=
+      preservesColimit_of_natIso _
+        (Functor.isoWhiskerRight (Over.pullbackPostIso toDeltaGenerated p) (Over.forget _))
+    have := preservesColimits_comp_of_hasColimit (span t' l') (Over.post toDeltaGenerated)
       (CategoryTheory.Over.pullback (toDeltaGenerated.map p) ⋙
-        Over.forget (toDeltaGenerated.obj E)) := by
-          sorry
-    have : PreservesColimit (span t l)
-      (CategoryTheory.Over.pullback (toDeltaGenerated.map p)) :=
+        Over.forget (toDeltaGenerated.obj E))
+    have : PreservesColimit (span ((Over.post toDeltaGenerated).map t')
+      ((Over.post toDeltaGenerated).map l'))
+      (CategoryTheory.Over.pullback (toDeltaGenerated.map p) ⋙
+        Over.forget (toDeltaGenerated.obj E)) :=
+      preservesColimit_of_iso_diagram _ (spanCompIso (Over.post toDeltaGenerated) t' l')
+    have : PreservesColimit (span ((Over.post toDeltaGenerated).map t')
+        ((Over.post toDeltaGenerated).map l'))
+        (CategoryTheory.Over.pullback (toDeltaGenerated.map p)) :=
         preservesColimit_of_reflects_of_preserves _ (Over.forget _)
     refine DeltaGenerated'.trivialBundlesWithFiber_overLocally_of_isPushout
-      sq' (closedEmbeddings_toObj_map_of_mono _) _ (h₀ _) ?_
+      (sq'.map (Over.post toDeltaGenerated)) (closedEmbeddings_toObj_map_of_mono _) _ (h₀ _) ?_
       (U := sorry) sorry sorry sorry sorry sorry sorry
     · rw [objectPropertyOver_iff,
         Over.nonempty_over_trivialBundlesWithFiber_iff]

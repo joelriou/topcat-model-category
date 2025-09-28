@@ -12,6 +12,18 @@ variable {C : Type t} [Category.{w} C] [HasPullbacks C]
 
 section
 
+variable {S' S : C} {p : S' ⟶ S} {X : Over S} {X' : C} {t : X' ⟶ X.left} {l : X' ⟶ S'}
+  (sq : IsPullback t l X.hom p)
+
+@[simps!]
+noncomputable def pullbackObjIsoOfIsPullback :
+    Over.mk l ≅ (Over.pullback p).obj X :=
+  Over.isoMk sq.isoPullback
+
+end
+
+section
+
 variable {X S X' S' : C} {f : X ⟶ S} {f' : X' ⟶ S'}
   (e : Arrow.mk f ≅ Arrow.mk f')
 

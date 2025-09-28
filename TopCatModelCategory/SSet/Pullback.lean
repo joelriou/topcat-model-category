@@ -1,6 +1,8 @@
 import TopCatModelCategory.PullbackTypes
 import TopCatModelCategory.SSet.Monoidal
+import TopCatModelCategory.Pullback
 import Mathlib.CategoryTheory.Limits.FunctorCategory.Basic
+import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Pullbacks
 import Mathlib.CategoryTheory.Limits.Over
 
 universe u
@@ -27,6 +29,12 @@ abbrev pullbackπ₁ : (pullback f g : SSet) ⟶ X :=
 abbrev pullbackπ₂ : (pullback f g : SSet) ⟶ Y :=
   Subcomplex.ι _ ≫ snd _ _
 
+lemma isPullback :
+    IsPullback (Subcomplex.pullbackπ₁ f g) (Subcomplex.pullbackπ₂ f g) f g where
+  w := by ext _ ⟨_, hx⟩; exact hx
+  isLimit' := ⟨evaluationJointlyReflectsLimits _ (fun _ ↦
+    (PullbackCone.isLimitMapConeEquiv ..).2 (Types.pullbackLimitCone _ _).isLimit)⟩
+
 end Subcomplex
 
 variable {E B : SSet.{u}} (p : E ⟶ B)
@@ -48,6 +56,13 @@ def overPullbackCompPostEvaluation (n : SimplexCategoryᵒᵖ) :
       Over.post ((evaluation _ _ ).obj n) ⋙ Types.overPullback (p.app n) :=
   Iso.refl _
 
+noncomputable def overPullbackIso : overPullback p ≅ Over.pullback p :=
+  NatIso.ofComponents
+    (fun S ↦ Over.pullbackObjIsoOfIsPullback (Subcomplex.isPullback S.hom p)) (fun {X Y} f ↦ by
+      ext : 1
+      dsimp
+      ext : 1 <;> simp)
+
 section
 
 variable {J : Type*} [Category J] [HasColimitsOfShape J (Type u)]
@@ -64,6 +79,9 @@ instance (F : J ⥤ Over B) : PreservesColimit F (overPullback p) where
         Types.overPullback (p.app n) ⋙ Over.forget _) hc))⟩
 
 instance : PreservesColimitsOfShape J (overPullback p) where
+
+instance : PreservesColimitsOfShape J (Over.pullback p) :=
+  preservesColimitsOfShape_of_natIso (overPullbackIso p)
 
 end
 
