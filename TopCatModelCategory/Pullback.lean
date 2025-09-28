@@ -59,6 +59,11 @@ noncomputable def pullbackCompForgetOfIsPullback :
 
 end
 
+lemma isPullback_map_left {B' B : C} (b : B' ⟶ B) {X Y : Over B} (f : X ⟶ Y) :
+    IsPullback ((Over.pullback b).map f).left (pullback.fst _ _) (pullback.fst _ _) f.left :=
+  IsPullback.of_right (by simpa using (IsPullback.of_hasPullback X.hom b).flip)
+    (by simp) (IsPullback.of_hasPullback Y.hom b).flip
+
 end Over
 
 end CategoryTheory

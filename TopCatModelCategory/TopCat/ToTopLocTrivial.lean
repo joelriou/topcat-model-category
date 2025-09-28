@@ -126,7 +126,29 @@ lemma trivialBundlesWithFiber_overLocally_of_isPushout'
     (l' : X₁.left ⟶ U) (fac : l' ≫ j = l.left) (ρ : U ⟶ X₁.left) (fac' : l' ≫ ρ = 𝟙 _) :
     ((trivialBundlesWithFiber F).objectPropertyOver p).overLocally grothendieckTopology
       (Over.mk (𝟙 B)) := by
-  sorry
+  rw [objectProprertyOverLocally_iff] at h₂ ⊢
+  intro a
+  obtain (⟨a₀, rfl⟩ | ⟨k, rfl, hk⟩) := Types.eq_or_eq_of_isPushout'
+    (sq.map (DeltaGenerated'.toTopCat ⋙ forget _)) a
+  · obtain ⟨U, i, hi, ha₀, hi'⟩ := h₂ a₀
+    refine ⟨sorry, sorry, sorry, sorry, ?_⟩
+    rw [objectPropertyOver_iff, Over.nonempty_over_trivialBundlesWithFiber_iff] at hi' ⊢
+    sorry
+  · dsimp at k hk ⊢
+    let e : ((Set.range l.left)ᶜ : Set _) ≃ₜ ((Set.range X₂.hom)ᶜ : Set _) :=
+      TopCat.homeoComplOfIsPushoutOfIsClosedEmbedding
+        (sq.map (DeltaGenerated'.toTopCat)).flip hl
+    have hr : IsOpen ((Set.range X₂.hom)ᶜ) :=
+      TopCat.closedEmbeddings.isOpen
+        (TopCat.isClosedEmbedding_of_isPushout
+          (sq.flip.map (DeltaGenerated'.toTopCat)) hl)
+    have : DeltaGeneratedSpace' ((Set.range l.left)ᶜ : Set _) :=
+      IsOpen.isGeneratedBy _ (by simpa only [isOpen_compl_iff] using hl.isClosed_range)
+    exact ⟨Over.mk (Y := .of ((Set.range l.left)ᶜ : Set _))
+      (TopCat.ofHom (ContinuousMap.comp ⟨_, continuous_subtype_val⟩ ⟨_, e.continuous⟩)),
+      Over.homMk (TopCat.ofHom ⟨fun ⟨x, _⟩ ↦ X₃.hom x, by continuity⟩),
+      (IsOpenEmbedding.comp (IsOpen.isOpenEmbedding_subtypeVal hr) e.isOpenEmbedding :),
+      ⟨⟨k, hk⟩, rfl⟩, h₃.precomp (Over.homMk (TopCat.ofHom ⟨_, continuous_subtype_val⟩))⟩
 
 lemma trivialBundlesWithFiber_overLocally_of_isPushout
     {E B F : DeltaGenerated'.{u}} {X₁ X₂ X₃ X₄ : Over B} {t : X₁ ⟶ X₂}
@@ -176,160 +198,6 @@ variable {E B : SSet.{u}} {p : E ⟶ B} {F : SSet.{u}}
   (τ : ∀ ⦃n : ℕ⦄ (σ : Δ[n] ⟶ B), TrivialBundleWithFiberOver F p σ)
 
 namespace MinimalFibrationLocTrivial
-
-section
-
-noncomputable abbrev pull (_ : ∀ ⦃n : ℕ⦄ (σ : Δ[n] ⟶ B), TrivialBundleWithFiberOver F p σ) :=
-    Over.pullback ((toDeltaGenerated.map p))
-
-variable (A : Over (toDeltaGenerated.obj B))
-
-noncomputable def pullObj : DeltaGenerated'.{u} := ((pull τ).obj A).left
-
-noncomputable def ι : pullObj τ A ⟶ toDeltaGenerated.obj E := ((pull τ).obj A).hom
-
-noncomputable def π : pullObj τ A ⟶ A.left := pullback.fst _ _
-
-lemma isPullback : IsPullback (ι τ A) (π τ A) (toDeltaGenerated.map p) A.hom :=
-  (IsPullback.of_hasPullback _ _).flip
-
-variable (p F) in
-def IsTrivial {A : DeltaGenerated'} (f : A ⟶ toDeltaGenerated.obj B) : Prop :=
-  Nonempty (TrivialBundleWithFiberOver (toDeltaGenerated.obj F) (toDeltaGenerated.map p) f)
-
-instance (X : Type u) [IsEmpty X] [TopologicalSpace X] [DeltaGeneratedSpace' X] :
-    IsEmpty ((forget DeltaGenerated').obj (.of X)) := by assumption
-
-lemma isTrivial_of_isEmpty (h : IsEmpty ((forget _).obj A.left)) :
-    IsTrivial p F A.hom := by
-  let φ := ((forget _).map (pullback.fst (X := A.left) A.hom (toDeltaGenerated.map p)))
-  have := Function.isEmpty φ
-  exact
-    ⟨{sq := (IsPullback.of_hasPullback _ _).flip
-      h :=
-      { r := (DeltaGenerated'.isInitialOfIsEmpty _).to _
-        isLimit :=DeltaGenerated'.isLimitBinaryFanOfIsEmpty h (by assumption) } }⟩
-
-lemma isTrivial_of_fac {A' A : DeltaGenerated'} {f : A ⟶ toDeltaGenerated.obj B}
-    (h : IsTrivial p F f) (j : A' ⟶ A)
-    (f' : A' ⟶ toDeltaGenerated.obj B)
-    (fac : j ≫ f = f')  :
-    IsTrivial p F f' := by
-  subst fac
-  exact ⟨h.some.pullback' _⟩
-
-def IsLocTrivial : Prop :=
-  (trivialBundlesWithFiber (toDeltaGenerated.obj F)).locallyTarget
-    GeneratedByTopCat.grothendieckTopology (π τ A)
-
-variable (p F) in
-def IsLocTrivialAt {A : DeltaGenerated'} (f : A ⟶ toDeltaGenerated.obj B) (a : A) : Prop :=
-  ∃ (U : DeltaGenerated') (i : U ⟶ A)
-        (_ : GeneratedByTopCat.openImmersions i) (_ : a ∈ Set.range i),
-        IsTrivial p F (i ≫ f)
-
-lemma isLocTrivial_iff :
-    IsLocTrivial τ A ↔
-      ∀ (a : A.left), IsLocTrivialAt p F A.hom a := by
-  refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
-  · intro a
-    obtain ⟨C, hC⟩ := h
-    obtain ⟨i, u, rfl⟩ := C.exists_eq a
-    refine ⟨C.U i, C.p i, C.hp i, ⟨_, rfl⟩, ?_⟩
-    have hi := hC (C.p i) (Sieve.ofArrows_mk _ _ _)
-    rw [mem_sieveLocallyTarget_iff] at hi
-    obtain ⟨hi⟩ := hi
-    exact ⟨{
-      E' := _
-      p' := hi.l
-      t := hi.t ≫ ι τ A
-      sq := hi.sq.paste_horiz (isPullback τ A)
-      h := hi.hl.some
-    }⟩
-  · choose U i hi hU' t using h
-    refine ⟨{
-      ι := A.left
-      U := U
-      p := i
-      hp := hi }, ?_⟩
-    simp only [Sieve.ofArrows_le_iff]
-    intro a
-    rw [mem_sieveLocallyTarget_iff]
-    refine ⟨?_⟩
-    have ip := (t a).some
-    exact {
-      obj := _
-      t := _
-      l := _
-      sq := (IsPullback.of_hasPullback (i a) (π τ A)).flip
-      hl := ⟨(t a).some.trivialBundleWithFiber
-          ((IsPullback.of_hasPullback _ _).flip.paste_horiz (isPullback τ A))⟩ }
-
-variable {τ A} in
-lemma IsTrivial.isLocTrivial (hA : IsTrivial p F A.hom) : IsLocTrivial τ A :=
-  MorphismProperty.le_locallyTarget _ _ _
-    ⟨hA.some.trivialBundleWithFiber (IsPullback.of_hasPullback _ _).flip⟩
-
-section
-
-variable {Z : DeltaGenerated'.{u}} {t : Z ⟶ toDeltaGenerated.obj E}
-    {l : Z ⟶ A.left} (sq : IsPullback t l (toDeltaGenerated.map p) A.hom)
-
-include sq
-
-noncomputable def objIso : pullObj τ A ≅ Z :=
-  (IsPullback.exists_iso_of_isos (isPullback τ A) sq (Iso.refl _)
-    (Iso.refl _) (Iso.refl _) (by simp) (by simp)).choose
-
-@[reassoc (attr := simp)]
-lemma objIso_hom_comp_eq_π : (objIso τ A sq).hom ≫ l = π τ A := by
-  simpa using ((IsPullback.exists_iso_of_isos (isPullback τ A) sq (Iso.refl _)
-    (Iso.refl _) (Iso.refl _) (by simp) (by simp)).choose_spec.2).symm
-
-end
-
-end
-
-section
-
-variable {A} {K₀ A₀ K : Over (toDeltaGenerated.obj B)}
-  {t : K₀ ⟶ A₀} {l : K₀ ⟶ K} {r : A₀ ⟶ A} {b : K ⟶ A}
-  (sq : IsPushout t l r b)
-
-include sq
-
-lemma isLocTrivial_of_isPushout
-    (hl : TopCat.closedEmbeddings (DeltaGenerated'.toTopCat.map l.left))
-    (hK : IsTrivial p F K.hom) (hA₀ : IsLocTrivial τ A₀)
-    (hsq : PreservesColimit (span t l) (CategoryTheory.Over.pullback (toDeltaGenerated.map p)))
-    {U : DeltaGenerated'.{u}} (i : U ⟶ K.left) (hi : GeneratedByTopCat.openImmersions i)
-    (l' : K₀.left ⟶ U) (fac : l' ≫ i = l.left) (ρ : U ⟶ K₀.left) (fac' : l' ≫ ρ = 𝟙 _) :
-    IsLocTrivial τ A := by
-  rw [isLocTrivial_iff] at hA₀ ⊢
-  intro a
-  obtain (⟨a₀, rfl⟩ | ⟨k, rfl, hk⟩) := Types.eq_or_eq_of_isPushout'
-    (sq.map (Over.forget _ ⋙ DeltaGenerated'.toTopCat ⋙ forget _)) a
-  · dsimp at a₀
-    dsimp
-    sorry
-  · dsimp at k hk ⊢
-    let e : ((Set.range l.left)ᶜ : Set _) ≃ₜ ((Set.range r.left)ᶜ : Set _) :=
-      TopCat.homeoComplOfIsPushoutOfIsClosedEmbedding
-        (sq.map (Over.forget _ ⋙ DeltaGenerated'.toTopCat)).flip hl
-    have hr : IsOpen ((Set.range r.left)ᶜ) :=
-      TopCat.closedEmbeddings.isOpen
-        (TopCat.isClosedEmbedding_of_isPushout
-          (sq.flip.map (Over.forget _ ⋙ DeltaGenerated'.toTopCat)) hl)
-    have : DeltaGeneratedSpace' ((Set.range l.left)ᶜ : Set _) :=
-      IsOpen.isGeneratedBy _ (by simpa only [isOpen_compl_iff] using hl.isClosed_range)
-    refine ⟨.of ((Set.range l.left)ᶜ : Set _),
-      TopCat.ofHom (ContinuousMap.comp ⟨_, continuous_subtype_val⟩ ⟨_, e.continuous⟩),
-      (IsOpenEmbedding.comp (IsOpen.isOpenEmbedding_subtypeVal hr) e.isOpenEmbedding :),
-      ⟨⟨k, hk⟩, rfl⟩,
-      isTrivial_of_fac hK (TopCat.ofHom ⟨_, continuous_subtype_val⟩) _
-      (by rw [← Over.w b]; rfl)⟩
-
-end
 
 include τ  in
 lemma isLocTrivial {Z : SSet.{u}} [IsFinite Z] (a : Z ⟶ B) :
