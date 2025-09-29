@@ -5,6 +5,7 @@ import TopCatModelCategory.TrivialBundleOver
 import TopCatModelCategory.TopCat.SerreFibrationBundle
 import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
 import TopCatModelCategory.TopCat.ToTopExact
+import TopCatModelCategory.TopCat.Pullback
 import TopCatModelCategory.ModelCategoryTopCat
 import TopCatModelCategory.Pullback
 
@@ -130,10 +131,47 @@ lemma trivialBundlesWithFiber_overLocally_of_isPushout'
   intro a
   obtain (⟨a₀, rfl⟩ | ⟨k, rfl, hk⟩) := Types.eq_or_eq_of_isPushout'
     (sq.map (DeltaGenerated'.toTopCat ⋙ forget _)) a
-  · obtain ⟨V, i, hi, ha₀, hi'⟩ := h₂ a₀
-    refine ⟨sorry, sorry, sorry, sorry, ?_⟩
-    rw [objectPropertyOver_iff, Over.nonempty_over_trivialBundlesWithFiber_iff] at hi' ⊢
-    sorry
+  · obtain ⟨V₀, i, hi, ha₀, hi'⟩ := h₂ a₀
+    obtain ⟨V, hV₂, hV₃⟩ : ∃ (V : TopologicalSpace.Opens B), X₂.hom ⁻¹' V.1 = Set.range i.left ∧
+        X₃.hom ⁻¹' V.1 ⊆ Set.range j := by
+      sorry
+    let W : Over B := Over.mk (Y := .of V) (TopCat.ofHom ⟨_, continuous_subtype_val⟩)
+    have hW : openImmersions W.hom := V.isOpen.isOpenEmbedding_subtypeVal
+    have := hW.preservesColimitsOfShape_overPullback (J := WalkingSpan)
+    refine ⟨W, Over.homMk W.hom, hW, ?_, ?_⟩
+    · rw [← hV₂] at ha₀
+      dsimp [W] at ha₀ ⊢
+      simp only [Set.mem_range, Subtype.exists]
+      simp only [Set.mem_preimage, SetLike.mem_coe] at ha₀
+      exact ⟨_, ha₀, rfl⟩
+    · let r : X₂ ⟶ Over.mk (𝟙 B) := Over.homMk X₂.hom
+      let b : X₃ ⟶ Over.mk (𝟙 B) := Over.homMk X₃.hom
+      have sq : IsPushout t l r b := by rwa [Over.isPushout_iff_forget]
+      have : IsSplitMono ((CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom).map l) := by
+        dsimp
+        sorry
+      have : PreservesColimit
+        (span ((CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom).map t)
+          ((CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom).map l))
+        (CategoryTheory.Over.pullback p) := sorry
+      have := TrivialBundleWithFiberOver.nonempty_of_isPushout_of_isSplitMono
+        (sq.map (Over.pullback W.hom ⋙ Over.map W.hom)) p (F := F) (Nonempty.some (by
+          rw [← Over.nonempty_over_trivialBundlesWithFiber_iff, ← objectPropertyOver_iff]
+          refine ObjectProperty.of_precomp _ (Over.homMk (hi.lift (pullback.fst _ _) ?_) ?_) hi'
+          · rw [← hV₂]
+            rintro _ ⟨b, rfl⟩
+            dsimp at b ⊢
+            simp only [Set.mem_preimage, SetLike.mem_coe]
+            convert (pullback.snd X₂.hom W.hom b).2
+            exact congr_fun ((forget _).congr_map
+              (pullback.condition (f := X₂.hom) (g := W.hom))) b
+          · dsimp
+            rw [← Over.w i, hi.lift_comp_assoc, pullback.condition])) (Nonempty.some (by
+          rw [← Over.nonempty_over_trivialBundlesWithFiber_iff, ← objectPropertyOver_iff]
+          exact ObjectProperty.of_precomp _
+            (Over.homMk (pullback.fst _ _) (by simp [pullback.condition])) h₃))
+      rw [← Over.nonempty_over_trivialBundlesWithFiber_iff, ← objectPropertyOver_iff] at this
+      exact ObjectProperty.of_precomp _ (by exact Over.homMk (pullback.lift W.hom (𝟙 _))) this
   · dsimp at k hk ⊢
     let e : ((Set.range l.left)ᶜ : Set _) ≃ₜ ((Set.range X₂.hom)ᶜ : Set _) :=
       TopCat.homeoComplOfIsPushoutOfIsClosedEmbedding
@@ -244,10 +282,17 @@ lemma isLocTrivial {Z : SSet.{u}} [IsFinite Z] (a : Z ⟶ B) :
         preservesColimit_of_reflects_of_preserves _ (Over.forget _)
     refine DeltaGenerated'.trivialBundlesWithFiber_overLocally_of_isPushout
       (sq'.map (Over.post toDeltaGenerated)) (closedEmbeddings_toObj_map_of_mono _) _ (h₀ _) ?_
-      (U := sorry) sorry sorry sorry sorry sorry sorry
+      (U := ?_) ?_ ?_ ?_ ?_ ?_ ?_
     · rw [objectPropertyOver_iff,
         Over.nonempty_over_trivialBundlesWithFiber_iff]
       exact ⟨(τ (j ≫ a)).map (SSet.toDeltaGenerated)⟩
+    · sorry
+    · sorry
+    · sorry
+    · sorry
+    · sorry
+    · sorry
+    · sorry
 
 end MinimalFibrationLocTrivial
 

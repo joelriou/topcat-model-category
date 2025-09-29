@@ -67,6 +67,26 @@ instance : openImmersions.{v}.IsStableUnderBaseChange where
       (U.isOpen.preimage b.hom.continuous).isOpenEmbedding_subtypeVal
     exact (MorphismProperty.arrow_mk_iso_iff _ (Arrow.isoMk e₁ (Iso.refl _))).2 h
 
+section
+
+variable {X Y : TopCat.{v}} {f : X ⟶ Y} (hf : openImmersions f) {Z : TopCat.{v}}
+  (g : Z ⟶ Y) (hg : Set.range g ⊆ Set.range f)
+
+noncomputable def openImmersions.lift : Z ⟶ X :=
+  TopCat.ofHom
+    (ContinuousMap.comp ⟨_, hf.homeoRange.continuous_symm⟩
+      ⟨fun z ↦ ⟨g z, hg (by simp)⟩, by continuity⟩)
+
+@[reassoc (attr := simp)]
+lemma openImmersions.lift_comp : hf.lift g hg ≫ f = g := by
+  ext x
+  obtain ⟨y, hy⟩ := hf.homeoRange.surjective ⟨g x, hg (by simp)⟩
+  dsimp [lift]
+  rw [← hy, Homeomorph.symm_apply_apply]
+  simpa [IsOpenEmbedding.homeoRange] using hy
+
+end
+
 end TopCat
 
 namespace GeneratedByTopCat
@@ -86,6 +106,19 @@ instance :
 instance : (openImmersions.{v} (X := X)).RespectsIso :=
   MorphismProperty.respectsIso_of_isStableUnderComposition
     (fun _ _ f (_ : IsIso f) ↦ openImmersions.of_isIso f)
+
+section
+
+variable {Y₁ Y₂ Z : GeneratedByTopCat.{v} X} {f : Y₁ ⟶ Y₂} (hf : openImmersions f)
+  (g : Z ⟶ Y₂) (hg : Set.range g ⊆ Set.range f)
+
+noncomputable def openImmersions.lift : Z ⟶ Y₁ := TopCat.openImmersions.lift hf g hg
+
+@[reassoc (attr := simp)]
+lemma openImmersions.lift_comp : hf.lift g hg ≫ f = g :=
+  TopCat.openImmersions.lift_comp hf g hg
+
+end
 
 section
 

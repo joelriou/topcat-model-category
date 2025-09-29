@@ -120,15 +120,15 @@ end TopCat
 
 namespace GeneratedByTopCat
 
-variable {J : Type t} [Category.{v} J]
-  {ι : Type w} {X : ι → Type t} [∀ i, TopologicalSpace (X i)]
-  {Y Z : GeneratedByTopCat.{v} X} {f : Y ⟶ Z}
-  [PreservesLimitsOfShape WalkingCospan (GeneratedByTopCat.toTopCat.{v} (X := X))]
+variable {J : Type t} [Category.{w'} J]
+  {ι : Type w} {X : ι → Type v} [∀ i, TopologicalSpace (X i)]
+  {Y Z : GeneratedByTopCat.{u} X} {f : Y ⟶ Z}
 
 lemma openImmersions.preservesColimitsOfShape_overPullback (hf : openImmersions f) :
     PreservesColimitsOfShape J (Over.pullback f) where
   preservesColimit {K} := ⟨fun {c} hc ↦ ⟨isColimitOfReflects (Over.post toTopCat) (by
     have := TopCat.openImmersions.preservesColimitsOfShape_overPullback hf J
+    have {A : GeneratedByTopCat.{u} X} (g : A ⟶ Z) : PreservesLimit (cospan g f) toTopCat := sorry
     let e := Over.pullbackPostIso toTopCat f
     refine (IsColimit.equivOfNatIsoOfIso
       (Functor.associator _ _ _ ≪≫ Functor.isoWhiskerLeft K e) _ _ ?_).2
