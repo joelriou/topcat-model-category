@@ -147,9 +147,33 @@ lemma trivialBundlesWithFiber_overLocally_of_isPushout'
     · let r : X₂ ⟶ Over.mk (𝟙 B) := Over.homMk X₂.hom
       let b : X₃ ⟶ Over.mk (𝟙 B) := Over.homMk X₃.hom
       have sq : IsPushout t l r b := by rwa [Over.isPushout_iff_forget]
-      have : IsSplitMono ((CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom).map l) := by
-        dsimp
-        sorry
+      have : IsSplitMono ((CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom).map l).left := by
+        obtain ⟨φ, hφ⟩ := hj.exists_lift (pullback.fst X₃.hom W.hom) (by
+          refine subset_trans ?_ hV₃
+          rw [← Set.image_subset_iff, ← Set.image_univ, ← Set.image_comp]
+          erw [← CategoryTheory.hom_comp]
+          rw [pullback.condition]
+          rintro _ ⟨a, _, rfl⟩
+          exact (pullback.snd X₃.hom W.hom a).prop)
+        refine ⟨⟨{
+          retraction := by
+            dsimp
+            exact pullback.lift (φ ≫ ρ) sorry sorry
+          id := by
+            have := hj.mono
+            dsimp
+            ext : 1
+            · dsimp
+              simp only [Category.assoc, limit.lift_π, PullbackCone.mk_pt, PullbackCone.mk_π_app,
+                Category.id_comp]
+              trans (pullback.fst X₁.hom W.hom ≫ l') ≫ ρ
+              · rw [← Category.assoc]
+                congr 1
+                simp only [← cancel_mono j, Category.assoc, hφ, pullback.lift_fst, fac]
+              · simp [fac']
+            · simp
+              sorry
+        }⟩⟩
       have : PreservesColimit
         (span ((CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom).map t)
           ((CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom).map l))

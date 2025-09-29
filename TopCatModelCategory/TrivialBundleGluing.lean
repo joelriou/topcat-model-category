@@ -137,7 +137,7 @@ namespace TrivialBundleWithFiberOver
 lemma nonempty_of_isPushout_of_isSplitMono [HasPullbacks C]
     [CartesianMonoidalCategory C] {B : C} {X₁ X₂ X₃ X₄ : CategoryTheory.Over B}
     {t : X₁ ⟶ X₂} {l : X₁ ⟶ X₃} {r : X₂ ⟶ X₄} {b : X₃ ⟶ X₄}
-    (sq : IsPushout t l r b) [IsSplitMono l]
+    (sq : IsPushout t l r b) [IsSplitMono l.left]
     {E : C} (p : E ⟶ B) {F : C}
     (h₂ : TrivialBundleWithFiberOver F p X₂.hom)
     (h₃ : TrivialBundleWithFiberOver F p X₃.hom)
@@ -147,6 +147,7 @@ lemma nonempty_of_isPushout_of_isSplitMono [HasPullbacks C]
   have : PreservesColimit (span ((Over.forget B).map t)
       ((Over.forget B).map l)) (tensorRight F) := by
     assumption
+  have : IsSplitMono ((Over.forget B).map l) := by assumption
   obtain ⟨h₄, _⟩ := TrivialBundleWithFiber.exists_gluing_of_isSplitMono
     (sq.map (Over.forget _)) (sq.map (CategoryTheory.Over.pullback p ⋙ Over.forget _))
     (Over.isPullback_map_left p _) (Over.isPullback_map_left p _)

@@ -38,6 +38,12 @@ def openImmersions : MorphismProperty TopCat.{v} :=
 lemma openImmersions_iff {Y Z : TopCat.{v}} (f : Y ⟶ Z) :
     openImmersions f ↔ IsOpenEmbedding f := Iff.rfl
 
+lemma openImmersions.mono {X Y : TopCat.{v}} {f : X ⟶ Y} (hf : openImmersions f) :
+    Mono f where
+  right_cancellation g₁ g₂ h := by
+    ext x
+    exact hf.injective (ConcreteCategory.congr_hom h x)
+
 instance : openImmersions.{v}.IsMultiplicative where
   id_mem _ := IsOpenEmbedding.id
   comp_mem _ _ h₁ h₂ := h₂.comp h₁
@@ -85,6 +91,13 @@ lemma openImmersions.lift_comp : hf.lift g hg ≫ f = g := by
   rw [← hy, Homeomorph.symm_apply_apply]
   simpa [IsOpenEmbedding.homeoRange] using hy
 
+@[reassoc]
+lemma openImmersions.comp_lift {T : TopCat.{v}} (φ : T ⟶ Z) :
+    φ ≫ hf.lift g hg = hf.lift (φ ≫ g)
+      (subset_trans (by rintro _ ⟨x, rfl⟩; exact ⟨_, rfl⟩) hg) := by
+  have := hf.mono
+  rw [← cancel_mono f, Category.assoc, lift_comp, lift_comp]
+
 end
 
 end TopCat
@@ -97,6 +110,12 @@ def openImmersions : MorphismProperty (GeneratedByTopCat.{v} X) :=
 lemma openImmersions.of_isIso {Y Z : GeneratedByTopCat.{v} X} (f : Y ⟶ Z) [IsIso f] :
     openImmersions f :=
   TopCat.openImmersions.of_isIso _
+
+lemma openImmersions.mono {Y₁ Y₂ : GeneratedByTopCat.{v} X} {f : Y₁ ⟶ Y₂} (hf : openImmersions f) :
+    Mono f where
+  right_cancellation g₁ g₂ h := by
+    ext x
+    exact hf.injective (ConcreteCategory.congr_hom h x)
 
 instance :
     (openImmersions.{v} (X := X)).IsMultiplicative := by
@@ -117,6 +136,22 @@ noncomputable def openImmersions.lift : Z ⟶ Y₁ := TopCat.openImmersions.lift
 @[reassoc (attr := simp)]
 lemma openImmersions.lift_comp : hf.lift g hg ≫ f = g :=
   TopCat.openImmersions.lift_comp hf g hg
+
+include hf hg in
+lemma openImmersions.exists_lift : ∃ (l : Z ⟶ Y₁), l ≫ f = g :=
+  ⟨hf.lift g hg, by simp⟩
+
+@[reassoc]
+lemma openImmersions.comp_lift {T : GeneratedByTopCat.{v} X} (φ : T ⟶ Z) :
+    φ ≫ hf.lift g hg = hf.lift (φ ≫ g)
+      (subset_trans (by rintro _ ⟨x, rfl⟩; exact ⟨_, rfl⟩) hg) :=
+  TopCat.openImmersions.comp_lift _ _ _ _
+
+@[reassoc (attr := simp)]
+lemma openImmersions.lift_comp_self (g : Z ⟶ Y₁) :
+    hf.lift (g ≫ f) (by rintro _ ⟨x, rfl⟩; exact ⟨_, rfl⟩) = g := by
+  have := hf.mono
+  rw [← cancel_mono f, lift_comp]
 
 end
 
