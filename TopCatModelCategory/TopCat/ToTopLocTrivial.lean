@@ -132,14 +132,16 @@ lemma trivialBundlesWithFiber_overLocally_of_isPushout'
   obtain (⟨a₀, rfl⟩ | ⟨k, rfl, hk⟩) := Types.eq_or_eq_of_isPushout'
     (sq.map (DeltaGenerated'.toTopCat ⋙ forget _)) a
   · obtain ⟨V₀, i, hi, ha₀, hi'⟩ := h₂ a₀
-    obtain ⟨V, hV₂, hV₃⟩ : ∃ (V : TopologicalSpace.Opens B), X₂.hom ⁻¹' V.1 = Set.range i.left ∧
-        X₃.hom ⁻¹' V.1 ⊆ Set.range j := by
-      sorry
+    obtain ⟨V, V₁, V₂, V₃, hV₂, hV₂', hV₁, hV₃, hV₃'⟩ :
+      ∃ (V : TopologicalSpace.Opens B) (V₁ : TopologicalSpace.Opens X₁.left)
+        (V₂ : TopologicalSpace.Opens X₂.left) (V₃ : TopologicalSpace.Opens U),
+        V₂.1 = Set.range i.left ∧ X₂.hom ⁻¹' V.1 = V₂.1 ∧ t.left ⁻¹' V₂.1 = V₁.1 ∧
+        V₃.1 = ρ ⁻¹' V₁.1 ∧ X₃.hom ⁻¹' V.1 = Set.image j V₃.1 := sorry
     let W : Over B := Over.mk (Y := .of V) (TopCat.ofHom ⟨_, continuous_subtype_val⟩)
     have hW : openImmersions W.hom := V.isOpen.isOpenEmbedding_subtypeVal
     have := hW.preservesColimitsOfShape_overPullback (J := WalkingSpan)
     refine ⟨W, Over.homMk W.hom, hW, ?_, ?_⟩
-    · rw [← hV₂] at ha₀
+    · rw [← hV₂, ← hV₂'] at ha₀
       dsimp [W] at ha₀ ⊢
       simp only [Set.mem_range, Subtype.exists]
       simp only [Set.mem_preimage, SetLike.mem_coe] at ha₀
@@ -148,41 +150,40 @@ lemma trivialBundlesWithFiber_overLocally_of_isPushout'
       let b : X₃ ⟶ Over.mk (𝟙 B) := Over.homMk X₃.hom
       have sq : IsPushout t l r b := by rwa [Over.isPushout_iff_forget]
       have : IsSplitMono ((CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom).map l).left := by
-        obtain ⟨φ, hφ⟩ := hj.exists_lift (pullback.fst X₃.hom W.hom) (by
-          refine subset_trans ?_ hV₃
-          rw [← Set.image_subset_iff, ← Set.image_univ, ← Set.image_comp]
-          erw [← CategoryTheory.hom_comp]
-          rw [pullback.condition]
-          rintro _ ⟨a, _, rfl⟩
-          exact (pullback.snd X₃.hom W.hom a).prop)
-        refine ⟨⟨{
-          retraction := by
-            dsimp
-            exact pullback.lift (φ ≫ ρ) sorry sorry
-          id := by
-            have := hj.mono
-            dsimp
-            ext : 1
-            · dsimp
-              simp only [Category.assoc, limit.lift_π, PullbackCone.mk_pt, PullbackCone.mk_π_app,
-                Category.id_comp]
-              trans (pullback.fst X₁.hom W.hom ≫ l') ≫ ρ
-              · rw [← Category.assoc]
-                congr 1
-                simp only [← cancel_mono j, Category.assoc, hφ, pullback.lift_fst, fac]
-              · simp [fac']
-            · simp
-              sorry
-        }⟩⟩
+        sorry
+      have : PreservesColimit (span t l)
+        ((CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom) ⋙
+          CategoryTheory.Over.pullback p) := by
+        let W' := (CategoryTheory.Over.pullback p).obj W
+        have hW' : openImmersions W'.hom :=
+          MorphismProperty.of_isPullback (IsPullback.of_hasPullback _ _) hW
+        have := hW'.preservesColimitsOfShape_overPullback (J := WalkingSpan)
+        have e : (CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom) ⋙
+          CategoryTheory.Over.pullback p ≅
+            CategoryTheory.Over.pullback p ⋙ CategoryTheory.Over.pullback W'.hom ⋙
+              Over.map W'.hom :=
+          Functor.associator _ _ _ ≪≫
+            Functor.isoWhiskerLeft _
+              (Over.mapCompPullbackIsoOfIsPullback (IsPullback.of_hasPullback W.hom p).flip) ≪≫
+              (Functor.associator _ _ _).symm ≪≫ Functor.isoWhiskerRight
+                ((Over.pullbackComp _ _).symm ≪≫ eqToIso (by
+                  congr 1; exact pullback.condition) ≪≫ Over.pullbackComp _ _) _ ≪≫
+                Functor.associator _ _ _
+        exact preservesColimit_of_natIso _ e.symm
       have : PreservesColimit
-        (span ((CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom).map t)
-          ((CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom).map l))
-        (CategoryTheory.Over.pullback p) := sorry
+          (span t l ⋙ (CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom))
+          (CategoryTheory.Over.pullback p) :=
+        preservesColimits_comp_of_hasColimit (span t l) _ _
+      have : PreservesColimit
+          (span ((CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom).map t)
+            ((CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom).map l))
+          (CategoryTheory.Over.pullback p) :=
+        preservesColimit_of_iso_diagram _ (spanCompIso _ t l)
       have := TrivialBundleWithFiberOver.nonempty_of_isPushout_of_isSplitMono
         (sq.map (Over.pullback W.hom ⋙ Over.map W.hom)) p (F := F) (Nonempty.some (by
           rw [← Over.nonempty_over_trivialBundlesWithFiber_iff, ← objectPropertyOver_iff]
           refine ObjectProperty.of_precomp _ (Over.homMk (hi.lift (pullback.fst _ _) ?_) ?_) hi'
-          · rw [← hV₂]
+          · rw [← hV₂, ← hV₂']
             rintro _ ⟨b, rfl⟩
             dsimp at b ⊢
             simp only [Set.mem_preimage, SetLike.mem_coe]

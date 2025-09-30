@@ -57,6 +57,37 @@ noncomputable def pullbackCompForgetOfIsPullback :
   NatIso.ofComponents (fun Z ↦
     ((IsPullback.of_hasPullback Z.hom l).paste_vert sq.flip).isoPullback)
 
+@[reassoc]
+lemma pullbackCompForgetOfIsPullback_inv_app_comp_pullback_snd (Z : Over B') :
+    (pullbackCompForgetOfIsPullback sq).inv.app Z ≫ pullback.snd Z.hom l =
+      sq.lift (pullback.snd _ _) (pullback.fst _ _ ≫ Z.hom) (by simp [pullback.condition]) := by
+  apply sq.hom_ext
+  · simp [pullbackCompForgetOfIsPullback]
+  · simp [pullbackCompForgetOfIsPullback, ← pullback.condition,
+      IsPullback.isoPullback_inv_fst_assoc]
+
+@[reassoc (attr := simp)]
+lemma pullbackCompForgetOfIsPullback_inv_app_comp_pullback_snd_comp (X : Over B') :
+    (pullbackCompForgetOfIsPullback sq).inv.app X ≫ pullback.snd X.hom l ≫ t =
+      pullback.snd _ _ := by
+  simp [pullbackCompForgetOfIsPullback]
+
+@[reassoc (attr := simp)]
+lemma pullbackCompForgetOfIsPullback_inv_app_comp_pullback_fst (X : Over B') :
+    (pullbackCompForgetOfIsPullback sq).inv.app X ≫ pullback.fst X.hom l = pullback.fst _ _ := by
+  simp [pullbackCompForgetOfIsPullback]
+
+noncomputable def mapCompPullbackIsoOfIsPullback :
+      Over.map b ⋙ Over.pullback r ≅ Over.pullback l ⋙ Over.map t :=
+  NatIso.ofComponents (fun X ↦
+    Over.isoMk ((pullbackCompForgetOfIsPullback sq).symm.app X)) (fun f ↦ by
+      dsimp
+      ext
+      dsimp
+      ext
+      · simp
+      · apply sq.hom_ext <;> simp [pullbackCompForgetOfIsPullback_inv_app_comp_pullback_snd])
+
 end
 
 lemma isPullback_map_left {B' B : C} (b : B' ⟶ B) {X Y : Over B} (f : X ⟶ Y) :
