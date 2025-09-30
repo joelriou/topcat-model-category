@@ -116,7 +116,7 @@ lemma DeltaGenerated'.isEmpty_of_isInitial {X : DeltaGenerated'.{u}}
 
 namespace DeltaGenerated'
 
-set_option maxHeartbeats 600000 in
+set_option maxHeartbeats 800000 in
 lemma trivialBundlesWithFiber_overLocally_of_isPushout'
     {E B F : DeltaGenerated'.{u}} {X₁ X₂ X₃ : Over B} {t : X₁ ⟶ X₂}
     {l : X₁ ⟶ X₃} (sq : IsPushout t.left l.left X₂.hom X₃.hom)
@@ -129,6 +129,10 @@ lemma trivialBundlesWithFiber_overLocally_of_isPushout'
     ((trivialBundlesWithFiber F).objectPropertyOver p).overLocally grothendieckTopology
       (Over.mk (𝟙 B)) := by
   rw [objectProprertyOverLocally_iff] at h₂ ⊢
+  have fac_apply (x₁ : X₁.left) : j (l' x₁) = l.left x₁ :=
+    ConcreteCategory.congr_hom fac x₁
+  have fac'_apply (x₁ : X₁.left) : ρ (l' x₁) = x₁ :=
+    ConcreteCategory.congr_hom fac' x₁
   intro a
   obtain (⟨a₀, rfl⟩ | ⟨k, rfl, hk⟩) := Types.eq_or_eq_of_isPushout'
     (sq.map (DeltaGenerated'.toTopCat ⋙ forget _)) a
@@ -137,7 +141,91 @@ lemma trivialBundlesWithFiber_overLocally_of_isPushout'
       ∃ (V : TopologicalSpace.Opens B) (V₁ : TopologicalSpace.Opens X₁.left)
         (V₂ : TopologicalSpace.Opens X₂.left) (V₃ : TopologicalSpace.Opens U),
         V₂.1 = Set.range i.left ∧ X₂.hom ⁻¹' V.1 = V₂.1 ∧ t.left ⁻¹' V₂.1 = V₁.1 ∧
-        V₃.1 = ρ ⁻¹' V₁.1 ∧ X₃.hom ⁻¹' V.1 = Set.image j V₃.1 := sorry
+        V₃.1 = ρ ⁻¹' V₁.1 ∧ X₃.hom ⁻¹' V.1 = Set.image j V₃.1 := by
+      let V₂ : Set X₂.left := Set.range i.left
+      let V₁ : Set X₁.left := t.left ⁻¹' V₂
+      let V₃ : Set U := ρ ⁻¹' V₁
+      let V₃' : Set X₃.left := j '' V₃
+      let V : Set B := X₂.hom '' V₂ ⊔ X₃.hom '' V₃'
+      have hV₂ : IsOpen V₂ := hi.isOpen_range
+      have hV₁ : IsOpen V₁ := Continuous.isOpen_preimage (by continuity) V₂ hV₂
+      have hV₃ : IsOpen V₃ := Continuous.isOpen_preimage (by continuity) V₁ hV₁
+      have hV₃' : IsOpen V₃' := hj.isOpen_iff_image_isOpen.1 hV₃
+      have hr : Function.Injective X₂.hom := (MorphismProperty.of_isPushout (sq.map toTopCat) hl).injective
+      have h₂ : X₂.hom ⁻¹' V = V₂ := by
+        ext x₂
+        dsimp at x₂
+        simp only [Functor.id_obj, Functor.const_obj_obj, Set.sup_eq_union, Set.preimage_union,
+          Set.mem_union, Set.mem_preimage, Set.mem_image, V]
+        constructor
+        · rintro (⟨y₂, h, h'⟩ | ⟨_, ⟨z, hz, rfl⟩, h'⟩)
+          · obtain rfl : y₂ = x₂ := hr h'
+            exact h
+          · obtain ⟨(x₁ : X₁.left), hx₁, rfl⟩ := Types.exists_of_inl_eq_inr_of_isPushout
+              (sq.flip.map (toTopCat ⋙ forget _)) hl.injective (j z) x₂ h'
+            dsimp at x₁ h' hx₁ ⊢
+            dsimp [V₃, V₁] at hz
+            simp only [Set.mem_preimage] at hz
+            convert hz
+            rw [← fac'_apply x₁]
+            congr 1
+            apply hj.injective
+            dsimp
+            rw [← hx₁, fac_apply]
+            rfl
+        · intro hx₂
+          exact Or.inl ⟨_, hx₂, rfl⟩
+      have h₃ : X₃.hom ⁻¹' V = V₃' := by
+        ext (x₃ : X₃.left)
+        simp [V, V₃']
+        constructor
+        · intro h₁
+          by_cases h₃ : X₃.hom x₃ ∈ Set.range X₂.hom
+          · obtain ⟨x₂, h⟩ := h₃
+            obtain ⟨x₁, rfl, rfl⟩ := Types.exists_of_inl_eq_inr_of_isPushout
+              (sq.flip.map (toTopCat ⋙ forget _)) hl.injective x₃ x₂ h.symm
+            refine ⟨l' x₁, ?_, fac_apply x₁⟩
+            simp [V₃, V₁]
+            rw [fac'_apply x₁]
+            obtain (⟨x₂, h, h'⟩ | ⟨u, hu, hx₃⟩) := h₁
+            · convert h
+              apply hr
+              dsimp
+              rw [h']
+              exact congr_fun ((forget _).congr_map sq.w) x₁
+            · dsimp at hx₃
+              erw [← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply,
+                ← sq.w, ConcreteCategory.comp_apply, ConcreteCategory.comp_apply] at hx₃
+              obtain ⟨y₁, hy₁, hy₁'⟩ := Types.exists_of_inl_eq_inr_of_isPushout
+                (sq.flip.map (toTopCat ⋙ forget _)) hl.injective _ _ hx₃
+              obtain rfl : u = l' y₁ := hj.injective (by
+                rw [← hy₁]
+                dsimp
+                rw [fac_apply]
+                rfl)
+              rw [← hy₁']
+              simpa [V₁, V₃, fac'_apply] using hu
+          · obtain (⟨x₂, h, h'⟩ | ⟨u, hu, hx₃⟩) := h₁
+            · exact (h₃ ⟨_, h'⟩).elim
+            · refine ⟨_, hu, ?_⟩
+              obtain h | ⟨_, y₀, _, rfl, _⟩ :=
+                (Types.pushoutCocone_inl_eq_inl_iff_of_isColimit
+                  (sq.flip.map (toTopCat ⋙ forget _)).isColimit hl.injective _ _).1 hx₃
+              · exact h
+              · exfalso
+                apply h₃
+                dsimp
+                erw [← ConcreteCategory.comp_apply, ← sq.w, ConcreteCategory.comp_apply]
+                exact ⟨_, rfl⟩
+        · rintro ⟨u, hu, rfl⟩
+          exact Or.inr ⟨u, hu, rfl⟩
+      refine ⟨⟨V, ?_⟩, ⟨V₁, hV₁⟩, ⟨V₂, hV₂⟩, ⟨V₃, hV₃⟩, rfl, h₂, rfl, rfl, h₃⟩
+      rw [TopCat.isOpen_iff_of_isPushout (sq.map toTopCat)]
+      constructor
+      · erw [h₂]
+        exact hV₂
+      · erw [h₃]
+        exact hV₃'
     let W : Over B := Over.mk (Y := .of V) (TopCat.ofHom ⟨_, continuous_subtype_val⟩)
     have hW : openImmersions W.hom := V.isOpen.isOpenEmbedding_subtypeVal
     have := hW.preservesColimitsOfShape_overPullback (J := WalkingSpan)
@@ -159,7 +247,7 @@ lemma trivialBundlesWithFiber_overLocally_of_isPushout'
           TopCat.ofHom ⟨_, continuous_subtype_val⟩ ≫ l.left
         obtain ⟨φ, hφ⟩ := hk.exists_lift α (by
             rintro _ ⟨a, rfl⟩
-            refine ⟨⟨l' a.1, ?_⟩, ConcreteCategory.congr_hom fac a.1⟩
+            refine ⟨⟨l' a.1, ?_⟩, fac_apply a.1⟩
             change l' a.1 ∈ V₃.carrier
             rw [hV₃]
             have : ρ (l' a.1) = a.1 := ConcreteCategory.congr_hom fac' a.1
@@ -176,9 +264,7 @@ lemma trivialBundlesWithFiber_overLocally_of_isPushout'
               simp only [hφ, α, ← fac]
               rfl)
             change ρ (φ ⟨v, hv⟩).1 = v
-            rw [this]
-            exact ConcreteCategory.congr_hom fac' v
-            }⟩⟩
+            rw [this, fac'_apply] }⟩⟩
         let ιV₁ : GeneratedByTopCat.of V₁ ⟶ X₁.left := TopCat.ofHom ⟨_, continuous_subtype_val⟩
         let pV₁ : GeneratedByTopCat.of V₁ ⟶ W.left :=
           TopCat.ofHom ⟨fun ⟨v, (hv : v ∈ V₁.carrier)⟩ ↦ ⟨X₁.hom v, by

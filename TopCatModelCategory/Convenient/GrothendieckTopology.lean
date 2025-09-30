@@ -163,6 +163,11 @@ lemma openImmersions.mono {Y₁ Y₂ : GeneratedByTopCat.{v} X} {f : Y₁ ⟶ Y�
     ext x
     exact hf.injective (ConcreteCategory.congr_hom h x)
 
+nonrec lemma openImmersions.injective
+    {Y₁ Y₂ : GeneratedByTopCat.{v} X} {f : Y₁ ⟶ Y₂} (hf : openImmersions f) :
+    Function.Injective f :=
+  hf.injective
+
 instance :
     (openImmersions.{v} (X := X)).IsMultiplicative := by
   dsimp only [openImmersions]
