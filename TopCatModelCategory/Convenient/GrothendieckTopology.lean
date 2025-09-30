@@ -100,6 +100,52 @@ lemma openImmersions.comp_lift {T : TopCat.{v}} (φ : T ⟶ Z) :
 
 end
 
+lemma openImmersions.isPullback {X₁ X₂ X₃ X₄ : TopCat.{v}}
+    {t : X₁ ⟶ X₂} {l : X₁ ⟶ X₃} {r : X₂ ⟶ X₄} {b : X₃ ⟶ X₄}
+    (ht : openImmersions t) (hb : openImmersions b) (w : t ≫ r = l ≫ b)
+    (h : r ⁻¹' (Set.range b) ⊆ Set.range t) : IsPullback t l r b := by
+  have : Set.range t = Set.range (pullback.fst r b) := by
+    ext x₂
+    constructor
+    · rintro ⟨x₁, rfl⟩
+      refine ⟨pullback.lift t l w x₁, ?_⟩
+      rw [← ConcreteCategory.comp_apply, pullback.lift_fst]
+    · rintro ⟨x, rfl⟩
+      refine h ⟨pullback.snd r b x, ?_⟩
+      rw [← ConcreteCategory.comp_apply, ← pullback.condition, ConcreteCategory.comp_apply]
+  let e' : Set.range t ≃ₜ Set.range (pullback.fst r b) :=
+    { toFun x := ⟨x.1, by rw [← this]; exact x.2⟩
+      invFun x := ⟨x.1, by rw [this]; exact x.2⟩
+      left_inv _ := rfl
+      right_inv _ := rfl }
+  have ht' : openImmersions (pullback.fst r b) :=
+    MorphismProperty.of_isPullback (IsPullback.of_hasPullback r b).flip hb
+  let e : X₁ ≅ pullback r b :=
+    isoOfHomeo (ht.homeoRange.trans (e'.trans ht'.homeoRange.symm))
+  have he₁ : e.hom ≫ pullback.fst _ _ = t := by
+    ext x
+    obtain ⟨⟨x, hx⟩, rfl⟩ := ht.homeoRange.symm.surjective x
+    simp [e, e']
+  have he₂ : e.hom ≫ pullback.snd _ _ = l := by
+    ext x
+    obtain ⟨⟨y, z, hz⟩, hz'⟩ := ht.homeoRange.symm.surjective x
+    obtain rfl : x = z := by
+      simp only [← hz', ← hz]
+      exact ht.homeoRange.symm_apply_apply z
+    dsimp [e, e']
+    change pullback.snd r b _ = _
+    apply hb.injective
+    rw [← ConcreteCategory.comp_apply, ← pullback.condition,
+      ← ConcreteCategory.comp_apply, ← w, ConcreteCategory.comp_apply,
+      ConcreteCategory.comp_apply]
+    congr 1
+    exact ConcreteCategory.congr_hom he₁ x
+  have sq := IsPullback.of_hasPullback r b
+  refine (IsPullback.of_hasPullback r b).of_iso e.symm
+    (Iso.refl _) (Iso.refl _) (Iso.refl _) ?_ ?_ (by simp) (by simp)
+  · simp [← cancel_epi e.hom, he₁]
+  · simp [← cancel_epi e.hom, he₂]
+
 end TopCat
 
 namespace GeneratedByTopCat
@@ -154,6 +200,16 @@ lemma openImmersions.lift_comp_self (g : Z ⟶ Y₁) :
   rw [← cancel_mono f, lift_comp]
 
 end
+
+lemma openImmersions.isPullback {X₁ X₂ X₃ X₄ : GeneratedByTopCat.{v} X}
+    {t : X₁ ⟶ X₂} {l : X₁ ⟶ X₃} {r : X₂ ⟶ X₄} {b : X₃ ⟶ X₄}
+    (ht : openImmersions t) (hb : openImmersions b)
+    (w : t ≫ r = l ≫ b)
+    (h : r ⁻¹' (Set.range b) ⊆ Set.range t) : IsPullback t l r b where
+  isLimit' := ⟨isLimitOfReflects toTopCat
+    ((PullbackCone.isLimitMapConeEquiv ..).2
+      (IsPullback.isLimit (TopCat.openImmersions.isPullback ht hb
+        (toTopCat.map_injective w) h)))⟩
 
 section
 

@@ -116,6 +116,7 @@ lemma DeltaGenerated'.isEmpty_of_isInitial {X : DeltaGenerated'.{u}}
 
 namespace DeltaGenerated'
 
+set_option maxHeartbeats 600000 in
 lemma trivialBundlesWithFiber_overLocally_of_isPushout'
     {E B F : DeltaGenerated'.{u}} {X₁ X₂ X₃ : Over B} {t : X₁ ⟶ X₂}
     {l : X₁ ⟶ X₃} (sq : IsPushout t.left l.left X₂.hom X₃.hom)
@@ -150,7 +151,95 @@ lemma trivialBundlesWithFiber_overLocally_of_isPushout'
       let b : X₃ ⟶ Over.mk (𝟙 B) := Over.homMk X₃.hom
       have sq : IsPushout t l r b := by rwa [Over.isPushout_iff_forget]
       have : IsSplitMono ((CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom).map l).left := by
-        sorry
+        let k : (GeneratedByTopCat.of V₃ : DeltaGenerated') ⟶ X₃.left :=
+          TopCat.ofHom ⟨_, continuous_subtype_val⟩ ≫ j
+        have hk : openImmersions k :=
+          MorphismProperty.comp_mem _ _ _ (V₃.isOpen.isOpenEmbedding_subtypeVal) hj
+        let α : (GeneratedByTopCat.of V₁ : DeltaGenerated') ⟶ X₃.left :=
+          TopCat.ofHom ⟨_, continuous_subtype_val⟩ ≫ l.left
+        obtain ⟨φ, hφ⟩ := hk.exists_lift α (by
+            rintro _ ⟨a, rfl⟩
+            refine ⟨⟨l' a.1, ?_⟩, ConcreteCategory.congr_hom fac a.1⟩
+            change l' a.1 ∈ V₃.carrier
+            rw [hV₃]
+            have : ρ (l' a.1) = a.1 := ConcreteCategory.congr_hom fac' a.1
+            simp only [TopologicalSpace.Opens.carrier_eq_coe, Set.mem_preimage, SetLike.mem_coe,
+              this, SetLike.coe_mem])
+        have : IsSplitMono φ := ⟨⟨{
+          retraction := TopCat.ofHom ⟨fun x ↦ ⟨ρ x.1, by
+            obtain ⟨x, (hx : x ∈ V₃.carrier)⟩ := x
+            rwa [hV₃] at hx⟩, by continuity⟩
+          id := by
+            ext ⟨v, hv⟩ : 3
+            have : (φ ⟨v, hv⟩).1 = l' v := hj.injective (by
+              change (φ ≫ k) ⟨v, hv⟩ = _
+              simp only [hφ, α, ← fac]
+              rfl)
+            change ρ (φ ⟨v, hv⟩).1 = v
+            rw [this]
+            exact ConcreteCategory.congr_hom fac' v
+            }⟩⟩
+        let ιV₁ : GeneratedByTopCat.of V₁ ⟶ X₁.left := TopCat.ofHom ⟨_, continuous_subtype_val⟩
+        let pV₁ : GeneratedByTopCat.of V₁ ⟶ W.left :=
+          TopCat.ofHom ⟨fun ⟨v, (hv : v ∈ V₁.carrier)⟩ ↦ ⟨X₁.hom v, by
+            rw [← hV₁, ← hV₂', ← Set.preimage_comp] at hv
+            dsimp at hv
+            rwa [← CategoryTheory.hom_comp, Over.w t] at hv⟩, by continuity⟩
+        let ιV₃ : GeneratedByTopCat.of V₃ ⟶ X₃.left :=
+          TopCat.ofHom ⟨_, continuous_subtype_val⟩ ≫ j
+        let pV₃ : GeneratedByTopCat.of V₃ ⟶ W.left :=
+          TopCat.ofHom ⟨fun ⟨v, hv⟩ ↦ ⟨X₃.hom (j v), by
+            dsimp
+            erw [← Set.mem_preimage, hV₃']
+            exact Set.mem_image_of_mem _ hv⟩, by continuity⟩
+        have facι : ιV₁ ≫ l.left = φ ≫ ιV₃ := hφ.symm
+        have facp : pV₁ = φ ≫ pV₃ := by
+          ext ⟨x, hx⟩
+          rw [Subtype.ext_iff]
+          dsimp [pV₁, pV₃]
+          change X₁.hom x = X₃.hom ((φ ≫ k) ⟨x, hx⟩)
+          rw [hφ, ← Over.w l]
+          rfl
+        have sq₁ : IsPullback ιV₁ pV₁ X₁.hom W.hom := by
+          apply openImmersions.isPullback
+          · exact V₁.isOpen.isOpenEmbedding_subtypeVal
+          · exact hW
+          · rfl
+          · rintro x hx
+            simp only [Functor.const_obj_obj, Set.mem_preimage, Set.mem_range] at hx
+            obtain ⟨y, hy⟩ := hx
+            refine ⟨⟨x, ?_⟩, rfl⟩
+            change x ∈ V₁.1
+            rw [← hV₁, ← hV₂', ← Set.preimage_comp]
+            dsimp
+            rw [← CategoryTheory.hom_comp, Over.w t]
+            simp only [Set.mem_preimage, SetLike.mem_coe]
+            rw [← hy]
+            exact y.2
+        have sq₃ : IsPullback ιV₃ pV₃ X₃.hom W.hom := by
+          apply openImmersions.isPullback
+          · exact MorphismProperty.comp_mem _ _ _ (V₃.isOpen.isOpenEmbedding_subtypeVal) hj
+          · exact hW
+          · rfl
+          · rintro x ⟨y, hy⟩
+            have hx : x ∈ j '' V₃ := by
+              dsimp at hV₃'
+              rw [← hV₃']
+              simp only [Set.mem_preimage, SetLike.mem_coe]
+              erw [← hy]
+              exact y.2
+            obtain ⟨z, hz, rfl⟩ := hx
+            exact ⟨⟨z, hz⟩, rfl⟩
+        let e₁ : GeneratedByTopCat.of V₁ ≅ pullback X₁.hom W.hom := sq₁.isoPullback
+        let e₃ : GeneratedByTopCat.of V₃ ≅ pullback X₃.hom W.hom := sq₃.isoPullback
+        have : ((CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom).map l).left =
+            e₁.inv ≫ φ ≫ e₃.hom := by
+          rw [← cancel_epi e₁.hom, e₁.hom_inv_id_assoc]
+          apply pullback.hom_ext
+          · simp [e₁, e₃, facι]
+          · simp [e₁, e₃, facp]
+        rw [this]
+        infer_instance
       have : PreservesColimit (span t l)
         ((CategoryTheory.Over.pullback W.hom ⋙ Over.map W.hom) ⋙
           CategoryTheory.Over.pullback p) := by

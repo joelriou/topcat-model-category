@@ -23,6 +23,14 @@ noncomputable def Topology.IsOpenEmbedding.homeoRange {X Y : Type*} [Topological
       bijective :=
         ⟨fun _ _ h ↦ hf.injective (by rwa [Subtype.ext_iff] at h), fun x ↦ by aesop⟩ }
 
+@[simp]
+noncomputable def Topology.IsOpenEmbedding.apply_homeoRange_symm {X Y : Type*} [TopologicalSpace X]
+    [TopologicalSpace Y] {f : X → Y} (hf : IsOpenEmbedding f) (x : Set.range f) :
+    f (hf.homeoRange.symm x) = x.1 := by
+  obtain ⟨x, rfl⟩ := hf.homeoRange.surjective x
+  rw [Homeomorph.symm_apply_apply]
+  rfl
+
 lemma IsOpen.isGeneratedBy [IsGeneratedBy X Y] {U : Set Y} (hU : IsOpen U) :
     IsGeneratedBy X U := by
   let α := Σ (i : ι), C(X i, Y)
