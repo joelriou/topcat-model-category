@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joël Riou
 -/
 import Mathlib.Topology.ContinuousMap.Basic
+import Mathlib.Topology.Homeomorph.Lemmas
 
 /-!
 # The `X`-generated topology for a family of topological spaces
@@ -212,6 +213,9 @@ lemma IsQuotientMap.isGeneratedBy {f : Y → Z} (hf : IsQuotientMap f) [IsGenera
     rw [← hf.isOpen_preimage, IsGeneratedBy.isOpen_iff X]
     intro i g
     exact hU ⟨f ∘ g, hf.continuous.comp g.continuous⟩
+
+instance [IsGeneratedBy X Y] : IsGeneratedBy X (ULift.{v'} Y) :=
+  Homeomorph.ulift.symm.isQuotientMap.isGeneratedBy
 
 end Topology
 

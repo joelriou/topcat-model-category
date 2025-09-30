@@ -437,7 +437,8 @@ variable {E B : SSet.{u}} {p : E ⟶ B} {F : SSet.{u}}
 
 namespace MinimalFibrationLocTrivial
 
-include τ  in
+open SimplexCategory.Hyperplane in
+include τ in
 lemma isLocTrivial {Z : SSet.{u}} [IsFinite Z] (a : Z ⟶ B) :
    ((trivialBundlesWithFiber (toDeltaGenerated.obj F)).objectPropertyOver
     (toDeltaGenerated.map p)).overLocally grothendieckTopology
@@ -482,17 +483,30 @@ lemma isLocTrivial {Z : SSet.{u}} [IsFinite Z] (a : Z ⟶ B) :
         preservesColimit_of_reflects_of_preserves _ (Over.forget _)
     refine DeltaGenerated'.trivialBundlesWithFiber_overLocally_of_isPushout
       (sq'.map (Over.post toDeltaGenerated)) (closedEmbeddings_toObj_map_of_mono _) _ (h₀ _) ?_
-      (U := ?_) ?_ ?_ ?_ ?_ ?_ ?_
+      (U := .of (ULift.{u} (stdSimplex.barycenterCompl n))) ?_ ?_ ?_ ?_ ?_ ?_
     · rw [objectPropertyOver_iff,
         Over.nonempty_over_trivialBundlesWithFiber_iff]
       exact ⟨(τ (j ≫ a)).map (SSet.toDeltaGenerated)⟩
-    · sorry
-    · sorry
-    · sorry
-    · sorry
-    · sorry
-    · sorry
-    · sorry
+    · exact TopCat.ofHom
+        (ContinuousMap.comp (ContinuousMap.comp
+          (ContinuousMap.comp ⟨_, ⦋n⦌.toTopHomeo.symm.continuous⟩
+        ⟨_, (stdSimplexHomeo n).continuous⟩) (stdSimplex.ιBarycenterCompl n))
+          ⟨_, Homeomorph.ulift.continuous⟩)
+    · exact ⦋n⦌.toTopHomeo.symm.isOpenEmbedding.comp
+        ((stdSimplexHomeo _).isOpenEmbedding.comp
+        ((stdSimplex.isOpenEmbedding_ιBarycenterCompl _).comp Homeomorph.ulift.isOpenEmbedding))
+    · exact TopCat.ofHom (ContinuousMap.comp ⟨_, Homeomorph.ulift.symm.continuous⟩
+        ((stdSimplex.boundaryToBarycenterCompl n).comp
+        ⟨_, (stdSimplex.boundaryHomeo.{u} n).symm.continuous⟩))
+    · ext x
+      exact stdSimplex.boundaryHomeo_compatibility _ _
+    · exact TopCat.ofHom (ContinuousMap.comp ⟨_, (stdSimplex.boundaryHomeo n).continuous⟩
+        ((stdSimplex.boundaryRetraction n).comp ⟨_, Homeomorph.ulift.continuous⟩))
+    · ext x
+      change (stdSimplex.boundaryHomeo n)
+        (stdSimplex.boundaryRetraction n
+          (stdSimplex.boundaryToBarycenterCompl n ((stdSimplex.boundaryHomeo n).symm x))) = x
+      simp
 
 end MinimalFibrationLocTrivial
 
