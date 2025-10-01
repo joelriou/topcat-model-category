@@ -1,24 +1,14 @@
+import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
 import TopCatModelCategory.Convenient.DeltaGenerated
 import TopCatModelCategory.Convenient.Colimits
 import TopCatModelCategory.Convenient.Open
 import TopCatModelCategory.ToTopObjHomeo
+import TopCatModelCategory.Homeomorph
 import TopCatModelCategory.ConvexCompact
 
 universe u
 
 open CategoryTheory Limits Topology Simplicial NormedSpace
-
-@[simps]
-def Equiv.ofSetEq {X : Type*} {S T : Set X} (h : S = T) : S ≃ T where
-  toFun x := ⟨x.1, by simpa only [h] using x.2⟩
-  invFun x := ⟨x.1, by simpa only [← h] using x.2⟩
-
-@[simps!]
-def Homeomorph.ofSetEq {X : Type*} [TopologicalSpace X] {S T : Set X} (h : S = T) :
-    S ≃ₜ T where
-  toEquiv := .ofSetEq h
-  continuous_toFun := by subst h; exact continuous_id
-  continuous_invFun := by subst h; exact continuous_id
 
 namespace SimplexCategory
 
@@ -138,14 +128,16 @@ instance : IsEmpty |(∂Δ[0] : SSet.{u})| := by
   simp only [SSet.boundary_zero]
   infer_instance
 
-def boundaryHomeo : boundary n ≃ₜ (|∂Δ[n]| : Type u) := by
+noncomputable def boundaryHomeo : boundary n ≃ₜ (|∂Δ[n]| : Type u) := by
   obtain _ | n := n
   · exact
       { toFun x := by exfalso; exact IsEmpty.false x
         invFun x := by exfalso; exact IsEmpty.false x
         left_inv _ := by subsingleton
         right_inv _ := by subsingleton }
-  · sorry
+  · refine Homeomorph.trans ?_
+      (SSet.boundary.t₁Inclusions_toTop_map_ι.{u} (n + 1)).homeomorphRange.symm
+    sorry
 
 lemma boundary_subset_barycenterCompl : boundary n ⊆ barycenterCompl n := by
   rintro x ⟨hx, i, hi⟩

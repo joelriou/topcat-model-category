@@ -31,6 +31,7 @@ import TopCatModelCategory.FunctorCategoryColimits
 import TopCatModelCategory.FunctorCategoryLimits
 import TopCatModelCategory.FunctorIterate
 import TopCatModelCategory.HasExactColimitsOfShape
+import TopCatModelCategory.Homeomorph
 import TopCatModelCategory.Homotopy.Basic
 import TopCatModelCategory.II
 import TopCatModelCategory.Interval.Basic
