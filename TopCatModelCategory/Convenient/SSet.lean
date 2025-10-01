@@ -119,6 +119,10 @@ def boundary' : Set (stdSimplex n) :=
 def boundary : Set (Hyperplane n) :=
   stdSimplex n ∩ setOf (fun x ↦ ∃ (i : Fin (n + 1)), (n + 1) • x.1 i + 1 = 0)
 
+lemma zero_notMem_boundary : 0 ∉ boundary n := by
+  intro hx
+  simp [boundary] at hx
+
 @[simps]
 def boundaryHomeoBoundary' : boundary n ≃ₜ boundary' n where
   toFun x := ⟨⟨x.1, x.2.1⟩, x.2.2⟩
@@ -189,10 +193,37 @@ lemma boundaryHomeo_compatibility (x : (|∂Δ[n]| : Type u)) :
   · simp [ιBarycenterCompl, boundaryToBarycenterCompl, boundaryHomeo, Homeomorph.restrict]
     rfl
 
+open retractionBoundaryOfConvexCompact homeoClosedBallOfConvexCompact in
 lemma boundary_eq :
     boundary (n + 1) =
       retractionBoundaryOfConvexCompact.boundary (stdSimplex (n + 1)) := by
-  sorry
+  ext x
+  simp only [mem_boundary_iff]
+  refine ⟨fun hx ↦ le_antisymm ?_ ?_, fun hx ↦ ?_⟩
+  · obtain ⟨hx, i, hi⟩ := hx
+    generalize ht : sup (stdSimplex (n + 1)) x = t
+    have h₁ := (sup_mem_set (Hyperplane.isCompact_stdSimplex (n + 1))
+      (Hyperplane.zero_mem_interior_stdSimplex _) x).2
+    rw [ht, mem_stdSimplex_iff] at h₁
+    replace h₁ := h₁ i
+    simp only [nsmul_eq_mul, Nat.cast_add, Nat.cast_one, SetLike.val_smul, Pi.smul_apply,
+      smul_eq_mul, add_eq_zero_iff_eq_neg'] at hi h₁
+    nth_rw 3 [hi] at h₁
+    simp only [le_add_neg_iff_add_le, zero_add] at h₁
+    rw [mul_le_mul_iff_of_pos_left (by positivity)] at h₁
+    have h₂ : 0 < - x.1 i := by
+      by_contra! h₃
+      have := mul_nonneg (show 0 ≤ (n : ℝ) + 1 + 1 by positivity)
+        (Left.neg_nonpos_iff.1 h₃)
+      grind
+    rwa [← mul_le_iff_le_one_left h₂, mul_neg, neg_le_neg_iff]
+  · rw [homeoClosedBallOfConvexCompact.le_sup_iff
+      (Hyperplane.convex_stdSimplex (n + 1)) (Hyperplane.isCompact_stdSimplex _)
+        (Hyperplane.zero_mem_interior_stdSimplex _) _ _ (by simp)]
+    · simpa only [one_smul] using hx.1
+    · rintro rfl
+      exact zero_notMem_boundary (n + 1) hx
+  · sorry
 
 noncomputable def boundaryRetraction : C(barycenterCompl n, boundary n) := by
   obtain _ | n := n
