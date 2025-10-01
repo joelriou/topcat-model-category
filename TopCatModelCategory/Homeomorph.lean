@@ -12,7 +12,7 @@ def Homeomorph.ofSetEq {X : Type*} [TopologicalSpace X] {S T : Set X} (h : S = T
   continuous_toFun := by subst h; exact continuous_id
   continuous_invFun := by subst h; exact continuous_id
 
-/-@[simps]
+@[simps]
 def Equiv.restrict {X Y : Type*} (e : X ≃ Y) {S : Set X} {T : Set Y}
     (h : e ⁻¹' T = S) :
     S ≃ T where
@@ -26,4 +26,4 @@ def Homeomorph.restrict {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
     S ≃ₜ T where
   toEquiv := e.toEquiv.restrict h
   continuous_toFun := by dsimp [Equiv.restrict]; continuity
-  continuous_invFun := by dsimp [Equiv.restrict]; continuity-/
+  continuous_invFun := by dsimp [Equiv.restrict]; continuity

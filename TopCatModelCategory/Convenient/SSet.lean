@@ -5,6 +5,7 @@ import TopCatModelCategory.Convenient.Open
 import TopCatModelCategory.ToTopObjHomeo
 import TopCatModelCategory.Homeomorph
 import TopCatModelCategory.ConvexCompact
+import TopCatModelCategory.TopCat.ToTopDecomposition
 
 universe u
 
@@ -112,8 +113,16 @@ lemma isOpenEmbedding_ιBarycenterCompl :
 instance : DeltaGeneratedSpace' (barycenterCompl n) :=
   (isOpenEmbedding_ιBarycenterCompl n).isGeneratedBy
 
+def boundary' : Set (stdSimplex n) :=
+  setOf (fun x ↦ ∃ (i : Fin (n + 1)), (n + 1) • x.1.1 i + 1 = 0)
+
 def boundary : Set (Hyperplane n) :=
   stdSimplex n ∩ setOf (fun x ↦ ∃ (i : Fin (n + 1)), (n + 1) • x.1 i + 1 = 0)
+
+@[simps]
+def boundaryHomeoBoundary' : boundary n ≃ₜ boundary' n where
+  toFun x := ⟨⟨x.1, x.2.1⟩, x.2.2⟩
+  invFun x := ⟨x.1.1, x.1.2, x.2⟩
 
 instance : IsEmpty (boundary 0) where
   false := by
@@ -128,6 +137,28 @@ instance : IsEmpty |(∂Δ[0] : SSet.{u})| := by
   simp only [SSet.boundary_zero]
   infer_instance
 
+lemma boundary'_eq_preimage :
+    boundary' n =
+      ((stdSimplexHomeo n).trans ⦋n⦌.toTopHomeo.symm) ⁻¹'
+        Set.range (SSet.toTop.{u}.map ∂Δ[n].ι) := by
+  suffices Set.range (SSet.toTop.{u}.map ∂Δ[n].ι) =
+      (⦋n⦌.toTopHomeo.trans (stdSimplexHomeo n).symm) ⁻¹' boundary' n by aesop
+  ext x
+  obtain ⟨x, rfl⟩ := ⦋n⦌.toTopHomeo.symm.surjective x
+  obtain ⟨⟨⟨x, hx₀⟩, hx⟩, rfl⟩ := (stdSimplexHomeo n).surjective x
+  simp [stdSimplex] at hx
+  rw [← not_iff_not, ← Set.mem_compl_iff, ← stdSimplex.toTopHomeo_mem_interior_iff,
+    Set.mem_preimage, Homeomorph.trans_apply, Homeomorph.apply_symm_apply,
+    Homeomorph.symm_apply_apply]
+  simp [stdSimplex.interior, stdSimplexHomeo, boundary']
+  refine forall_congr' (fun i ↦ ?_)
+  trans 0 < (↑n + 1) * x i + 1
+  · have h : 0 < (n : ℝ) + 1 := by positivity
+    rw [← Subtype.coe_lt_coe]
+    dsimp
+    rw [← mul_pos_iff_of_pos_left h, mul_add, mul_inv_cancel₀ h.ne']
+  · exact LE.le.lt_iff_ne' (hx i)
+
 noncomputable def boundaryHomeo : boundary n ≃ₜ (|∂Δ[n]| : Type u) := by
   obtain _ | n := n
   · exact
@@ -135,9 +166,10 @@ noncomputable def boundaryHomeo : boundary n ≃ₜ (|∂Δ[n]| : Type u) := by
         invFun x := by exfalso; exact IsEmpty.false x
         left_inv _ := by subsingleton
         right_inv _ := by subsingleton }
-  · refine Homeomorph.trans ?_
+  · exact ((boundaryHomeoBoundary' (n + 1)).trans
+      (Homeomorph.restrict ((stdSimplexHomeo (n + 1)).trans ⦋n + 1⦌.toTopHomeo.symm)
+        (boundary'_eq_preimage (n + 1)).symm)).trans
       (SSet.boundary.t₁Inclusions_toTop_map_ι.{u} (n + 1)).homeomorphRange.symm
-    sorry
 
 lemma boundary_subset_barycenterCompl : boundary n ⊆ barycenterCompl n := by
   rintro x ⟨hx, i, hi⟩
@@ -154,7 +186,8 @@ lemma boundaryHomeo_compatibility (x : (|∂Δ[n]| : Type u)) :
   obtain _ | n := n
   · exfalso
     exact IsEmpty.false x
-  · sorry
+  · simp [ιBarycenterCompl, boundaryToBarycenterCompl, boundaryHomeo, Homeomorph.restrict]
+    rfl
 
 lemma boundary_eq :
     boundary (n + 1) =
