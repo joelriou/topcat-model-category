@@ -191,7 +191,8 @@ lemma boundaryHomeo_compatibility (x : (|∂Δ[n]| : Type u)) :
 
 lemma boundary_eq :
     boundary (n + 1) =
-      retractionBoundaryOfConvexCompact.boundary (stdSimplex (n + 1)) := sorry
+      retractionBoundaryOfConvexCompact.boundary (stdSimplex (n + 1)) := by
+  sorry
 
 noncomputable def boundaryRetraction : C(barycenterCompl n, boundary n) := by
   obtain _ | n := n
