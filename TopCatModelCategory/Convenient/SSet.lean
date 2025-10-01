@@ -6,13 +6,23 @@ import TopCatModelCategory.ConvexCompact
 
 universe u
 
-open CategoryTheory Limits Topology Simplicial
+open CategoryTheory Limits Topology Simplicial NormedSpace
+
+@[simps]
+def Equiv.ofSetEq {X : Type*} {S T : Set X} (h : S = T) : S ≃ T where
+  toFun x := ⟨x.1, by simpa only [h] using x.2⟩
+  invFun x := ⟨x.1, by simpa only [← h] using x.2⟩
+
+@[simps!]
+def Homeomorph.ofSetEq {X : Type*} [TopologicalSpace X] {S T : Set X} (h : S = T) :
+    S ≃ₜ T where
+  toEquiv := .ofSetEq h
+  continuous_toFun := by subst h; exact continuous_id
+  continuous_invFun := by subst h; exact continuous_id
 
 namespace SimplexCategory
 
 namespace Hyperplane
-
-open NormedSpace
 
 noncomputable def stdSimplexHomeoClosedBall (n : ℕ) :
     stdSimplex n ≃ₜ (Metric.closedBall (0 : Hyperplane n) 1) := by
@@ -83,30 +93,41 @@ namespace SimplexCategory.Hyperplane.stdSimplex
 
 variable (n : ℕ)
 
-def barycenterCompl : TopologicalSpace.Opens (stdSimplex n) where
-  carrier := {⟨⟨fun _ ↦ 0, by simp⟩, by simp [stdSimplex]⟩}ᶜ
-  is_open' := isOpen_compl_singleton
+def barycenterCompl : Set (Hyperplane n) :=
+  stdSimplex n ∩ {⟨0, by simp⟩}ᶜ
 
-lemma notMem_barycenterCompl_zero (x : stdSimplex 0) :
-    x ∉ (barycenterCompl 0).1 := by
-  simpa [barycenterCompl] using Subsingleton.elim _ _
+lemma barycenterCompl_subset_stdSimplex : barycenterCompl n ⊆ stdSimplex n :=
+  Set.inter_subset_left
 
-instance : DeltaGeneratedSpace' (barycenterCompl n) := by
-  infer_instance
+@[simp]
+lemma barycenterCompl_zero :
+    barycenterCompl 0 = ∅ := by
+  ext ⟨x, hx⟩
+  simp [barycenterCompl]
+  intro
+  ext i
+  fin_cases i
+  simpa using hx
 
 def ιBarycenterCompl : C(barycenterCompl n, stdSimplex n) :=
-  ⟨_, continuous_subtype_val⟩
+  ⟨fun x ↦ ⟨x.1, barycenterCompl_subset_stdSimplex _ x.2⟩, by continuity⟩
 
 lemma isOpenEmbedding_ιBarycenterCompl :
     IsOpenEmbedding (ιBarycenterCompl n) :=
-  TopologicalSpace.Opens.isOpenEmbedding' _
+  IsOpenEmbedding.inclusion (barycenterCompl_subset_stdSimplex n) (by
+    simp [barycenterCompl]
+    convert isClosed_singleton (X := stdSimplex n) (x := ⟨⟨0, by simp⟩, by simp [stdSimplex]⟩)
+    aesop)
 
-def boundary : Set (stdSimplex n) :=
-  setOf (fun x ↦ ∃ (i : Fin (n + 1)), (n + 1) • x.1.1 i + 1 = 0)
+instance : DeltaGeneratedSpace' (barycenterCompl n) :=
+  (isOpenEmbedding_ιBarycenterCompl n).isGeneratedBy
+
+def boundary : Set (Hyperplane n) :=
+  stdSimplex n ∩ setOf (fun x ↦ ∃ (i : Fin (n + 1)), (n + 1) • x.1 i + 1 = 0)
 
 instance : IsEmpty (boundary 0) where
   false := by
-    rintro ⟨⟨⟨x, hx⟩, hx'⟩, i, hi⟩
+    rintro ⟨⟨x, hx⟩, hx', i, hi⟩
     obtain rfl : x = 0 := by
       ext i
       fin_cases i
@@ -127,26 +148,12 @@ def boundaryHomeo : boundary n ≃ₜ (|∂Δ[n]| : Type u) := by
   · sorry
 
 lemma boundary_subset_barycenterCompl : boundary n ⊆ barycenterCompl n := by
-  rintro x ⟨i, hi⟩
-  rintro rfl
-  simp at hi
+  rintro x ⟨hx, i, hi⟩
+  simp only [barycenterCompl, Set.mem_inter_iff, Set.mem_compl_iff, Set.mem_singleton_iff]
+  exact ⟨hx, by rintro rfl; simp at hi⟩
 
 def boundaryToBarycenterCompl : C(boundary n, barycenterCompl n) :=
   ⟨fun x ↦ ⟨x.1, boundary_subset_barycenterCompl n x.2⟩, by continuity⟩
-
-def boundaryRetraction : C(barycenterCompl n, boundary n) := by
-  obtain _ | n := n
-  · exact ⟨fun x ↦ (notMem_barycenterCompl_zero x x.2).elim, by continuity⟩
-  · sorry
-
-@[simp]
-lemma boundaryRetraction_boundaryToBarycenterCompl (x : boundary n):
-    stdSimplex.boundaryRetraction n
-      (stdSimplex.boundaryToBarycenterCompl n x) = x := by
-  obtain _ | n := n
-  · exfalso
-    exact IsEmpty.false x
-  · sorry
 
 lemma boundaryHomeo_compatibility (x : (|∂Δ[n]| : Type u)) :
     ⦋n⦌.toTopHomeo.symm (stdSimplexHomeo n (stdSimplex.ιBarycenterCompl n
@@ -156,5 +163,30 @@ lemma boundaryHomeo_compatibility (x : (|∂Δ[n]| : Type u)) :
   · exfalso
     exact IsEmpty.false x
   · sorry
+
+lemma boundary_eq :
+    boundary (n + 1) =
+      retractionBoundaryOfConvexCompact.boundary (stdSimplex (n + 1)) := sorry
+
+noncomputable def boundaryRetraction : C(barycenterCompl n, boundary n) := by
+  obtain _ | n := n
+  · exact ⟨fun ⟨x, hx⟩ ↦ by simp at hx, by continuity⟩
+  · exact ContinuousMap.comp ⟨_, (Homeomorph.ofSetEq (boundary_eq n)).symm.continuous⟩
+      ⟨fun x ↦ retractionBoundaryOfConvexCompact.retraction
+        (Hyperplane.convex_stdSimplex (n + 1)) (Hyperplane.isCompact_stdSimplex _)
+        (Hyperplane.zero_mem_interior_stdSimplex _) ⟨x, x.2.2⟩, by continuity⟩
+
+@[simp]
+lemma boundaryRetraction_boundaryToBarycenterCompl (x : boundary n):
+    stdSimplex.boundaryRetraction n
+      (stdSimplex.boundaryToBarycenterCompl n x) = x := by
+  obtain _ | n := n
+  · exfalso
+    exact IsEmpty.false x
+  · obtain ⟨x, hx⟩ := x
+    have := retractionBoundaryOfConvexCompact.retraction_boundaryι_apply
+      (Hyperplane.convex_stdSimplex (n + 1)) (Hyperplane.isCompact_stdSimplex _)
+        (Hyperplane.zero_mem_interior_stdSimplex _) ⟨x, by rwa [← boundary_eq]⟩
+    rwa [Subtype.ext_iff] at this ⊢
 
 end SimplexCategory.Hyperplane.stdSimplex

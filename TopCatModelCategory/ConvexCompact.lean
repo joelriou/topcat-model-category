@@ -458,6 +458,7 @@ noncomputable def retraction (x : (({0}ᶜ : Set E) : Type _)) : boundary X :=
     obtain ⟨x, hx⟩ := x
     simp [norm_smul, inv_mul_cancel₀ (a := ‖x‖) (by simpa using hx)]⟩
 
+@[continuity]
 lemma continuous_retraction : Continuous (retraction hX₁ hX₂ hX₃) :=
   Continuous.subtype_mk (continuous_subtype_val.comp
     ((Homeomorph.continuous_symm _).comp (Continuous.subtype_mk
