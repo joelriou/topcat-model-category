@@ -337,6 +337,20 @@ lemma precomp_φ (g : Y ⟶ X) {d : SimplexCategory} (y : Y.obj (op d)) :
     (f.precomp g).φ y = f.φ (g.app _ y) :=
   IsAffineAt.precomp_φ f.f g y
 
+@[continuity]
+lemma continuous {E : Type v} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
+    (f : X.AffineMap E):
+    Continuous f.f := by
+  rw [TopCat.continuous_iff_of_isColimit' _
+    (isColimitOfPreserves toTop (Presheaf.colimitOfRepresentable X))]
+  rintro ⟨⟨n⟩, x⟩
+  convert ((f.continuous_φ x).comp
+    Homeomorph.ulift.continuous).comp (toTopSimplex.hom.app n).hom.continuous
+  ext x
+  dsimp [φ, IsAffineAt.φ] at x ⊢
+  congr
+  exact (ConcreteCategory.congr_hom (toTopSimplex.app n).hom_inv_id x).symm
+
 namespace b
 
 noncomputable def affineMap (s : (B.obj X).N) : ⦋s.dim⦌.toTopObj → E :=
@@ -521,6 +535,23 @@ noncomputable def stdSimplex (n : ℕ) :
       · intro b _ hb
         simp [if_neg hb.symm]
       · simp
+
+lemma injective_stdSimplex_f (n : ℕ) :
+    Function.Injective (stdSimplex n).f := by
+  intro x y h
+  obtain ⟨x, rfl⟩ := ⦋n⦌.toTopHomeo.symm.surjective x
+  obtain ⟨y, rfl⟩ := ⦋n⦌.toTopHomeo.symm.surjective y
+  simp only [stdSimplex, Homeomorph.apply_symm_apply] at h
+  simp only [EmbeddingLike.apply_eq_iff_eq]
+  ext i
+  exact congr_fun h i
+
+/-lemma stdSimplex_f_naturality {n m : ℕ} (φ : ⦋n⦌ₛ ⟶ ⦋m⦌ₛ) (x) :
+    (AffineMap.stdSimplex m).f
+      (SSet.toTop.map (SSet.stdSimplex.map (SemiSimplexCategory.toSimplexCategory.map φ)) x) = by
+      -- need #28891
+      have := (AffineMap.stdSimplex n).f x
+      sorry := sorry-/
 
 end AffineMap
 

@@ -1,6 +1,7 @@
 import TopCatModelCategory.SemiSimplexCategory
 import TopCatModelCategory.TopCat.Adj
 import TopCatModelCategory.SSet.AffineMap
+import TopCatModelCategory.Homeomorph
 
 universe u
 
@@ -50,6 +51,31 @@ end
 noncomputable abbrev sdToTop : CosimplicialObject TopCat.{u} :=
   sd ⋙ SSet.toTop
 
+def toTopObj' (n : SimplexCategory) : Set ((Fin (n.len + 1) → ℝ)) :=
+  { f | (∀ x, 0 ≤ f x) ∧ ∑ x, f x = 1 }
+
+def toTopObjHomeo' (n : SimplexCategory) :
+    n.toTopObj ≃ₜ n.toTopObj' where
+  toFun x := ⟨fun i ↦ x i, by
+    obtain ⟨x, hx⟩ := x
+    dsimp [toTopObj] at hx
+    simp [toTopObj', ← NNReal.coe_sum, hx]⟩
+  invFun x := ⟨fun i ↦ ⟨x.1 i, x.2.1 i⟩, by
+    obtain ⟨x, _, hx⟩ := x
+    ext
+    simpa⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+  continuous_toFun := by continuity
+  continuous_invFun := Isometry.continuous (fun _ => congrFun rfl)
+
+lemma affineMap_stdSimplex_f (n : ℕ) :
+    (AffineMap.stdSimplex n).f = Subtype.val ∘ toTopObjHomeo' ⦋n⦌ ∘ toTopHomeo _ := rfl
+
+lemma affineMap_stdSimplex_range_f (n : ℕ) :
+    Set.range (AffineMap.stdSimplex n).f = ⦋n⦌.toTopObj' := by
+  simp [affineMap_stdSimplex_f, Set.range_comp]
+
 end SimplexCategory
 
 namespace SemiSimplexCategory
@@ -63,13 +89,34 @@ noncomputable def sdToTop : SemiCosimplicialObject TopCat.{u} :=
 
 namespace BIso
 
-def homApp (n : ℕ) : |B.obj (Δ[n] : SSet.{u})| ⟶ toTop.obj ⦋n⦌ₛ := by
-  sorry
+noncomputable def homApp (n : ℕ) :
+    |B.obj (Δ[n] : SSet.{u})| ⟶ toTop.obj ⦋n⦌ₛ :=
+  TopCat.ofHom (⦋n⦌.toTopHomeo.symm.continuousMap.comp
+    (⦋n⦌.toTopObjHomeo'.symm.continuousMap.comp ⟨fun x ↦
+    ⟨(AffineMap.stdSimplex n).b.f x, by
+      rw [← SimplexCategory.affineMap_stdSimplex_range_f.{u}]
+      exact (AffineMap.stdSimplex.{u} n).range_b_f_subset_range_f (by simp)⟩,
+    (AffineMap.stdSimplex n).b.continuous.subtype_mk _⟩))
 
-@[reassoc (attr := simp)]
+lemma f_comp_homApp (n : ℕ) :
+    (AffineMap.stdSimplex n).f ∘ homApp n =
+      (AffineMap.stdSimplex n).b.f := by
+  ext x
+  simp [homApp, SimplexCategory.toTopObjHomeo', AffineMap.stdSimplex]
+
+lemma f_comp_homApp_apply {n : ℕ} (x) :
+    (AffineMap.stdSimplex n).f (homApp n x) =
+      (AffineMap.stdSimplex n).b.f x :=
+  congr_fun (f_comp_homApp n) x
+
 lemma homApp_naturality {n m : ℕ} (f : ⦋n⦌ₛ ⟶ ⦋m⦌ₛ) :
-    SSet.toTop.map (B.map (toSSet.map f)) ≫ homApp m  =
-      homApp n ≫ toTop.map f :=
+    SSet.toTop.map (B.map (toSSet.map f)) ≫ homApp m =
+      homApp n ≫ toTop.map f := by
+  ext x
+  apply AffineMap.injective_stdSimplex_f
+  dsimp
+  erw [f_comp_homApp_apply]
+  have := f_comp_homApp_apply x
   sorry
 
 instance (n : ℕ) : IsIso (homApp.{u} n) := sorry

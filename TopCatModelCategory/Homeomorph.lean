@@ -27,3 +27,8 @@ def Homeomorph.restrict {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
   toEquiv := e.toEquiv.restrict h
   continuous_toFun := by dsimp [Equiv.restrict]; continuity
   continuous_invFun := by dsimp [Equiv.restrict]; continuity
+
+abbrev Homeomorph.continuousMap
+    {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
+    (e : X ≃ₜ Y) : C(X, Y) :=
+  ⟨_, e.continuous⟩
