@@ -31,6 +31,10 @@ theorem ext (a b : SemiSimplexCategory) : a.len = b.len → a = b := id
 
 attribute [irreducible] SemiSimplexCategory
 
+protected def rec {F : SemiSimplexCategory → Sort*} (h : ∀ n : ℕ, F ⦋n⦌ₛ) :
+    ∀ X, F X :=
+  fun n => h n.len
+
 protected def Hom (a b : SemiSimplexCategory) :=
   Fin (a.len + 1) ↪o Fin (b.len + 1)
 

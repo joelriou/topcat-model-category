@@ -61,7 +61,29 @@ noncomputable def toTop : SemiCosimplicialObject TopCat.{u} :=
 noncomputable def sdToTop : SemiCosimplicialObject TopCat.{u} :=
   SimplexCategory.sdToTop.toSemiCosimplicialObject
 
-def BIso : toSSet ⋙ B ⋙ SSet.toTop ≅ toTop := sorry
+namespace BIso
+
+def homApp (n : ℕ) : |B.obj (Δ[n] : SSet.{u})| ⟶ toTop.obj ⦋n⦌ₛ := by
+  sorry
+
+@[reassoc (attr := simp)]
+lemma homApp_naturality {n m : ℕ} (f : ⦋n⦌ₛ ⟶ ⦋m⦌ₛ) :
+    SSet.toTop.map (B.map (toSSet.map f)) ≫ homApp m  =
+      homApp n ≫ toTop.map f :=
+  sorry
+
+instance (n : ℕ) : IsIso (homApp.{u} n) := sorry
+
+end BIso
+
+noncomputable def BIso : toSSet ⋙ B ⋙ SSet.toTop ≅ toTop :=
+  NatIso.ofComponents (fun n ↦ by
+    induction n using SemiSimplexCategory.rec with | _ n =>
+    exact asIso (BIso.homApp n)) (by
+    intro n m f
+    induction n using SemiSimplexCategory.rec with | _ n =>
+    induction m using SemiSimplexCategory.rec with | _ m =>
+    exact BIso.homApp_naturality f)
 
 open Functor in
 noncomputable def sdIso : sdToTop.{u} ≅ toTop :=
