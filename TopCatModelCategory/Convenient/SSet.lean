@@ -223,7 +223,55 @@ lemma boundary_eq :
     · simpa only [one_smul] using hx.1
     · rintro rfl
       exact zero_notMem_boundary (n + 1) hx
-  · sorry
+  · by_contra! h₁
+    have h₂ := sup_mem_set (Hyperplane.isCompact_stdSimplex (n + 1))
+      (Hyperplane.zero_mem_interior_stdSimplex _) x
+    simp only [hx, mem_set_iff, zero_le_one, one_smul, true_and] at h₂
+    simp only [boundary, nsmul_eq_mul, Nat.cast_add, Nat.cast_one, Set.mem_inter_iff,
+      Set.mem_setOf_eq, not_and, not_exists] at h₁
+    have hx₀ : x ≠ 0 := by
+      rintro rfl
+      rw [sup_zero (E := Hyperplane (n + 1))
+        (Hyperplane.zero_mem_interior_stdSimplex (n + 1))] at hx
+      exact zero_ne_one hx
+    replace h₁ (i : Fin (n + 2)) :=
+      lt_of_le_of_ne (by simpa using h₂ i) fun h => h₁ h₂ i h.symm
+    have h₃ (i : Fin (n + 2)) : ∃ (t : ℝ), 1 < t ∧
+        0 ≤ ((n : ℝ) + 1 + 1) * t * x.1 i + 1 := by
+      by_cases hi : 0 ≤ x.1 i
+      · exact ⟨2, by simp, by positivity⟩
+      · replace hi : ((n : ℝ) + 1 + 1) * x.1 i < 0 :=
+          mul_neg_of_pos_of_neg (by positivity) (not_le.1 hi)
+        replace h₁ := h₁ i
+        obtain ⟨u, hu⟩ : ∃ u, ((n : ℝ) + 1 + 1) * x.1 i = -u := ⟨_, (neg_neg _).symm⟩
+        simp only [mul_assoc]
+        simp only [mul_comm _ (x.1 i)]
+        simp only [← mul_assoc]
+        simp only [hu, lt_neg_add_iff_add_lt, add_zero, Left.neg_neg_iff, neg_mul,
+          le_neg_add_iff_add_le] at h₁ hi ⊢
+        exact ⟨u⁻¹, (one_lt_inv₀ hi).2 h₁, mul_inv_le_one⟩
+    choose t ht using h₃
+    let t' := (Finset.image t .univ).min' (by simp)
+    obtain ⟨i, hi⟩ : ∃ i, t i = t' := by
+      simpa using (Finset.image t .univ).min'_mem (by simp)
+    have ht'₀ : 0 ≤ t' := by
+      rw [← hi]
+      exact le_trans (by simp) (ht i).1.le
+    have ht' : t' • x ∈ stdSimplex (n + 1) := fun j ↦ by
+      dsimp
+      simp only [nsmul_eq_mul, Nat.cast_add, Nat.cast_one]
+      by_cases hj : 0 ≤ x.1 j
+      · positivity
+      · refine le_trans (ht j).2 ?_
+        simp only [not_le] at hj
+        simp only [add_le_add_iff_right, mul_assoc]
+        rw [mul_le_mul_iff_of_pos_left (by positivity), mul_le_mul_right_of_neg hj]
+        exact Finset.min'_le _ _ (by simp)
+    rw [← homeoClosedBallOfConvexCompact.le_sup_iff
+      (Hyperplane.convex_stdSimplex (n + 1)) (Hyperplane.isCompact_stdSimplex _)
+        (Hyperplane.zero_mem_interior_stdSimplex _) hx₀ _ ht'₀] at ht'
+    rw [hx, ← hi] at ht'
+    exact not_lt.2 ht' (ht i).1
 
 noncomputable def boundaryRetraction : C(barycenterCompl n, boundary n) := by
   obtain _ | n := n
