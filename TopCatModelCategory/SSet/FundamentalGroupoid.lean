@@ -34,7 +34,7 @@ lemma sq : Subcomplex.Sq ⊥ (stdSimplex.face {0}) (stdSimplex.face {1})
       · exact Or.inl h
   min_eq := by
     ext ⟨m⟩ x
-    induction' m using SimplexCategory.rec with m
+    induction m using SimplexCategory.rec with | _ m
     aesop
 
 noncomputable def ι₀ : Δ[0] ⟶ (boundary 1 : SSet.{u}) :=

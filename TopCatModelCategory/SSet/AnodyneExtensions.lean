@@ -559,7 +559,7 @@ lemma preimage_ι_comp_r_eq_top :
   constructor
   · rw [← Subcomplex.image_le_iff]
     rintro ⟨d⟩ _ ⟨⟨y₁, y₂⟩, ⟨_, hy₂⟩, rfl⟩
-    induction' d using SimplexCategory.rec with d
+    induction d using SimplexCategory.rec with | _ d
     replace hy₂ := horn₁.eq_objMk_const _ _ hy₂
     apply face_le_horn (Fin.last _) _ (fun h ↦ by
       simp only [Fin.ext_iff, Fin.val_last, Fin.coe_castSucc] at h
@@ -572,7 +572,7 @@ lemma preimage_ι_comp_r_eq_top :
     omega
   · rw [← Subcomplex.image_le_iff]
     rintro ⟨d⟩ _ ⟨⟨y₁, y₂⟩, ⟨hy₁, _⟩, rfl⟩
-    induction' d using SimplexCategory.rec with d
+    induction d using SimplexCategory.rec with | _ d
     rw [horn, Set.mem_setOf_eq] at hy₁ ⊢
     intro h
     apply hy₁ (subset_antisymm (by simp) ?_)
@@ -663,7 +663,7 @@ lemma preimage_ι_comp_r_eq_top :
   constructor
   · rw [← Subcomplex.image_le_iff]
     rintro ⟨d⟩ _ ⟨⟨y₁, y₂⟩, ⟨_, hy₂⟩, rfl⟩
-    induction' d using SimplexCategory.rec with d
+    induction d using SimplexCategory.rec with | _ d
     replace hy₂ := horn₁.eq_objMk_const _ _ hy₂
     apply face_le_horn 0 _ (fun h ↦ by
       rw [Fin.ext_iff] at h
@@ -676,7 +676,7 @@ lemma preimage_ι_comp_r_eq_top :
     simp at this
   · rw [← Subcomplex.image_le_iff]
     rintro ⟨d⟩ _ ⟨⟨y₁, y₂⟩, ⟨hy₁, _⟩, rfl⟩
-    induction' d using SimplexCategory.rec with d
+    induction d using SimplexCategory.rec with | _ d
     rw [horn, Set.mem_setOf_eq] at hy₁ ⊢
     intro h
     apply hy₁ (subset_antisymm (by simp) ?_)

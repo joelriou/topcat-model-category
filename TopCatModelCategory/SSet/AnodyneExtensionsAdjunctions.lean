@@ -245,7 +245,7 @@ lemma anodyneExtensions.pushoutTensorι₂' {A B : SSet.{u}} (i : A ⟶ B) [Mono
 lemma hornOneUnionProdInclusions_le_anodyneExtensions :
     hornOneUnionProdInclusions.{u} ≤ anodyneExtensions := by
   rintro _ _ i hi
-  simp [hornOneUnionProdInclusions] at hi
+  simp [-Fin.exists_fin_two, hornOneUnionProdInclusions] at hi
   obtain ⟨k, X, ⟨A⟩⟩ := hi
   simpa using anodyneExtensions.pushoutTensorι₂' A.ι k (PushoutTensor.unionProd _ _)
 
@@ -287,12 +287,14 @@ lemma hasLiftingProperty_unionProd_horn₁_ι_pullbackIhomπ [Mono i] [Fibration
     HasLiftingProperty (X.unionProd Λ[1, k]).ι h.π := by
   let h' : PullbackIhom (Subcomplex.range i).ι p :=
     { pt := h.pt
-      fst := h.fst ≫ (pre (inv (Subpresheaf.toRange i))).app _
+      fst := h.fst ≫ (MonoidalClosed.pre (inv (Subpresheaf.toRange i))).app _
       snd := h.snd
       isPullback := by
         fapply h.isPullback.of_iso (Iso.refl _)
-          ((internalHom.mapIso (asIso (Subpresheaf.toRange i)).symm.op).app S) (Iso.refl _)
-          ((internalHom.mapIso (asIso (Subpresheaf.toRange i)).symm.op).app T)
+          ((MonoidalClosed.internalHom.mapIso
+            (asIso (Subpresheaf.toRange i)).symm.op).app S) (Iso.refl _)
+          ((MonoidalClosed.internalHom.mapIso
+            (asIso (Subpresheaf.toRange i)).symm.op).app T)
           (by simp) (by simp) (by simp) ?_
         · dsimp
           rw [Category.id_comp, ← NatTrans.comp_app, ← MonoidalClosed.pre_map]

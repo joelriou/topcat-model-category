@@ -72,9 +72,9 @@ lemma stdSimplex.subcomplex_le_horn_iff
     by_cases hd : d < n
     · simp [horn_obj_eq_top i d (by omega)]
     · simp only [not_lt] at hd
-      obtain ⟨⟨S, hS⟩, rfl⟩ := stdSimplex.nonDegenerateEquiv.symm.surjective x
+      obtain ⟨⟨S, hS⟩, rfl⟩ := stdSimplex.nonDegenerateEquiv'.symm.surjective x
       dsimp at hS
-      simp only [stdSimplex.nonDegenerateEquiv_symm_mem_iff_face_le] at hx ⊢
+      simp only [stdSimplex.nonDegenerateEquiv'_symm_mem_iff_face_le] at hx ⊢
       obtain hd | rfl := hd.lt_or_eq
       · obtain rfl : S = Finset.univ := by
           rw [← Finset.card_eq_iff_eq_univ, Fintype.card_fin]
@@ -116,7 +116,7 @@ lemma objEquiv_symm_δ_notMem_horn_iff {n : ℕ} (i j : Fin (n + 2)) :
 lemma objEquiv_symm_notMem_horn_of_isIso {n : ℕ} (i : Fin (n + 1))
     {d : SimplexCategory} (f : d ⟶ ⦋n⦌) [IsIso f] :
     stdSimplex.objEquiv.symm f ∉ (horn n i).obj (op d) := by
-  induction' d using SimplexCategory.rec with d
+  induction d using SimplexCategory.rec with | _ d
   obtain rfl : n = d :=
     le_antisymm
       (SimplexCategory.len_le_of_epi f)

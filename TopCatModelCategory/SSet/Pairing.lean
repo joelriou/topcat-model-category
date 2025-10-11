@@ -122,7 +122,7 @@ lemma eq_map_mono_of_mem_ofSimplex_of_mem_nonDegenerate
     (hx : x ∈ X.nonDegenerate _) :
     ∃ (f : ⦋n⦌ ⟶ ⦋m⦌), Mono f ∧ X.map f.op y = x := by
   obtain ⟨g, rfl⟩ := hxy
-  exact ⟨g.unop, mono_of_nonDegenerate _ _ hx, rfl⟩
+  exact ⟨g.unop, mono_of_nonDegenerate' _ _ hx, rfl⟩
 
 lemma isFace_iff_neq_and_mem_ofSimplex {n m : ℕ} {x : X _⦋n⦌} {y : X _⦋m⦌}
     (hx : x ∈ X.nonDegenerate _) :
@@ -134,7 +134,7 @@ lemma isFace_iff_neq_and_mem_ofSimplex {n m : ℕ} {x : X _⦋n⦌} {y : X _⦋m
     obtain ⟨f, rfl⟩ := Quiver.Hom.op_surjective f
     have : Mono f := by
       subst hf
-      exact mono_of_nonDegenerate _ _ hx
+      exact mono_of_nonDegenerate' _ _ hx
     refine ⟨f, inferInstance, ?_, hf⟩
     rintro rfl
     obtain rfl := SimplexCategory.eq_id_of_mono f
@@ -436,7 +436,7 @@ lemma isRegular_iff [P.IsProper] :
         ∀ (x y : P.II) (_ : x.1.1.1.1 = y.1.1.1.1), P.AncestralRel x y → φ x < φ y :=
   ⟨fun _ ↦ ⟨P.rank', fun x y _ h ↦ P.rank'_lt h⟩, fun ⟨φ, hφ⟩ ↦
     { wf := by
-        rw [WellFounded.wellFounded_iff_no_descending_seq]
+        rw [wellFounded_iff_isEmpty_descending_chain]
         refine ⟨fun ⟨f, hf⟩ ↦ ?_⟩
         let d (n : ℕ) := (f n).1.1.1.1
         obtain ⟨n₀, hn₀⟩ := (wellFoundedGT_iff_monotone_chain_condition (α := ℕᵒᵈ)).1
@@ -578,7 +578,7 @@ lemma filtration_preimage_map' {n : ℕ} (x : P.Cells n) :
       change X.map f.op σ = _ at hz'
       have hy := y.1.2
       rw [← hz'] at hy
-      have : Mono f := mono_of_nonDegenerate _ _ hy
+      have : Mono f := mono_of_nonDegenerate' _ _ hy
       obtain ⟨t, ht⟩ := P.exists_or y
       have htx : P.AncestralRel t x := by
         obtain rfl | rfl := ht
@@ -669,7 +669,7 @@ instance {n : ℕ} (x : P.Cells n) :
     Mono (P.ιSigmaStdSimplex x) := by
   rw [NatTrans.mono_iff_mono_app]
   rintro ⟨d⟩
-  induction' d using SimplexCategory.rec with d
+  induction d using SimplexCategory.rec with | _ d
   rw [mono_iff_injective]
   intro _ _ h
   simpa [ιSigmaStdSimplex_eq_iff] using h.symm
@@ -715,7 +715,7 @@ lemma isPullback (n : ℕ) :
   isLimit' := ⟨evaluationJointlyReflectsLimits _ (fun ⟨d⟩ ↦ by
     refine (isLimitMapConePullbackConeEquiv _ _).2
       (IsPullback.isLimit ?_)
-    induction' d using SimplexCategory.rec with d
+    induction d using SimplexCategory.rec with | _ d
     rw [Types.isPullback_iff]
     dsimp
     refine ⟨congr_app (P.w n) (op ⦋d⦌), ?_, ?_⟩
@@ -883,7 +883,7 @@ lemma isPushout (n : ℕ) :
     IsPushout (P.t n) (P.m n) (homOfLE (P.filtration_monotone (by simp))) (P.b n) where
   w := P.w n
   isColimit' := ⟨evaluationJointlyReflectsColimits _ (fun ⟨d⟩ ↦ by
-    induction' d using SimplexCategory.rec with d
+    induction d using SimplexCategory.rec with | _ d
     refine (isColimitMapCoconePushoutCoconeEquiv _ _).2
       (IsPushout.isColimit ?_)
     refine Limits.Types.isPushout_of_isPullback_of_mono'
@@ -900,7 +900,7 @@ lemma isPushout (n : ℕ) :
       all_goals
       · rw [Subcomplex.mem_nonDegenerate_iff]
         apply P.isPushout_aux₁)
-    obtain rfl := X.unique_nonDegenerate₃ (((P.b n)).app _ x).1
+    obtain rfl := X.unique_nonDegenerate_map (((P.b n)).app _ x).1
       f ⟨_, P.isPushout_aux₁ s⟩
         (by simp [mapN, ← hf, FunctorToTypes.naturality])
       g ⟨_, P.isPushout_aux₁ s⟩

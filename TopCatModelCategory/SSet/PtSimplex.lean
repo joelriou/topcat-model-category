@@ -715,8 +715,8 @@ lemma nonempty (i : Fin (n + 1)) :
       omega
   · exact {
       map := γ
-      δ_succ_succ_map := by rw [hγ, hα₂]
-      δ_castSucc_castSucc_map := by rw [hγ, hα₁]
+      δ_succ_succ_map := by rw [hγ _ (fun h ↦ by simp [Fin.ext_iff] at h), hα₂]
+      δ_castSucc_castSucc_map := by rw [hγ _ (fun h ↦ by simp [Fin.ext_iff] at h), hα₁]
       δ_castSucc_succ_map := rfl
       δ_map_of_lt j hj := by
         rw [hγ, hα₀ _ hj, Subcomplex.RelativeMorphism.const_map]
@@ -759,7 +759,7 @@ lemma exists_left_inverse (i : Fin (n + 1)) :
         simp at hj), δ_map]
   · exact {
       map := γ
-      δ_castSucc_castSucc_map := by rw [hγ, hα₀]
+      δ_castSucc_castSucc_map := by rw [hγ _ (fun h ↦ by simp [Fin.ext_iff] at h; omega), hα₀]
       δ_castSucc_succ_map := by rw [hγ, hα₁] <;> simp [Fin.ext_iff]
       δ_map_of_lt j hj := by
         simp [Fin.lt_iff_val_lt_val] at hj

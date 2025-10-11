@@ -17,8 +17,8 @@ def homMk : X ⟶ Y where
     | h n => exact app n
   naturality := by
     rintro ⟨d₁⟩ ⟨d₂⟩ ⟨f⟩
-    induction' d₁ using SimplexCategory.rec with d₁
-    induction' d₂ using SimplexCategory.rec with d₂
+    induction d₁ using SimplexCategory.rec with | _ d₁
+    induction d₂ using SimplexCategory.rec with | _ d₂
     exact naturality f
 
 @[simp]
@@ -48,7 +48,7 @@ def homEquiv {p q n : ℕ} :
     (fun _ _ _ ↦ rfl)
   left_inv φ := by
     ext ⟨d⟩ x : 2
-    induction' d using SimplexCategory.rec with d
+    induction d using SimplexCategory.rec with | _ d
     ext i : 1
     exact DFunLike.congr_fun (congr_fun (φ.naturality (SimplexCategory.const ⦋0⦌ ⦋d⦌ i).op) x) 0
   right_inv _ := rfl

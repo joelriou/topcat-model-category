@@ -42,7 +42,7 @@ end TopCat
 
 namespace SimplexCategory
 
-def toTopCompUliftFunctor :
+noncomputable def toTopCompUliftFunctor :
     toTop.{u} ⋙ TopCat.uliftFunctor.{v} ≅ toTop.{max u v} :=
   (Functor.associator _ _ _) ≪≫ Functor.isoWhiskerLeft _ TopCat.uliftFunctorComp.{u, v, 0}
 

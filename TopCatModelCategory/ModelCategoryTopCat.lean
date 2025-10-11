@@ -65,7 +65,7 @@ instance :
       apply evaluationJointlyReflectsColimits
       rintro ⟨n⟩
       have : CompactSpace (SimplexCategory.toTop.{u}.obj n) :=
-        inferInstanceAs (CompactSpace (ULift n.toTopObj))
+        inferInstanceAs (CompactSpace (ULift (stdSimplex ℝ (Fin (n.len + 1)))))
       have : PreservesColimit hf.F _ :=
         t₁Inclusions.preservesColimit_coyoneda_obj_of_compactSpace
                 (hf.ofLE inf_le_left) (SimplexCategory.toTop.obj n)

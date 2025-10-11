@@ -74,16 +74,16 @@ noncomputable def sdIso : stdSimplex.{u} ⋙ sd ≅ SimplexCategory.sd :=
 
 def partOrdIso : stdSimplex.{u} ≅ SimplexCategory.toPartOrd ⋙ PartOrd.nerveFunctor :=
   NatIso.ofComponents (fun n ↦ by
-    induction' n using SimplexCategory.rec with n
-    exact isoNerve _ (orderIsoULift _).symm)
+    induction n using SimplexCategory.rec with | _ n
+    exact isoNerve' _ (orderIsoULift _).symm)
 
 @[simp]
 lemma partOrdIso_inv_app (n : ℕ) :
-    partOrdIso.{u}.inv.app ⦋n⦌ = (isoNerve _ (orderIsoULift _).symm).inv := rfl
+    partOrdIso.{u}.inv.app ⦋n⦌ = (isoNerve' _ (orderIsoULift _).symm).inv := rfl
 
 @[simp]
 lemma partOrdIso_hom_app (n : ℕ) :
-    partOrdIso.{u}.hom.app ⦋n⦌ = (isoNerve _ (orderIsoULift _).symm).hom := rfl
+    partOrdIso.{u}.hom.app ⦋n⦌ = (isoNerve' _ (orderIsoULift _).symm).hom := rfl
 
 end stdSimplex
 
@@ -218,7 +218,7 @@ instance : Epi (sdToB.app X) := by
     rw [toS_mapN_of_isIso]
     dsimp [PartOrd.nerveFunctorCompNIso]
     have : NonemptyFiniteChains.nerveNEquiv.symm (ψ i) =
-      N.mk' (S.map (stdSimplex.isoNerve.{u} (ULift.{u} (Fin (d + 1)))
+      N.mk' (S.map (stdSimplex.isoNerve'.{u} (ULift.{u} (Fin (d + 1)))
         (orderIsoULift _).symm).hom (φ i).toS) (by
           rw [S.simplex_map_nonDegenerate_iff_of_mono]
           exact (φ i).nonDegenerate) := by
@@ -286,7 +286,7 @@ open Functor in
 noncomputable def isColimitBMapCoconeCoconeN :
     IsColimit (B.mapCocone X.coconeN) :=
   evaluationJointlyReflectsColimits _ (fun ⟨n⟩ ↦ by
-    induction' n using SimplexCategory.rec with n
+    induction n using SimplexCategory.rec with | _ n
     apply Nonempty.some
     rw [Types.isColimit_iff_coconeTypesIsColimit]
     refine ⟨⟨?_, fun b ↦ ?_⟩⟩
@@ -364,7 +364,7 @@ instance (T : Type u) [PartialOrder T] :
     rw [PartialOrder.mem_nonDegenerate_iff] at hx
     rw [NatTrans.mono_iff_mono_app]
     intro ⟨n⟩
-    induction' n using SimplexCategory.rec with n
+    induction n using SimplexCategory.rec with | _ n
     rw [mono_iff_injective]
     intro i j h
     ext k : 1
@@ -387,8 +387,8 @@ lemma mono_yonedaEquiv_symm {n : ℕ} (x : X _⦋n⦌) (hx : x ∈ X.nonDegenera
 
 instance : Functor.Faithful stdSimplex.{u} where
   map_injective {n m f g} h := by
-    induction' n using SimplexCategory.rec with n
-    induction' m using SimplexCategory.rec with m
+    induction n using SimplexCategory.rec with | _ n
+    induction m using SimplexCategory.rec with | _ m
     ext i : 3
     exact DFunLike.congr_fun
       ((congr_fun (NatTrans.congr_app h (op ⦋n⦌)) (stdSimplex.objEquiv.symm (𝟙 _)))) i
@@ -455,7 +455,7 @@ instance : B.{u}.PreservesMonomorphisms where
   preserves {X Y} f hf := by
     rw [NatTrans.mono_iff_mono_app]
     rintro ⟨n⟩
-    induction' n using SimplexCategory.rec with n
+    induction n using SimplexCategory.rec with | _ n
     rw [mono_iff_injective]
     intro s t h
     apply Preorder.nerveExt
@@ -524,7 +524,7 @@ lemma iSup_range_sd_map :
     ⨆ (s : X.N),
       Subcomplex.range (sd.map (yonedaEquiv.symm s.simplex)) = ⊤ := by
   ext ⟨n⟩ x
-  induction' n using SimplexCategory.rec with n
+  induction n using SimplexCategory.rec with | _ n
   simp only [Subpresheaf.iSup_obj, Subpresheaf.range_obj, Set.mem_iUnion, Set.mem_range,
     Subpresheaf.top_obj, Set.top_eq_univ, Set.mem_univ, iff_true]
   obtain ⟨s, y, hs⟩ := Types.jointly_surjective_of_isColimit

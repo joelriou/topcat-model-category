@@ -161,9 +161,9 @@ class IsRegular extends h.IsProper where
 instance [h.IsRegular] : h.pairing.IsRegular where
   wf := by
     have := IsRegular.wf (h := h)
-    rw [WellFounded.wellFounded_iff_no_descending_seq, isEmpty_iff] at this ⊢
-    rintro ⟨f, hf⟩
-    exact this ⟨fun n ↦ h.equivII.symm (f n), fun n ↦ by simpa [ancestralRel_iff] using hf n⟩
+    rw [wellFounded_iff_isEmpty_descending_chain] at this ⊢
+    exact ⟨fun ⟨f, hf⟩ ↦ this.false
+      ⟨fun n ↦ h.equivII.symm (f n), fun n ↦ by simpa [ancestralRel_iff] using hf n⟩⟩
 
 lemma isRegular_pairing_iff : h.pairing.IsRegular ↔ h.IsRegular := by
   refine ⟨fun _ ↦ ?_, fun _ ↦ inferInstance⟩
@@ -172,7 +172,7 @@ lemma isRegular_pairing_iff : h.pairing.IsRegular ↔ h.IsRegular := by
     infer_instance
   constructor
   have := h.pairing.wf
-  rw [WellFounded.wellFounded_iff_no_descending_seq, isEmpty_iff] at this ⊢
+  rw [wellFounded_iff_isEmpty_descending_chain, isEmpty_iff] at this ⊢
   rintro ⟨f, hf⟩
   exact this ⟨fun n ↦ h.equivII (f n), fun n ↦ by simpa [ancestralRel_iff] using hf n⟩
 

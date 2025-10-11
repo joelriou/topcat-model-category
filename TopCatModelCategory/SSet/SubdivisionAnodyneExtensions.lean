@@ -32,7 +32,7 @@ lemma SSet.mem_horn_iff_not_subset {n : ℕ} {i : Fin (n + 1)}
     {d : SimplexCategoryᵒᵖ} (x : (Δ[n] : SSet.{u}).obj d) :
     x ∈ Λ[n, i].obj d ↔ ¬ ({i}ᶜ ⊆ Set.range (stdSimplex.objEquiv x)) := by
   obtain ⟨d⟩ := d
-  induction' d using SimplexCategory.rec with d
+  induction d using SimplexCategory.rec with | _ d
   simp [horn_eq_iSup]
   constructor
   · rintro ⟨j, hj, hj'⟩ h
@@ -77,9 +77,9 @@ def horn : (nerve X).Subcomplex where
 
 def hornArrowIso (n : ℕ) (i : Fin (n + 2)) :
     Arrow.mk (horn.{u} (ULift.up i)).ι ≅ Arrow.mk (SSet.horn (n + 1) i).ι :=
-  (Subcomplex.congrArrowι' ((stdSimplex.isoNerve _ (orderIsoULift _).symm)) (by
+  (Subcomplex.congrArrowι' ((stdSimplex.isoNerve' _ (orderIsoULift _).symm)) (by
     ext ⟨d⟩ x
-    induction' d using SimplexCategory.rec with d
+    induction d using SimplexCategory.rec with | _ d
     simp [SSet.mem_horn_iff_not_subset, not_iff_not]
     constructor
     · rintro h j hj
@@ -100,7 +100,7 @@ noncomputable def hornArrowIsoB' :
   Subcomplex.congrArrowι'
     (PartOrd.nerveFunctor.mapIso (PartOrd.nerveFunctorCompNIso.app (.of X))) (by
       ext ⟨n⟩ x
-      induction' n using SimplexCategory.rec with n
+      induction n using SimplexCategory.rec with | _ n
       dsimp at x
       conv_lhs =>
         simp [PartOrd.nerveFunctorCompNIso, Functor.mapComposableArrows]

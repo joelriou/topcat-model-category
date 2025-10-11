@@ -13,8 +13,7 @@ variable {n : ℕ}
 
 noncomputable def nonDegenerateEquiv :
     Fin (n + 1) ≃ (Δ[n] ⊗ Δ[1] : SSet.{u}).nonDegenerate (n + 1) :=
-  prodStdSimplex.nonDegenerateEquiv₁.{u}.trans
-    (nonDegenerateEquivOfIso (β_ _ _) _)
+  prodStdSimplex.nonDegenerateEquiv₁.{u}.trans (nonDegenerateEquivOfIso (β_ _ _))
 
 @[simp]
 lemma nonDegenerateEquiv_fst (i : Fin (n + 1)) :
@@ -134,7 +133,7 @@ lemma ofSimplex_codimOneSimplex (j : Fin n) :
       rw [Fin.succ_castSucc, ← δ_castSucc_nonDegenerateEquiv]
       rfl
   · rintro ⟨k⟩ s hs
-    induction' k using SimplexCategory.rec with k
+    induction k using SimplexCategory.rec with | _ k
     obtain ⟨f, rfl⟩ := prodStdSimplex.objEquiv.symm.surjective s
     simp only [prodStdSimplex.mem_ofSimplex_iff, intersectionNondeg,
       Subpresheaf.min_obj, Set.mem_inter_iff, Equiv.apply_symm_apply] at hs ⊢
@@ -163,7 +162,7 @@ lemma intersectionNondeg_le_intersectionNondeg (i j k : Fin (n + 1))
     (hij : i ≤ j) (hij : j ≤ k) :
     intersectionNondeg.{u} i k ≤ intersectionNondeg.{u} j k := by
   rintro ⟨k⟩ x hx
-  induction' k using SimplexCategory.rec with k
+  induction k using SimplexCategory.rec with | _ k
   dsimp [intersectionNondeg] at hx ⊢
   simp only [Set.mem_inter_iff, prodStdSimplex.mem_ofSimplex_iff,
     ← Set.subset_inter_iff] at hx ⊢
@@ -181,7 +180,7 @@ lemma intersectionNondeg_le_intersectionNondeg' (i j k : Fin (n + 1))
     (hij : i ≤ j) (hij : j ≤ k) :
     intersectionNondeg.{u} i k ≤ intersectionNondeg.{u} i j := by
   rintro ⟨k⟩ x hx
-  induction' k using SimplexCategory.rec with k
+  induction k using SimplexCategory.rec with | _ k
   dsimp [intersectionNondeg] at hx ⊢
   simp only [Set.mem_inter_iff, prodStdSimplex.mem_ofSimplex_iff,
     ← Set.subset_inter_iff] at hx ⊢
@@ -328,7 +327,7 @@ lemma hom_ext {X : SSet.{u}} {f g : Δ[n] ⊗ Δ[1] ⟶ X}
     (h : ∀ (i : Fin (n + 1)), ι i ≫ f = ι i ≫ g) :
     f = g := by
   ext ⟨m⟩ x
-  induction' m using SimplexCategory.rec with m
+  induction m using SimplexCategory.rec with | _ m
   have hx : x ∈ (⊤ : SSet.Subcomplex _).obj _ := by simp
   simp only [← filtration_last.{u} n, filtration, Subpresheaf.iSup_obj,
     Set.mem_iUnion, Subtype.exists, exists_prop,

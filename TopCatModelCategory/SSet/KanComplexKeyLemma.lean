@@ -42,7 +42,7 @@ lemma exists_contractible₀ (n : ℕ) :
   · apply le_antisymm (by simp)
     rw [← Subcomplex.image_le_iff, Subcomplex.image_top]
     rintro ⟨d⟩ _ ⟨⟨⟨y₁, hy₁⟩, y₂⟩, rfl⟩
-    induction' d using SimplexCategory.rec with d
+    induction d using SimplexCategory.rec with | _ d
     dsimp
     rw [horn, Set.mem_setOf_eq] at hy₁ ⊢
     intro h

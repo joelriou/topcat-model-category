@@ -400,7 +400,7 @@ lemma surjective_q : Function.Surjective (q (x₀ := x₀)) := by
   obtain ⟨d, x, h₁, h₂, rfl⟩ := x.mk_surjective
   obtain ⟨i, hi⟩ := finset_eq_emptyset_or x₀ x
   obtain rfl | ⟨i, rfl⟩ := Fin.eq_zero_or_eq_succ i
-  · simp only [Fin.not_lt_zero, Finset.filter_False] at hi
+  · simp only [Fin.not_lt_zero, Finset.filter_false] at hi
     obtain ⟨φ, hφ₀, hφ⟩ : ∃ (φ : Fin (d + 2) → NonemptyFiniteChains X),
         (φ 0).1 = {x₀} ∧ ∀ (i : Fin (d + 1)), φ i.succ = x.obj i :=
       ⟨Fin.cons ⟨{x₀}, by simp, by simp⟩ x.obj, rfl, fun _ ↦ rfl⟩

@@ -10,7 +10,7 @@ open CategoryTheory Simplicial HomotopicalAlgebra Limits Opposite
 
 namespace SSet
 
-lemma mono_of_nonDegenerate {X : SSet.{u}} {d d' : ℕ} (x : X _⦋d⦌)
+lemma mono_of_nonDegenerate' {X : SSet.{u}} {d d' : ℕ} (x : X _⦋d⦌)
     (f : ⦋d'⦌ ⟶ ⦋d⦌)
     (h : X.map f.op x ∈ X.nonDegenerate d') : Mono f := by
   have := isIso_of_nonDegenerate _ ⟨_, h⟩ (factorThruImage f)
@@ -59,7 +59,7 @@ lemma mem_skeleton_obj_iff_of_nonDegenerate
     obtain ⟨x, hx⟩ := x
     obtain ⟨⟨i, hi⟩, y, hy, ⟨f⟩, rfl⟩ := h
     dsimp at y hy f
-    have := mono_of_nonDegenerate y f hx
+    have := mono_of_nonDegenerate' y f hx
     have : d ≤ i := SimplexCategory.len_le_of_mono f
     omega
   · apply mem_skeleton
@@ -287,7 +287,7 @@ lemma isPullback : IsPullback (t i d) (m i d) (r i d) (b i d) where
   isLimit' := ⟨evaluationJointlyReflectsLimits _ (fun ⟨n⟩ ↦ by
     refine (isLimitMapConePullbackConeEquiv _ _).2
       (IsPullback.isLimit ?_)
-    induction' n using SimplexCategory.rec with n
+    induction n using SimplexCategory.rec with | _ n
     rw [Types.isPullback_iff]
     dsimp
     refine ⟨?_, ?_, ?_⟩
@@ -332,7 +332,7 @@ lemma exists_epi {n : ℕ} (y : (B i d) _⦋n⦌)
 lemma isPushout : IsPushout (t i d) (m i d) (r i d) (b i d) where
   w := w i d
   isColimit' := ⟨evaluationJointlyReflectsColimits _ (fun ⟨n⟩ ↦ by
-    induction' n using SimplexCategory.rec with n
+    induction n using SimplexCategory.rec with | _ n
     refine (isColimitMapCoconePushoutCoconeEquiv _ _).2
       (IsPushout.isColimit ?_)
     have := mono_r i d
@@ -348,9 +348,9 @@ lemma isPushout : IsPushout (t i d) (m i d) (r i d) (b i d) where
           Subtype.ext_iff] at h
       obtain rfl : x₁ = x₂ := by
         rw [Subtype.ext_iff]
-        exact Y.unique_nonDegenerate₂ _ f₁ x₁.1 rfl f₂ x₂.1 h'
+        exact Y.unique_nonDegenerate_simplex _ f₁ x₁.1 rfl f₂ x₂.1 h'
       obtain rfl : f₁ = f₂ :=
-        Y.unique_nonDegenerate₃ _ f₁ x₁.1 rfl f₂ x₁.1 h'
+        Y.unique_nonDegenerate_map _ f₁ x₁.1 rfl f₂ x₁.1 h'
       rfl)⟩
 
 end relativeCellComplexOfMono

@@ -110,8 +110,8 @@ noncomputable def fromPushoutProductCongr {K' L' A' B' : SSet.{u}} {f' : K' ⟶ 
     dsimp at this
     simp only [tensorHom_def, Category.assoc, whisker_exchange_assoc,
       ← MonoidalCategory.whiskerLeft_comp, this]
-  · simp [pushout.map_comp, ← tensor_comp]
-  · simp [pushout.map_comp, ← tensor_comp]
+  · simp [pushout.map_comp]
+  · simp [pushout.map_comp]
   · dsimp only [Arrow.mk_left, Arrow.mk_right, Functor.id_obj, Functor.id_map, Arrow.mk_hom,
       eq_mp_eq_cast, cast_eq, _root_.id_eq, eq_mpr_eq_cast, tensorIso_hom, Functor.mapIso_hom,
       Arrow.rightFunc_map]
@@ -127,8 +127,8 @@ noncomputable def fromPushoutProductιιIso (A : K.Subcomplex) (B : L.Subcomplex
   Arrow.isoMk (Subcomplex.unionProd.isPushout A B).isoPushout.symm (Iso.refl _)
 
 noncomputable abbrev ihomToPullback :
-    (ihom B).obj X ⟶ pullback ((ihom A).map p) ((pre i).app Y) :=
-  pullback.lift ((pre i).app X) ((ihom B).map p) (by simp)
+    (ihom B).obj X ⟶ pullback ((ihom A).map p) ((MonoidalClosed.pre i).app Y) :=
+  pullback.lift ((MonoidalClosed.pre i).app X) ((ihom B).map p) (by simp)
 
 variable {f i p} in
 @[simps]
@@ -269,7 +269,7 @@ end
 @[simps! hom_left inv_left hom_right]
 noncomputable def ihomToPullbackTerminalFromArrowIso (f : A ⟶ B) (Z : SSet.{u}) :
     Arrow.mk (ihomToPullback f (terminal.from Z)) ≅
-      Arrow.mk ((pre f).app Z) :=
+      Arrow.mk ((MonoidalClosed.pre f).app Z) :=
   Arrow.isoMk (Iso.refl _)
     { hom := pullback.fst _ _
       inv := pullback.lift (𝟙 _) (by
@@ -286,7 +286,7 @@ noncomputable def ihomToPullbackTerminalFromArrowIso (f : A ⟶ B) (Z : SSet.{u}
       inv_hom_id := by simp }
 
 instance {Z : SSet.{u}} (f : A ⟶ B) [Mono f] [IsFibrant Z] :
-    Fibration ((pre f).app Z) := by
+    Fibration ((MonoidalClosed.pre f).app Z) := by
   rw [HomotopicalAlgebra.fibration_iff]
   refine ((fibrations _).arrow_mk_iso_iff (ihomToPullbackTerminalFromArrowIso f Z)).1 ?_
   rw [← HomotopicalAlgebra.fibration_iff]
@@ -341,7 +341,7 @@ variable {t : A ⟶ X} {i : A ⟶ B} {p : X ⟶ Y} {b : B ⟶ Y} (sq : CommSq t 
 
 include sq in
 noncomputable def ihomToPullbackTgt₀Mk :
-    pullback ((ihom A).map p) ((pre i).app Y) _⦋0⦌ :=
+    pullback ((ihom A).map p) ((MonoidalClosed.pre i).app Y) _⦋0⦌ :=
   yonedaEquiv (pullback.lift (yonedaEquiv.symm (ihom₀Equiv.symm t))
       (yonedaEquiv.symm (ihom₀Equiv.symm b))
         (yonedaEquiv.injective (ihom₀Equiv.injective (by
@@ -350,28 +350,29 @@ noncomputable def ihomToPullbackTgt₀Mk :
 
 @[simp]
 lemma pullback_fst_app_ihomToPullbackTgt₀Mk :
-    (pullback.fst ((ihom A).map p) ((pre i).app Y)).app _
+    (pullback.fst ((ihom A).map p) ((MonoidalClosed.pre i).app Y)).app _
       (ihomToPullbackTgt₀Mk sq) = ihom₀Equiv.symm t := by
   apply yonedaEquiv.symm.injective
   simp [← yonedaEquiv_symm_comp, ihomToPullbackTgt₀Mk]
 
 @[simp]
 lemma pullback_snd_app_ihomToPullbackTgt₀Mk :
-    (pullback.snd ((ihom A).map p) ((pre i).app Y)).app _
+    (pullback.snd ((ihom A).map p) ((MonoidalClosed.pre i).app Y)).app _
       (ihomToPullbackTgt₀Mk sq) = ihom₀Equiv.symm b := by
   apply yonedaEquiv.symm.injective
   simp [← yonedaEquiv_symm_comp, ihomToPullbackTgt₀Mk]
 
-lemma ihomToPullbackTgt₀Mk_surjective (x : pullback ((ihom A).map p) ((pre i).app Y) _⦋0⦌) :
+lemma ihomToPullbackTgt₀Mk_surjective
+    (x : pullback ((ihom A).map p) ((MonoidalClosed.pre i).app Y) _⦋0⦌) :
     ∃ (t : A ⟶ X) (b : B ⟶ Y) (sq : CommSq t i p b),
       ihomToPullbackTgt₀Mk sq = x := by
-  refine ⟨ihom₀Equiv ((pullback.fst ((ihom A).map p) ((pre i).app Y)).app _ x),
-    ihom₀Equiv ((pullback.snd ((ihom A).map p) ((pre i).app Y)).app _ x), ⟨?_⟩, ?_⟩
+  refine ⟨ihom₀Equiv ((pullback.fst ((ihom A).map p) ((MonoidalClosed.pre i).app Y)).app _ x),
+    ihom₀Equiv ((pullback.snd ((ihom A).map p) ((MonoidalClosed.pre i).app Y)).app _ x), ⟨?_⟩, ?_⟩
   · apply ihom₀Equiv.symm.injective
     rw [ihom₀Equiv_symm_comp', Equiv.symm_apply_apply,
       ihom₀Equiv_symm_comp, Equiv.symm_apply_apply]
     exact congr_fun (congr_app (pullback.condition
-      (f := (ihom A).map p) (g := (pre i).app Y)) (op ⦋0⦌)) x
+      (f := (ihom A).map p) (g := (MonoidalClosed.pre i).app Y)) (op ⦋0⦌)) x
   · simp only [ihomToPullbackTgt₀Mk, Equiv.symm_apply_apply]
     apply yonedaEquiv.symm.injective
     simp only [Equiv.symm_apply_apply]
@@ -383,7 +384,7 @@ noncomputable abbrev ihomToPullbackFiber : ((ihom B).obj X).Subcomplex :=
 
 lemma range_le_ihomToPullbackFiber_iff {Z : SSet.{u}} (f : Z ⟶ (ihom B).obj X) :
     Subcomplex.range f ≤ ihomToPullbackFiber sq ↔
-      f ≫ (pre i).app X = SSet.const (ihom₀Equiv.symm t) ∧
+      f ≫ (MonoidalClosed.pre i).app X = SSet.const (ihom₀Equiv.symm t) ∧
       f ≫ (ihom B).map p = SSet.const (ihom₀Equiv.symm b) := by
   rw [ihomToPullbackFiber, ihomToPullbackTgt₀Mk, Subcomplex.le_fiber_iff, ihomToPullback,
     pullback.hom_ext_iff, Category.assoc, Category.assoc, pullback.lift_fst,
@@ -401,7 +402,7 @@ lemma range_le_ihomToPullbackFiber_iff {Z : SSet.{u}} (f : Z ⟶ (ihom B).obj X)
 
 lemma le_ihomToPullbackFiber_iff (Z : ((ihom B).obj X).Subcomplex) :
     Z ≤ ihomToPullbackFiber sq ↔
-      Z.ι ≫ (pre i).app X = SSet.const (ihom₀Equiv.symm t) ∧
+      Z.ι ≫ (MonoidalClosed.pre i).app X = SSet.const (ihom₀Equiv.symm t) ∧
       Z.ι ≫ (ihom B).map p = SSet.const (ihom₀Equiv.symm b) := by
   rw [← range_le_ihomToPullbackFiber_iff sq]
   simp only [Subcomplex.range_ι]
@@ -426,7 +427,7 @@ lemma ihomToPullbackFiber_ihom_map :
 
 @[reassoc (attr := simp)]
 lemma ihomToPullbackFiber_pre_app :
-    (ihomToPullbackFiber sq).ι ≫ (pre i).app X = SSet.const (ihom₀Equiv.symm t) :=
+    (ihomToPullbackFiber sq).ι ≫ (MonoidalClosed.pre i).app X = SSet.const (ihom₀Equiv.symm t) :=
   ((le_ihomToPullbackFiber_iff sq _).1 (by rfl)).1
 
 instance [Mono i] [Fibration p] :
@@ -438,7 +439,7 @@ end
 
 section
 
-instance (i : A ⟶ B) : IsIso ((pre i).app (⊤_ SSet)) :=
+instance (i : A ⟶ B) : IsIso ((MonoidalClosed.pre i).app (⊤_ SSet)) :=
   ⟨(IsTerminal.isTerminalObj _ _ terminalIsTerminal).from _,
     (IsTerminal.isTerminalObj _ _ terminalIsTerminal).hom_ext _ _,
     (IsTerminal.isTerminalObj _ _ terminalIsTerminal).hom_ext _ _⟩
@@ -456,7 +457,7 @@ instance (i : A ⟶ B) [Mono i] [IsFibrant X] :
         apply IsTerminal.hom_ext
         apply IsTerminal.isTerminalObj
         exact terminalIsTerminal }
-  have : h.π = (pre i).app X := by
+  have : h.π = (MonoidalClosed.pre i).app X := by
     apply h.isPullback.hom_ext
     · rw [h.π_fst]
       simp [h]

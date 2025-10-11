@@ -188,7 +188,7 @@ lemma sq : Sq (ofSimplex.{u} (yonedaEquiv diagonal))
     · exact Or.inr (mem_ofSimplex_obj _)
   min_eq := by
     ext ⟨k⟩ x
-    induction' k using SimplexCategory.rec with k
+    induction k using SimplexCategory.rec with | _ k
     obtain ⟨x, rfl⟩ := prodStdSimplex.objEquiv.symm.surjective x
     dsimp
     simp only [Set.mem_inter_iff, prodStdSimplex.mem_ofSimplex_iff,

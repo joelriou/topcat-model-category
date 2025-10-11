@@ -166,7 +166,7 @@ lemma comp_forget_hom_ext
     {f g : cosimp I₁ ⋙ forget _ ⟶ cosimp I₂ ⋙ forget _}
     (h : f.app ⦋1⦌ = g.app ⦋1⦌) : f = g := by
   ext n x
-  induction' n using SimplexCategory.rec with n
+  induction n using SimplexCategory.rec with | _ n
   dsimp
   apply Subtype.ext
   ext i

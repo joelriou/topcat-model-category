@@ -14,7 +14,7 @@ namespace π₀
 lemma congr_mk_map {n : SimplexCategoryᵒᵖ} (x : X.obj n) (α β : ⦋0⦌ ⟶ n.unop) :
     π₀.mk (X.map α.op x) = π₀.mk (X.map β.op x) := by
   obtain ⟨n⟩ := n
-  induction' n using SimplexCategory.rec with n
+  induction n using SimplexCategory.rec with | _ n
   let f (i : Fin (n + 1)) : X.π₀ := π₀.mk (X.map (⦋0⦌.const ⦋n⦌ i).op x)
   have hf (i : Fin n) : f i.castSucc = f i.succ := by
     refine π₀.sound (X.map (SimplexCategory.mkOfLe _ _ i.castSucc_le_succ).op x) ?_ ?_

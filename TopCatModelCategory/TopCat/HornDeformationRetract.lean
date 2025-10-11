@@ -5,6 +5,15 @@ open CategoryTheory MorphismProperty TopCat Simplicial HomotopicalAlgebra
 
 universe u
 
+lemma stdSimplex.subtypeMk_apply {X : Type*} [Fintype X]
+    (f : X → ℝ) (hf : f ∈ stdSimplex ℝ X) (x : X) :
+    (⟨f, hf⟩ : stdSimplex ℝ X) x = f x  := rfl
+
+@[continuity]
+lemma stdSimplex.continuous_apply {X : Type*} [Fintype X] (x : X) :
+    Continuous (fun (f : stdSimplex ℝ X) ↦ f x) :=
+  (_root_.continuous_apply x).comp continuous_subtype_val
+
 namespace TopCat
 
 variable (n : ℕ)
@@ -13,28 +22,28 @@ section
 
 variable (i : Fin (n + 1))
 
-protected def horn : Set (ToType ⦋n⦌ → ℝ≥0) :=
+protected def horn : Set (Fin (n + 1) → ℝ) :=
   (SSet.Subcomplex.toTopSet (SSet.stdSimplex.ιToTop.{0} n)).obj (SSet.horn.{0} n i)
 
 variable {n}
 
-lemma mem_horn_iff (f : ToType ⦋n⦌ → ℝ≥0) :
-    f ∈ TopCat.horn n i ↔ f ∈ ⦋n⦌.toTopObj ∧ ∃ (j : Fin (n + 1))
+lemma mem_horn_iff (f : Fin (n + 1) → ℝ) :
+    f ∈ TopCat.horn n i ↔ f ∈ stdSimplex ℝ (Fin (n + 1)) ∧ ∃ (j : Fin (n + 1))
       (_ : j ≠ i), f j = 0 := by
   simp only [TopCat.horn, SSet.horn_eq_iSup, SSet.Subcomplex.toTopSet_iSup,
     SSet.stdSimplex.toTopSet_obj_face_singleton_compl]
   aesop
 
-lemma mem_horn_iff' (f : ⦋n⦌.toTopObj) :
+lemma mem_horn_iff' (f : stdSimplex ℝ (Fin (n + 1))) :
     f.1 ∈ TopCat.horn n i ↔ ∃ (j : Fin (n + 1))
       (_ : j ≠ i), f j = 0 := by
   rw [mem_horn_iff]
   aesop
 
-lemma horn_le_toTopObj : TopCat.horn n i ⊆ ⦋n⦌.toTopObj :=
+lemma horn_le_toTopObj : TopCat.horn n i ⊆ stdSimplex ℝ (Fin (n + 1)) :=
   (SSet.Subcomplex.toTopSet_obj_subset _ _).trans (by simp)
 
-def horn.ι : of (TopCat.horn n i) ⟶ of (⦋n⦌.toTopObj) :=
+def horn.ι : of (TopCat.horn n i) ⟶ of (stdSimplex ℝ (Fin (n + 1))) :=
   ofHom ⟨fun ⟨x, hx⟩ ↦ ⟨x, horn_le_toTopObj i hx⟩, by continuity⟩
 
 end
@@ -114,7 +123,10 @@ lemma μ_eq_zero (f : TopCat.horn (n + 1) i) :
     obtain ⟨_, ⟨j, hj, hj'⟩⟩ := hf
     simp only [Finset.mem_image, Finset.mem_compl, Finset.mem_singleton]
     refine ⟨j, hj, by simpa⟩
-  · simp
+  · simp only [Finset.le_min'_iff, Finset.mem_image, Finset.mem_compl, Finset.mem_singleton,
+      forall_exists_index, and_imp, forall_apply_eq_imp_iff₂]
+    intro j hj
+    apply (horn_le_toTopObj _ f.2).1
 
 -- FIXME: v(i) should be -(n + 1)...
 def v : ToType ⦋n + 1⦌ → ℝ :=
@@ -139,68 +151,49 @@ noncomputable def h' : (ToType ⦋n + 1⦌ → ℝ) × TopCat.I.{u} → (ToType 
   fun ⟨f, t⟩ j ↦ f j - TopCat.I.toℝ (TopCat.I.symm t) * μ i f * v i j
 
 @[simps! hom]
-noncomputable def h : of ⦋n + 1⦌.toTopObj ⊗ I ⟶ of ⦋n + 1⦌.toTopObj :=
-  ofHom ⟨fun ⟨f, t⟩ ↦ ⟨fun j ↦ ⟨f j - TopCat.I.toℝ (TopCat.I.symm t) *
-      μ i (fun k ↦ (f.1 k).1) * v i j, by
-    obtain ⟨j₀, hj₀, hj₀'⟩ := exists_eq_μ i (fun k ↦ (f.1 k))
-    by_cases hij : j = i
-    · erw [← hj₀']
-      subst hij
-      rw [v_eq, mul_neg, sub_neg_eq_add]
-      exact add_nonneg (f.1 j).2 (mul_nonneg
-        (mul_nonneg (I.symm t).1.2.1 (f.1 j₀).2) (by linarith))
-    · rw [v_eq_one hij, mul_one, sub_nonneg]
-      refine le_trans ?_ (μ_le (fun k ↦ f.1 k) hij)
-      refine mul_le_of_le_one_left ?_ (I.symm t).1.2.2
-      erw [← hj₀']
-      exact (f.1 j₀).2⟩, by
-      ext
-      let coeℝ : ℝ≥0 →+ ℝ := AddMonoidHom.mk' (fun (x : ℝ≥0) ↦ x.1) (by aesop)
-      apply (map_sum coeℝ _ _).trans
-      have hf := f.2
-      simp only [SimplexCategory.toTopObj, Set.mem_setOf_eq] at hf
-      rw [Subtype.ext_iff] at hf
-      replace hf := (map_sum coeℝ _ _).symm.trans hf
-      dsimp [coeℝ] at hf ⊢
-      simp only [Finset.sum_sub_distrib, hf, sub_eq_self]
-      rw [← Finset.mul_sum]
-      erw [sum_v i]
-      rw [mul_zero]⟩, by
-    apply Continuous.subtype_mk
-    apply continuous_pi
-    intro j
-    apply Continuous.subtype_mk
-    apply Continuous.sub
-    · apply Continuous.comp'
-      · apply continuous_induced_dom
-      · exact (continuous_apply j).comp (Continuous.fst' continuous_subtype_val)
-    · apply Continuous.mul
-      · apply Continuous.mul
-        · continuity
-        · apply Continuous.comp'
-          · apply TopCat.horn.continuous_μ
-          · apply continuous_pi
-            intro j
-            apply Continuous.comp'
-            · apply continuous_induced_dom
-            · exact (continuous_apply j).comp (Continuous.fst' continuous_subtype_val)
-      · exact continuous_const⟩
+noncomputable def h : of (stdSimplex ℝ (Fin (n + 2))) ⊗ I ⟶ of (stdSimplex ℝ (Fin (n + 2))) :=
+  ofHom ⟨fun ⟨f, t⟩ ↦ ⟨fun j ↦ f j - TopCat.I.toℝ (TopCat.I.symm t) * μ i f * v i j, by
+    obtain ⟨j₀, hj₀, hj₀'⟩ := exists_eq_μ i f
+    dsimp
+    constructor
+    · intro j
+      by_cases hij : j = i
+      · erw [← hj₀']
+        subst hij
+        dsimp
+        rw [v_eq, mul_neg, sub_neg_eq_add]
+        exact add_nonneg (by simp) (mul_nonneg (mul_nonneg (I.symm t).1.2.1 (by simp))
+          (by positivity))
+      · dsimp
+        rw [v_eq_one hij, mul_one, sub_nonneg]
+        refine le_trans ?_ (μ_le (fun k ↦ f.1 k) hij)
+        refine mul_le_of_le_one_left ?_ (I.symm t).1.2.2
+        rw [← hj₀']
+        simp
+    · simp only [Finset.sum_sub_distrib, stdSimplex.sum_eq_one, sub_eq_self,
+        ← Finset.mul_sum, sum_v, mul_zero]⟩, by
+      have (j : Fin (n + 2)) :
+        Continuous (fun (x : stdSimplex ℝ (Fin (n + 2)) × I.{0}) ↦ x.1 j) :=
+          (stdSimplex.continuous_apply _).comp (by continuity)
+      continuity⟩
 
 lemma hi (f : TopCat.horn (n + 1) i) (t : TopCat.I) (j : ToType ⦋n + 1⦌):
     h i ⟨⟨f.1, horn_le_toTopObj i f.2⟩, t⟩ j = f.1 j := by
-  aesop
+  simp [h]
+  dsimp [DFunLike.coe]
+  simp [μ_eq_zero _ f]
 
-noncomputable def r : of ⦋n + 1⦌.toTopObj ⟶ of (TopCat.horn (n + 1) i) :=
+noncomputable def r : of (stdSimplex ℝ (Fin (n + 2))) ⟶ of (TopCat.horn (n + 1) i) :=
   ofHom ⟨fun f ↦ ⟨h i ⟨f, 0⟩, by
     rw [mem_horn_iff]
     refine ⟨(h i ⟨f, 0⟩).2, ?_⟩
-    obtain ⟨j, hij, hj⟩ := exists_eq_μ i (fun k ↦ f.1 k)
-    exact ⟨j, hij, by simp [hj, v_eq_one hij]⟩⟩, by
+    obtain ⟨j, hij, hj⟩ := exists_eq_μ i f
+    exact ⟨j, hij, by simp [stdSimplex.subtypeMk_apply, hj, v_eq_one hij]⟩⟩, by
       apply Continuous.subtype_mk
       exact Continuous.comp continuous_subtype_val (ι₀ ≫ h i).hom.2⟩
 
 noncomputable def deformationRetractι : TopCat.DeformationRetract
-    (of (TopCat.horn (n + 1) i)) (of ⦋n + 1⦌.toTopObj) where
+    (of (TopCat.horn (n + 1) i)) (of (stdSimplex ℝ (Fin (n + 2)))) where
   i := horn.ι i
   h := h i
   r := r i
@@ -211,7 +204,7 @@ noncomputable def deformationRetractι : TopCat.DeformationRetract
     ext x : 4
     dsimp
     rw [ι₁_apply]
-    simp
+    simp [stdSimplex.subtypeMk_apply]
 
 def deformationRetracts_ι : TopCat.deformationRetracts (horn.ι i) :=
   ⟨deformationRetractι i, rfl⟩
