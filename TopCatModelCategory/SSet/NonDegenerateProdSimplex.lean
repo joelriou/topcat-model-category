@@ -264,7 +264,7 @@ lemma subsimplex_le_subsimplex_iff {n m : ℕ}
   · intro h
     simpa [subsimplex_obj_zero] using h (op ⦋0⦌)
   · rintro h ⟨k⟩ x
-    induction' k using SimplexCategory.rec with k
+    induction k using SimplexCategory.rec with | _ k
     simp only [mem_subsimplex_iff]
     intro h'
     exact h'.trans h

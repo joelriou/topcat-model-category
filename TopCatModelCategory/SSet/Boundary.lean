@@ -192,8 +192,8 @@ lemma exists_isPushout_of_ne_top {X : SSet.{u}} (A : X.Subcomplex) (hA : A ≠ �
   apply hA
   ext ⟨n⟩ : 2
   simp only [Subpresheaf.top_obj, Set.top_eq_univ, Set.eq_univ_iff_forall]
-  induction' n using SimplexCategory.rec with n
-  induction' n using Nat.strong_induction_on with n hn
+  induction n using SimplexCategory.rec with | _ n
+  induction n using Nat.strong_induction_on with | _ n hn
   by_contra!
   obtain ⟨x, hx⟩ := this
   have hx' : x ∈ X.nonDegenerate _ := fun hx' ↦ by
@@ -237,7 +237,7 @@ lemma exists_isPushout_of_ne_top {X : SSet.{u}} (A : X.Subcomplex) (hA : A ≠ �
     obtain hy | ⟨z, hz⟩ := hy
     · exact Or.inl ⟨y, hy, rfl⟩
     · exact Or.inr ⟨stdSimplex.objEquiv.symm z.unop, by rwa [Subtype.ext_iff]⟩
-  · induction' m using SimplexCategory.rec with m
+  · induction m using SimplexCategory.rec with | _ m
     intro x₃ y₃ hx₃ hy₃ h
     simp only [Set.mem_range, Subpresheaf.ι_app, Subtype.exists,
       exists_prop, exists_eq_right] at hx₃ hy₃
@@ -250,7 +250,7 @@ lemma exists_isPushout_of_ne_top {X : SSet.{u}} (A : X.Subcomplex) (hA : A ≠ �
     have : Epi ψ := by
       rw [SimplexCategory.epi_iff_surjective]
       exact not_not.1 hy₃
-    obtain rfl := X.unique_nonDegenerate₃ _ φ ⟨x, hx'⟩ rfl ψ ⟨x, hx'⟩ h
+    obtain rfl := X.unique_nonDegenerate_map _ φ ⟨x, hx'⟩ rfl ψ ⟨x, hx'⟩ h
     rfl
 
 section

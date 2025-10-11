@@ -341,9 +341,9 @@ variable (f : X ⟶ Y)
 
 attribute [local simp] FunctorToTypes.naturality
 
-abbrev Subcomplex.range : Y.Subcomplex := Subpresheaf.range f
+/-abbrev Subcomplex.range : Y.Subcomplex := Subpresheaf.range f
 
-/-@[simps]
+@[simps]
 def Subcomplex.range : Y.Subcomplex where
   obj Δ := Set.range (f.app Δ)
   map := by
@@ -506,12 +506,12 @@ lemma ofSimplex_le_iff {n : ℕ} (x : X _[n]) (A : X.Subcomplex) :
     apply mem_ofSimplex_obj
   · rintro h m _ ⟨y, rfl⟩
     obtain ⟨f, rfl⟩ := (standardSimplex.objEquiv _ _).symm.surjective y
-    exact A.map f.op h-/
+    exact A.map f.op h
 
 lemma mem_ofSimplex_obj_iff {n : ℕ} (x : X _⦋n⦌) {m : SimplexCategoryᵒᵖ} (y : X.obj m) :
     y ∈ (ofSimplex x).obj m ↔ ∃ (f : m.unop ⟶ ⦋n⦌), X.map f.op x = y := by
   simp [ofSimplex, Subpresheaf.ofSection]
-  aesop
+  aesop-/
 
 lemma le_ofSimplex_iff (x : X _⦋0⦌) (A : X.Subcomplex) :
     A ≤ ofSimplex x ↔ A.ι = const x := by

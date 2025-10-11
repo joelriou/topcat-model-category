@@ -1,4 +1,4 @@
-jriou-model-category-prerequisites-bump
+jriou-model-category-prerequisites
 
 -- merged to mathlib
 sset-category-with-fibrations #26169
@@ -14,6 +14,7 @@ jriou-is-stable-under-transfinite-composition-argument #26030
 lifting-property-fixed-bot #28489
 sset-simplices #28034
 
--- migrated to fork
+--
 jriou-types-mono #28219
+refactor-topological-simplex2 #28893
 

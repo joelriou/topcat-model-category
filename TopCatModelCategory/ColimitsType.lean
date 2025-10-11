@@ -8,7 +8,6 @@ import Mathlib.CategoryTheory.Limits.Types.Limits
 import Mathlib.CategoryTheory.MorphismProperty.Limits
 import Mathlib.Order.CompleteLattice.MulticoequalizerDiagram
 import Mathlib.Data.Set.Lattice
-import Mathlib.Data.Set.FunctorToTypes
 import TopCatModelCategory.Multiequalizer
 
 universe w v u

@@ -220,7 +220,7 @@ namespace Subcomplex
 
 variable {X} (A : X.Subcomplex)
 
-lemma mem_degenerate_iff {n : ℕ} (x : A.obj (op (.mk n))) :
+/-lemma mem_degenerate_iff {n : ℕ} (x : A.obj (op (.mk n))) :
     x ∈ degenerate A n ↔ x.1 ∈ X.degenerate n := by
   rw [SSet.mem_degenerate_iff, SSet.mem_degenerate_iff]
   constructor
@@ -243,7 +243,7 @@ lemma le_iff_contains_nonDegenerate (B : X.Subcomplex) :
   constructor
   · aesop
   · rintro h ⟨n⟩ x hx
-    induction' n using SimplexCategory.rec with n
+    induction n using SimplexCategory.rec with | _ n
     obtain ⟨m, f, _, ⟨a, ha⟩, ha'⟩ := exists_nonDegenerate A ⟨x, hx⟩
     simp only [Subpresheaf.toPresheaf_obj, Subtype.ext_iff,
       Subpresheaf.toPresheaf_map_coe] at ha'
@@ -275,7 +275,7 @@ lemma iSup_ofSimplex_nonDegenerate_eq_top :
   intro n x hx
   simp only [Subpresheaf.iSup_obj, Set.mem_iUnion, Sigma.exists,
     Subtype.exists, exists_prop]
-  exact ⟨n, x, hx, mem_ofSimplex_obj x⟩
+  exact ⟨n, x, hx, mem_ofSimplex_obj x⟩-/
 
 end Subcomplex
 
@@ -288,7 +288,7 @@ lemma degenerate_map {n : ℕ} {x : X _⦋n⦌} (hx : x ∈ X.degenerate n) (f :
   obtain ⟨m, hm, g, y, rfl⟩ := hx
   exact ⟨m, hm, g, f.app _ y, by rw [FunctorToTypes.naturality]⟩
 
-lemma degenerate_le_preimage (f : X ⟶ Y) (n : ℕ) :
+/-lemma degenerate_le_preimage (f : X ⟶ Y) (n : ℕ) :
     X.degenerate n ⊆ Set.preimage (f.app _) (Y.degenerate n) :=
   fun _ hx ↦ degenerate_map hx f
 
@@ -315,11 +315,11 @@ def nonDegenerateEquivOfIso (e : X ≅ Y) (n : ℕ) :
   toFun := fun ⟨x, hx⟩ ↦ ⟨e.hom.app _ x, by aesop⟩
   invFun := fun ⟨y, hy⟩ ↦ ⟨e.inv.app _ y, by aesop⟩
   left_inv _ := by aesop
-  right_inv _ := by aesop
+  right_inv _ := by aesop-/
 
 end
 
-variable {X} in
+/-variable {X} in
 lemma degenerate_iff_of_mono {Y : SSet.{u}} (f : X ⟶ Y) [Mono f] (x : X _⦋n⦌) :
     f.app _ x ∈ Y.degenerate n ↔ x ∈ X.degenerate n := by
   rw [← degenerate_iff_of_isIso (toRangeSubcomplex f) x,
@@ -329,7 +329,7 @@ lemma degenerate_iff_of_mono {Y : SSet.{u}} (f : X ⟶ Y) [Mono f] (x : X _⦋n�
 variable {X} in
 lemma nonDegenerate_iff_of_mono {Y : SSet.{u}} (f : X ⟶ Y) [Mono f] (x : X _⦋n⦌) :
     f.app _ x ∈ Y.nonDegenerate n ↔ x ∈ X.nonDegenerate n := by
-  simp only [mem_nonDegenerate_iff_notMem_degenerate, degenerate_iff_of_mono]
+  simp only [mem_nonDegenerate_iff_notMem_degenerate, degenerate_iff_of_mono]-/
 
 lemma eq_of_degenerate_of_δ_eq
     {X : SSet.{u}} {n : ℕ} {x y : X _⦋n + 1⦌} (hx : x ∈ X.degenerate (n + 1))

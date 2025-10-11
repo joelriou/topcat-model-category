@@ -24,7 +24,7 @@ lemma mono_iff_of_strictSegal [IsStrictSegal X] :
   rw [NatTrans.mono_iff_mono_app]
   simp only [mono_iff_injective]
   refine ⟨fun hf ↦ hf _, fun hf ⟨k⟩ ↦ ?_⟩
-  induction' k using SimplexCategory.rec with k
+  induction k using SimplexCategory.rec with | _ k
   obtain _ | k := k
   · intro x y h
     apply σ_injective 0

@@ -6,9 +6,9 @@ universe u
 
 open CategoryTheory Simplicial Limits Opposite
 
-@[simp]
+/-@[simp]
 lemma SSet.id_app {X : SSet.{u}} {n : SimplexCategoryᵒᵖ} (x : X.obj n) :
-    NatTrans.app (𝟙 X) n x = x := rfl
+    NatTrans.app (𝟙 X) n x = x := rfl-/
 
 lemma Quiver.Hom.op_surjective {C : Type*} [Quiver C] {X Y : Cᵒᵖ} (f : X ⟶ Y) :
     ∃ (g : Y.unop ⟶ X.unop), f = g.op := ⟨f.unop, rfl⟩
@@ -29,7 +29,7 @@ lemma SimplexCategory.exists_mono_fac {n m : SimplexCategory} (f : n ⟶ m) :
     ∃ (d : ℕ) (p : n ⟶ ⦋d⦌) (i : ⦋d⦌ ⟶ m), Epi p ∧ Mono i ∧ p ≫ i = f := by
   suffices ∃ (d : SimplexCategory) (p : n ⟶ d) (i : d ⟶ m), Epi p ∧ Mono i ∧ p ≫ i = f by
     obtain ⟨d, p, i, _, _, fac⟩ := this
-    induction' d using SimplexCategory.rec with d
+    induction d using SimplexCategory.rec with | _ d
     exact ⟨d, p, i, inferInstance, inferInstance, fac⟩
   exact ⟨_, _, _, inferInstance, inferInstance, image.fac f⟩
 
@@ -262,7 +262,7 @@ lemma existsUnique_toNπ' {x : X.S} {y : X.N} (hy : x.toN = y) :
     rw [← N.subcomplex_injective_iff, hy]
     exact subcomplex_eq_of_epi _ _ f rfl
   exact existsUnique_of_exists_of_unique ⟨f, inferInstance, rfl⟩
-    (fun f₁ f₂ ⟨_, hf₁⟩ ⟨_, hf₂⟩ ↦ unique_nonDegenerate₃ _ _ _ _ hf₁.symm _ _ hf₂.symm)
+    (fun f₁ f₂ ⟨_, hf₁⟩ ⟨_, hf₂⟩ ↦ unique_nonDegenerate_map _ _ _ _ hf₁.symm _ _ hf₂.symm)
 
 section
 
@@ -382,13 +382,13 @@ lemma descApp_apply' (x : X.N) :
 
 noncomputable def desc : X ⟶ s.pt where
   app := fun ⟨n⟩ ↦ by
-    induction' n using SimplexCategory.rec with n
+    induction n using SimplexCategory.rec with | _ n
     exact descApp _
   naturality := by
     rintro ⟨n⟩ ⟨m⟩ f
     obtain ⟨f, rfl⟩ := Quiver.Hom.op_surjective f
-    induction' n using SimplexCategory.rec with n
-    induction' m using SimplexCategory.rec with m
+    induction n using SimplexCategory.rec with | _ n
+    induction m using SimplexCategory.rec with | _ m
     dsimp [SimplexCategory.rec]
     ext x
     dsimp [descApp]

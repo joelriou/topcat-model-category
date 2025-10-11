@@ -198,7 +198,7 @@ lemma upper_bound : ∃ δ > 0, ∀ (u : E), ‖u‖ < δ → sup X v - ε ≤ s
     simp only [Metric.mem_ball, dist_zero_right, m, norm_smul,
       norm_div, norm_mul, Real.norm_eq_abs]
     rw [abs_of_nonneg hμ₀.le, abs_of_nonneg hε₀.le, abs_of_nonneg (by grind)]
-    exact ((mul_lt_mul_left h).2 hu).trans hδ₂)
+    exact ((mul_lt_mul_iff_right₀ h).2 hu).trans hδ₂)
   convert hX₁ (sup_mem_set hX₂ hX₃ v).2 hm
     (a := (μ - ε) / μ) (div_nonneg (by grind) hμ₀.le)
     (div_nonneg hε₀.le hμ₀.le) (by grind) using 1
@@ -239,7 +239,7 @@ lemma lower_bound : ∃ δ > 0, ∀ (u : E), ‖u‖ < δ → sup X (v + u) ≤ 
   have hm : m ∈ X := hα (by
     simp only [Metric.mem_ball, dist_zero_right, m, neg_smul, norm_neg, norm_smul,
       Real.norm_eq_abs, abs_of_pos hβ₀]
-    exact lt_of_lt_of_le ((mul_lt_mul_left hβ₀).2 hu) hδ₂)
+    exact lt_of_lt_of_le ((mul_lt_mul_iff_right₀ hβ₀).2 hu) hδ₂)
   convert hX₁ hu' hm (a := (2 * μ + ε) / (2 * (μ + ε))) (b := ε / (2 * (μ + ε)))
     (by positivity) (by positivity) (by grind) using 1
   have : (2 * μ + ε) / (2 * (μ + ε)) * (μ + ε) = μ + 2⁻¹ * ε := by

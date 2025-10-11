@@ -112,6 +112,7 @@ noncomputable def unitBallHomeo :
         intro hv'
         grind
       field_simp
+      simp
     · rw [one_smul]
   right_inv u := by
     simp [smul_smul, norm_smul]
@@ -119,6 +120,7 @@ noncomputable def unitBallHomeo :
     trans (1 : ℝ) • u
     · congr 1
       field_simp
+      simp
     · rw [one_smul]
   continuous_toFun := by
     exact Continuous.smul (Continuous.inv₀ (by continuity) (by simp; grind)) continuous_subtype_val

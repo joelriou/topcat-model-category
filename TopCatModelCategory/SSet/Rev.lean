@@ -68,9 +68,6 @@ def revEquivalence : SimplicialObject C ≌ SimplicialObject C where
   inverse := revFunctor
   unitIso := revFunctorCompRevFunctor.symm
   counitIso := revFunctorCompRevFunctor
-  functor_unitIso_comp X := by
-    ext
-    simp [Functor.whiskeringLeftObjIdIso, Functor.whiskeringLeftObjCompIso]
 
 end SimplicialObject
 

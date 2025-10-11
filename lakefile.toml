@@ -8,5 +8,5 @@ name = "TopCatModelCategory"
 [[require]]
 name = "mathlib"
 git = "https://github.com/joelriou/mathlib4.git"
-rev = "fdac0ecbe4f6d7ecc392445c318c4010ce345658"
+rev = "81294d19f6d4dbb251bfabc5072cf0cfdd239863"
 

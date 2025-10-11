@@ -46,7 +46,7 @@ lemma Subcomplex.natCard_n_lt_of_ne_top [X.IsFinite] (A : X.Subcomplex)
 
 instance [X.IsFinite] : WellFoundedLT X.Subcomplex where
   wf := by
-    rw [WellFounded.wellFounded_iff_no_descending_seq]
+    rw [wellFounded_iff_isEmpty_descending_chain]
     exact ⟨fun ⟨f, hf⟩ ↦
       not_strictAnti_of_wellFoundedLT (fun n ↦ Nat.card (f n).toSSet.N)
         (strictAnti_nat_of_succ_lt (fun n ↦ Subcomplex.strictMono_card_n (hf n)))⟩
@@ -61,27 +61,28 @@ lemma finite_induction
       ⦃b : Δ[n] ⟶ X⦄ (_ : IsPushout a ∂Δ[n].ι i b) [X.IsFinite], P X₀ → P X)
     (X : SSet.{u}) [X.IsFinite] : P X := by
   generalize hd : Nat.card X.N = d
-  induction' d using Nat.strong_induction_on with d hd' generalizing X
+  induction d using Nat.strong_induction_on generalizing X with | _ d hd'
   have hX (A : X.Subcomplex) (hA : A ≠ ⊤) : P A := by
     subst hd
     exact hd' _ (A.natCard_n_lt_of_ne_top hA) _ rfl
   clear d hd' hd
   obtain ⟨n, hn⟩ := X.hasDimensionLT_of_isFinite
-  induction' n using Nat.strong_induction_on with n hn'
+  induction n using Nat.strong_induction_on with | _ n hn'
   obtain _ | n := n
   · apply hP₀
   · by_cases hn : X.HasDimensionLT n
     · exact hn' n (by omega) hn
     · obtain ⟨x, hx⟩ : Nonempty (X.nonDegenerate n) := by
         by_contra!
-        simp only [nonempty_subtype, not_exists] at this
         apply hn
         constructor
         intro d hd
         obtain hd | rfl := hd.lt_or_eq
-        · exact X.degenerate_eq_top_of_hasDimensionLT (n + 1) d (by omega)
+        · apply X.degenerate_eq_top_of_hasDimensionLT (n + 1) d (by omega)
         · ext x
-          simpa [mem_degenerate_iff_notMem_nonDegenerate] using this x
+          simp at this ⊢
+          rw [mem_degenerate_iff_notMem_nonDegenerate, this]
+          simp
       let A : X.Subcomplex := ⨆ (s : ({N.mk x hx}ᶜ : Set _)), s.1.subcomplex
       have hA' : x ∉ A.obj _ := fun hA' ↦ by
         simp only [A, Subpresheaf.iSup_obj, Set.iUnion_coe_set, Set.mem_compl_iff,

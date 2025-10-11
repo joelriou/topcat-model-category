@@ -1,4 +1,5 @@
 import TopCatModelCategory.SSet.StandardSimplex
+import Mathlib.Data.Finite.Sigma
 
 universe u
 
@@ -58,7 +59,7 @@ lemma hasDimensionLT_of_isFinite [X.IsFinite] :
 
 instance [X.IsFinite] (n : SimplexCategoryᵒᵖ) : Finite (X.obj n) := by
   obtain ⟨n⟩ := n
-  induction' n using SimplexCategory.rec with n
+  induction n using SimplexCategory.rec with | _ n
   let φ : (Σ (m : Fin (n + 1)) (f : ⦋n⦌ ⟶ ⦋m.1⦌),
     X.nonDegenerate m.1) → X _⦋n⦌ := fun ⟨m, f, x⟩ ↦ X.map f.op x.1
   have hφ : Function.Surjective φ := fun x ↦ by

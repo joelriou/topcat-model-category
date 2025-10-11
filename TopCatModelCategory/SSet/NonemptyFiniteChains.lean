@@ -106,7 +106,7 @@ variable {X}
 lemma mem_nonDegenerate_iff {n : ℕ} (s : (nerve X) _⦋n⦌) :
     s ∈ (nerve X).nonDegenerate n ↔ StrictMono s.obj := by
   obtain _ | n := n
-  · simp only [nerve_obj, SimplexCategory.len_mk, SSet.nondegenerate_zero, Set.top_eq_univ,
+  · simp only [nerve_obj, SimplexCategory.len_mk, SSet.nondegenerate_zero,
       Set.mem_univ, Nat.reduceAdd, true_iff]
     intro a b h
     fin_cases a

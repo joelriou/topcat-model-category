@@ -48,7 +48,7 @@ lemma subcomplexRev_iSup {n : SimplexCategory} {ι : Type*}
 lemma subcomplexRev_face {n : ℕ} (S : Finset (Fin (n + 1))) :
     subcomplexRev (face S) = face (Finset.image Fin.rev S) := by
   ext ⟨d⟩ x
-  induction' d using SimplexCategory.rec with d
+  induction d using SimplexCategory.rec with | _ d
   simp [mem_subcomplexRev_obj_iff]
   refine ⟨fun hx i ↦ ?_, fun hx i ↦ ?_⟩
   · exact ⟨_, hx i.rev, by simp⟩
