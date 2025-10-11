@@ -11,11 +11,9 @@ category-theory-limits-yoneda-ulift #27576
 sset-nondegenerate2 #26076
 simplex-category-better-len-lemmas #27968
 jriou-is-stable-under-transfinite-composition-argument #26030
+lifting-property-fixed-bot #28489
+sset-simplices #28034
 
 -- migrated to fork
 jriou-types-mono #28219
-lifting-property-fixed-bot #28489
-
--- to cleanup ?
-sset-simplices #28034
 
