@@ -9,8 +9,14 @@ open Simplicial CategoryTheory HomotopicalAlgebra Limits
 
 namespace stdSimplex
 
-def interior (X : Type*) [Fintype X]: Set (stdSimplex ℝ X) :=
+def interior (X : Type*) [Fintype X] : Set (stdSimplex ℝ X) :=
   setOf (fun x ↦ ∀ i, 0 < x i)
+
+lemma notMem_interior_iff {X : Type*} [Fintype X]
+    (f : stdSimplex ℝ X) :
+    f ∉ interior X ↔ ∃ i, f i = 0 := by
+  simp [interior]
+  exact ⟨fun ⟨i, hi⟩ ↦ ⟨i, le_antisymm hi (by simp)⟩, fun ⟨i, hi⟩ ↦ ⟨i, by rw [hi]⟩⟩
 
 def toTopMap_mem_interior {n m : SimplexCategory} (f : n ⟶ m) [hf : Epi f]
     (x : stdSimplex ℝ (Fin (n.len + 1)))
@@ -58,61 +64,55 @@ lemma toTopHomeo_apply_eq_zero_iff {n : ℕ} (x : (|Δ[n]| : Type u)) (i : Fin (
   · rw [range_toTop_map_face_singleton_compl]
     obtain ⟨x, rfl⟩ := ⦋n + 1⦌.toTopHomeo.symm.surjective x
     simp only [Homeomorph.apply_symm_apply, Set.mem_range]
-    sorry
-    /-trans ∃ (y : ⦋n⦌.toTopObj), toTopMap (δ i) y = x
+    trans ∃ (y : stdSimplex ℝ (Fin (n + 1))), stdSimplex.map (δ i) y = x
     · constructor
       · intro hx
-        let y (j : Fin (n + 1)) : ℝ≥0 := x (Fin.succAbove i j)
-        refine ⟨⟨y, ?_⟩, ?_⟩
-        · simp [toTopObj, y]
+        refine ⟨⟨fun j ↦ x (i.succAbove j), by simp, ?_⟩, ?_⟩
+        · dsimp
           trans ∑ (j ∈ {i}ᶜ), x j
           · exact Finset.sum_of_injOn i.succAbove (by simp) (by simp)
               (by simp; tauto) (by simp)
-          · have := x.2
-            simp only [toTopObj, Set.mem_setOf_eq] at this
-            rw [← this]
-            convert Finset.sum_compl_add_sum (s := {i}) (f := x)
-            simpa
-        · ext j : 2
-          dsimp [ToType] at j ⊢
-          by_cases hj : j < i
-          · obtain ⟨j, rfl⟩ := Fin.eq_castSucc_of_ne_last (Fin.ne_last_of_lt hj)
-            dsimp [y]
-            rw [Finset.sum_eq_single (a := j), Fin.succAbove_of_castSucc_lt i j hj]
-            · simp
-              intro b hb hb'
-              exact (hb' (Fin.succAbove_right_injective
-                (hb.trans (Fin.succAbove_of_castSucc_lt i j hj).symm))).elim
-            · simp
-              intro h
-              change Fin.succAbove _ _ ≠ _ at h
-              rw [Fin.succAbove_of_castSucc_lt _ _ hj] at h
-              tauto
-          · simp only [not_lt] at hj
-            obtain hj | hj := hj.lt_or_eq
-            · obtain ⟨j, rfl⟩ := Fin.eq_succ_of_ne_zero (Fin.ne_zero_of_lt hj)
-              simp [y]
-              rw [Finset.sum_eq_single (a := j), Fin.succAbove_of_lt_succ _ _ hj]
-              · simp
-                intro b hb hb'
-                exact (hb' (Fin.succAbove_right_injective
-                  (hb.trans (Fin.succAbove_of_lt_succ i j hj).symm))).elim
-              · simp
-                intro h
-                change Fin.succAbove _ _ ≠ _ at h
-                rw [Fin.succAbove_of_lt_succ _ _ hj] at h
-                tauto
-            · subst hj
-              simp [y]
-              rw [hx, Finset.sum_eq_zero]
-              simp
-              intro x hx
-              exact (Fin.succAbove_ne _ _ hx).elim
-      · rintro ⟨x, rfl⟩
-        simp only [toTopMap, len_mk, Finset.sum_eq_zero_iff, Finset.mem_filter, Finset.mem_univ,
-          true_and]
-        rintro j hj
-        exact (Fin.succAbove_ne _ _ hj).elim
+          · dsimp at hx
+            simpa [hx] using Finset.sum_compl_add_sum (s := {i}) (f := x)
+        · ext k
+          dsimp at hx k ⊢
+          rw [FunOnFinite.linearMap_apply_apply]
+          obtain hk | rfl | hk := lt_trichotomy k i
+          · obtain ⟨k, rfl⟩ := k.eq_castSucc_of_ne_last (Fin.ne_last_of_lt hk)
+            rw [Finset.sum_eq_single (a := k)]
+            · dsimp only [DFunLike.coe]
+              rw [Fin.succAbove_of_castSucc_lt _ _ hk]
+            · intro l hl hl'
+              exfalso
+              apply hl'
+              rw [← Fin.succAbove_right_inj (p := i),
+                Fin.succAbove_of_castSucc_lt _ _ hk]
+              simpa using hl
+            · intro hk'
+              exact (hk' (by simpa using Fin.succAbove_of_castSucc_lt _ _ hk)).elim
+          · simp only [hx]
+            apply Finset.sum_eq_zero
+            intro i hi
+            simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hi
+            exact (Fin.succAbove_ne _ _ hi).elim
+          · obtain ⟨k, rfl⟩ := k.eq_succ_of_ne_zero (Fin.ne_zero_of_lt hk)
+            rw [Finset.sum_eq_single (a := k)]
+            · dsimp only [DFunLike.coe]
+              rw [Fin.succAbove_of_lt_succ _ _ hk]
+            · intro l hl hl'
+              exfalso
+              apply hl'
+              rw [← Fin.succAbove_right_inj (p := i),
+                Fin.succAbove_of_lt_succ _ _ hk]
+              simpa using hl
+            · intro hk'
+              exact (hk' (by simpa using Fin.succAbove_of_lt_succ _ _ hk)).elim
+      · rintro ⟨y, rfl⟩
+        simp [FunOnFinite.linearMap_apply_apply]
+        rw [Finset.sum_eq_zero]
+        intro j hj
+        simp at hj
+        exact (Fin.succAbove_ne i j hj).elim
     · constructor
       · rintro ⟨y, rfl⟩
         exact ⟨⦋n⦌.toTopHomeo.symm y,
@@ -122,17 +122,15 @@ lemma toTopHomeo_apply_eq_zero_iff {n : ℕ} (x : (|Δ[n]| : Type u)) (i : Fin (
         refine ⟨y, ?_⟩
         apply ⦋n + 1⦌.toTopHomeo.symm.injective
         rw [← hy]
-        exact toTopHomeo_symm_naturality_apply _ _-/
+        exact toTopHomeo_symm_naturality_apply _ _
 
 lemma toTopHomeo_mem_interior_iff {n : ℕ} (x : |Δ[n]|) :
     ⦋n⦌.toTopHomeo x ∈ interior _ ↔ x ∈ (Set.range (SSet.toTop.map ∂Δ[n].ι))ᶜ := by
-  dsimp [interior]
-  rw [← not_iff_not]
-  sorry
-  --simp only [Set.mem_compl_iff, not_not, not_forall, not_lt, nonpos_iff_eq_zero]
-  --rw [SSet.boundary_eq_iSup]
-  --simp only [SSet.Subcomplex.range_toTop_map_iSup_ι, Set.mem_iUnion, toTopHomeo_apply_eq_zero_iff ]
-  --rfl
+  rw [← not_iff_not, SSet.boundary_eq_iSup]
+  simp only [notMem_interior_iff, Set.mem_compl_iff, not_not,
+    SSet.Subcomplex.range_toTop_map_iSup_ι, Set.mem_iUnion,
+    toTopHomeo_apply_eq_zero_iff]
+  rfl
 
 open TopCat in
 lemma toTopMap_apply_injective_of_epi_of_mem_interior
@@ -198,13 +196,13 @@ lemma sigmaToTop_bijective : Function.Bijective X.sigmaToTop := by
       invFun := fun ⟨s, y, hy⟩ ↦
         ⟨relativeCellComplexCellsEquiv X (mapCellsEquiv _ _ s), ⟨⦋s.j⦌.toTopHomeo y, by
             dsimp
-            sorry
-            --rwa [stdSimplex.toTopHomeo_mem_interior_iff]
-            ⟩⟩
+            erw [stdSimplex.toTopHomeo_mem_interior_iff]
+            assumption⟩⟩
       left_inv := by
         rintro ⟨s, x, hx⟩
-        sorry
-        --aesop
+        dsimp
+        rw [Sigma.ext_iff]
+        exact ⟨rfl, by simpa using ⦋s.dim⦌.toTopHomeo.apply_symm_apply x⟩
       right_inv := by
         rintro ⟨s, y, hy⟩
         aesop }
