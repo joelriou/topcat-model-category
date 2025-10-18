@@ -7,12 +7,7 @@ universe u
 
 lemma stdSimplex.subtypeMk_apply {X : Type*} [Fintype X]
     (f : X → ℝ) (hf : f ∈ stdSimplex ℝ X) (x : X) :
-    (⟨f, hf⟩ : stdSimplex ℝ X) x = f x  := rfl
-
-@[continuity]
-lemma stdSimplex.continuous_apply {X : Type*} [Fintype X] (x : X) :
-    Continuous (fun (f : stdSimplex ℝ X) ↦ f x) :=
-  (_root_.continuous_apply x).comp continuous_subtype_val
+    (⟨f, hf⟩ : stdSimplex ℝ X) x = f x := rfl
 
 namespace TopCat
 
@@ -174,7 +169,7 @@ noncomputable def h : of (stdSimplex ℝ (Fin (n + 2))) ⊗ I ⟶ of (stdSimplex
         ← Finset.mul_sum, sum_v, mul_zero]⟩, by
       have (j : Fin (n + 2)) :
         Continuous (fun (x : stdSimplex ℝ (Fin (n + 2)) × I.{0}) ↦ x.1 j) :=
-          (stdSimplex.continuous_apply _).comp (by continuity)
+          (stdSimplex.continuous_eval _).comp (by continuity)
       continuity⟩
 
 lemma hi (f : TopCat.horn (n + 1) i) (t : TopCat.I) (j : ToType ⦋n + 1⦌):

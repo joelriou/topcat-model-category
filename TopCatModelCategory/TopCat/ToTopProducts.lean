@@ -92,8 +92,8 @@ lemma preservesLimit_pair_toDeltaGenerated' (X : SSet.{u})
   simp only [preservesLimit_pair_iff_of_cartesianMonoidal] at hX ⊢
   choose e₀ h₁ h₂ using hX
   have e₀_naturality {n m : ℕ} (f : ⦋n⦌ ⟶ ⦋m⦌) :
-      toDeltaGenerated.map (X ◁ stdSimplex.map f) ≫ (e₀ m).hom =
-        (e₀ n).hom ≫ toDeltaGenerated.obj X ◁ toDeltaGenerated.map (stdSimplex.map f) := by
+      toDeltaGenerated.map (X ◁ SSet.stdSimplex.map f) ≫ (e₀ m).hom =
+        (e₀ n).hom ≫ toDeltaGenerated.obj X ◁ toDeltaGenerated.map (SSet.stdSimplex.map f) := by
     ext : 1
     · rw [Category.assoc, Category.assoc, h₁, whiskerLeft_fst, h₁,
         ← Functor.map_comp, whiskerLeft_fst]
@@ -102,18 +102,18 @@ lemma preservesLimit_pair_toDeltaGenerated' (X : SSet.{u})
   let e₁ : stdSimplex ⋙ tensorLeft X ⋙ toDeltaGenerated ≅
       stdSimplex ⋙ toDeltaGenerated ⋙ tensorLeft (toDeltaGenerated.obj X) :=
     NatIso.ofComponents (fun n ↦ by
-      induction' n using SimplexCategory.rec with n
+      induction n using SimplexCategory.rec with | _ n
       exact e₀ n) (fun {n m} f ↦ by
-      induction' n using SimplexCategory.rec with n
-      induction' m using SimplexCategory.rec with m
+      induction n using SimplexCategory.rec with | _ n
+      induction m using SimplexCategory.rec with | _ m
       apply e₀_naturality)
   have e₁_hom_app_fst (n : SimplexCategory) : e₁.hom.app n ≫ fst _ _ =
       toDeltaGenerated.map (fst _ _) := by
-    induction' n using SimplexCategory.rec with n
+    induction n using SimplexCategory.rec with | _ n
     apply h₁
   have e₁_hom_app_snd (n : SimplexCategory) : e₁.hom.app n ≫ snd _ _ =
       toDeltaGenerated.map (snd _ _) := by
-    induction' n using SimplexCategory.rec with n
+    induction n using SimplexCategory.rec with | _ n
     apply h₂
   let hc := Presheaf.colimitOfRepresentable Y
   let hc₁ := isColimitOfPreserves (tensorLeft X ⋙ toDeltaGenerated) hc

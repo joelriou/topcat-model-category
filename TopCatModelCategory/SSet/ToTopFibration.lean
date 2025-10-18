@@ -68,14 +68,14 @@ instance {E B : SSet.{u}} (p : E ⟶ B) [MinimalFibration p] :
   rw [mem_trivialBundles_iff] at this
   obtain ⟨F', ⟨hσ⟩⟩ := this
   let b₁ : B _⦋0⦌ :=
-    yonedaEquiv (stdSimplex.map (SimplexCategory.const _ _ 0) ≫ σ)
+    yonedaEquiv (SSet.stdSimplex.map (SimplexCategory.const _ _ 0) ≫ σ)
   obtain ⟨e⟩ := MinimalFibration.nonempty_iso_fiber p
     (Subsingleton.elim (π₀.mk b₀) (π₀.mk b₁))
   let t : (Subcomplex.fiber p b₁ : SSet) ⟶ pullback p σ :=
     pullback.lift (Subcomplex.fiber p b₁).ι
       (SSet.const (stdSimplex.obj₀Equiv.symm 0))
   have sqt : IsPullback t (stdSimplex.objZeroIsTerminal.from _) (pullback.snd _ _)
-      (stdSimplex.map (SimplexCategory.const ⦋0⦌ ⦋n⦌ 0)) := by
+      (SSet.stdSimplex.map (SimplexCategory.const ⦋0⦌ ⦋n⦌ 0)) := by
     refine IsPullback.of_right ?_ ?_ (IsPullback.of_hasPullback p σ)
     · convert Subcomplex.fiber_isPullback p b₁ using 1
       · simp [t]

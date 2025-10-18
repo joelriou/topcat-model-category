@@ -39,14 +39,21 @@ open NormedSpace SimplexCategory
 instance (n : ℕ) : DeltaGeneratedSpace' (Hyperplane.stdSimplex n) :=
   (Hyperplane.stdSimplexHomeoClosedBall n).symm.isQuotientMap.isGeneratedBy
 
-instance (n : SimplexCategory) : DeltaGeneratedSpace' n.toTopObj := by
-  induction' n using SimplexCategory.rec with n
-  exact (Hyperplane.stdSimplexHomeo n).isQuotientMap.isGeneratedBy
+instance : IsEmpty (_root_.stdSimplex ℝ (Fin 0)) where
+  false f := by
+    have := f.2.2
+    simp at this
+
+instance (n : ℕ) :
+    DeltaGeneratedSpace' (_root_.stdSimplex ℝ (Fin n)) := by
+  obtain _ | n := n
+  · infer_instance
+  · exact (Hyperplane.stdSimplexHomeo n).isQuotientMap.isGeneratedBy
 
 end
 
 instance (n : SimplexCategory) : DeltaGeneratedSpace' (SimplexCategory.toTop.{u}.obj n) :=
-  (Homeomorph.ulift.{u} (X := n.toTopObj)).symm.isQuotientMap.isGeneratedBy
+  (Homeomorph.ulift.{u} (X := _root_.stdSimplex ℝ _)).symm.isQuotientMap.isGeneratedBy
 
 instance (n : SimplexCategory) : DeltaGeneratedSpace' (toTop.{u}.obj (stdSimplex.obj n)) :=
   (TopCat.homeoOfIso (toTopSimplex.{u}.app n)).symm.isQuotientMap.isGeneratedBy
@@ -146,20 +153,23 @@ lemma boundary'_eq_preimage :
       ((stdSimplexHomeo n).trans ⦋n⦌.toTopHomeo.symm) ⁻¹'
         Set.range (SSet.toTop.{u}.map ∂Δ[n].ι) := by
   suffices Set.range (SSet.toTop.{u}.map ∂Δ[n].ι) =
-      (⦋n⦌.toTopHomeo.trans (stdSimplexHomeo n).symm) ⁻¹' boundary' n by aesop
+      (⦋n⦌.toTopHomeo.trans (stdSimplexHomeo n).symm) ⁻¹' boundary' n by
+    rw [this]
+    ext x
+    simp
+    erw [Homeomorph.apply_symm_apply, Homeomorph.apply_symm_apply]
   ext x
   obtain ⟨x, rfl⟩ := ⦋n⦌.toTopHomeo.symm.surjective x
   obtain ⟨⟨⟨x, hx₀⟩, hx⟩, rfl⟩ := (stdSimplexHomeo n).surjective x
   simp [stdSimplex] at hx
   rw [← not_iff_not, ← Set.mem_compl_iff, ← stdSimplex.toTopHomeo_mem_interior_iff,
-    Set.mem_preimage, Homeomorph.trans_apply, Homeomorph.apply_symm_apply,
-    Homeomorph.symm_apply_apply]
+    Set.mem_preimage, Homeomorph.trans_apply, Homeomorph.apply_symm_apply]
+  erw [Homeomorph.symm_apply_apply]
   simp [stdSimplex.interior, stdSimplexHomeo, boundary']
   refine forall_congr' (fun i ↦ ?_)
   trans 0 < (↑n + 1) * x i + 1
   · have h : 0 < (n : ℝ) + 1 := by positivity
-    rw [← Subtype.coe_lt_coe]
-    dsimp
+    dsimp only [DFunLike.coe]
     rw [← mul_pos_iff_of_pos_left h, mul_add, mul_inv_cancel₀ h.ne']
   · exact LE.le.lt_iff_ne' (hx i)
 
@@ -169,7 +179,9 @@ noncomputable def boundaryHomeo : boundary n ≃ₜ (|∂Δ[n]| : Type u) := by
       { toFun x := by exfalso; exact IsEmpty.false x
         invFun x := by exfalso; exact IsEmpty.false x
         left_inv _ := by subsingleton
-        right_inv _ := by subsingleton }
+        right_inv _ := by subsingleton
+        continuous_toFun := by continuity
+        continuous_invFun := by continuity }
   · exact ((boundaryHomeoBoundary' (n + 1)).trans
       (Homeomorph.restrict ((stdSimplexHomeo (n + 1)).trans ⦋n + 1⦌.toTopHomeo.symm)
         (boundary'_eq_preimage (n + 1)).symm)).trans

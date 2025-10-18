@@ -9,17 +9,21 @@ open Simplicial CategoryTheory HomotopicalAlgebra Limits
 
 namespace stdSimplex
 
-def interior (n : SimplexCategory) : Set (n.toTopObj) :=
+def interior (X : Type*) [Fintype X]: Set (stdSimplex ℝ X) :=
   setOf (fun x ↦ ∀ i, 0 < x i)
 
-def toTopMap_mem_interior {n m : SimplexCategory} (x : n.toTopObj)
-    (hx : x ∈ interior n) (f : n ⟶ m) [hf : Epi f] :
-      SimplexCategory.toTopMap f x ∈ interior m := by
+def toTopMap_mem_interior {n m : SimplexCategory} (f : n ⟶ m) [hf : Epi f]
+    (x : stdSimplex ℝ (Fin (n.len + 1)))
+    (hx : x ∈ interior (Fin (n.len + 1)))  :
+    stdSimplex.map f x ∈ interior _ := by
   rw [SimplexCategory.epi_iff_surjective] at hf
   intro i
   obtain ⟨j, hj⟩ := hf i
-  dsimp
-  exact lt_of_lt_of_le (hx j) (Finset.single_le_sum (a := j) (by simp) (by simpa))
+  exact lt_of_lt_of_le (hx j) (by
+    simp [FunOnFinite.linearMap_apply_apply]
+    apply Finset.single_le_sum (a := j)
+    · simp
+    · simpa)
 
 lemma range_toTop_map_face_singleton_compl {n : ℕ} (i : Fin (n + 2)) :
     Set.range (SSet.toTop.{u}.map (SSet.stdSimplex.face {i}ᶜ).ι) =
@@ -54,7 +58,8 @@ lemma toTopHomeo_apply_eq_zero_iff {n : ℕ} (x : (|Δ[n]| : Type u)) (i : Fin (
   · rw [range_toTop_map_face_singleton_compl]
     obtain ⟨x, rfl⟩ := ⦋n + 1⦌.toTopHomeo.symm.surjective x
     simp only [Homeomorph.apply_symm_apply, Set.mem_range]
-    trans ∃ (y : ⦋n⦌.toTopObj), toTopMap (δ i) y = x
+    sorry
+    /-trans ∃ (y : ⦋n⦌.toTopObj), toTopMap (δ i) y = x
     · constructor
       · intro hx
         let y (j : Fin (n + 1)) : ℝ≥0 := x (Fin.succAbove i j)
@@ -117,24 +122,25 @@ lemma toTopHomeo_apply_eq_zero_iff {n : ℕ} (x : (|Δ[n]| : Type u)) (i : Fin (
         refine ⟨y, ?_⟩
         apply ⦋n + 1⦌.toTopHomeo.symm.injective
         rw [← hy]
-        exact toTopHomeo_symm_naturality_apply _ _
+        exact toTopHomeo_symm_naturality_apply _ _-/
 
 lemma toTopHomeo_mem_interior_iff {n : ℕ} (x : |Δ[n]|) :
     ⦋n⦌.toTopHomeo x ∈ interior _ ↔ x ∈ (Set.range (SSet.toTop.map ∂Δ[n].ι))ᶜ := by
   dsimp [interior]
   rw [← not_iff_not]
-  simp only [Set.mem_compl_iff, not_not, not_forall, not_lt, nonpos_iff_eq_zero]
-  rw [SSet.boundary_eq_iSup]
-  simp only [SSet.Subcomplex.range_toTop_map_iSup_ι, Set.mem_iUnion, toTopHomeo_apply_eq_zero_iff ]
-  rfl
+  sorry
+  --simp only [Set.mem_compl_iff, not_not, not_forall, not_lt, nonpos_iff_eq_zero]
+  --rw [SSet.boundary_eq_iSup]
+  --simp only [SSet.Subcomplex.range_toTop_map_iSup_ι, Set.mem_iUnion, toTopHomeo_apply_eq_zero_iff ]
+  --rfl
 
 open TopCat in
 lemma toTopMap_apply_injective_of_epi_of_mem_interior
     {n m : SimplexCategory} {f g : n ⟶ m} [Epi f] [Epi g]
-    {x : n.toTopObj} (h : SimplexCategory.toTopMap f x = SimplexCategory.toTopMap g x)
-    (hx : x ∈ interior n) :
+    {x : stdSimplex ℝ (Fin (n.len + 1))} (h : stdSimplex.map f x = stdSimplex.map g x)
+    (hx : x ∈ interior _) :
     f = g := by
-  refine cosimp.injective_map_interior_of_epi unitInterval f g
+  /-refine cosimp.injective_map_interior_of_epi unitInterval f g
     ((cosimp.toTopIso.app _).hom x) (Fin.strictMono_iff_lt_succ.2 (by
       intro i
       rw [Subtype.mk_lt_mk]
@@ -145,7 +151,8 @@ lemma toTopMap_apply_injective_of_epi_of_mem_interior
   have h₁ := ConcreteCategory.congr_hom (cosimp.toTopIso.hom.naturality f) x
   have h₂ := congr_arg (cosimp.toTopIso.hom.app m) h
   have h₃ := ConcreteCategory.congr_hom (cosimp.toTopIso.hom.naturality g) x
-  exact h₁.symm.trans (h₂.trans h₃)
+  exact h₁.symm.trans (h₂.trans h₃)-/
+  sorry
 
 end stdSimplex
 
@@ -153,53 +160,57 @@ namespace SSet
 
 variable {X Y : SSet.{u}} (f : X ⟶ Y)
 
-noncomputable def toTopObjToTop {n : ℕ} (x : X _⦋n⦌) (p : ⦋n⦌.toTopObj) : |X| :=
+noncomputable def toTopObjToTop {n : ℕ} (x : X _⦋n⦌)
+    (p : _root_.stdSimplex ℝ (Fin (n + 1))) : |X| :=
   toTop.map (yonedaEquiv.symm x) (⦋n⦌.toTopHomeo.symm p)
 
-lemma toTopObjToTop_naturality {n : ℕ} (x : X _⦋n⦌) (p : ⦋n⦌.toTopObj) :
+lemma toTopObjToTop_naturality {n : ℕ} (x : X _⦋n⦌) (p : _root_.stdSimplex ℝ (Fin (n + 1))) :
     toTop.map f (toTopObjToTop x p) = toTopObjToTop (f.app _ x) p := by
   dsimp [toTopObjToTop]
   rw [← ConcreteCategory.comp_apply, ← Functor.map_comp, yonedaEquiv_symm_comp]
 
-lemma toTopObjToTop_naturality' {n m : ℕ} (x : X _⦋n⦌) (p : ⦋m⦌.toTopObj)
+lemma toTopObjToTop_naturality' {n m : ℕ} (x : X _⦋n⦌) (p : _root_.stdSimplex ℝ (Fin (m + 1)))
     (f : ⦋m⦌ ⟶ ⦋n⦌) :
-    toTopObjToTop x (SimplexCategory.toTopMap f p) = toTopObjToTop (X.map f.op x) p := by
+    toTopObjToTop x (_root_.stdSimplex.map f p) = toTopObjToTop (X.map f.op x) p := by
   dsimp only [toTopObjToTop]
-  obtain ⟨p, rfl⟩ := (SimplexCategory.toTopHomeo _).surjective p
+  obtain ⟨p, rfl⟩ := (SimplexCategory.toTopHomeo ⦋m⦌).surjective p
   have := congr_fun (SimplexCategory.toTopHomeo_naturality f) p
   dsimp at this ⊢
   rw [Homeomorph.symm_apply_apply, ← this, Homeomorph.symm_apply_apply,
     ← ConcreteCategory.comp_apply, ← Functor.map_comp,
     stdSimplex.map_comp_yonedaEquiv_symm]
 
-noncomputable def sigmaToTop : (Σ (s : X.N), stdSimplex.interior ⦋s.dim⦌) → |X| :=
+noncomputable def sigmaToTop : (Σ (s : X.N), stdSimplex.interior (Fin (s.dim + 1))) → |X| :=
   fun ⟨s, p⟩ ↦ toTopObjToTop s.simplex p
 
 open RelativeCellComplex in
 lemma sigmaToTop_bijective : Function.Bijective X.sigmaToTop := by
   let hX := X.relativeCellComplex.map (SSet.toTop)
-  let e₁ : (Σ (s : X.N), (stdSimplex.interior ⦋s.dim⦌)) ≃
+  let e₁ : (Σ (s : X.N), (stdSimplex.interior (Fin (s.dim + 1)))) ≃
     (Σ (c : hX.Cells), ((Set.range (ConcreteCategory.hom
       (toTop.{u}.map ∂Δ[c.j].ι)))ᶜ : Set _)) :=
     { toFun := fun ⟨s, x, hx⟩ ↦
         ⟨(mapCellsEquiv _ _).symm
           ((relativeCellComplexCellsEquiv X).symm s), ⟨⦋s.dim⦌.toTopHomeo.symm x, by
-            obtain ⟨y, rfl⟩ := (SimplexCategory.toTopHomeo.{u} _).surjective x
-            rw [stdSimplex.toTopHomeo_mem_interior_iff] at hx
+            obtain ⟨y, rfl⟩ := (SimplexCategory.toTopHomeo.{u} ⦋s.dim⦌).surjective x
+            erw [stdSimplex.toTopHomeo_mem_interior_iff] at hx
             rwa [Homeomorph.symm_apply_apply]⟩⟩
       invFun := fun ⟨s, y, hy⟩ ↦
         ⟨relativeCellComplexCellsEquiv X (mapCellsEquiv _ _ s), ⟨⦋s.j⦌.toTopHomeo y, by
             dsimp
-            rwa [stdSimplex.toTopHomeo_mem_interior_iff]⟩⟩
+            sorry
+            --rwa [stdSimplex.toTopHomeo_mem_interior_iff]
+            ⟩⟩
       left_inv := by
         rintro ⟨s, x, hx⟩
-        aesop
+        sorry
+        --aesop
       right_inv := by
         rintro ⟨s, y, hy⟩
         aesop }
   let e₂ := TopCat.RelativeT₁CellComplex.sigmaEquiv hX
     (fun _ _ ↦ boundary.t₁Inclusions_toTop_map_ι _)
-  let e : (Σ (s : X.N), stdSimplex.interior ⦋s.dim⦌) ≃ |X| :=
+  let e : (Σ (s : X.N), stdSimplex.interior (Fin (s.dim + 1))) ≃ |X| :=
     (e₁.trans e₂).trans (Equiv.subtypeUnivEquiv (by simp))
   convert e.bijective
   ext ⟨s, x, hx⟩
@@ -211,33 +222,35 @@ lemma sigmaToTop_bijective : Function.Bijective X.sigmaToTop := by
   congr 3
   exact (X.relativeCellComplexι_eq ((relativeCellComplexCellsEquiv X).symm s)).symm
 
-lemma sigmaToTop_naturality (s : X.N) (p : stdSimplex.interior ⦋s.dim⦌)
+lemma sigmaToTop_naturality (s : X.N) (p : stdSimplex.interior (Fin (s.dim + 1)))
     (t : Y.N) (g : ⦋s.dim⦌ ⟶ ⦋t.dim⦌) [Epi g] (hg : f.app _ s.simplex = Y.map g.op t.simplex) :
     toTop.map f (sigmaToTop ⟨s, p⟩) =
-      sigmaToTop ⟨t, ⟨SimplexCategory.toTopMap g p,
-        stdSimplex.toTopMap_mem_interior p.1 p.2 g⟩⟩ := by
+      sigmaToTop ⟨t, ⟨stdSimplex.map g p.1,
+      stdSimplex.toTopMap_mem_interior g p.1 p.2⟩⟩ := by
   dsimp [sigmaToTop]
   obtain ⟨p, _⟩ := p
   dsimp
-  rw [toTopObjToTop_naturality, hg, toTopObjToTop_naturality']
+  sorry
+  --rw [toTopObjToTop_naturality, hg, toTopObjToTop_naturality']
 
 @[simps! apply]
-noncomputable def sigmaEquivToTop : (Σ (s : X.N), stdSimplex.interior ⦋s.dim⦌) ≃ |X| :=
+noncomputable def sigmaEquivToTop : (Σ (s : X.N), stdSimplex.interior (Fin (s.dim + 1))) ≃ |X| :=
   Equiv.ofBijective _ sigmaToTop_bijective
 
 @[simp]
-lemma sigmaEquivToTop_symm_apply (x : (Σ (s : X.N), stdSimplex.interior ⦋s.dim⦌)) :
+lemma sigmaEquivToTop_symm_apply (x : (Σ (s : X.N), stdSimplex.interior (Fin (s.dim + 1)))) :
     sigmaEquivToTop.symm (X.sigmaToTop x) = x :=
   sigmaEquivToTop.symm_apply_apply x
 
-lemma sigmaToTop_mem_interiorCell (x : (Σ (s : X.N), stdSimplex.interior ⦋s.dim⦌)) :
+lemma sigmaToTop_mem_interiorCell (x : (Σ (s : X.N), stdSimplex.interior (Fin (s.dim +1)))) :
     sigmaToTop x ∈ TopCat.RelativeT₁CellComplex.interiorCell
     ((X.relativeCellComplex.mapCellsEquiv toTop).symm
       (X.relativeCellComplexCellsEquiv.symm x.1)) := by
   obtain ⟨s, x⟩ := x
   refine ⟨⦋s.dim⦌.toTopHomeo.symm x.1, ?_, by aesop⟩
   · dsimp
-    simp only [← stdSimplex.toTopHomeo_mem_interior_iff,
-      Homeomorph.apply_symm_apply, Subtype.coe_prop]
+    simp only [← stdSimplex.toTopHomeo_mem_interior_iff]
+    erw [Homeomorph.apply_symm_apply]
+    exact x.2
 
 end SSet

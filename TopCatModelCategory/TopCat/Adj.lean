@@ -445,7 +445,7 @@ lemma _root_.SimplexCategory.toTopHomeo_toTopObjMk {n : ℕ} (i : Fin (n + 1)):
 namespace stdSimplex
 
 
---@[simp]
+@[simp]
 lemma toTopObjHomeoUnitInterval_zero :
     toTopObjHomeoUnitInterval.{u, u} (toTopObjMk.{u} (stdSimplex.const _ 0 _)) = 0 := by
   apply toTopObjHomeoUnitInterval.{u}.symm.injective
@@ -596,5 +596,10 @@ lemma mem_range_map_iff {S : Type*} [Semiring S] [PartialOrder S] [IsOrderedRing
           rintro ⟨z, hz, rfl⟩
           simp [hr] at hx'
         · simp [hr y hy]
+
+@[continuity]
+lemma continuous_eval {X : Type*} [Fintype X] (i : X) :
+    Continuous (fun (x : stdSimplex ℝ X) ↦ x i) :=
+  (_root_.continuous_apply _ ).comp continuous_subtype_val
 
 end stdSimplex

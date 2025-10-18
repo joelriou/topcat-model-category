@@ -28,11 +28,6 @@ variable {n m : SimplexCategory}
 
 namespace stdSimplex
 
-@[continuity]
-lemma continuous_eval {X : Type*} [Fintype X] (i : X) :
-    Continuous (fun (x : stdSimplex ℝ X) ↦ x.1 i) :=
-  (continuous_apply i).comp continuous_subtype_val
-
 def barycenter {X α : Type*} [Fintype X] [Fintype α] (p : α → stdSimplex ℝ X)
     (w : α → ℝ) (hw₀ : ∀ a, 0 ≤ w a) (hw₁ : ∑ a, w a = 1) : stdSimplex ℝ X :=
   ⟨fun x ↦ ∑ (a : α), w a • (p a).1 x,

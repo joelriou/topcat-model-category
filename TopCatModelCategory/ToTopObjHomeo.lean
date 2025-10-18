@@ -4,23 +4,7 @@ import TopCatModelCategory.TopCat.Adj
 
 open Simplicial
 
-@[continuity]
-lemma _root_.stdSimplex.continuous_apply {X : Type*} [Fintype X] (i : X) :
-    Continuous (fun (x : stdSimplex ℝ X) ↦ x.1 i) :=
-  (_root_.continuous_apply _ ).comp continuous_subtype_val
-
 namespace SimplexCategory
-
-/-@[simp]
-lemma toTopObj_sum_coe {n : ℕ} (x : ⦋n⦌.toTopObj) :
-    ∑ i, (x.1 i : ℝ) = 1 := by
-  simpa using congr_arg (fun a ↦ a.1) x.2
-
-@[continuity]
-lemma toTopObj.continuous_apply {n : SimplexCategory} (i : Fin (n.len + 1)) :
-    Continuous (fun (x : n.toTopObj) ↦ x.1 i) :=
-  (_root_.continuous_apply _ ).comp continuous_subtype_val-/
-
 
 variable (n : ℕ)
 
