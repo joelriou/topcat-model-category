@@ -130,7 +130,6 @@ lemma diam_le_iff (x : X.S) (r : ℝ):
 
 lemma monotone_self_div_succ (a b : ℝ) (h : a ≤ b) (ha : 0 ≤ a := by positivity) :
     a / (a + 1) ≤ b / (b + 1) := by
-  simp only [ge_iff_le] at ha
   have (t : ℝ) (ht : t ≠ -1) : t / (t + 1) = 1 - 1 / (t + 1) := by
     grind
   rw [this a (by grind), this b (by grind), sub_le_sub_iff_left]

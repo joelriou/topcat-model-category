@@ -26,142 +26,164 @@ end SSet
 
 variable {n m : SimplexCategory}
 
-namespace SimplexCategory.toTopObj
+namespace stdSimplex
 
 @[continuity]
-lemma continuous_eval (i : ToType n) :
-    Continuous (fun (x : n.toTopObj) ↦ x.1 i) :=
+lemma continuous_eval {X : Type*} [Fintype X] (i : X) :
+    Continuous (fun (x : stdSimplex ℝ X) ↦ x.1 i) :=
   (continuous_apply i).comp continuous_subtype_val
 
-@[simp]
-lemma sum_coe_eq_one (a : n.toTopObj) :
-    ∑ (i : Fin (n.len + 1)), (a i : ℝ) = 1 := by
-  rw [← NNReal.coe_sum, a.2, coe_one]
-
-@[simps]
-def barycenter {α : Type*} [Fintype α] (p : α → n.toTopObj) (w : α → ℝ≥0)
-    (hw : ∑ a, w a = 1) : n.toTopObj :=
-  ⟨fun j ↦ ∑ (a : α), w a • p a j, by
-    dsimp [toTopObj]
-    rw [Finset.sum_comm]
-    conv_rhs => rw [← hw]
+def barycenter {X α : Type*} [Fintype X] [Fintype α] (p : α → stdSimplex ℝ X)
+    (w : α → ℝ) (hw₀ : ∀ a, 0 ≤ w a) (hw₁ : ∑ a, w a = 1) : stdSimplex ℝ X :=
+  ⟨fun x ↦ ∑ (a : α), w a • (p a).1 x,
+    fun x ↦ Finset.sum_nonneg (fun a _ ↦ mul_nonneg (hw₀ a) ((p a).2.1 x)), by
+    dsimp
+    rw [Finset.sum_comm, ← hw₁]
     congr
     ext a
-    have := (p a).2
-    dsimp [toTopObj] at this
-    rw [Subtype.ext_iff] at this
-    simp only [val_eq_coe, coe_sum, coe_one] at this
-    simp only [coe_sum, NNReal.coe_mul]
-    rw [← Finset.mul_sum, this, mul_one]⟩
+    rw [← Finset.mul_sum, (p a).2.2, mul_one]⟩
 
-lemma eq_barycenter_vertex (x : n.toTopObj) :
-    x = barycenter vertex x.1 x.2 := by
-  ext
-  simp [vertex, barycenter]
+@[simp]
+lemma barycenter_apply
+    {X α : Type*} [Fintype X] [Fintype α] (p : α → stdSimplex ℝ X)
+    (w : α → ℝ) (hw₀ : ∀ a, 0 ≤ w a) (hw₁ : ∑ a, w a = 1) (x : X) :
+    barycenter p w hw₀ hw₁ x = ∑ (a : α), w a • p a x := rfl
 
-lemma exists_barycenter_vertex (x : n.toTopObj) :
-    ∃ (w : Fin (n.len + 1) → ℝ≥0) (hw : ∑ a, w a = 1),
-      x = barycenter vertex w hw :=
-  ⟨_, _, eq_barycenter_vertex x⟩
+lemma eq_barycenter_vertex {X : Type*} [Fintype X] [DecidableEq X] (f : stdSimplex ℝ X) :
+    f = barycenter vertex f.1 f.2.1 f.2.2 := by
+  ext x
+  dsimp only [barycenter, DFunLike.coe]
+  rw [Finset.sum_eq_single (a := x) _ (by simp), Pi.single_eq_same, smul_eq_mul, mul_one]
+  intro y _ h
+  rw [Pi.single_eq_of_ne' h, smul_zero]
+
+lemma exists_barycenter_vertex {X : Type*} [Fintype X] [DecidableEq X] (f : stdSimplex ℝ X) :
+    ∃ (w : X → ℝ) (hw₀ : ∀ x, 0 ≤ w x) (hw₁ : ∑ a, w a = 1),
+      f = barycenter vertex w hw₀ hw₁ :=
+  ⟨_, _, _, eq_barycenter_vertex f⟩
 
 variable (n) in
-noncomputable def isobarycenter : n.toTopObj :=
-  barycenter vertex (fun _ ↦ 1 / (n.len + 1)) (by simp)
+noncomputable def isobarycenter (X : Type*) [Fintype X] [DecidableEq X] [Nonempty X] :
+    stdSimplex ℝ X :=
+  barycenter vertex (fun _ ↦ 1 / Fintype.card X) (by simp) (by simp)
 
 @[simp]
-lemma toTopMap_barycenter (g : n ⟶ m)
-    {α : Type*} [Fintype α] (p : α → n.toTopObj) (w : α → ℝ≥0)
-    (hw : ∑ a, w a = 1) :
-    toTopMap g (barycenter p w hw) = barycenter (fun a ↦ toTopMap g (p a)) w hw := by
-  ext i
-  simp only [toTopMap, barycenter_coe, smul_eq_mul, coe_sum, NNReal.coe_mul, Finset.mul_sum]
+lemma map_barycenter {X Y α : Type*} [Fintype X] [Fintype Y] [Fintype α]
+    (g : X → Y) (p : α → stdSimplex ℝ X) (w : α → ℝ) (hw₀ : ∀ a, 0 ≤ w a)
+    (hw₁ : ∑ a, w a = 1) :
+    map g (barycenter p w hw₀ hw₁) = barycenter (fun a ↦ map g (p a)) w hw₀ hw₁ := by
+  classical
+  ext y
+  simp only [map_coe, barycenter_apply, smul_eq_mul, FunOnFinite.linearMap_apply_apply]
   rw [Finset.sum_comm]
+  simp only [← Finset.mul_sum]
 
-variable {E : Type v} [AddCommGroup E] [Module ℝ E] (f : n.toTopObj → E)
+variable {X : Type*} [Fintype X]
+variable {E : Type v} [AddCommGroup E] [Module ℝ E] (f : stdSimplex ℝ X → E)
 
-def IsAffine : Prop :=
-  ∀ (x : n.toTopObj), f x = ∑ (i : Fin (n.len + 1)), (x.1 i : ℝ) • f (vertex i)
+def IsAffine [DecidableEq X] : Prop :=
+  ∀ (p : stdSimplex ℝ X), f p = ∑ (x : X), p x • f (vertex x)
 
-abbrev affineMap (p : Fin (n.len + 1) → E) : n.toTopObj → E :=
-  fun x ↦ ∑ (i : Fin (n.len + 1)), (x.1 i : ℝ) • p i
+abbrev affineMap (p : X → E) : stdSimplex ℝ X → E :=
+  fun y ↦ ∑ (x : X), y x • p x
 
 @[simp]
-lemma affineMap_vertex (p : Fin (n.len + 1) → E) (i : Fin (n.len + 1)) :
-    affineMap p (vertex i) = p i := by
+lemma affineMap_vertex [DecidableEq X] (p : X → E) (x : X) :
+    affineMap p (vertex x) = p x := by
   dsimp [affineMap, vertex]
-  rw [Finset.sum_eq_single (a := i)]
+  rw [Finset.sum_eq_single (a := x)]
   all_goals aesop
 
-lemma isAffine_affineMap (p : Fin (n.len + 1) → E) :
+lemma isAffine_affineMap [DecidableEq X] (p : X → E) :
     IsAffine (affineMap p) := by
   intro
   simp
 
+variable (X) in
+lemma affineMap_vertex_eq [DecidableEq X] :
+    affineMap (Subtype.val ∘ vertex : X → _) = DFunLike.coe := by
+  ext f x
+  simp only [Finset.sum_apply, Function.comp_apply, Pi.smul_apply, smul_eq_mul]
+  rw [Finset.sum_eq_single (a := x) _ (by simp), Pi.single_eq_same, mul_one]
+  intro y _ h
+  rw [Pi.single_eq_of_ne' h, mul_zero]
+
+variable (X) in
+lemma isAffine_dFunLikeCoe [DecidableEq X] :
+    IsAffine (DFunLike.coe : stdSimplex ℝ X → _) := by
+  rw [← affineMap_vertex_eq]
+  apply isAffine_affineMap
+
 lemma continuous_affineMap {E : Type v} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
-    (p : Fin (n.len + 1) → E) :
+    (p : X → E) :
     Continuous (affineMap p) := by
   continuity
 
 namespace IsAffine
 
-variable {f} (hf : IsAffine f)
+variable {f} [DecidableEq X] (hf : IsAffine f)
 
 include hf
 
 lemma exists_eq :
-    ∃ (p : Fin (n.len + 1) → E), f = affineMap p :=
+    ∃ (p : X → E), f = affineMap p :=
   ⟨fun i ↦ f (vertex i), by ext; rw [hf]⟩
 
-lemma map_barycenter {α : Type*} [Fintype α] (p : α → n.toTopObj) (w : α → ℝ≥0)
-    (hw : ∑ a, w a = 1) : f (barycenter p w hw) = ∑ (a : α), w a • f (p a) := by
+lemma map_barycenter {α : Type*} [Fintype α] (p : α → stdSimplex ℝ X) (w : α → ℝ)
+    (hw₀ : ∀ a, 0 ≤ w a) (hw₁ : ∑ a, w a = 1) :
+    f (barycenter p w hw₀ hw₁) = ∑ (a : α), w a • f (p a) := by
   obtain ⟨q, rfl⟩ := hf.exists_eq
   simp only [Finset.smul_sum, affineMap]
   rw [Finset.sum_comm]
   congr
-  ext j
-  simp only [barycenter, smul_eq_mul, coe_sum, NNReal.coe_mul, Finset.sum_smul, ← smul_assoc]
-  rfl
+  ext x
+  simp [smul_smul, Finset.sum_smul]
 
-lemma map (g : m ⟶ n) : IsAffine (f.comp (toTopMap g)) := by
+lemma map {Y : Type*} [Fintype Y] [DecidableEq Y] (g : Y → X) :
+    IsAffine (f.comp (stdSimplex.map g)) := by
   intro x
-  obtain ⟨w, hw, rfl⟩ := exists_barycenter_vertex x
+  obtain ⟨w, hw₀, hw₁, rfl⟩ := exists_barycenter_vertex x
   dsimp
-  simp only [toTopMap_barycenter, toTopMap_vertex, coe_sum, NNReal.coe_mul, hf.map_barycenter]
-  congr
-  ext a
-  dsimp [vertex]
-  rw [Finset.sum_eq_single (a := a)]
-  all_goals aesop
+  rw [stdSimplex.map_barycenter, hf.map_barycenter]
+  congr 1
+  ext y
+  simp only [map_vertex]
+  congr 1
+  rw [Finset.sum_eq_single (a := y) (by aesop) (by aesop),
+    Pi.single_eq_same, mul_one]
 
-lemma ext {g : n.toTopObj → E} (hg : IsAffine g)
-    (h : ∀ (i : Fin (n.len + 1)), f (vertex i) = g (vertex i)) : f = g := by
+lemma ext {g : stdSimplex ℝ X → E} (hg : IsAffine g)
+    (h : ∀ (x : X), f (vertex x) = g (vertex x)) : f = g := by
   ext x
   rw [hf, hg]
   simp [h]
 
 lemma convex_range : Convex ℝ (Set.range f) := by
   rintro _ ⟨x, rfl⟩ _ ⟨y, rfl⟩ a b ha hb h
-  refine ⟨⟨fun i ↦ ⟨a * ↑(x i) + b * ↑(y i), ?_⟩, ?_⟩, ?_⟩
-  · positivity
-  · ext
-    simp [toTopObj, Finset.sum_add_distrib, ← Finset.mul_sum, h]
+  have := hf
+  refine ⟨⟨fun i ↦ a * x i + b * y i,
+    fun i ↦ add_nonneg (mul_nonneg ha (x.2.1 i))
+      (mul_nonneg hb (y.2.1 i)), ?_⟩, ?_⟩
+  · simpa [Finset.sum_add_distrib, ← Finset.mul_sum]
   · obtain ⟨p, rfl⟩ := hf.exists_eq
-    simp [affineMap, Finset.smul_sum, add_smul, Finset.sum_add_distrib, ← smul_assoc]
+    simp [affineMap, Finset.smul_sum, Finset.sum_add_distrib,
+      DFunLike.coe, add_smul, smul_smul]
 
 lemma map_barycenter_mem_of_convex
-    {α : Type*} [Fintype α] (p : α → n.toTopObj) (w : α → ℝ≥0) (hw : ∑ a, w a = 1)
+    {α : Type*} [Fintype α] (p : α → stdSimplex ℝ X) (w : α → ℝ)
+    (hw₀ : ∀ a, 0 ≤ w a) (hw₁ : ∑ a, w a = 1)
     {S : Set E} (hS : Convex ℝ S) (hq : ∀ (a : α), f (p a) ∈ S) :
-    f (barycenter p w hw) ∈ S := by
+    f (barycenter p w hw₀ hw₁) ∈ S := by
   rw [hf.map_barycenter]
-  exact hS.sum_mem (by simp) (by simp [← NNReal.coe_sum, hw]) (by tauto)
+  exact hS.sum_mem (by simpa) hw₁ (by simpa)
 
 lemma range_subset_iff_of_convex {F : Set E} (hF : Convex ℝ F) :
     Set.range f ⊆ F ↔ ∀ i, f (vertex i) ∈ F := by
   have := hf
   refine ⟨fun h i ↦ h (by simp), fun h ↦ ?_⟩
   rintro _ ⟨x, rfl⟩
-  obtain ⟨w, hw, rfl⟩ := exists_barycenter_vertex x
-  exact hf.map_barycenter_mem_of_convex _ _ _ hF h
+  obtain ⟨w, hw₀, hw₁, rfl⟩ := exists_barycenter_vertex x
+  exact hf.map_barycenter_mem_of_convex _ _ _ _ hF h
 
 lemma range_eq_convexHull :
     Set.range f = convexHull ℝ (Set.range (fun i ↦ f (vertex i))) := by
@@ -175,14 +197,14 @@ lemma range_eq_convexHull :
 omit hf
 
 lemma continuous {F : Type v} [SeminormedAddCommGroup F] [NormedSpace ℝ F]
-    (f : n.toTopObj → F) (hf : IsAffine f) :
+    (f : stdSimplex ℝ X → F) (hf : IsAffine f) :
     Continuous f := by
   obtain ⟨p, rfl⟩ := hf.exists_eq
   exact continuous_affineMap p
 
 end IsAffine
 
-end SimplexCategory.toTopObj
+end stdSimplex
 
 namespace SSet
 
@@ -194,7 +216,8 @@ variable (f : |X| → E)
 
 namespace IsAffineAt
 
-noncomputable def φ (x : X.obj (op n)) : n.toTopObj → E :=
+noncomputable def φ (x : X.obj (op n)) :
+    _root_.stdSimplex ℝ (Fin (n.len + 1)) → E :=
   f.comp (Function.comp
     (toTopSimplex.inv.app _ ≫ toTop.map (yonedaEquiv.symm x)) ULift.up)
 
@@ -205,7 +228,7 @@ lemma precomp_φ (g : Y ⟶ X) (y : Y.obj (op n)) :
   rfl
 
 lemma map_φ {n : SimplexCategory} (x : X.obj (op n)) (g : m ⟶ n) :
-    φ f (X.map g.op x) = φ f x ∘ SimplexCategory.toTopMap g := by
+    φ f (X.map g.op x) = φ f x ∘ stdSimplex.map g := by
   dsimp only [φ]
   rw [SSet.yonedaEquiv_symm_map]
   dsimp
@@ -221,7 +244,7 @@ end IsAffineAt
 variable [AddCommGroup E] [Module ℝ E]
 
 def IsAffineAt {n : SimplexCategory} (x : X.obj (op n)) : Prop :=
-  SimplexCategory.toTopObj.IsAffine (IsAffineAt.φ f x)
+  stdSimplex.IsAffine (IsAffineAt.φ f x)
 
 variable {f} in
 lemma IsAffineAt.map {n m : SimplexCategory} {x : X.obj (op n)}
@@ -266,7 +289,8 @@ namespace AffineMap
 
 variable {X E} (f : AffineMap X E)
 
-noncomputable abbrev φ {d : SimplexCategory} (s : X.obj (op d)) : d.toTopObj → E :=
+noncomputable abbrev φ {d : SimplexCategory} (s : X.obj (op d)) :
+    _root_.stdSimplex ℝ (Fin (d.len + 1)) → E :=
   IsAffineAt.φ f.f s
 
 lemma continuous_φ {E : Type v} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
@@ -275,7 +299,7 @@ lemma continuous_φ {E : Type v} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
   (f.isAffine x).continuous
 
 lemma map_φ {d e : SimplexCategory} (s : X.obj (op d)) (g : e ⟶ d) :
-    f.φ (X.map g.op s) = f.φ s ∘ SimplexCategory.toTopMap g := by
+    f.φ (X.map g.op s) = f.φ s ∘ stdSimplex.map g := by
   simp [IsAffineAt.map_φ]
 
 lemma range_subset_of_le {s t : X.S} (hst : s ≤ t) :
@@ -290,7 +314,7 @@ lemma range_subset_of_le {s t : X.S} (hst : s ≤ t) :
   grind
 
 noncomputable def isobarycenter (s : X.S) : E :=
-  f.φ s.simplex (SimplexCategory.toTopObj.isobarycenter _)
+  f.φ s.simplex (stdSimplex.isobarycenter _)
 
 lemma range_φ_subset_range_f (s : X.S) :
     Set.range (f.φ s.simplex) ⊆ Set.range f.f := by
@@ -304,7 +328,7 @@ lemma range_f_eq' :
     obtain ⟨⟨⟨n⟩, s⟩, x, rfl⟩ := Types.jointly_surjective_of_isColimit
       (isColimitOfPreserves (toTop ⋙ forget _)
       (X.isColimitCoconeFromElementsOp)) x
-    induction' n using SimplexCategory.rec with n
+    induction n using SimplexCategory.rec with | _ n
     dsimp at x ⊢
     obtain ⟨x, rfl⟩ := (TopCat.homeoOfIso (toTopSimplex.{u}.app ⦋n⦌)).toEquiv.symm.surjective x
     simp only [Set.mem_iUnion]
@@ -353,24 +377,24 @@ lemma continuous {E : Type v} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
 
 namespace b
 
-noncomputable def affineMap (s : (B.obj X).N) : ⦋s.dim⦌.toTopObj → E :=
-  (SimplexCategory.toTopObj.affineMap
+noncomputable def affineMap (s : (B.obj X).N) :
+    _root_.stdSimplex ℝ (Fin (s.dim + 1)) → E :=
+  (stdSimplex.affineMap
     (fun i ↦ f.isobarycenter (s.simplex.obj i).toS))
 
 lemma isAffine_affineMap (s : (B.obj X).N) :
-    SimplexCategory.toTopObj.IsAffine (affineMap f s) :=
-  SimplexCategory.toTopObj.isAffine_affineMap _
-
+    stdSimplex.IsAffine (affineMap f s) :=
+  stdSimplex.isAffine_affineMap _
 lemma affineMap_comp {s t : (B.obj X).N} (hst : s ≤ t) :
-    (affineMap f t).comp (SimplexCategory.toTopMap (N.monoOfLE hst)) =
+    (affineMap f t).comp (stdSimplex.map (N.monoOfLE hst)) =
       affineMap f s := by
-  refine SimplexCategory.toTopObj.IsAffine.ext
-    (SimplexCategory.toTopObj.IsAffine.map
-      (SimplexCategory.toTopObj.isAffine_affineMap _) _)
-    (SimplexCategory.toTopObj.isAffine_affineMap _) (fun i ↦ ?_)
+  refine stdSimplex.IsAffine.ext
+    (stdSimplex.IsAffine.map
+      (stdSimplex.isAffine_affineMap _) _)
+    (stdSimplex.isAffine_affineMap _) (fun i ↦ ?_)
   dsimp [affineMap]
-  simp only [SimplexCategory.toTopObj.toTopMap_vertex, SimplexCategory.len_mk,
-    SimplexCategory.toTopObj.affineMap_vertex, ← N.map_monoOfLE hst]
+  simp only [stdSimplex.map_vertex, stdSimplex.affineMap_vertex,
+    ← N.map_monoOfLE hst]
   rfl
 
 lemma range_affineMap_le (s : (B.obj X).N) (t : X.N) (hs : s.simplex.obj (Fin.last _) ≤ t) :
@@ -379,8 +403,8 @@ lemma range_affineMap_le (s : (B.obj X).N) (t : X.N) (hs : s.simplex.obj (Fin.la
     (f.isAffine t.simplex).convex_range]
   intro i
   dsimp only [affineMap]
-  rw [SimplexCategory.toTopObj.affineMap_vertex]
-  exact (f.isAffine (s.simplex.obj i).simplex).map_barycenter_mem_of_convex _ _ _
+  rw [stdSimplex.affineMap_vertex]
+  exact (f.isAffine (s.simplex.obj i).simplex).map_barycenter_mem_of_convex _ _ _ _
     (f.isAffine t.simplex).convex_range
     (fun a ↦ f.range_subset_of_le ((s.simplex.monotone i.le_last).trans hs) (by simp))
 
@@ -409,7 +433,7 @@ lemma comp_g_toTop_map (s : (B.obj X).N) :
 
 lemma isAffineAtφ_g (s : (B.obj X).N) :
     IsAffineAt.φ (g f) s.simplex =
-      SimplexCategory.toTopObj.affineMap
+      stdSimplex.affineMap
         (fun i ↦ f.isobarycenter (s.simplex.obj i).toS) := by
   dsimp [IsAffineAt.φ]
   rw [← Function.comp_assoc, ← Function.comp_assoc]
@@ -429,7 +453,7 @@ lemma isAffine_g : IsAffine (g f) := by
   have := isAffineAtφ_g f (N.mk x hx)
   dsimp at this
   rw [this]
-  exact SimplexCategory.toTopObj.isAffine_affineMap _
+  exact stdSimplex.isAffine_affineMap _
 
 end b
 
@@ -447,20 +471,19 @@ lemma range_b_f_subset_range_f : Set.range f.b.f ⊆ Set.range f.f := by
     (le_trans (by rfl) (le_iSup _ (s.simplex.obj (Fin.last _))))
 
 lemma φ_barycenter (s : X.obj (op n))
-    {α : Type*} [Fintype α] (p : α → n.toTopObj) (w : α → ℝ≥0) (hw : ∑ a, w a = 1) :
-    f.φ s (SimplexCategory.toTopObj.barycenter p w hw) =
+    {α : Type*} [Fintype α] (p : α → _root_.stdSimplex ℝ (Fin (n.len + 1))) (w : α → ℝ)
+    (hw₀ : ∀ a, 0 ≤ w a) (hw₁ : ∑ a, w a = 1) :
+    f.φ s (stdSimplex.barycenter p w hw₀ hw₁) =
       Finset.centerMass (R := ℝ) (Finset.univ) (fun a ↦ w a) (fun a ↦ f.φ s (p a)) := by
   dsimp [φ]
-  rw [(f.isAffine s).map_barycenter, Finset.centerMass_eq_of_sum_1 _ _ (by
-    rw [← NNReal.coe_sum, hw, coe_one])]
-  rfl
+  rw [(f.isAffine s).map_barycenter, Finset.centerMass_eq_of_sum_1 _ _ hw₁]
 
 noncomputable def vertex (x : X _⦋0⦌) : E := f.φ x default
 
 lemma φ_vertex {n : SimplexCategory} (x : X.obj (op n)) (i : Fin (n.len + 1)) :
-    f.φ x (SimplexCategory.toTopObj.vertex i) = f.vertex (vertexOfSimplex x i) := by
+    f.φ x (stdSimplex.vertex i) = f.vertex (vertexOfSimplex x i) := by
   have h₁ := congr_fun (f.map_φ x (SimplexCategory.const ⦋0⦌ n i)) default
-  have h₂ := SimplexCategory.toTopObj.toTopMap_vertex (SimplexCategory.const ⦋0⦌ n i) 0
+  have h₂ := stdSimplex.map_vertex (S := ℝ) (SimplexCategory.const ⦋0⦌ n i) 0
   dsimp [vertex, vertexOfSimplex] at h₁ ⊢
   rw [SimplexCategory.const_apply'] at h₂
   rw [h₁, ← h₂]
@@ -479,13 +502,13 @@ lemma vertex_b (x : (B.obj X) _⦋0⦌) :
   dsimp [b.affineMap] at this
   dsimp only [vertex]
   rw [this]
-  convert SimplexCategory.toTopObj.affineMap_vertex (fun i ↦ f.isobarycenter (x.obj i).toS) 0
+  convert stdSimplex.affineMap_vertex (fun i ↦ f.isobarycenter (x.obj i).toS) 0
   subsingleton
 
 lemma isobarycenter_eq_centerMass (s : X.S) :
     f.isobarycenter s = Finset.univ.centerMass (fun _ ↦ (1 : ℝ))
         (fun i ↦ f.vertex (vertexOfSimplex s.simplex i)) := by
-  dsimp [isobarycenter, SimplexCategory.toTopObj.isobarycenter]
+  dsimp [isobarycenter, stdSimplex.isobarycenter]
   simp [φ_barycenter, φ_vertex]
   rw [← Finset.centerMass_smul_left (c := (s.dim : ℝ) + 1)]
   · congr
@@ -520,21 +543,9 @@ noncomputable def stdSimplex (n : ℕ) :
   isAffine := by
     rw [isAffine_iff_eq_top, stdSimplex.subcomplex_eq_top_iff, mem_isAffine_iff]
     dsimp only [IsAffineAt]
-    let φ (x : ⦋n⦌.toTopObj) (i : (Fin (n + 1))) : ℝ := x i
-    convert_to SimplexCategory.toTopObj.IsAffine φ using 1
-    · ext x i
-      dsimp [IsAffineAt.φ]
-      simp only [Equiv.symm_apply_apply, CategoryTheory.Functor.map_id, TopCat.hom_id,
-        ContinuousMap.id_apply]
-      exact congr_fun (congr_arg φ (⦋n⦌.toTopHomeo.right_inv x)) i
-    · intro x
-      ext i
-      simp [SimplexCategory.toTopObj.vertex, φ]
-      rw [Finset.sum_eq_single (a := i)]
-      · simp
-      · intro b _ hb
-        simp [if_neg hb.symm]
-      · simp
+    convert stdSimplex.isAffine_dFunLikeCoe (Fin (n + 1))
+    ext f i
+    simpa [IsAffineAt.φ] using DFunLike.congr_fun (⦋n⦌.toTopHomeo.right_inv f) i
 
 lemma injective_stdSimplex_f (n : ℕ) :
     Function.Injective (stdSimplex n).f := by
