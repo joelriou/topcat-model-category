@@ -69,8 +69,8 @@ noncomputable def pathEv₀₁ : X.path ⟶ X ⊗ X := lift X.pathEv₀ X.pathEv
 namespace boundary₁
 
 noncomputable def ihomObjIso : (ihom (∂Δ[1] : SSet.{u})).obj X ≅ X ⊗ X where
-  hom := lift ((pre ι₀).app X ≫ stdSimplex.ihom₀.hom.app X)
-      ((pre ι₁).app X ≫ stdSimplex.ihom₀.hom.app X)
+  hom := lift ((MonoidalClosed.pre ι₀).app X ≫ stdSimplex.ihom₀.hom.app X)
+      ((MonoidalClosed.pre ι₁).app X ≫ stdSimplex.ihom₀.hom.app X)
   inv := curry ((boundary₁.isColimitRightTensor (X ⊗ X)).desc
       (BinaryCofan.mk (snd _ _ ≫ fst _ _) (snd _ _ ≫ snd _ _)))
   hom_inv_id := by
@@ -98,26 +98,29 @@ noncomputable def ihomObjIso : (ihom (∂Δ[1] : SSet.{u})).obj X ≅ X ⊗ X wh
 
 @[reassoc (attr := simp)]
 lemma ihomObjIso_hom_fst :
-    (ihomObjIso.{u} X).hom ≫ fst _ _ = ((pre ι₀).app X ≫ stdSimplex.ihom₀.hom.app X) := rfl
+    (ihomObjIso.{u} X).hom ≫ fst _ _ =
+      ((MonoidalClosed.pre ι₀).app X ≫ stdSimplex.ihom₀.hom.app X) := rfl
 
 @[reassoc (attr := simp)]
 lemma ihomObjIso_hom_snd :
-    (ihomObjIso.{u} X).hom ≫ snd _ _ = ((pre ι₁).app X ≫ stdSimplex.ihom₀.hom.app X) := rfl
+    (ihomObjIso.{u} X).hom ≫ snd _ _ =
+      ((MonoidalClosed.pre ι₁).app X ≫ stdSimplex.ihom₀.hom.app X) := rfl
 
 end boundary₁
 
 lemma pre_boundary_ι_app_comp_boundary₁_ihomObjIso :
-    (pre ∂Δ[1].ι).app X ≫ (boundary₁.ihomObjIso X).hom = X.pathEv₀₁ := by
+    (MonoidalClosed.pre ∂Δ[1].ι).app X ≫ (boundary₁.ihomObjIso X).hom = X.pathEv₀₁ := by
   ext : 1
   · dsimp [pathEv₀]
-    rw [Category.assoc, boundary₁.ihomObjIso_hom_fst, ← NatTrans.comp_app_assoc, ← pre_map,
-      boundary₁.ι₀_ι, stdSimplex.δ_one]
+    rw [Category.assoc, boundary₁.ihomObjIso_hom_fst, ← NatTrans.comp_app_assoc,
+      ← MonoidalClosed.pre_map, boundary₁.ι₀_ι, stdSimplex.δ_one]
     rfl
-  · rw [Category.assoc, boundary₁.ihomObjIso_hom_snd, ← NatTrans.comp_app_assoc, ← pre_map,
-      boundary₁.ι₁_ι, stdSimplex.δ_zero]
+  · rw [Category.assoc, boundary₁.ihomObjIso_hom_snd, ← NatTrans.comp_app_assoc,
+      ← MonoidalClosed.pre_map, boundary₁.ι₁_ι, stdSimplex.δ_zero]
     rfl
 
-noncomputable def arrowMkPathEv₀₁Iso : Arrow.mk X.pathEv₀₁ ≅ Arrow.mk ((pre ∂Δ[1].ι).app X) :=
+noncomputable def arrowMkPathEv₀₁Iso :
+    Arrow.mk X.pathEv₀₁ ≅ Arrow.mk ((MonoidalClosed.pre ∂Δ[1].ι).app X) :=
   Iso.symm (Arrow.isoMk (Iso.refl _) (boundary₁.ihomObjIso X) (by
     simp [pre_boundary_ι_app_comp_boundary₁_ihomObjIso]))
 
@@ -306,9 +309,10 @@ end stdSimplex
 
 noncomputable def pathHomotopy :
     Homotopy (X.pathEv₀ ≫ X.pathConst) (𝟙 X.path) where
-  h := (β_ _ _).hom ≫ curry ((α_ _ _ _).inv ≫ uncurry ((pre stdSimplex.hDelta₁).app X))
+  h := (β_ _ _).hom ≫ curry ((α_ _ _ _).inv ≫ uncurry
+    ((MonoidalClosed.pre stdSimplex.hDelta₁).app X))
   h₀ := by
-    rw [uncurry_pre, Subcomplex.RelativeMorphism.botEquiv_symm_apply_map,
+    rw [MonoidalClosed.uncurry_pre, Subcomplex.RelativeMorphism.botEquiv_symm_apply_map,
       ← cancel_epi (stdSimplex.rightUnitor _).hom, stdSimplex.rightUnitor_hom_ι₀_assoc,
       BraidedCategory.braiding_naturality_right_assoc,
       ← curry_natural_left, associator_inv_naturality_middle_assoc,
@@ -318,7 +322,7 @@ noncomputable def pathHomotopy :
     rw [← curry_natural_left]
     rfl
   h₁ := by
-    rw [uncurry_pre, Subcomplex.RelativeMorphism.botEquiv_symm_apply_map,
+    rw [MonoidalClosed.uncurry_pre, Subcomplex.RelativeMorphism.botEquiv_symm_apply_map,
       ← cancel_epi (stdSimplex.rightUnitor _).hom, stdSimplex.rightUnitor_hom_ι₁_assoc,
       BraidedCategory.braiding_naturality_right_assoc, Category.comp_id,
       ← curry_natural_left, associator_inv_naturality_middle_assoc,
@@ -330,7 +334,7 @@ noncomputable def pathHomotopy :
 lemma path₀_ι_whiskerLeft_pathHomotopy_h_pathEv₀ :
     (X.path₀ x).ι ▷ Δ[1] ≫ X.pathHomotopy.h ≫ X.pathEv₀ = const x := by
   dsimp only [pathHomotopy, pathEv₀, ihomEv, NatTrans.comp_app]
-  rw [Category.assoc, uncurry_pre,
+  rw [Category.assoc, MonoidalClosed.uncurry_pre,
     BraidedCategory.braiding_naturality_left_assoc,
     ← cancel_epi (β_ _ _).inv, Iso.inv_hom_id_assoc, comp_const,
     curry_pre_app_assoc, ← curry_natural_left_assoc,

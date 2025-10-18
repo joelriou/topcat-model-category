@@ -68,7 +68,8 @@ lemma le_fiberwiseHom_iff (Z : ((ihom E).obj E').Subcomplex) :
   (le_ihomToPullbackFiber_iff _ _).trans (by
     simp only [and_iff_right_iff_imp]
     intro
-    have : (pre (initial.to E)).app E' = const (ihom₀Equiv.symm (initial.to E')) := by
+    have : (MonoidalClosed.pre (initial.to E)).app E' =
+        const (ihom₀Equiv.symm (initial.to E')) := by
       apply uncurry_injective
       rw [← cancel_epi (β_ _ _).hom]
       apply curry_injective

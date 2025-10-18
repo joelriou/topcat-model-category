@@ -269,8 +269,8 @@ include hu
 lemma injective_app_of_minimalFibration (n : SimplexCategoryᵒᵖ) :
     Function.Injective (u.app n) := by
   obtain ⟨n⟩ := n
-  induction' n using SimplexCategory.rec with n
-  induction' n using Nat.strong_induction_on with n hn
+  induction n using SimplexCategory.rec with | _ n
+  induction n using Nat.strong_induction_on with | _ n hn
   intro s₁ s₂ hs
   obtain ⟨t, ht₁, ht₂⟩ : ∃ (t : B _⦋n⦌), p.app _ s₁ = t ∧ p.app _ s₂ = t := ⟨_, rfl, by
     convert congr_arg (p.app _ ) hs.symm using 1
@@ -290,8 +290,8 @@ lemma injective_app_of_minimalFibration (n : SimplexCategoryᵒᵖ) :
 lemma surjective_app_of_minimalFibration (n : SimplexCategoryᵒᵖ) :
     Function.Surjective (u.app n) := by
   obtain ⟨n⟩ := n
-  induction' n using SimplexCategory.rec with n
-  induction' n using Nat.strong_induction_on with n hn
+  induction n using SimplexCategory.rec with | _ n
+  induction n using Nat.strong_induction_on with | _ n hn
   intro x
   obtain ⟨y, hy⟩ :
       ∃ (y : (∂Δ[n] : SSet) ⟶ E), y ≫ u = ∂Δ[n].ι ≫ yonedaEquiv.symm x := by

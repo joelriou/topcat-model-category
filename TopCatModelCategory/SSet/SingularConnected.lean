@@ -46,25 +46,6 @@ lemma NNReal.sum_coe {α : Type*} [Fintype α] (f : α → ℝ≥0) :
 
 namespace SSet
 
-instance (n : SimplexCategory) : PathConnectedSpace (SimplexCategory.toTopObj n) := by
-  induction' n using SimplexCategory.rec with n
-  refine ⟨⟨SimplexCategory.toTopMap (⦋0⦌.const ⦋n⦌ 0) default⟩, fun ⟨x, hx⟩ ⟨y, hy⟩ ↦
-    ⟨⟨fun t ↦ ⟨fun i ↦ ⟨(1 - t) * (x i).1 + t * (y i).1, ?_⟩, ?_⟩, ?_⟩, ?_, ?_⟩⟩
-  · apply add_nonneg
-    · exact mul_nonneg (by simpa only [sub_nonneg] using t.2.2) (x i).2
-    · exact mul_nonneg t.2.1 (y i).2
-  · ext
-    simp only [SimplexCategory.toTopObj, Set.mem_setOf_eq] at hx hy
-    rw [Subtype.ext_iff, NNReal.sum_coe] at hx hy
-    dsimp at hx hy
-    refine (NNReal.sum_coe _).trans ?_
-    dsimp
-    simp only [Finset.sum_add_distrib, ← Finset.mul_sum, hx, hy]
-    ring
-  · continuity
-  · aesop
-  · aesop
-
 instance (n : ℕ) : PathConnectedSpace |Δ[n]| :=
   ⦋n⦌.toTopHomeo.symm.surjective.pathConnectedSpace (by continuity)
 
@@ -96,11 +77,11 @@ lemma surjective_mapπ₀_sSetTopAdj_unit_app :
   obtain ⟨⟨⟨n⟩, s⟩, x, rfl⟩ := Types.jointly_surjective_of_isColimit
     (isColimitOfPreserves (toTop ⋙ forget _)
     (X.isColimitCoconeFromElementsOp)) x
-  induction' n using SimplexCategory.rec with n
+  induction n using SimplexCategory.rec with | _ n
   dsimp at x
   refine ⟨π₀.mk (X.map (⦋0⦌.const ⦋n⦌ 0).op s), ?_⟩
   dsimp [-TopCat.toSSetObj₀Equiv_symm_apply]
-  let x₀ := (toTop.map (stdSimplex.map (⦋0⦌.const ⦋n⦌ 0)) default)
+  let x₀ := (toTop.map (SSet.stdSimplex.map (⦋0⦌.const ⦋n⦌ 0)) (by exact default))
   refine Eq.trans ?_ (congr_arg (mapπ₀ (TopCat.toSSet.map (toTop.map (yonedaEquiv.symm s))))
     (π₀.eq_of_path (PathConnectedSpace.somePath x₀ x)))
   simp only [TopCat.toSSetObj₀Equiv_symm_apply, mapπ₀_mk]
@@ -112,21 +93,19 @@ lemma surjective_mapπ₀_sSetTopAdj_unit_app :
   apply TopCat.toSSetObj₀Equiv.injective
   dsimp [TopCat.toSSetObj₀Equiv, x₀]
   let f : ⦋0⦌ ⟶ ⦋n⦌ := SimplexCategory.const _ _ 0
-  have : toTop.{u}.map (stdSimplex.map f) =
+  have : toTop.{u}.map (SSet.stdSimplex.map f) =
     TopCat.ofHom ((TopCat.toSSetObjEquiv _ _
-      (((sSetTopAdj.unit.app Δ[n]).app (op ⦋0⦌)) (yonedaEquiv (stdSimplex.map f)))).comp
+      (((sSetTopAdj.unit.app Δ[n]).app (op ⦋0⦌)) (yonedaEquiv (SSet.stdSimplex.map f)))).comp
       (toContinuousMap ⦋0⦌.toTopHomeo)) := by
     ext x₀
     have h₁ : (stdSimplex.{u}.map f).app (op ⦋0⦌) (yonedaEquiv (𝟙 Δ[0])) =
-      yonedaEquiv (stdSimplex.map f) := rfl
-    have h₂ := congr_fun (congr_app (sSetTopAdj.unit.naturality (stdSimplex.map f)) (op ⦋0⦌))
+      yonedaEquiv (SSet.stdSimplex.map f) := rfl
+    have h₂ := congr_fun (congr_app (sSetTopAdj.unit.naturality (SSet.stdSimplex.map f)) (op ⦋0⦌))
       (yonedaEquiv (𝟙 _))
     dsimp at h₂ ⊢
     rw [← h₁, h₂]
-    apply congr_arg (toTop.map (stdSimplex.map f))
+    apply congr_arg (toTop.map (SSet.stdSimplex.map f))
     apply Subsingleton.elim
-  simp only [Equiv.apply_symm_apply, ContinuousMap.coe_mk]
-  rw [this, Subsingleton.elim default (⦋0⦌.toTopHomeo default)]
   rfl
 
 def isIsoWhiskerRightSSetTopAdjUnitπ₀FunctorApp : ObjectProperty SSet.{u} :=

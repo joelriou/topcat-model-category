@@ -4,9 +4,14 @@ import TopCatModelCategory.TopCat.Adj
 
 open Simplicial
 
+@[continuity]
+lemma _root_.stdSimplex.continuous_apply {X : Type*} [Fintype X] (i : X) :
+    Continuous (fun (x : stdSimplex ℝ X) ↦ x.1 i) :=
+  (_root_.continuous_apply _ ).comp continuous_subtype_val
+
 namespace SimplexCategory
 
-@[simp]
+/-@[simp]
 lemma toTopObj_sum_coe {n : ℕ} (x : ⦋n⦌.toTopObj) :
     ∑ i, (x.1 i : ℝ) = 1 := by
   simpa using congr_arg (fun a ↦ a.1) x.2
@@ -14,7 +19,8 @@ lemma toTopObj_sum_coe {n : ℕ} (x : ⦋n⦌.toTopObj) :
 @[continuity]
 lemma toTopObj.continuous_apply {n : SimplexCategory} (i : Fin (n.len + 1)) :
     Continuous (fun (x : n.toTopObj) ↦ x.1 i) :=
-  (_root_.continuous_apply _ ).comp continuous_subtype_val
+  (_root_.continuous_apply _ ).comp continuous_subtype_val-/
+
 
 variable (n : ℕ)
 
@@ -86,35 +92,19 @@ lemma continuous_apply (i : Fin (n + 1)) :
 
 end stdSimplex
 
-noncomputable def stdSimplexHomeo : stdSimplex n ≃ₜ ⦋n⦌.toTopObj where
-  toFun x := ⟨fun i ↦ ⟨x.1.1 i + 1 / (n + 1), by
-    rw [← mul_nonneg_iff_of_pos_right (c := (n + 1 : ℝ)) (by positivity)]
-    convert stdSimplex.zero_le x i using 1
-    rw [mul_comm, mul_add, nsmul_eq_mul, one_div, Nat.cast_add, Nat.cast_one, add_right_inj,
-      mul_inv_cancel₀ (by positivity)]⟩, by
-      ext
-      simp only [one_div, NNReal.coe_sum, NNReal.coe_mk, NNReal.coe_one, Finset.sum_add_distrib,
-        sum_eq_zero, zero_add, Finset.sum_const, Finset.card_univ, Fintype.card_fin, len_mk,
-        nsmul_eq_mul, Nat.cast_add, Nat.cast_one, ]
-      rw [mul_inv_cancel₀ (by positivity)]⟩
-  invFun x := ⟨⟨fun i ↦ x i - 1 / (n + 1), by
-    simp only [one_div, LinearMap.mem_ker, sumCoordinates_apply, Finset.sum_sub_distrib,
-      Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, Nat.cast_add,
-      Nat.cast_one]
-    erw [toTopObj_sum_coe x]
-    rw [mul_inv_cancel₀ (by positivity), sub_eq_zero]⟩, by
-    rw [mem_stdSimplex_iff]
-    intro i
-    simp only [one_div, nsmul_eq_mul, Nat.cast_add, Nat.cast_one, mul_sub]
-    rw [mul_inv_cancel₀ (by positivity), sub_add_cancel,
-      mul_nonneg_iff_of_pos_left (by positivity)]
-    simp only [NNReal.zero_le_coe]⟩
-  left_inv _ := by aesop
-  right_inv _ := by aesop
-  continuous_toFun := by
-    continuity
-  continuous_invFun := by
-    continuity
+noncomputable def stdSimplexHomeo : stdSimplex n ≃ₜ _root_.stdSimplex ℝ (Fin (n + 1)) where
+  toFun x := ⟨fun i ↦ x.1.1 i + 1 / (n + 1), fun i ↦ by
+    rw [← mul_nonneg_iff_of_pos_left (c := (n + 1 : ℝ)) (by positivity)]
+    simpa [mul_add, mul_inv_cancel₀ (show (n + 1 : ℝ) ≠ 0 by positivity)] using x.2 i, by
+    simp [Finset.sum_add_distrib, mul_inv_cancel₀ (show (n + 1 : ℝ) ≠ 0 by positivity)]⟩
+  invFun x := ⟨⟨fun i ↦ x.1 i - 1 / (n + 1), by
+    simp [mul_inv_cancel₀ (show (n + 1 : ℝ) ≠ 0 by positivity)]⟩, fun i ↦ by
+    simp [mul_sub, mul_inv_cancel₀ (show (n + 1 : ℝ) ≠ 0 by positivity)]
+    exact mul_nonneg (by positivity) (x.2.1 i)⟩
+  left_inv _ := by ext; simp
+  right_inv x := by ext; simp; rfl
+  continuous_toFun := by continuity
+  continuous_invFun := by continuity
 
 instance : CompactSpace (stdSimplex n) := (stdSimplexHomeo n).symm.compactSpace
 
