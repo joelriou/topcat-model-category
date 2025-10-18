@@ -12,7 +12,7 @@ namespace TopCat
 
 -- this is redone in `TopCatModelCategory.Interval.Iso`
 
-namespace cosimp
+/-namespace cosimp
 
 section
 
@@ -125,6 +125,6 @@ noncomputable def toTopIso : SimplexCategory.toTop₀ ≅ cosimp unitInterval :=
       true_and, exists_eq_right']
     exact (SimplexCategory.II.castSucc_lt_map_apply g i j).symm)
 
-end cosimp
+end cosimpt-/
 
 end TopCat
