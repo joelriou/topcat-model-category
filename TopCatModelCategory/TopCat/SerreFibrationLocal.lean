@@ -250,9 +250,9 @@ lemma exists_iter :
     ∃ (r : ℕ), HasLiftingPropertyFixedBot
         (toTop.map ((sd.iter r).map (horn _ i).ι)) p
           ((toTopSdIterIso Δ[n + 1] r).hom ≫ b) := by
-  let b' : C(⦋n + 1⦌.toTopObj, B) :=
+  let b' : C(stdSimplex ℝ (Fin (n + 2)), B) :=
     ⟨b ∘ ⦋n + 1⦌.toTopHomeo.symm, by continuity⟩
-  obtain ⟨ε, hε₀, hε⟩ := lebesgue_number_lemma_of_metric (α := ⦋n + 1⦌.toTopObj)
+  obtain ⟨ε, hε₀, hε⟩ := lebesgue_number_lemma_of_metric (α := stdSimplex ℝ (Fin (n + 2)))
     (hs := CompactSpace.isCompact_univ) (c := fun i ↦ b' ⁻¹' (U i))
       (fun i ↦ IsOpen.preimage (by continuity) (Opens.isOpen _))
       ((hU.comap b').iSup_set_eq_univ.symm.subset)
@@ -261,7 +261,7 @@ lemma exists_iter :
   rw [sSetTopAdj.hasLiftingPropertyFixedBot_iff]
   refine anodyneExtensions.hasLiftingPropertyFixedBot_of_simplices
     ((anodyneExtensions.horn_ι_mem n i).sd_iter_map r) _ _ (fun d σ i ↦ ?_)
-  obtain ⟨x₀, a, ha⟩ : ∃ (x₀ : ⦋n + 1⦌.toTopObj) (a : ι),
+  obtain ⟨x₀, a, ha⟩ : ∃ (x₀ : stdSimplex ℝ (Fin (n + 2))) (a : ι),
       Set.range (b ∘ (toTopSdIterIso.{u} Δ[n + 1] r).hom ∘ toTop.map σ) ⊆ U a := by
     let α₀ := AffineMap.stdSimplex.{u} (n + 1)
     let α := α₀.sdIter r
@@ -273,7 +273,7 @@ lemma exists_iter :
         (Metric.dist_le_diam_of_mem (s := Set.range (α.φ (yonedaEquiv σ)))
         (AffineMap.isBounded _ _) hx hy) hα
     let x₀ : Set.range (α.φ (yonedaEquiv σ)) :=
-      ⟨α.φ (yonedaEquiv σ) (SimplexCategory.toTopObj.vertex 0), by simp⟩
+      ⟨α.φ (yonedaEquiv σ) (stdSimplex.vertex 0), by simp⟩
     obtain ⟨z, hz⟩ := (α₀.range_sdIter_f_subset_range_f r)
       ((α.range_φ_subset_range_f (S.mk (yonedaEquiv σ))) x₀.2)
     obtain ⟨i, hi⟩ := hε (⦋n + 1⦌.toTopHomeo z) (by simp)

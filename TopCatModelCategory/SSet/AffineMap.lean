@@ -537,25 +537,34 @@ lemma range_sdIter_f_subset_range_f (n : ℕ) : Set.range (f.sdIter n).f ⊆ Set
   | zero => rfl
   | succ n hn => exact (range_sd_f_subset_range_f _).trans hn
 
+lemma isAffineAtφ_toTopHomeo (n : ℕ) :
+    (IsAffineAt.φ (fun s i ↦ ⦋n⦌.toTopHomeo s i)
+      (SSet.yonedaEquiv.{u} (𝟙 _))) = DFunLike.coe := by
+  ext f i
+  simpa [IsAffineAt.φ] using DFunLike.congr_fun (⦋n⦌.toTopHomeo.right_inv f) i
+
 noncomputable def stdSimplex (n : ℕ) :
     (Δ[n] : SSet.{u}).AffineMap (Fin (n + 1) → ℝ) where
-  f x i := ⦋n⦌.toTopHomeo x i
+  f := DFunLike.coe ∘ ⦋n⦌.toTopHomeo
   isAffine := by
     rw [isAffine_iff_eq_top, stdSimplex.subcomplex_eq_top_iff, mem_isAffine_iff]
     dsimp only [IsAffineAt]
-    convert stdSimplex.isAffine_dFunLikeCoe (Fin (n + 1))
-    ext f i
-    simpa [IsAffineAt.φ] using DFunLike.congr_fun (⦋n⦌.toTopHomeo.right_inv f) i
+    erw [isAffineAtφ_toTopHomeo]
+    exact stdSimplex.isAffine_dFunLikeCoe (Fin (n + 1))
+
+@[simp]
+lemma stdSimplex_f_toTopHomeo_symm {n : ℕ}  (x : _root_.stdSimplex ℝ (Fin (n + 1))) :
+    (stdSimplex n).f (⦋n⦌.toTopHomeo.symm x) = x := by
+  simpa [stdSimplex] using ⦋n⦌.toTopHomeo.right_inv x
 
 lemma injective_stdSimplex_f (n : ℕ) :
     Function.Injective (stdSimplex n).f := by
   intro x y h
   obtain ⟨x, rfl⟩ := ⦋n⦌.toTopHomeo.symm.surjective x
   obtain ⟨y, rfl⟩ := ⦋n⦌.toTopHomeo.symm.surjective y
-  simp only [stdSimplex, Homeomorph.apply_symm_apply] at h
-  simp only [EmbeddingLike.apply_eq_iff_eq]
-  ext i
-  exact congr_fun h i
+  simp only [stdSimplex_f_toTopHomeo_symm] at h
+  obtain rfl : x = y := by aesop
+  rfl
 
 /-lemma stdSimplex_f_naturality {n m : ℕ} (φ : ⦋n⦌ₛ ⟶ ⦋m⦌ₛ) (x) :
     (AffineMap.stdSimplex m).f

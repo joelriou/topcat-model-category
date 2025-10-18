@@ -13,28 +13,13 @@ section
 
 variable (n : ℕ)
 
-lemma isAffineMap_aux :
-    (IsAffineAt.φ (fun s i ↦ ((⦋n⦌.toTopHomeo s).1 i).1)
-      (SSet.yonedaEquiv.{u} (𝟙 _))) = toTopObjι := by
-  dsimp [IsAffineAt.φ]
-  ext x i
-  dsimp [toTopHomeo, toTopObjι]
-  simp only [Equiv.symm_apply_apply, CategoryTheory.Functor.map_id, TopCat.hom_id,
-    ContinuousMap.id_apply, coe_inj]
-  exact congr_fun (congr_arg Subtype.val (congr_arg ULift.down
-    (congr_fun ((forget _).congr_map ((toTopSimplex.{u}.app ⦋n⦌).inv_hom_id)) (ULift.up x)))) i
 
 noncomputable def affineMap : AffineMap.{_, u} Δ[n] (Fin (n + 1) → ℝ) where
-  f s i := ((⦋n⦌.toTopHomeo s).1 i).1
+  f s := ⦋n⦌.toTopHomeo s
   isAffine := by
-    rw [isAffine_iff_eq_top, stdSimplex.subcomplex_eq_top_iff, mem_isAffine_iff, IsAffineAt]
-    erw [isAffineMap_aux]
-    intro x
-    ext i
-    dsimp
-    simp [toTopObj.vertex]
-    rw [Finset.sum_eq_single i (by aesop) (by simp)]
-    simp
+    rw [isAffine_iff_eq_top, stdSimplex.subcomplex_eq_top_iff, mem_isAffine_iff,
+      IsAffineAt, AffineMap.isAffineAtφ_toTopHomeo]
+    exact stdSimplex.isAffine_dFunLikeCoe _
 
 namespace affineMap
 
@@ -51,7 +36,7 @@ end
 noncomputable abbrev sdToTop : CosimplicialObject TopCat.{u} :=
   sd ⋙ SSet.toTop
 
-def toTopObj' (n : SimplexCategory) : Set ((Fin (n.len + 1) → ℝ)) :=
+/-def toTopObj' (n : SimplexCategory) : Set ((Fin (n.len + 1) → ℝ)) :=
   { f | (∀ x, 0 ≤ f x) ∧ ∑ x, f x = 1 }
 
 def toTopObjHomeo' (n : SimplexCategory) :
@@ -67,14 +52,16 @@ def toTopObjHomeo' (n : SimplexCategory) :
   left_inv _ := rfl
   right_inv _ := rfl
   continuous_toFun := by continuity
-  continuous_invFun := Isometry.continuous (fun _ => congrFun rfl)
+  continuous_invFun := Isometry.continuous (fun _ => congrFun rfl)-/
 
 lemma affineMap_stdSimplex_f (n : ℕ) :
-    (AffineMap.stdSimplex n).f = Subtype.val ∘ toTopObjHomeo' ⦋n⦌ ∘ toTopHomeo _ := rfl
+    (AffineMap.stdSimplex n).f = DFunLike.coe ∘ toTopHomeo _ := rfl
 
 lemma affineMap_stdSimplex_range_f (n : ℕ) :
-    Set.range (AffineMap.stdSimplex n).f = ⦋n⦌.toTopObj' := by
+    Set.range (AffineMap.stdSimplex n).f = stdSimplex _ _ := by
   simp [affineMap_stdSimplex_f, Set.range_comp]
+  change Set.range Subtype.val = _
+  simp
 
 end SimplexCategory
 
@@ -92,17 +79,19 @@ namespace BIso
 noncomputable def homApp (n : ℕ) :
     |B.obj (Δ[n] : SSet.{u})| ⟶ toTop.obj ⦋n⦌ₛ :=
   TopCat.ofHom (⦋n⦌.toTopHomeo.symm.continuousMap.comp
-    (⦋n⦌.toTopObjHomeo'.symm.continuousMap.comp ⟨fun x ↦
+    ⟨fun x ↦
     ⟨(AffineMap.stdSimplex n).b.f x, by
       rw [← SimplexCategory.affineMap_stdSimplex_range_f.{u}]
       exact (AffineMap.stdSimplex.{u} n).range_b_f_subset_range_f (by simp)⟩,
-    (AffineMap.stdSimplex n).b.continuous.subtype_mk _⟩))
+    (AffineMap.stdSimplex n).b.continuous.subtype_mk _⟩)
 
 lemma f_comp_homApp (n : ℕ) :
     (AffineMap.stdSimplex n).f ∘ homApp n =
       (AffineMap.stdSimplex n).b.f := by
-  ext x
-  simp [homApp, SimplexCategory.toTopObjHomeo', AffineMap.stdSimplex]
+  ext f : 1
+  dsimp [homApp]
+  erw [AffineMap.stdSimplex_f_toTopHomeo_symm]
+  rfl
 
 lemma f_comp_homApp_apply {n : ℕ} (x) :
     (AffineMap.stdSimplex n).f (homApp n x) =
