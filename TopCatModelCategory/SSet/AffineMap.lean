@@ -370,6 +370,11 @@ lemma continuous {E : Type v} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
   congr
   exact (ConcreteCategory.congr_hom (toTopSimplex.app n).hom_inv_id x).symm
 
+@[simp]
+lemma isobarycenter_precomp (g : Y ⟶ X) (s : Y.S) :
+    (f.precomp g).isobarycenter s = f.isobarycenter (s.map g) := by
+  simp [isobarycenter]
+
 noncomputable def vertex (x : X _⦋0⦌) : E := f.φ x default
 
 lemma φ_vertex {n : SimplexCategory} (x : X.obj (op n)) (i : Fin (n.len + 1)) :
@@ -390,7 +395,22 @@ lemma precomp_vertex (f : X.AffineMap E) (g : Y ⟶ X) (y : Y _⦋0⦌) :
 @[ext]
 lemma ext {f g : X.AffineMap E}
     (h : ∀ (x : X _⦋0⦌), f.vertex x = g.vertex x) : f = g := by
-  sorry
+  suffices f.f = g.f by cases f; cases g; aesop
+  suffices ∀ {d : SimplexCategory} (s : X.obj (op d)), f.φ s = g.φ s by
+    ext y
+    obtain ⟨⟨⟨d⟩, s⟩, z, rfl⟩:= Types.jointly_surjective_of_isColimit
+      (isColimitOfPreserves (toTop ⋙ forget _) (isColimitCoconeFromElementsOp X)) y
+    dsimp at z ⊢
+    replace this := congr_fun (this s) (d.toTopHomeo z)
+    dsimp [φ, IsAffineAt.φ] at this
+    have hz : z = toTopSimplex.{u}.inv.app d (ULift.up (d.toTopHomeo z)) := by
+      obtain ⟨z, rfl⟩ := d.toTopHomeo.symm.surjective z
+      simp
+      rfl
+    convert this
+  intro d s
+  exact stdSimplex.IsAffine.ext (f.isAffine s) (g.isAffine s)
+    (fun i ↦ by simp [φ_vertex, h])
 
 namespace b
 
@@ -524,8 +544,11 @@ lemma isobarycenter_eq_centerMass (s : X.S) :
 lemma b_precomp (g : Y ⟶ X) [Mono g] :
     (f.precomp g).b = f.b.precomp (B.map g) := by
   ext s
-  simp
-  sorry
+  dsimp
+  rw [vertex_b, isobarycenter_precomp, precomp_vertex, vertex_b, B_map_app_obj,
+    toS_mapN_of_nonDegenerate]
+  rw [nonDegenerate_iff_of_mono]
+  exact (s.obj 0).nonDegenerate
 
 protected noncomputable def sd : (sd.obj X).AffineMap E := f.b.precomp (sdToB.app X)
 
