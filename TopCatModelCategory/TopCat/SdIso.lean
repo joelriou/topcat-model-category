@@ -76,50 +76,60 @@ noncomputable def sdToTop : SemiCosimplicialObject TopCat.{u} :=
 
 namespace BIso
 
+@[simps]
 noncomputable def homApp (n : ℕ) :
-    |B.obj (Δ[n] : SSet.{u})| ⟶ toTop.obj ⦋n⦌ₛ :=
-  TopCat.ofHom (⦋n⦌.toTopHomeo.symm.continuousMap.comp
-    ⟨fun x ↦
-    ⟨(AffineMap.stdSimplex n).b.f x, by
-      rw [← SimplexCategory.affineMap_stdSimplex_range_f.{u}]
-      exact (AffineMap.stdSimplex.{u} n).range_b_f_subset_range_f (by simp)⟩,
-    (AffineMap.stdSimplex n).b.continuous.subtype_mk _⟩)
+    C(|B.obj (Δ[n] : SSet.{u})|, stdSimplex ℝ (Fin (n + 1))) where
+  toFun x := ⟨(AffineMap.stdSimplex n).b.f x, by
+    rw [← SimplexCategory.affineMap_stdSimplex_range_f.{u}]
+    exact (AffineMap.stdSimplex.{u} n).range_b_f_subset_range_f (by simp)⟩
+  continuous_toFun := (AffineMap.stdSimplex n).b.continuous.subtype_mk _
 
-lemma f_comp_homApp (n : ℕ) :
-    (AffineMap.stdSimplex n).f ∘ homApp n =
+lemma homApp_naturality {n m : ℕ} (f : ⦋n⦌ₛ ⟶ ⦋m⦌ₛ) (x : |B.{u}.obj Δ[n]|) :
+    homApp m (SSet.toTop.map (B.map (toSSet.map f)) x) =
+      stdSimplex.map f.toOrderEmbedding (homApp n x) := by
+  sorry
+
+lemma isHomeomorph (n : ℕ) : IsHomeomorph (homApp.{u} n) := sorry
+
+noncomputable def homApp' (n : ℕ) :
+    |B.obj (Δ[n] : SSet.{u})| ⟶ toTop.obj ⦋n⦌ₛ :=
+  TopCat.ofHom (⦋n⦌.toTopHomeo.symm.continuousMap.comp (homApp n))
+
+lemma f_comp_homApp' (n : ℕ) :
+    (AffineMap.stdSimplex n).f ∘ homApp' n =
       (AffineMap.stdSimplex n).b.f := by
   ext f : 1
-  dsimp [homApp]
+  dsimp [homApp']
   erw [AffineMap.stdSimplex_f_toTopHomeo_symm]
   rfl
 
-lemma f_comp_homApp_apply {n : ℕ} (x) :
-    (AffineMap.stdSimplex n).f (homApp n x) =
+lemma f_comp_homApp'_apply {n : ℕ} (x) :
+    (AffineMap.stdSimplex n).f (homApp' n x) =
       (AffineMap.stdSimplex n).b.f x :=
-  congr_fun (f_comp_homApp n) x
+  congr_fun (f_comp_homApp' n) x
 
-lemma homApp_naturality {n m : ℕ} (f : ⦋n⦌ₛ ⟶ ⦋m⦌ₛ) :
-    SSet.toTop.map (B.map (toSSet.map f)) ≫ homApp m =
-      homApp n ≫ toTop.map f := by
+lemma homApp'_naturality {n m : ℕ} (f : ⦋n⦌ₛ ⟶ ⦋m⦌ₛ) :
+    SSet.toTop.map (B.map (toSSet.map f)) ≫ homApp' m =
+      homApp' n ≫ toTop.map f := by
   ext x
-  apply AffineMap.injective_stdSimplex_f
-  dsimp
-  erw [f_comp_homApp_apply]
-  have := f_comp_homApp_apply x
-  sorry
+  dsimp [homApp']
+  erw [homApp_naturality f x,
+    SimplexCategory.toTopHomeo_symm_naturality_apply (toSimplexCategory.map f)]
+  rfl
 
-instance (n : ℕ) : IsIso (homApp.{u} n) := sorry
+instance (n : ℕ) : IsIso (homApp'.{u} n) :=
+  (TopCat.isoOfHomeo ((isHomeomorph.{u} n).homeomorph.trans ⦋n⦌.toTopHomeo.symm)).isIso_hom
 
 end BIso
 
 noncomputable def BIso : toSSet ⋙ B ⋙ SSet.toTop ≅ toTop :=
   NatIso.ofComponents (fun n ↦ by
     induction n using SemiSimplexCategory.rec with | _ n =>
-    exact asIso (BIso.homApp n)) (by
+    exact asIso (BIso.homApp' n)) (by
     intro n m f
     induction n using SemiSimplexCategory.rec with | _ n =>
     induction m using SemiSimplexCategory.rec with | _ m =>
-    exact BIso.homApp_naturality f)
+    exact BIso.homApp'_naturality f)
 
 open Functor in
 noncomputable def sdIso : sdToTop.{u} ≅ toTop :=

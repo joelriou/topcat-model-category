@@ -4,6 +4,7 @@ import TopCatModelCategory.TopCat.CosimpInterior
 import TopCatModelCategory.TopCat.CosimpIso
 import TopCatModelCategory.TopCat.RelativeT1CellComplex
 import TopCatModelCategory.CellComplex
+import TopCatModelCategory.Interval.Iso
 
 open Simplicial CategoryTheory HomotopicalAlgebra Limits
 
@@ -20,7 +21,7 @@ lemma notMem_interior_iff {X : Type*} [Fintype X]
 
 def toTopMap_mem_interior {n m : SimplexCategory} (f : n ⟶ m) [hf : Epi f]
     (x : stdSimplex ℝ (Fin (n.len + 1)))
-    (hx : x ∈ interior (Fin (n.len + 1)))  :
+    (hx : x ∈ interior (Fin (n.len + 1))) :
     stdSimplex.map f x ∈ interior _ := by
   rw [SimplexCategory.epi_iff_surjective] at hf
   intro i
@@ -132,25 +133,25 @@ lemma toTopHomeo_mem_interior_iff {n : ℕ} (x : |Δ[n]|) :
     toTopHomeo_apply_eq_zero_iff]
   rfl
 
+lemma injective_toTopObjEquiv_iff {n : ℕ} {x : stdSimplex ℝ (Fin (n + 1))} :
+    Function.Injective (Interval.toTopObjEquiv x) ↔ x ∈ interior _ := by
+  trans StrictMono (Interval.toTopObjEquiv x)
+  · exact (Monotone.strictMono_iff_injective (Interval.toTopObjEquiv x).orderHom.monotone).symm
+  · rw [Fin.strictMono_iff_lt_succ]
+    exact forall_congr' (fun i ↦ by simp [← Subtype.coe_lt_coe])
+
 open TopCat in
 lemma toTopMap_apply_injective_of_epi_of_mem_interior
     {n m : SimplexCategory} {f g : n ⟶ m} [Epi f] [Epi g]
     {x : stdSimplex ℝ (Fin (n.len + 1))} (h : stdSimplex.map f x = stdSimplex.map g x)
     (hx : x ∈ interior _) :
     f = g := by
-  /-refine cosimp.injective_map_interior_of_epi unitInterval f g
-    ((cosimp.toTopIso.app _).hom x) (Fin.strictMono_iff_lt_succ.2 (by
-      intro i
-      rw [Subtype.mk_lt_mk]
-      dsimp [cosimp.toTopIso, cosimp.objUnitIntervalHomeomorph]
-      simp only [cosimp.objOfToTopObj_succ, NNReal.val_eq_coe,
-        lt_add_iff_pos_right, NNReal.coe_pos]
-      apply hx i)) ?_
-  have h₁ := ConcreteCategory.congr_hom (cosimp.toTopIso.hom.naturality f) x
-  have h₂ := congr_arg (cosimp.toTopIso.hom.app m) h
-  have h₃ := ConcreteCategory.congr_hom (cosimp.toTopIso.hom.naturality g) x
-  exact h₁.symm.trans (h₂.trans h₃)-/
-  sorry
+  rw [← injective_toTopObjEquiv_iff] at hx
+  apply SimplexCategory.Hom.toIntervalHom_injective
+  apply_fun Interval.toTopObjEquiv at h
+  simp only [Interval.toTopObjEquiv_naturality] at h
+  ext i : 3
+  exact hx (DFunLike.congr_fun h i)
 
 end stdSimplex
 
@@ -228,8 +229,8 @@ lemma sigmaToTop_naturality (s : X.N) (p : stdSimplex.interior (Fin (s.dim + 1))
   dsimp [sigmaToTop]
   obtain ⟨p, _⟩ := p
   dsimp
-  sorry
-  --rw [toTopObjToTop_naturality, hg, toTopObjToTop_naturality']
+  rw [toTopObjToTop_naturality, hg]
+  erw [toTopObjToTop_naturality']
 
 @[simps! apply]
 noncomputable def sigmaEquivToTop : (Σ (s : X.N), stdSimplex.interior (Fin (s.dim + 1))) ≃ |X| :=

@@ -358,7 +358,7 @@ lemma precomp_φ (g : Y ⟶ X) {d : SimplexCategory} (y : Y.obj (op d)) :
 
 @[continuity]
 lemma continuous {E : Type v} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
-    (f : X.AffineMap E):
+    (f : X.AffineMap E) :
     Continuous f.f := by
   rw [TopCat.continuous_iff_of_isColimit' _
     (isColimitOfPreserves toTop (Presheaf.colimitOfRepresentable X))]
@@ -369,6 +369,28 @@ lemma continuous {E : Type v} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
   dsimp [φ, IsAffineAt.φ] at x ⊢
   congr
   exact (ConcreteCategory.congr_hom (toTopSimplex.app n).hom_inv_id x).symm
+
+noncomputable def vertex (x : X _⦋0⦌) : E := f.φ x default
+
+lemma φ_vertex {n : SimplexCategory} (x : X.obj (op n)) (i : Fin (n.len + 1)) :
+    f.φ x (stdSimplex.vertex i) = f.vertex (vertexOfSimplex x i) := by
+  have h₁ := congr_fun (f.map_φ x (SimplexCategory.const ⦋0⦌ n i)) default
+  have h₂ := stdSimplex.map_vertex (S := ℝ) (SimplexCategory.const ⦋0⦌ n i) 0
+  dsimp [vertex, vertexOfSimplex] at h₁ ⊢
+  rw [SimplexCategory.const_apply'] at h₂
+  rw [h₁, ← h₂]
+  congr
+  subsingleton
+
+@[simp]
+lemma precomp_vertex (f : X.AffineMap E) (g : Y ⟶ X) (y : Y _⦋0⦌) :
+    (f.precomp g).vertex y = f.vertex (g.app _ y) := by
+  simp [vertex]
+
+@[ext]
+lemma ext {f g : X.AffineMap E}
+    (h : ∀ (x : X _⦋0⦌), f.vertex x = g.vertex x) : f = g := by
+  sorry
 
 namespace b
 
@@ -473,18 +495,6 @@ lemma φ_barycenter (s : X.obj (op n))
   dsimp [φ]
   rw [(f.isAffine s).map_barycenter, Finset.centerMass_eq_of_sum_1 _ _ hw₁]
 
-noncomputable def vertex (x : X _⦋0⦌) : E := f.φ x default
-
-lemma φ_vertex {n : SimplexCategory} (x : X.obj (op n)) (i : Fin (n.len + 1)) :
-    f.φ x (stdSimplex.vertex i) = f.vertex (vertexOfSimplex x i) := by
-  have h₁ := congr_fun (f.map_φ x (SimplexCategory.const ⦋0⦌ n i)) default
-  have h₂ := stdSimplex.map_vertex (S := ℝ) (SimplexCategory.const ⦋0⦌ n i) 0
-  dsimp [vertex, vertexOfSimplex] at h₁ ⊢
-  rw [SimplexCategory.const_apply'] at h₂
-  rw [h₁, ← h₂]
-  congr
-  subsingleton
-
 lemma range_φ_eq_convexHull {d : SimplexCategory} (x : X.obj (op d)) :
     Set.range (f.φ x) =
       convexHull ℝ (Set.range (fun (i : Fin (d.len + 1)) ↦ f.vertex (vertexOfSimplex x i))) := by
@@ -510,6 +520,12 @@ lemma isobarycenter_eq_centerMass (s : X.S) :
     ext
     simpa using mul_inv_cancel₀ (by positivity)
   · positivity
+
+lemma b_precomp (g : Y ⟶ X) [Mono g] :
+    (f.precomp g).b = f.b.precomp (B.map g) := by
+  ext s
+  simp
+  sorry
 
 protected noncomputable def sd : (sd.obj X).AffineMap E := f.b.precomp (sdToB.app X)
 

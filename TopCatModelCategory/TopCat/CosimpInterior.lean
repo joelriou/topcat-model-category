@@ -1,4 +1,4 @@
-import TopCatModelCategory.TopCat.Cosimp
+/-import TopCatModelCategory.TopCat.Cosimp
 
 universe u
 
@@ -32,4 +32,4 @@ def injective_map_interior_of_epi {m n : SimplexCategory} (f g : m ⟶ n) [Epi f
 
 end cosimp
 
-end TopCat
+end TopCat-/
