@@ -6,7 +6,7 @@ import TopCatModelCategory.Homeomorph
 
 universe u
 
-open CategoryTheory SSet NNReal Simplicial Topology
+open CategoryTheory SSet NNReal Simplicial Topology Limits
 
 namespace SimplexCategory
 
@@ -58,6 +58,19 @@ noncomputable def sdToTop : SemiCosimplicialObject TopCat.{u} :=
 
 namespace BIso
 
+section
+
+variable (n : ℕ)
+
+noncomputable abbrev ι := (B.{u}.obj Δ[n]).N
+
+noncomputable def F : ι.{u} n ⥤ TopCat.{u} := (B.{u}.obj Δ[n]).functorN ⋙ SSet.toTop
+
+noncomputable def cocone₁ := SSet.toTop.mapCocone (B.{u}.obj Δ[n]).coconeN
+
+noncomputable def isColimit₁ : IsColimit (cocone₁.{u} n) :=
+  isColimitOfPreserves _ (B.obj Δ[n]).isColimitCoconeN
+
 @[simps]
 noncomputable def homApp (n : ℕ) :
     C(|B.obj (Δ[n] : SSet.{u})|, stdSimplex ℝ (Fin (n + 1))) where
@@ -66,12 +79,22 @@ noncomputable def homApp (n : ℕ) :
     exact (AffineMap.stdSimplex.{u} n).range_b_f_subset_range_f (by simp)⟩
   continuous_toFun := (AffineMap.stdSimplex n).b.continuous.subtype_mk _
 
+def cocone₂ : (F.{u} n).CoconeTop where
+  pt := stdSimplex ℝ (Fin (n + 1))
+  ι := sorry
+  ι_naturality := sorry
+  continuous_ι := sorry
+
+lemma isColimit₂ : (cocone₂.{u} n).IsColimit := sorry
+
+lemma isHomeomorph : IsHomeomorph (homApp.{u} n) := by
+  sorry
+
+end
+
 lemma homApp_naturality {n m : ℕ} (f : ⦋n⦌ₛ ⟶ ⦋m⦌ₛ) (x : |B.{u}.obj Δ[n]|) :
     homApp m (SSet.toTop.map (B.map (toSSet.map f)) x) =
       stdSimplex.map f.toOrderEmbedding (homApp n x) := by
-  sorry
-
-lemma isHomeomorph (n : ℕ) : IsHomeomorph (homApp.{u} n) := by
   sorry
 
 noncomputable def homApp' (n : ℕ) :
