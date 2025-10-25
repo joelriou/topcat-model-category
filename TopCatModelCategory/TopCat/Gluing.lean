@@ -1,8 +1,9 @@
 import Mathlib.Topology.Category.TopCat.Limits.Basic
 import Mathlib.Topology.Homeomorph.Lemmas
 import TopCatModelCategory.ColimitsType
+import TopCatModelCategory.TopCat.CoconeTop
 
-universe w v u
+universe w' w'' w v u
 
 open CategoryTheory Topology Limits
 
@@ -259,3 +260,75 @@ noncomputable def homeomorph : A ≃ₜ A' where
 end MulticoequalizerDiagram
 
 end TopCat
+
+namespace CategoryTheory.Functor.CoconeTop
+
+lemma isColimit_of_isClosedEmbedding
+    {ι : Type w} [Category ι] [Finite ι]
+    {F : ι ⥤ TopCat.{u}}
+    (c : CoconeTop.{v} F)
+    (h₁ : ⋃ i, Set.range (c.ι i) = .univ)
+    (h₂ : ∀ (i : ι), IsClosedEmbedding (c.ι i))
+    (h₃ : ∀ ⦃i₁ i₂ : ι⦄ (x₁ : F.obj i₁) (x₂ : F.obj i₂),
+      c.ι i₁ x₁ = c.ι i₂ x₂ →
+        ∃ (j : ι) (f₁ : j ⟶ i₁) (f₂ : j ⟶ i₂) (y : F.obj j),
+          F.map f₁ y = x₁ ∧ F.map f₂ y = x₂) : IsColimit c := by
+  rw [isColimit_iff_toCoconeTypes_isColimit_and_coinduced]
+  refine ⟨⟨fun x₁ x₂ hx ↦ ?_, fun x ↦ ?_⟩, ?_⟩
+  · obtain ⟨i₁, x₁, rfl⟩ := ιColimitType_jointly_surjective _ x₁
+    obtain ⟨i₂, x₂, rfl⟩ := ιColimitType_jointly_surjective _ x₂
+    dsimp at hx
+    obtain ⟨j, f₁, f₂, y, rfl, rfl⟩ := h₃ _ _ hx
+    exact ((F ⋙ forget _).ιColimitType_map f₁ y).trans
+      ((F ⋙ forget _).ιColimitType_map f₂ y).symm
+  · have hx := Set.mem_univ x
+    simp only [← h₁, comp_obj, Set.mem_iUnion, Set.mem_range] at hx
+    obtain ⟨i, y, rfl⟩ := hx
+    exact ⟨ιColimitType _ i y, rfl⟩
+  · rw [TopologicalSpace.ext_iff_isClosed]
+    intro Z
+    rw [isClosed_iSup_iff]
+    trans ∀ (i : ι), IsClosed ((c.ι i) ⁻¹' Z)
+    · refine ⟨fun h i ↦ ?_, fun h ↦ ?_⟩
+      · exact IsClosed.preimage (c.continuous_ι i) h
+      · have : Z = ⋃ (i : ι), c.ι i '' (c.ι i ⁻¹' Z) := by
+          ext z
+          simp only [comp_obj, Set.mem_iUnion, Set.mem_image,
+            Set.mem_preimage]
+          refine ⟨fun hz ↦ ?_, ?_⟩
+          · have hz' := Set.mem_univ z
+            rw [← h₁] at hz'
+            simp only [comp_obj, Set.mem_iUnion, Set.mem_range] at hz'
+            obtain ⟨i, y, rfl⟩ := hz'
+            exact ⟨i, y, hz, rfl⟩
+          · rintro ⟨i, x, hx, rfl⟩
+            exact hx
+        rw [this]
+        exact isClosed_iUnion_of_finite
+          (fun i ↦ (IsClosedEmbedding.isClosed_iff_image_isClosed (h₂ i)).1 (h i))
+    · exact forall_congr' (fun i ↦ by simp [isClosed_coinduced])
+
+section
+
+variable {ι : Type u} [Category.{v} ι] {F : ι ⥤ TopCat.{w}}
+  {c : CoconeTop.{w'} F} {c' : CoconeTop.{w''} F}
+  (hc : c.IsColimit) (hc' : c'.IsColimit)
+
+include hc hc' in
+noncomputable def IsColimit.ptUnique : c.pt ≃ₜ c'.pt :=
+  hc.homeomorph.symm.trans hc'.homeomorph
+
+@[simp]
+lemma IsColimit.ptUnique_ι
+    {i : ι} (x : F.obj i) :
+    (hc.ptUnique hc') (c.ι i x) = c'.ι i x := by
+  simp [ptUnique]
+
+@[simp]
+lemma IsColimit.ptUnique_comp_ι (i : ι)  :
+    hc.ptUnique hc' ∘ c.ι i = c'.ι i := by
+  aesop
+
+end
+
+end CategoryTheory.Functor.CoconeTop

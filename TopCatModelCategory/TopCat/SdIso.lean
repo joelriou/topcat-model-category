@@ -1,5 +1,6 @@
 import TopCatModelCategory.SemiSimplexCategory
 import TopCatModelCategory.TopCat.Adj
+import TopCatModelCategory.TopCat.Gluing
 import TopCatModelCategory.SSet.AffineMap
 import TopCatModelCategory.Homeomorph
 
@@ -12,7 +13,6 @@ namespace SimplexCategory
 section
 
 variable (n : ℕ)
-
 
 noncomputable def affineMap : AffineMap.{_, u} Δ[n] (Fin (n + 1) → ℝ) where
   f s := ⦋n⦌.toTopHomeo s
@@ -35,24 +35,6 @@ end
 
 noncomputable abbrev sdToTop : CosimplicialObject TopCat.{u} :=
   sd ⋙ SSet.toTop
-
-/-def toTopObj' (n : SimplexCategory) : Set ((Fin (n.len + 1) → ℝ)) :=
-  { f | (∀ x, 0 ≤ f x) ∧ ∑ x, f x = 1 }
-
-def toTopObjHomeo' (n : SimplexCategory) :
-    n.toTopObj ≃ₜ n.toTopObj' where
-  toFun x := ⟨fun i ↦ x i, by
-    obtain ⟨x, hx⟩ := x
-    dsimp [toTopObj] at hx
-    simp [toTopObj', ← NNReal.coe_sum, hx]⟩
-  invFun x := ⟨fun i ↦ ⟨x.1 i, x.2.1 i⟩, by
-    obtain ⟨x, _, hx⟩ := x
-    ext
-    simpa⟩
-  left_inv _ := rfl
-  right_inv _ := rfl
-  continuous_toFun := by continuity
-  continuous_invFun := Isometry.continuous (fun _ => congrFun rfl)-/
 
 lemma affineMap_stdSimplex_f (n : ℕ) :
     (AffineMap.stdSimplex n).f = DFunLike.coe ∘ toTopHomeo _ := rfl
@@ -89,7 +71,8 @@ lemma homApp_naturality {n m : ℕ} (f : ⦋n⦌ₛ ⟶ ⦋m⦌ₛ) (x : |B.{u}.
       stdSimplex.map f.toOrderEmbedding (homApp n x) := by
   sorry
 
-lemma isHomeomorph (n : ℕ) : IsHomeomorph (homApp.{u} n) := sorry
+lemma isHomeomorph (n : ℕ) : IsHomeomorph (homApp.{u} n) := by
+  sorry
 
 noncomputable def homApp' (n : ℕ) :
     |B.obj (Δ[n] : SSet.{u})| ⟶ toTop.obj ⦋n⦌ₛ :=
