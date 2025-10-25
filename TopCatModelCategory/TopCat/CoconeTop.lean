@@ -80,6 +80,15 @@ instance : TopologicalSpace ((F ⋙ forget _).ColimitType) :=
 
 variable {F} (c : F.CoconeTop)
 
+@[simps]
+def postcomp {T : Type*} [TopologicalSpace T] (f : C(c.pt, T)) : F.CoconeTop where
+  pt := T
+  ι j := f ∘ c.ι j
+  ι_naturality g := by
+    ext x
+    exact congr_arg f (c.ι_naturality_apply g x)
+  continuous_ι j := f.continuous.comp (c.continuous_ι j)
+
 @[continuity]
 lemma continuous_descColimitType :
     Continuous ((F ⋙ forget _).descColimitType c.toCoconeTypes) := by
@@ -111,6 +120,18 @@ lemma homeomorph_apply (hc : c.IsColimit) (i : J) (x : F.obj i) :
 lemma homeomorph_symm_apply (hc : c.IsColimit) (i : J) (x : F.obj i) :
     hc.homeomorph.symm (c.ι i x) = (F ⋙ forget _).ιColimitType i x :=
   hc.homeomorph.injective (by simp)
+
+def funext (hc : c.IsColimit) {T : Type*}
+    {f₁ f₂ : c.pt → T} (h : ∀ i, f₁ ∘ c.ι i = f₂ ∘ c.ι i) : f₁ = f₂ := by
+  ext x
+  obtain ⟨x, rfl⟩ := hc.homeomorph.surjective x
+  obtain ⟨i, x, rfl⟩ := ιColimitType_jointly_surjective _ x
+  rw [hc.homeomorph_apply]
+  exact congr_fun (h i) x
+
+def funext' (hc : c.IsColimit) {T : Type*}
+    {f₁ f₂ : c.pt → T} (h : ∀ i, f₁ ∘ c.ι i = f₂ ∘ c.ι i) (x : c.pt) : f₁ x = f₂ x := by
+  rw [hc.funext h]
 
 end IsColimit
 
