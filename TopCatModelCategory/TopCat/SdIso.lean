@@ -444,7 +444,8 @@ lemma mem_range_iff (x : stdSimplex ℝ (Fin (n + 1))) :
   · obtain ⟨x, hx⟩ := x
     obtain ⟨x, rfl⟩ := h
     sorry
-  · sorry
+  · rintro ⟨f, hf, h₁, h₂⟩
+    sorry
 
 end ι
 
