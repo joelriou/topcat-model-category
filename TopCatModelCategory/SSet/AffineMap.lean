@@ -114,6 +114,11 @@ lemma continuous_affineMap {E : Type v} [SeminormedAddCommGroup E] [NormedSpace 
     Continuous (affineMap p) := by
   continuity
 
+lemma IsAffine.postcomp {f : stdSimplex ℝ X → E} [DecidableEq X] (hf : IsAffine f)
+    {E' : Type*} [AddCommGroup E'] [Module ℝ E']
+    (φ : E →ₗ[ℝ] E') : IsAffine (φ ∘ f) :=
+  fun x ↦ by simp [hf x]
+
 namespace IsAffine
 
 variable {f} [DecidableEq X] (hf : IsAffine f)
@@ -123,6 +128,11 @@ include hf
 lemma exists_eq :
     ∃ (p : X → E), f = affineMap p :=
   ⟨fun i ↦ f (vertex i), by ext; rw [hf]⟩
+
+lemma exists_linearMap :
+    ∃ (l : (X → ℝ) →ₗ[ℝ] E), f = l ∘ Subtype.val := by
+  obtain ⟨p, rfl⟩ := hf.exists_eq
+  exact ⟨Fintype.linearCombination ℝ p, rfl⟩
 
 lemma map_barycenter {α : Type*} [Fintype α] (p : α → stdSimplex ℝ X) (w : α → ℝ)
     (hw₀ : ∀ a, 0 ≤ w a) (hw₁ : ∑ a, w a = 1) :
@@ -271,6 +281,22 @@ lemma isAffine_iff_eq_top : IsAffine f ↔ isAffine f = ⊤ := by
     simpa using h x
   · simp [← mem_isAffine_iff, h]
 
+section
+
+variable {f} {E' : Type*} [AddCommGroup E'] [Module ℝ E']
+
+lemma IsAffineAt.postcomp
+    {x : X.obj (op n)} (hx : IsAffineAt f x) (φ : E →ₗ[ℝ] E') :
+    IsAffineAt (φ ∘ f) x :=
+  stdSimplex.IsAffine.postcomp hx φ
+
+lemma IsAffine.postcomp
+    (hf : IsAffine f) (φ : E →ₗ[ℝ] E') :
+    IsAffine (φ ∘ f) :=
+  fun _ x ↦ (hf x).postcomp φ
+
+end
+
 end
 
 variable [AddCommGroup E] [Module ℝ E]
@@ -356,6 +382,12 @@ lemma precomp_φ (g : Y ⟶ X) {d : SimplexCategory} (y : Y.obj (op d)) :
     (f.precomp g).φ y = f.φ (g.app _ y) :=
   IsAffineAt.precomp_φ f.f g y
 
+@[simps -fullyApplied f]
+def postcomp {E' : Type*} [AddCommGroup E'] [Module ℝ E'] (φ : E →ₗ[ℝ] E') :
+    AffineMap X E' where
+  f := φ ∘ f.f
+  isAffine := f.isAffine.postcomp φ
+
 @[continuity]
 lemma continuous {E : Type v} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
     (f : X.AffineMap E) :
@@ -391,6 +423,12 @@ lemma φ_vertex {n : SimplexCategory} (x : X.obj (op n)) (i : Fin (n.len + 1)) :
 lemma precomp_vertex (f : X.AffineMap E) (g : Y ⟶ X) (y : Y _⦋0⦌) :
     (f.precomp g).vertex y = f.vertex (g.app _ y) := by
   simp [vertex]
+
+@[simp]
+lemma postcomp_vertex (f : X.AffineMap E)
+    {E' : Type*} [AddCommGroup E'] [Module ℝ E'] (φ : E →ₗ[ℝ] E') (x : X _⦋0⦌) :
+    (f.postcomp φ).vertex x = φ (f.vertex x) :=
+  rfl
 
 @[ext]
 lemma ext {f g : X.AffineMap E}

@@ -492,24 +492,29 @@ lemma f_comp_toStdSimplex'_apply {n : ℕ} (x) :
 section
 
 variable {E : Type v} [AddCommGroup E] [Module ℝ E]
-  {X : SSet.{u}} [X.IsWeaklyPolyhedralLike]
+  {X : SSet.{u}}
   (f : X.AffineMap E) (x : X.N)
 
 lemma isAffine_φ_comp_toStdSimplex :
     IsAffine (f.φ x.simplex ∘ toStdSimplex x.dim) := by
-  sorry
+  obtain ⟨l, hl⟩ :=
+    (f.isAffine x.simplex).exists_linearMap
+  simpa only [hl] using ((AffineMap.stdSimplex x.dim).b.isAffine.postcomp l)
 
-lemma b_f_comp_toTop_map  :
+lemma b_f_comp_toTop_map [X.IsWeaklyPolyhedralLike] :
     f.b.f ∘ SSet.toTop.map (B.map (yonedaEquiv.symm x.simplex)) =
       f.φ x.simplex ∘ toStdSimplex x.dim := by
-  let α : (B.{u}.obj Δ[x.dim]).AffineMap E :=
-    ⟨_, isAffine_φ_comp_toStdSimplex f x⟩
-  suffices f.b.precomp (B.map (yonedaEquiv.symm x.simplex)) = α from
-    congr_arg AffineMap.f this
+  obtain ⟨l, hl⟩ := (f.isAffine x.simplex).exists_linearMap
+  have : f.precomp (SSet.yonedaEquiv.symm x.simplex) =
+      (AffineMap.stdSimplex.{u} x.dim).postcomp l := by
+    sorry
+  suffices f.b.precomp (B.map (yonedaEquiv.symm x.simplex)) =
+      (AffineMap.stdSimplex.{u} x.dim).b.postcomp l by
+    simpa only [hl] using congr_arg AffineMap.f this
   ext y : 1
-  simp [α]
-  rw [toS_mapN_of_mono]
-  sorry
+  simp
+  rw [toS_mapN_of_mono, ← AffineMap.isobarycenter_precomp, this]
+  rfl
 
 end
 
