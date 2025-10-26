@@ -214,6 +214,14 @@ lemma monotone_finset : Monotone s.finset := s.strictMono_finset.monotone
 noncomputable def finsetDiff (i : Fin (s.dim + 1)) : Finset (Fin (n + 1)) :=
   s.finset i \ Finset.biUnion (Finset.filter (fun j ↦ j < i) Finset.univ) s.finset
 
+lemma notMem_finsetDiff {j i : Fin (s.dim + 1)} {x : Fin (n + 1)} (hj : x ∈ s.finset j)
+    (h : j < i):
+    x ∉ s.finsetDiff i := by
+  intro hx
+  simp only [finsetDiff, Finset.mem_sdiff, Finset.mem_biUnion, Finset.mem_filter, Finset.mem_univ,
+    true_and, not_exists, not_and] at hx
+  exact hx.2 _ h hj
+
 @[simp]
 lemma finsetDiff_zero : s.finsetDiff 0 = s.finset 0 := by
   simp [finsetDiff]
@@ -240,9 +248,10 @@ lemma finset_eq_biUnion (i : Fin (s.dim + 1)) :
     intro j h
     exact (s.finsetDiff_subset_finset j).trans (s.monotone_finset h)
 
-lemma nonempty_finset_zero : (s.finset 0).Nonempty :=
-  Finset.nonempty_iff_ne_empty.2
-    ((SSet.stdSimplex.orderIsoN (s.simplex.obj 0)).2)
+@[simp]
+lemma finset_ne_empty (i : Fin (s.dim + 1)) :
+    ¬ s.finset i = ∅ :=
+  (SSet.stdSimplex.orderIsoN (s.simplex.obj i)).2
 
 lemma disjoint_finsetDiff {i j : Fin (s.dim + 1)} (hij : i ≠ j) :
     Disjoint (s.finsetDiff i) (s.finsetDiff j) := by
@@ -257,8 +266,7 @@ lemma disjoint_finsetDiff {i j : Fin (s.dim + 1)} (hij : i ≠ j) :
 
 lemma nonempty_finsetDiff (i) : (s.finsetDiff i).Nonempty := by
   obtain rfl | ⟨i, rfl⟩ := i.eq_zero_or_eq_succ
-  · rw [finsetDiff_zero]
-    exact s.nonempty_finset_zero
+  · simp [Finset.nonempty_iff_ne_empty]
   · have := s.strictMono_finset i.castSucc_lt_succ
     obtain ⟨a, h₁, h₂⟩ := (Finset.ssubset_iff_of_subset this.subset).1 this
     simp [Finset.nonempty_def, finsetDiff]
@@ -340,9 +348,60 @@ lemma φ_apply_eq_zero (v : stdSimplex ℝ (Fin (σ.dim + 1))) (i : Fin (n + 1))
   simp only [Finset.mem_biUnion, Finset.mem_filter, Finset.mem_univ, true_and, not_exists, not_and]
   tauto
 
+lemma φ_apply (v : stdSimplex ℝ (Fin (σ.dim + 1))) {i : Fin (n + 1)} {a : Fin (σ.dim + 1)}
+    (h : i ∈ σ.finsetDiff a) :
+    σ.φ v i = ∑ (b : Fin (σ.dim + 1)) with a ≤ b, v b * ((σ.finset b).card : ℝ)⁻¹ := by
+  simp only [φ_eq, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
+  rw [← Finset.sum_subset (s₁ := { b | a ≤ b}) (by simp) (fun b _ hb ↦ by
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, not_le] at hb
+    rw [isobary_apply_eq_zero, mul_zero]
+    intro hb'
+    exact σ.notMem_finsetDiff hb' hb h)]
+  refine Finset.sum_congr rfl (fun b hb ↦ ?_)
+  simp at hb
+  congr 1
+  rw [isobary_apply_eq]
+  have := σ.finsetDiff_subset_finset a h
+  exact σ.monotone_finset hb (σ.finsetDiff_subset_finset a h)
+
+lemma eq_of_mem_finsetDiff_last
+    (v : stdSimplex ℝ (Fin (σ.dim + 1))) {i : Fin (n + 1)}
+    (h : i ∈ σ.finsetDiff (Fin.last _)) :
+    v (Fin.last _) = (σ.finset (Fin.last _)).card * σ.φ v i := by
+  rw [σ.φ_apply v h, Finset.sum_eq_single (a := Fin.last _) (by simp) (by simp),
+    mul_comm (v _), ← mul_assoc, mul_inv_cancel₀ (by simp), one_mul]
+
+lemma eq_of_mem_finsetDiff_succ
+    (v : stdSimplex ℝ (Fin (σ.dim + 1))) {i j : Fin (n + 1)} {a : Fin σ.dim}
+    (hi : i ∈ σ.finsetDiff a.castSucc) (hj : j ∈ σ.finsetDiff a.succ) :
+    v a.castSucc = (σ.finset a.castSucc).card * (σ.φ v i - σ.φ v j) := by
+  rw [σ.φ_apply _ hi, σ.φ_apply _ hj]
+  have : Finset.filter (fun b ↦ a.castSucc ≤ b) .univ =
+      insert a.castSucc (Finset.filter (fun b ↦ a.succ ≤ b) .univ) := by
+    ext b
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_insert]
+    constructor
+    · intro h
+      obtain h | rfl := h.lt_or_eq
+      · exact Or.inr (by rwa [← Fin.castSucc_lt_iff_succ_le])
+      · exact Or.inl rfl
+    · rintro (h | h)
+      · rw [h]
+      · exact a.castSucc_le_succ.trans h
+  rw [this, Finset.sum_insert (by simp), add_sub_cancel_right, mul_comm (v _),
+    ← mul_assoc, mul_inv_cancel₀ (by simp), one_mul]
+
 lemma injective_φ : Function.Injective σ.φ := by
-  rw [φ_eq]
-  sorry
+  intro v₁ v₂ hv
+  choose i hi using fun a ↦ σ.nonempty_finsetDiff a
+  ext a
+  induction a using Fin.reverseInduction with
+  | last =>
+    rw [σ.eq_of_mem_finsetDiff_last v₁ (hi _),
+      σ.eq_of_mem_finsetDiff_last v₂ (hi _), hv]
+  | cast a ha =>
+    rw [σ.eq_of_mem_finsetDiff_succ v₁ (hi a.castSucc) (hi a.succ),
+      σ.eq_of_mem_finsetDiff_succ v₂ (hi a.castSucc) (hi a.succ), hv]
 
 lemma injective_cocone₂_ι :
     Function.Injective ((cocone₂ n).ι σ) := by
