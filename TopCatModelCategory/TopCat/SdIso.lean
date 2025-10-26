@@ -342,6 +342,24 @@ lemma val_comp_cocone₂_ι :
   apply congr_arg
   exact (⦋σ.dim⦌.toTopHomeo.symm_apply_apply x).symm
 
+lemma mem_range_cocone₂_ι_iff (x : stdSimplex ℝ (Fin (n + 1))) :
+    x ∈ Set.range ((cocone₂ n).ι σ) ↔ x.1 ∈ Set.range σ.φ := by
+  constructor
+  · rintro ⟨x, rfl⟩
+    have := congr_fun (σ.val_comp_cocone₂_ι) x
+    dsimp at this
+    rw [this]
+    apply Set.mem_range_self
+  · obtain ⟨x, hx⟩ := x
+    rintro ⟨x, rfl⟩
+    dsimp
+    refine ⟨⦋σ.dim⦌.toTopHomeo.symm x, ?_⟩
+    rw [Subtype.ext_iff]
+    have := congr_fun (σ.val_comp_cocone₂_ι) (⦋σ.dim⦌.toTopHomeo.symm x)
+    dsimp at this ⊢
+    rw [this]
+    erw [Homeomorph.apply_symm_apply]
+
 lemma φ_apply_eq_zero (v : stdSimplex ℝ (Fin (σ.dim + 1))) (i : Fin (n + 1))
     (hi : ∀ a, i ∉ σ.finsetDiff a) :
     σ.φ v i = 0 := by
@@ -414,12 +432,35 @@ lemma injective_cocone₂_ι :
   rw [val_comp_cocone₂_ι]
   exact Function.Injective.comp σ.injective_φ (Homeomorph.injective _)
 
+lemma mem_range_iff (x : stdSimplex ℝ (Fin (n + 1))) :
+    x ∈ Set.range ((cocone₂ n).ι σ) ↔
+      ∃ (f : Fin (σ.dim + 1) → ℝ) (hf : Antitone f),
+        (∀ (i : Fin (σ.dim + 1)),
+          ∀ (j : Fin (n + 1)), j ∈ σ.finsetDiff i → x j = f i) ∧
+        ∀ (j : Fin (n + 1)) (hj : ∀ (i : Fin (σ.dim + 1)), j ∉ σ.finsetDiff i), x j = 0 := by
+  rw [mem_range_cocone₂_ι_iff]
+  choose i hi using fun a ↦ σ.nonempty_finsetDiff a
+  refine ⟨fun h ↦ ?_, ?_⟩
+  · obtain ⟨x, hx⟩ := x
+    obtain ⟨x, rfl⟩ := h
+    sorry
+  · sorry
+
 end ι
 
 variable {n} in
-lemma exists_iff (x : stdSimplex ℝ (Fin (n + 1))) :
-    ∃ (σ₀ : ι.{u} n), ∀ (σ : ι.{u} n), x ∈ Set.range ((cocone₂ n).ι σ) ↔ σ₀ ≤ σ :=
+lemma exists' (x : stdSimplex ℝ (Fin (n + 1))) :
+    ∃ (σ₀ : ι.{u} n) (h₀ : x ∈ Set.range ((cocone₂ n).ι σ₀)),
+      ∀ (σ : ι.{u} n), x ∈ Set.range ((cocone₂ n).ι σ) → σ₀ ≤ σ :=
   sorry
+
+variable {n} in
+lemma exists_iff (x : stdSimplex ℝ (Fin (n + 1))) :
+    ∃ (σ₀ : ι.{u} n), ∀ (σ : ι.{u} n), x ∈ Set.range ((cocone₂ n).ι σ) ↔ σ₀ ≤ σ := by
+  obtain ⟨σ₀, h₀, h⟩ := exists'.{u} x
+  refine ⟨σ₀, fun σ ↦ ⟨h σ, fun hσ ↦ ?_⟩⟩
+  obtain ⟨x, rfl⟩ := h₀
+  exact ⟨_, (cocone₂ n).ι_naturality_apply (homOfLE hσ) x⟩
 
 instance (σ : ι.{u} n) :
     CompactSpace ((((B.obj Δ[n]).functorN' ⋙ SSet.toTop) ⋙ forget TopCat).obj σ) := by
