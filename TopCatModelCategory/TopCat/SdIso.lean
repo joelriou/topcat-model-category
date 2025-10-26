@@ -445,7 +445,6 @@ lemma mem_range_iff (x : stdSimplex ℝ (Fin (n + 1))) :
   refine ⟨fun h ↦ ?_, ?_⟩
   · obtain ⟨x, h₁⟩ := x
     obtain ⟨x, rfl⟩ := h
-    dsimp only [DFunLike.coe]
     refine ⟨fun a ↦ σ.φ x (i a), ?_, fun a k ha ↦ ?_, σ.φ_apply_eq_zero _ ⟩
     · rw [Fin.antitone_iff_succ_le]
       intro a
@@ -453,7 +452,7 @@ lemma mem_range_iff (x : stdSimplex ℝ (Fin (n + 1))) :
       simp only [Finset.mem_filter, Finset.mem_univ, Fin.succ_le_castSucc_iff, lt_self_iff_false,
         and_false, not_false_eq_true, Finset.sum_insert, le_add_iff_nonneg_left]
       exact mul_nonneg (by simp) (by positivity)
-    · dsimp
+    · dsimp only [DFunLike.coe]
       rw [σ.φ_apply _ ha, σ.φ_apply _ (hi a)]
   · rintro ⟨f, hf, h₁, h₂⟩
     sorry
