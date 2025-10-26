@@ -600,13 +600,6 @@ lemma injective_stdSimplex_f (n : ℕ) :
   obtain rfl : x = y := by aesop
   rfl
 
-/-lemma stdSimplex_f_naturality {n m : ℕ} (φ : ⦋n⦌ₛ ⟶ ⦋m⦌ₛ) (x) :
-    (AffineMap.stdSimplex m).f
-      (SSet.toTop.map (SSet.stdSimplex.map (SemiSimplexCategory.toSimplexCategory.map φ)) x) = by
-      -- need #28891
-      have := (AffineMap.stdSimplex n).f x
-      sorry := sorry-/
-
 end AffineMap
 
 end SSet

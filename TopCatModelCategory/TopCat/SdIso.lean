@@ -375,8 +375,7 @@ lemma isClosedEmbedding_cocone₂_ι (σ : ι.{u} n) :
 
 
 lemma isColimit₂ : (cocone₂.{u} n).IsColimit := by
-  refine (cocone₂.{u} n).isColimit_of_isClosedEmbedding
-    ?_ isClosedEmbedding_cocone₂_ι ?_
+  refine (cocone₂.{u} n).isColimit_of_isClosedEmbedding ?_ isClosedEmbedding_cocone₂_ι ?_
   · ext x
     obtain ⟨i, hi⟩ := exists_iff.{u} x
     simp only [Set.mem_iUnion, Set.mem_univ, iff_true, Set.mem_range]
@@ -431,11 +430,29 @@ lemma f_comp_toStdSimplex'_apply {n : ℕ} (x) :
       (AffineMap.stdSimplex n).b.f x :=
   congr_fun (f_comp_toStdSimplex' n) x
 
-lemma b_f_comp_toTop_map {X : SSet.{u}} [X.IsWeaklyPolyhedralLike]
-    {E : Type v} [AddCommGroup E] [Module ℝ E] (f : X.AffineMap E) (x : X.N) :
-    f.b.f ∘ SSet.toTop.map ((B.map (yonedaEquiv.symm x.simplex))) =
-      f.φ x.simplex ∘ toStdSimplex x.dim := by
+section
+
+variable {E : Type v} [AddCommGroup E] [Module ℝ E]
+  {X : SSet.{u}} [X.IsWeaklyPolyhedralLike]
+  (f : X.AffineMap E) (x : X.N)
+
+lemma isAffine_φ_comp_toStdSimplex :
+    IsAffine (f.φ x.simplex ∘ toStdSimplex x.dim) := by
   sorry
+
+lemma b_f_comp_toTop_map  :
+    f.b.f ∘ SSet.toTop.map (B.map (yonedaEquiv.symm x.simplex)) =
+      f.φ x.simplex ∘ toStdSimplex x.dim := by
+  let α : (B.{u}.obj Δ[x.dim]).AffineMap E :=
+    ⟨_, isAffine_φ_comp_toStdSimplex f x⟩
+  suffices f.b.precomp (B.map (yonedaEquiv.symm x.simplex)) = α from
+    congr_arg AffineMap.f this
+  ext y : 1
+  simp [α]
+  rw [toS_mapN_of_mono]
+  sorry
+
+end
 
 lemma toStdSimplex_naturality {n m : ℕ} (f : ⦋n⦌ₛ ⟶ ⦋m⦌ₛ) (y : |B.{u}.obj Δ[n]|) :
     toStdSimplex m (SSet.toTop.map (B.map (toSSet.map f)) y) =
