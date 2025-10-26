@@ -434,6 +434,20 @@ lemma injective_cocone₂_ι :
   rw [val_comp_cocone₂_ι]
   exact Function.Injective.comp σ.injective_φ (Homeomorph.injective _)
 
+lemma _root_.Fin.exists_sum_ge {A : Type*} [AddCommGroup A] {n : ℕ}
+    (f : Fin (n + 1) → A) :
+    ∃ (g : Fin (n + 1) → A),
+      ∀ (i : Fin (n + 1)), f i = ∑ j with i ≤ j, g j :=
+  ⟨Fin.reverseInduction (f (Fin.last _))
+    (fun i _ ↦ f i.castSucc - f i.succ), by
+      intro i
+      induction i using Fin.reverseInduction with
+      | last =>
+        rw [Finset.sum_eq_single (a := Fin.last _) (by simp) (by simp)]
+        simp
+      | cast i hi =>
+        simp [Finset.filter_finCastSucc_le, ← hi]⟩
+
 lemma mem_range_iff (x : stdSimplex ℝ (Fin (n + 1))) :
     x ∈ Set.range ((cocone₂ n).ι σ) ↔
       ∃ (f : Fin (σ.dim + 1) → ℝ) (hf : Antitone f),
@@ -455,7 +469,30 @@ lemma mem_range_iff (x : stdSimplex ℝ (Fin (n + 1))) :
     · dsimp only [DFunLike.coe]
       rw [σ.φ_apply _ ha, σ.φ_apply _ (hi a)]
   · rintro ⟨f, hf, h₁, h₂⟩
-    sorry
+    obtain ⟨g, hg⟩ := Fin.exists_sum_ge f
+    refine ⟨⟨fun a ↦ g a * (σ.finset a).card, fun a ↦ ?_, ?_⟩, ?_⟩
+    · refine mul_nonneg ?_ (by simp)
+      obtain ⟨a, rfl⟩ | rfl := a.eq_castSucc_or_eq_last
+      · simpa [hg, Finset.filter_finCastSucc_le] using hf a.castSucc_le_succ
+      · have := hg (Fin.last _)
+        rw [Finset.sum_eq_single (a := Fin.last _) (by simp) (by simp)] at this
+        rw [← this, ← h₁ _ _ (hi (Fin.last _))]
+        exact x.2.1 _
+    · sorry
+    · ext j
+      by_cases hj : ∃ a, j ∈ σ.finsetDiff a
+      · obtain ⟨a, ha⟩ := hj
+        dsimp
+        rw [σ.φ_apply _ ha, h₁ _ _ ha]
+        simp only [hg]
+        dsimp only [DFunLike.coe]
+        apply Finset.sum_congr rfl
+        intro b hb
+        rw [mul_assoc, mul_inv_cancel₀ (by simp), mul_one]
+      · simp at hj
+        have := h₂ j hj
+        dsimp only [DFunLike.coe] at this
+        rw [this, σ.φ_apply_eq_zero _ _ hj]
 
 end ι
 
