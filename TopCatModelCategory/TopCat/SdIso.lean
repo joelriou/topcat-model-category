@@ -413,10 +413,6 @@ lemma isHomeomorph : IsHomeomorph (toStdSimplex.{u} n) := by
 
 end
 
-lemma toStdSimplex_naturality {n m : ℕ} (f : ⦋n⦌ₛ ⟶ ⦋m⦌ₛ) (x : |B.{u}.obj Δ[n]|) :
-    toStdSimplex m (SSet.toTop.map (B.map (toSSet.map f)) x) =
-      stdSimplex.map f.toOrderEmbedding (toStdSimplex n x) := by
-  sorry
 
 noncomputable def toStdSimplex' (n : ℕ) :
     |B.obj (Δ[n] : SSet.{u})| ⟶ toTop.obj ⦋n⦌ₛ :=
@@ -435,6 +431,17 @@ lemma f_comp_toStdSimplex'_apply {n : ℕ} (x) :
       (AffineMap.stdSimplex n).b.f x :=
   congr_fun (f_comp_toStdSimplex' n) x
 
+lemma b_f_comp_toTop_map {X : SSet.{u}} [X.IsWeaklyPolyhedralLike]
+    {E : Type v} [AddCommGroup E] [Module ℝ E] (f : X.AffineMap E) (x : X.N) :
+    f.b.f ∘ SSet.toTop.map ((B.map (yonedaEquiv.symm x.simplex))) =
+      f.φ x.simplex ∘ toStdSimplex x.dim := by
+  sorry
+
+lemma toStdSimplex_naturality {n m : ℕ} (f : ⦋n⦌ₛ ⟶ ⦋m⦌ₛ) (y : |B.{u}.obj Δ[n]|) :
+    toStdSimplex m (SSet.toTop.map (B.map (toSSet.map f)) y) =
+      stdSimplex.map f.toOrderEmbedding (toStdSimplex n y) := by
+  sorry
+
 lemma toStdSimplex'_naturality {n m : ℕ} (f : ⦋n⦌ₛ ⟶ ⦋m⦌ₛ) :
     SSet.toTop.map (B.map (toSSet.map f)) ≫ toStdSimplex' m =
       toStdSimplex' n ≫ toTop.map f := by
@@ -443,6 +450,7 @@ lemma toStdSimplex'_naturality {n m : ℕ} (f : ⦋n⦌ₛ ⟶ ⦋m⦌ₛ) :
   erw [toStdSimplex_naturality f x,
     SimplexCategory.toTopHomeo_symm_naturality_apply (toSimplexCategory.map f)]
   rfl
+
 
 instance (n : ℕ) : IsIso (toStdSimplex'.{u} n) :=
   (TopCat.isoOfHomeo ((isHomeomorph.{u} n).homeomorph.trans ⦋n⦌.toTopHomeo.symm)).isIso_hom

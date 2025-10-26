@@ -13,13 +13,13 @@ variable {X : SSet.{u}} [X.IsWeaklyPolyhedralLike]
   {E : Type v} [AddCommGroup E] [Module ℝ E] (f : X.AffineMap E)
 
 lemma b_f_toTop_map_b_map_apply (x : X.N) (y) :
-    f.b.f ((ConcreteCategory.hom (toTop.map (B.map (yonedaEquiv.symm x.simplex)))) y) =
+    f.b.f ((toTop.map (B.map (yonedaEquiv.symm x.simplex))) y) =
       f.f (toTop.map (yonedaEquiv.symm x.simplex)
         (SemiSimplexCategory.BIso.{u}.hom.app ⦋x.dim⦌ₛ y)) :=
-  sorry
+  congr_fun (SemiSimplexCategory.BIso.b_f_comp_toTop_map f x) y
 
 lemma sd_f_toTop_map_sd_map_apply (x : X.N) (y : |sd.obj Δ[x.dim]|) :
-    f.sd.f ((ConcreteCategory.hom (toTop.map (sd.map (yonedaEquiv.symm x.simplex)))) y) =
+    f.sd.f ((toTop.map (sd.map (yonedaEquiv.symm x.simplex))) y) =
       f.f (toTop.map (yonedaEquiv.symm x.simplex)
         (SemiSimplexCategory.sdIso.hom.app ⦋x.dim⦌ₛ
         (toTop.map (stdSimplex.sdIso.hom.app ⦋x.dim⦌) y))) := by
