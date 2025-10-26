@@ -45,6 +45,12 @@ noncomputable def orderIsoN {n : ℕ} :
     rw [← face_nonDegenerateEquiv', ← face_nonDegenerateEquiv', face_le_face_iff]
     rfl
 
+@[simp]
+lemma orderIsoN_card {n : ℕ} (σ : (Δ[n] : SSet.{u}).N) :
+    (orderIsoN σ).1.card = σ.dim + 1 := by
+  simp [orderIsoN, Finset.card_image_of_injective (f := σ.simplex) _
+    (nonDegenerateEquiv ⟨σ.simplex, σ.nonDegenerate⟩).injective]
+
 end SSet.stdSimplex
 
 namespace SimplexCategory
@@ -86,6 +92,27 @@ lemma affineMap_stdSimplex_range_f (n : ℕ) :
 
 end SimplexCategory
 
+lemma stdSimplex.isAffine_map {d : ℕ} {X : Type*} [Fintype X]
+    (f : Fin (d + 1) → X) :
+    stdSimplex.IsAffine (Subtype.val ∘ stdSimplex.map (S := ℝ) f) := by
+  classical
+  intro g
+  ext x
+  simp [map, FunOnFinite.linearMap_apply_apply]
+  sorry
+
+namespace SSet.AffineMap
+
+variable {n : ℕ}
+lemma stdSimplex_φ {d : ℕ} (s : (Δ[n] : SSet.{u}) _⦋d⦌) :
+    (AffineMap.stdSimplex n).φ s = Subtype.val ∘ _root_.stdSimplex.map s :=
+  stdSimplex.IsAffine.ext ((stdSimplex n).isAffine s) (stdSimplex.isAffine_map s) (by
+    intro i
+    simp
+    sorry)
+
+end SSet.AffineMap
+
 namespace SemiSimplexCategory
 
 @[simps!]
@@ -106,32 +133,104 @@ noncomputable abbrev ι := (B.{u}.obj Δ[n]).N
 structure ι' where
   d : ℕ
   S (i : Fin (d + 1)) : Finset (Fin (n + 1))
-  hS₀ i : Nonempty (S i)
-  inter i j (hij : i ≠ j) : Disjoint (S i) (S j)
+  hS₀ i : (S i).Nonempty
+  inter {i j} (hij : i ≠ j) : Disjoint (S i) (S j)
 
-section
+variable {n} in
+noncomputable def isobary (S : Finset (Fin (n + 1))) (a : Fin (n + 1)) : ℝ :=
+  if a ∈ S then S.card⁻¹ else 0
+
+variable {n} in
+lemma isobary_apply_eq_zero (S : Finset (Fin (n + 1))) (a : Fin (n + 1))
+    (ha : a ∉ S) :
+    isobary S a = 0 :=
+  if_neg ha
+
+variable {n} in
+lemma isobary_apply_eq (S : Finset (Fin (n + 1))) (a : Fin (n + 1))
+    (ha : a ∈ S) :
+    isobary S a = (S.card⁻¹ : ℝ) :=
+  if_pos ha
+
+variable {n} in
+lemma isobary_orderIsoN_apply (σ : Δ[n].N) :
+    isobary (SSet.stdSimplex.orderIsoN σ).1 =
+      (AffineMap.stdSimplex n).isobarycenter σ.toS := by
+  ext a
+  have ha : a ∈ (SSet.stdSimplex.orderIsoN σ).1 ↔ a ∈ Set.range σ.simplex := by
+    simp [SSet.stdSimplex.orderIsoN]
+  by_cases ha' : a ∈ (SSet.stdSimplex.orderIsoN σ).1
+  · rw [isobary_apply_eq _ _ ha']
+    rw [ha, Set.mem_range] at ha'
+    obtain ⟨i, rfl⟩ := ha'
+    simp only [ne_eq, stdSimplex.orderIsoN_card, Nat.cast_add, Nat.cast_one]
+    dsimp [AffineMap.isobarycenter]
+    rw [SSet.AffineMap.stdSimplex_φ]
+    dsimp
+    rw [FunOnFinite.linearMap_apply_apply_of_injective _ _ _
+      (by exact (stdSimplex.nonDegenerateEquiv ⟨σ.simplex, σ.nonDegenerate⟩).injective)]
+    dsimp [stdSimplex.isobarycenter]
+    rw [Finset.sum_eq_single (a := i) _ (by simp),
+      Fintype.card_fin, Nat.cast_add, Nat.cast_one, one_div, Pi.single_eq_same, mul_one]
+    intro j _ hj
+    simp [Pi.single_eq_of_ne' hj]
+  · rw [isobary_apply_eq_zero _ _ ha']
+    rw [ha] at ha'
+    dsimp only [AffineMap.isobarycenter]
+    rw [SSet.AffineMap.stdSimplex_φ]
+    dsimp
+    rw [FunOnFinite.linearMap_apply_apply, Finset.sum_eq_zero]
+    intro i hi
+    exact (ha' ⟨i, by simpa using hi⟩).elim
+
+namespace ι
 
 variable {n} (s : ι.{u} n)
 
-noncomputable def ι.finset (i : Fin (s.dim + 1)) : Finset (Fin (n + 1)) :=
+noncomputable def finset (i : Fin (s.dim + 1)) : Finset (Fin (n + 1)) :=
   (SSet.stdSimplex.orderIsoN (s.simplex.obj i)).1
 
-lemma ι.strictMono_finset : StrictMono s.finset := by
+lemma strictMono_finset : StrictMono s.finset := by
   intro i j hij
   have := (PartialOrder.mem_nonDegenerate_iff s.simplex).1 s.nonDegenerate hij
   rwa [← stdSimplex.orderIsoN.lt_iff_lt] at this
 
-noncomputable def ι.finsetDiff (i : Fin (s.dim + 1)) : Finset (Fin (n + 1)) :=
+lemma monotone_finset : Monotone s.finset := s.strictMono_finset.monotone
+
+noncomputable def finsetDiff (i : Fin (s.dim + 1)) : Finset (Fin (n + 1)) :=
   s.finset i \ Finset.biUnion (Finset.filter (fun j ↦ j < i) Finset.univ) s.finset
 
 @[simp]
-lemma ι.finsetDiff_zero : s.finsetDiff 0 = s.finset 0 := by
+lemma finsetDiff_zero : s.finsetDiff 0 = s.finset 0 := by
   simp [finsetDiff]
 
-lemma ι.finset_zero_ne_empty : s.finset 0 ≠ ∅ :=
-  (SSet.stdSimplex.orderIsoN (s.simplex.obj 0)).2
+lemma finsetDiff_subset_finset (i : Fin (s.dim + 1)) :
+    s.finsetDiff i ⊆ s.finset i :=
+  Finset.sdiff_subset
 
-lemma ι.disjoint_finsetDiff {i j : Fin (s.dim + 1)} (hij : i ≠ j) :
+lemma finset_eq_biUnion (i : Fin (s.dim + 1)) :
+    s.finset i = Finset.biUnion { j | j ≤ i } s.finsetDiff := by
+  refine subset_antisymm ?_ ?_
+  · intro x hx
+    let S : Finset (Fin (s.dim + 1)) := {j | x ∈ s.finset j}
+    have hS : S.Nonempty := ⟨i, by simpa [S]⟩
+    simp only [Finset.mem_biUnion, Finset.mem_filter, Finset.mem_univ, true_and]
+    refine ⟨S.min' hS, S.min'_le _ (by simpa [S]), ?_⟩
+    simp only [finsetDiff, Finset.lt_min'_iff, Finset.mem_sdiff, Finset.mem_biUnion,
+      Finset.mem_filter, Finset.mem_univ, true_and, not_exists, not_and]
+    exact ⟨by simpa [S] using S.min'_mem hS,
+      fun k hk hk' ↦ (lt_self_iff_false k).1
+        (lt_of_lt_of_le (hk _ (S.min'_mem hS)) (S.min'_le k (by simpa [S])))⟩
+  · simp only [Finset.biUnion_subset_iff_forall_subset, Finset.mem_filter, Finset.mem_univ,
+      true_and]
+    intro j h
+    exact (s.finsetDiff_subset_finset j).trans (s.monotone_finset h)
+
+lemma nonempty_finset_zero : (s.finset 0).Nonempty :=
+  Finset.nonempty_iff_ne_empty.2
+    ((SSet.stdSimplex.orderIsoN (s.simplex.obj 0)).2)
+
+lemma disjoint_finsetDiff {i j : Fin (s.dim + 1)} (hij : i ≠ j) :
     Disjoint (s.finsetDiff i) (s.finsetDiff j) := by
   wlog h : j < i generalizing i j
   · exact (this hij.symm (by omega)).symm
@@ -142,25 +241,25 @@ lemma ι.disjoint_finsetDiff {i j : Fin (s.dim + 1)} (hij : i ≠ j) :
     Finset.notMem_empty, iff_false, and_imp]
   exact fun _ h₂ h₃ ↦ (h₂ j h h₃).elim
 
-noncomputable def ι.toι' : ι' n where
+lemma nonempty_finsetDiff (i) : (s.finsetDiff i).Nonempty := by
+  obtain rfl | ⟨i, rfl⟩ := i.eq_zero_or_eq_succ
+  · rw [finsetDiff_zero]
+    exact s.nonempty_finset_zero
+  · have := s.strictMono_finset i.castSucc_lt_succ
+    obtain ⟨a, h₁, h₂⟩ := (Finset.ssubset_iff_of_subset this.subset).1 this
+    simp [Finset.nonempty_def, finsetDiff]
+    refine ⟨a, h₁, fun j hj ↦ ?_⟩
+    rw [← Fin.le_castSucc_iff] at hj
+    intro h₃
+    exact h₂ (s.monotone_finset hj h₃)
+
+noncomputable def toι' : ι' n where
   d := s.dim
   S := s.finsetDiff
-  hS₀ := by
-    intro i
-    obtain rfl | ⟨i, rfl⟩ := i.eq_zero_or_eq_succ
-    · by_contra!
-      exact s.finset_zero_ne_empty (by simpa using this)
-    · have := s.strictMono_finset i.castSucc_lt_succ
-      obtain ⟨a, h₁, h₂⟩ := (Finset.ssubset_iff_of_subset this.subset).1 this
-      simp only [finsetDiff, Finset.mem_sdiff, Finset.mem_biUnion, Finset.mem_filter,
-        Finset.mem_univ, true_and, not_exists, not_and, nonempty_subtype]
-      refine ⟨a, h₁, fun j hj ↦ ?_⟩
-      rw [← Fin.le_castSucc_iff] at hj
-      intro h₃
-      exact h₂ (s.strictMono_finset.monotone hj h₃)
-  inter i j hij := s.disjoint_finsetDiff hij
+  hS₀ := s.nonempty_finsetDiff
+  inter := s.disjoint_finsetDiff
 
-end
+end ι
 
 noncomputable def cocone₁ := SSet.toTop.mapCocone (B.{u}.obj Δ[n]).coconeN'
 
@@ -178,25 +277,75 @@ noncomputable def toStdSimplex (n : ℕ) :
     exact (AffineMap.stdSimplex.{u} n).range_b_f_subset_range_f (by simp)⟩
   continuous_toFun := (AffineMap.stdSimplex n).b.continuous.subtype_mk _
 
+@[simps! pt]
 noncomputable def cocone₂ : ((B.{u}.obj Δ[n]).functorN' ⋙ SSet.toTop).CoconeTop :=
   ((Functor.coconeTopEquiv _).symm (cocone₁.{u} n)).postcomp (toStdSimplex.{u} n)
 
-variable {n} in
-lemma injective_cocone₂_ι (i : ι.{u} n) :
-    Function.Injective ((cocone₂ n).ι i) := by
-  dsimp [cocone₂, Functor.coconeTopEquiv, cocone₁, Functor.CoconeTop.postcomp,
-    toStdSimplex]
+namespace ι
+
+variable {n} (σ : ι.{u} n)
+noncomputable def affineMap :=
+  (AffineMap.stdSimplex n).b.precomp (yonedaEquiv.symm σ.simplex)
+
+lemma cocone₂_ι :
+    Subtype.val ∘ (cocone₂ n).ι σ = σ.affineMap.f :=
+  rfl
+
+noncomputable def φ :
+    _root_.stdSimplex ℝ (Fin (σ.dim + 1)) → (Fin (n + 1) → ℝ) :=
+  (AffineMap.stdSimplex n).b.φ σ.simplex
+
+lemma φ_eq : σ.φ = stdSimplex.affineMap (fun s ↦ isobary (σ.finset s)) := by
+  simp only [φ, AffineMap.b_φ, AffineMap.b.affineMap]
+  congr
+  ext s : 1
+  rw [← isobary_orderIsoN_apply]
+  rfl
+
+lemma φ_vertex (s : Fin (σ.dim + 1)) :
+    σ.φ (stdSimplex.vertex s) = isobary (σ.finset s) := by
+  simp [φ_eq]
+
+lemma val_comp_cocone₂_ι :
+    Subtype.val ∘ ((cocone₂ n).ι σ) = σ.φ ∘ ⦋σ.dim⦌.toTopHomeo := by
+  ext x : 1
+  dsimp at x
+  simp [cocone₂, Functor.coconeTopEquiv, cocone₁, φ, toStdSimplex, AffineMap.φ, IsAffineAt.φ]
+  apply congr_arg
+  apply congr_arg
+  exact (⦋σ.dim⦌.toTopHomeo.symm_apply_apply x).symm
+
+lemma φ_apply_eq_zero (v : stdSimplex ℝ (Fin (σ.dim + 1))) (i : Fin (n + 1))
+    (hi : ∀ a, i ∉ σ.finsetDiff a) :
+    σ.φ v i = 0 := by
+  simp only [φ_eq, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
+  rw [Finset.sum_eq_zero]
+  intro j _
+  rw [isobary_apply_eq_zero, mul_zero]
+  rw [finset_eq_biUnion]
+  simp only [Finset.mem_biUnion, Finset.mem_filter, Finset.mem_univ, true_and, not_exists, not_and]
+  tauto
+
+lemma injective_φ : Function.Injective σ.φ := by
+  rw [φ_eq]
   sorry
+
+lemma injective_cocone₂_ι :
+    Function.Injective ((cocone₂ n).ι σ) := by
+  apply Function.Injective.of_comp (f := Subtype.val)
+  rw [val_comp_cocone₂_ι]
+  exact Function.Injective.comp σ.injective_φ (Homeomorph.injective _)
+
+end ι
 
 variable {n} in
 lemma exists_iff (x : stdSimplex ℝ (Fin (n + 1))) :
-    ∃ (i : ι.{u} n), ∀ (j : ι.{u} n), x ∈ Set.range ((cocone₂ n).ι j) ↔
-      i ≤ j :=
+    ∃ (σ₀ : ι.{u} n), ∀ (σ : ι.{u} n), x ∈ Set.range ((cocone₂ n).ι σ) ↔ σ₀ ≤ σ :=
   sorry
 
-instance (s : ι.{u} n) :
-    CompactSpace ((((B.obj Δ[n]).functorN' ⋙ SSet.toTop) ⋙ forget TopCat).obj s) := by
-  change CompactSpace (SSet.toTop.obj Δ[s.dim])
+instance (σ : ι.{u} n) :
+    CompactSpace ((((B.obj Δ[n]).functorN' ⋙ SSet.toTop) ⋙ forget TopCat).obj σ) := by
+  change CompactSpace (SSet.toTop.obj Δ[σ.dim])
   infer_instance
 
 instance : T2Space (cocone₂.{u} n).pt := by
@@ -204,11 +353,11 @@ instance : T2Space (cocone₂.{u} n).pt := by
   infer_instance
 
 variable {n} in
-lemma isClosedEmbedding_cocone₂_ι (i : ι.{u} n) :
-    IsClosedEmbedding ((cocone₂ n).ι i) := by
+lemma isClosedEmbedding_cocone₂_ι (σ : ι.{u} n) :
+    IsClosedEmbedding ((cocone₂ n).ι σ) := by
   refine IsClosedEmbedding.of_continuous_injective_isClosedMap
-    ((cocone₂ n).continuous_ι i) (injective_cocone₂_ι i) ?_
-  apply ((cocone₂ n).continuous_ι i).isClosedMap
+    ((cocone₂ n).continuous_ι σ) σ.injective_cocone₂_ι ?_
+  apply ((cocone₂ n).continuous_ι σ).isClosedMap
 
 
 lemma isColimit₂ : (cocone₂.{u} n).IsColimit := by
@@ -219,16 +368,16 @@ lemma isColimit₂ : (cocone₂.{u} n).IsColimit := by
     simp only [Set.mem_iUnion, Set.mem_univ, iff_true, Set.mem_range]
     obtain ⟨y, hy⟩ := (hi i).2 le_rfl
     exact ⟨i, y, hy⟩
-  · intro i₁ i₂ x₁ x₂ h
+  · intro (i₁ : ι _) (i₂ : ι n) x₁ x₂ h
     generalize hy : (cocone₂ n).ι i₁ x₁ = y
     obtain ⟨i, hi⟩ := exists_iff.{u} y
     have h₁ := (hi i₁).1 ⟨x₁, hy⟩
     have h₂ := (hi i₂).1 ⟨x₂, by rw [← hy, h]⟩
     obtain ⟨z, hz⟩ := (hi i).2 le_rfl
     exact ⟨i, homOfLE h₁, homOfLE h₂, z,
-      injective_cocone₂_ι i₁
+      i₁.injective_cocone₂_ι
         (((cocone₂ n).ι_naturality_apply (homOfLE h₁) z).trans (by rw [hz, hy])),
-      injective_cocone₂_ι i₂
+      i₂.injective_cocone₂_ι
         (((cocone₂ n).ι_naturality_apply (homOfLE h₂) z).trans (by rw [hz, ← hy, h]))⟩
 
 noncomputable def homeomorph :
