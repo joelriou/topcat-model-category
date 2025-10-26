@@ -99,17 +99,31 @@ lemma stdSimplex.isAffine_map {d : ℕ} {X : Type*} [Fintype X]
   intro g
   ext x
   simp [map, FunOnFinite.linearMap_apply_apply]
-  sorry
+  conv_rhs => rw [← Finset.sum_subset (s₁ := { y | f y = x}) (by simp) (by aesop)]
+  exact Finset.sum_congr rfl (by aesop)
 
 namespace SSet.AffineMap
 
 variable {n : ℕ}
+
+lemma stdSimplex_vertex_vertexOfSimplex
+    {d : ℕ} (s : (Δ[n] : SSet.{u}) _⦋d⦌) (i : Fin (d + 1)) :
+    (stdSimplex n).vertex (vertexOfSimplex s i) = Pi.single (s i) 1 := by
+  let α := (⦋0⦌.const ⦋n⦌ (s i))
+  refine ((stdSimplex n).precomp_vertex
+    (SSet.stdSimplex.{u}.map α) default).symm.trans ?_
+  simp [AffineMap.vertex, AffineMap.φ, IsAffineAt.φ, precomp, stdSimplex]
+  erw [SimplexCategory.toTopHomeo_naturality_apply α]
+  rw [Subsingleton.elim (⦋0⦌.toTopHomeo default) (stdSimplex.vertex 0),
+    stdSimplex.map_vertex]
+  rfl
+
 lemma stdSimplex_φ {d : ℕ} (s : (Δ[n] : SSet.{u}) _⦋d⦌) :
-    (AffineMap.stdSimplex n).φ s = Subtype.val ∘ _root_.stdSimplex.map s :=
-  stdSimplex.IsAffine.ext ((stdSimplex n).isAffine s) (stdSimplex.isAffine_map s) (by
-    intro i
-    simp
-    sorry)
+    (AffineMap.stdSimplex n).φ s = Subtype.val ∘ _root_.stdSimplex.map s := by
+  refine stdSimplex.IsAffine.ext ?_ ?_ (fun i ↦ ?_)
+  · exact (stdSimplex n).isAffine s
+  · exact stdSimplex.isAffine_map s
+  · simp [AffineMap.φ_vertex, stdSimplex_vertex_vertexOfSimplex]
 
 end SSet.AffineMap
 
