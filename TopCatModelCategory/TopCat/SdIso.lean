@@ -118,6 +118,11 @@ lemma stdSimplex_vertex_vertexOfSimplex
     stdSimplex.map_vertex]
   rfl
 
+lemma stdSimplex_vertex {n : ℕ} (s : Δ[n] _⦋0⦌) :
+    (AffineMap.stdSimplex.{u} n).vertex s = Pi.single (stdSimplex.obj₀Equiv s) 1 := by
+  obtain ⟨i, rfl⟩ := stdSimplex.obj₀Equiv.symm.surjective s
+  exact stdSimplex_vertex_vertexOfSimplex (stdSimplex.obj₀Equiv.symm i) 0
+
 lemma stdSimplex_φ {d : ℕ} (s : (Δ[n] : SSet.{u}) _⦋d⦌) :
     (AffineMap.stdSimplex n).φ s = Subtype.val ∘ _root_.stdSimplex.map s := by
   refine stdSimplex.IsAffine.ext ?_ ?_ (fun i ↦ ?_)
@@ -504,10 +509,18 @@ lemma isAffine_φ_comp_toStdSimplex :
 lemma b_f_comp_toTop_map [X.IsWeaklyPolyhedralLike] :
     f.b.f ∘ SSet.toTop.map (B.map (yonedaEquiv.symm x.simplex)) =
       f.φ x.simplex ∘ toStdSimplex x.dim := by
-  obtain ⟨l, hl⟩ := (f.isAffine x.simplex).exists_linearMap
+  obtain ⟨l, hl : f.φ x.simplex = _⟩ := (f.isAffine x.simplex).exists_linearMap
   have : f.precomp (SSet.yonedaEquiv.symm x.simplex) =
       (AffineMap.stdSimplex.{u} x.dim).postcomp l := by
-    sorry
+    ext i
+    obtain ⟨i, rfl⟩ := stdSimplex.obj₀Equiv.symm.surjective i
+    have h := f.φ_vertex x.simplex i
+    rw [hl] at h
+    dsimp at h
+    simp only [AffineMap.postcomp_vertex]
+    rw [AffineMap.precomp_vertex, AffineMap.stdSimplex_vertex,
+      Equiv.apply_symm_apply, h]
+    rfl
   suffices f.b.precomp (B.map (yonedaEquiv.symm x.simplex)) =
       (AffineMap.stdSimplex.{u} x.dim).b.postcomp l by
     simpa only [hl] using congr_arg AffineMap.f this
