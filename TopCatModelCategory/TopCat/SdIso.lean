@@ -394,24 +394,26 @@ lemma eq_of_mem_finsetDiff_last
   rw [σ.φ_apply v h, Finset.sum_eq_single (a := Fin.last _) (by simp) (by simp),
     mul_comm (v _), ← mul_assoc, mul_inv_cancel₀ (by simp), one_mul]
 
+lemma _root_.Finset.filter_finCastSucc_le {n : ℕ} (a : Fin n):
+    Finset.filter (fun b ↦ a.castSucc ≤ b) .univ =
+      insert a.castSucc (Finset.filter (fun b ↦ a.succ ≤ b) .univ) := by
+  ext b
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_insert]
+  constructor
+  · intro h
+    obtain h | rfl := h.lt_or_eq
+    · exact Or.inr (by rwa [← Fin.castSucc_lt_iff_succ_le])
+    · exact Or.inl rfl
+  · rintro (h | h)
+    · rw [h]
+    · exact a.castSucc_le_succ.trans h
+
 lemma eq_of_mem_finsetDiff_succ
     (v : stdSimplex ℝ (Fin (σ.dim + 1))) {i j : Fin (n + 1)} {a : Fin σ.dim}
     (hi : i ∈ σ.finsetDiff a.castSucc) (hj : j ∈ σ.finsetDiff a.succ) :
     v a.castSucc = (σ.finset a.castSucc).card * (σ.φ v i - σ.φ v j) := by
-  rw [σ.φ_apply _ hi, σ.φ_apply _ hj]
-  have : Finset.filter (fun b ↦ a.castSucc ≤ b) .univ =
-      insert a.castSucc (Finset.filter (fun b ↦ a.succ ≤ b) .univ) := by
-    ext b
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_insert]
-    constructor
-    · intro h
-      obtain h | rfl := h.lt_or_eq
-      · exact Or.inr (by rwa [← Fin.castSucc_lt_iff_succ_le])
-      · exact Or.inl rfl
-    · rintro (h | h)
-      · rw [h]
-      · exact a.castSucc_le_succ.trans h
-  rw [this, Finset.sum_insert (by simp), add_sub_cancel_right, mul_comm (v _),
+  rw [σ.φ_apply _ hi, σ.φ_apply _ hj, Finset.filter_finCastSucc_le,
+    Finset.sum_insert (by simp), add_sub_cancel_right, mul_comm (v _),
     ← mul_assoc, mul_inv_cancel₀ (by simp), one_mul]
 
 lemma injective_φ : Function.Injective σ.φ := by
@@ -441,9 +443,18 @@ lemma mem_range_iff (x : stdSimplex ℝ (Fin (n + 1))) :
   rw [mem_range_cocone₂_ι_iff]
   choose i hi using fun a ↦ σ.nonempty_finsetDiff a
   refine ⟨fun h ↦ ?_, ?_⟩
-  · obtain ⟨x, hx⟩ := x
+  · obtain ⟨x, h₁⟩ := x
     obtain ⟨x, rfl⟩ := h
-    sorry
+    dsimp only [DFunLike.coe]
+    refine ⟨fun a ↦ σ.φ x (i a), ?_, fun a k ha ↦ ?_, σ.φ_apply_eq_zero _ ⟩
+    · rw [Fin.antitone_iff_succ_le]
+      intro a
+      rw [σ.φ_apply _ (hi _), σ.φ_apply _ (hi _), Finset.filter_finCastSucc_le]
+      simp only [Finset.mem_filter, Finset.mem_univ, Fin.succ_le_castSucc_iff, lt_self_iff_false,
+        and_false, not_false_eq_true, Finset.sum_insert, le_add_iff_nonneg_left]
+      exact mul_nonneg (by simp) (by positivity)
+    · dsimp
+      rw [σ.φ_apply _ ha, σ.φ_apply _ (hi a)]
   · rintro ⟨f, hf, h₁, h₂⟩
     sorry
 
