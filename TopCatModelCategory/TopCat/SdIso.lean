@@ -459,10 +459,10 @@ lemma _root_.Fin.exists_sum_ge {A : Type*} [AddCommGroup A] {n : ℕ}
 
 lemma mem_range_iff (x : stdSimplex ℝ (Fin (n + 1))) :
     x ∈ Set.range ((cocone₂ n).ι σ) ↔
-      ∃ (f : Fin (σ.dim + 1) → ℝ) (hf : Antitone f),
+      ∃ (f : Fin (σ.dim + 1) → ℝ) (_ : Antitone f),
         (∀ (i : Fin (σ.dim + 1)),
           ∀ (j : Fin (n + 1)), j ∈ σ.finsetDiff i → x j = f i) ∧
-        ∀ (j : Fin (n + 1)) (hj : ∀ (i : Fin (σ.dim + 1)), j ∉ σ.finsetDiff i), x j = 0 := by
+        ∀ (j : Fin (n + 1)) (_ : ∀ (i : Fin (σ.dim + 1)), j ∉ σ.finsetDiff i), x j = 0 := by
   rw [mem_range_cocone₂_ι_iff]
   choose i hi using fun a ↦ σ.nonempty_finsetDiff a
   refine ⟨fun h ↦ ?_, ?_⟩
