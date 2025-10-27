@@ -527,6 +527,41 @@ lemma mem_range_iff (x : stdSimplex ℝ (Fin (n + 1))) :
 
 end ι
 
+namespace ι'
+
+variable {n} (t : ι' n)
+
+def finset (i : Fin (t.d + 1)) : Finset (Fin (n + 1)) :=
+  Finset.biUnion {j | j ≤ i} t.S
+
+lemma subset_finset_of_le {i j : Fin (t.d + 1)} (h : j ≤ i) :
+    t.S j ⊆ t.finset i := by
+  intro x hx
+  simp only [finset, Finset.mem_biUnion, Finset.mem_filter, Finset.mem_univ, true_and]
+  exact ⟨j, h, hx⟩
+
+lemma nonempty_finset (i : Fin (t.d + 1)) : (t.finset i).Nonempty :=
+  Finset.Nonempty.mono (t.subset_finset_of_le (Fin.zero_le i)) (t.hS₀ 0)
+
+noncomputable def simplexObj (k : Fin (t.d + 1)) :=
+  stdSimplex.orderIsoN.symm ⟨t.finset k, by
+    simpa only [Finset.nonempty_iff_ne_empty] using t.nonempty_finset k⟩
+
+lemma strictMono_simplexObj : StrictMono t.simplexObj := by
+  sorry
+
+noncomputable def simplex : (B.{u}.obj Δ[n]) _⦋t.d⦌ :=
+  t.strictMono_simplexObj.monotone.functor
+
+lemma nonDegenerate : t.simplex ∈ SSet.nonDegenerate _ _ := by
+  dsimp [B]
+  rw [PartialOrder.mem_nerve_nonDegenerate_iff_strictMono]
+  exact t.strictMono_simplexObj
+
+noncomputable def toι : ι.{u} n := N.mk t.simplex t.nonDegenerate
+
+end ι'
+
 variable {n} in
 lemma exists' (x : stdSimplex ℝ (Fin (n + 1))) :
     ∃ (σ₀ : ι.{u} n) (h₀ : x ∈ Set.range ((cocone₂ n).ι σ₀)),
