@@ -637,6 +637,19 @@ lemma exists_of_mem_values {y : ℝ} (hy : y ∈ values x) :
   simpa [values] using hy
 
 variable {x} in
+lemma ne_zero_of_mem_values {y : ℝ} (hy : y ∈ values x) :
+    y ≠ 0 :=
+  (exists_of_mem_values hy).2
+
+variable {x} in
+lemma zero_lt_of_mem_values {y : ℝ} (hy : y ∈ values x) :
+    0 < y := by
+  obtain ⟨⟨i, rfl⟩, h⟩ := exists_of_mem_values hy
+  obtain hi | hi := (x.2.1 i).lt_or_eq
+  · exact hi
+  · simp only [DFunLike.coe, hi, ne_eq, not_true_eq_false] at h
+
+variable {x} in
 lemma mem_values_of_ne_zero {i : Fin (n + 1)} (hi : x i ≠ 0) : x i ∈ values x := by
   simpa [values]
 
@@ -700,7 +713,33 @@ lemma mem_range_simplex_obj
     ∃ (a : Fin (σ.dim + 1)), σ.finset a = (t hφ).finset i := by
   rw [ι.mem_range_iff] at hx
   obtain ⟨f, hf, h₁, h₂⟩ := hx
-  sorry
+  obtain ⟨a, ha, ha'⟩ : ∃ (a : Fin (σ.dim + 1)), f a = φ i ∧
+      ∀ (b : Fin (σ.dim + 1)), φ i ≤ f b ↔ b ≤ a := by
+    sorry
+  have ha₀ : f a ∈ values x := by simp [ha]
+  refine ⟨a, ?_⟩
+  rw [σ.finset_eq_biUnion, ι'.finset]
+  ext k
+  simp only [Finset.mem_biUnion, Finset.mem_filter, Finset.mem_univ, true_and,
+    t_d, t_S, mem_S_iff]
+  constructor
+  · rintro ⟨u, hu₁, hu₂⟩
+    have : f u ∈ values x := by
+      rw [← h₁ _ _ hu₂]
+      apply mem_values_of_ne_zero
+      rw [h₁ _ _ hu₂]
+      exact (lt_of_lt_of_le (zero_lt_of_mem_values ha₀) (hf hu₁)).ne'
+    rw [h₁ _ _ hu₂]
+    obtain ⟨b, hb⟩ := φ.surjective ⟨_, this⟩
+    exact ⟨b, by rwa [← hφ.le_iff_ge, hb, Subtype.mk_le_mk, ha'], by simp [hb]⟩
+  · rintro ⟨u, hu₁, hu₂⟩
+    obtain ⟨j, hj⟩ : ∃ (j : Fin (σ.dim + 1)), k ∈ σ.finsetDiff j := by
+      by_contra!
+      rw [h₂ _ this] at hu₂
+      exact ne_zero_of_mem_values (φ u).2 hu₂.symm
+    refine ⟨j, ?_, hj⟩
+    rw [← ha', ← h₁ _ _ hj, hu₂]
+    exact hφ.antitone hu₁
 
 end exists'
 
