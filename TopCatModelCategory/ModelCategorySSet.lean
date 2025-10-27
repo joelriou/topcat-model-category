@@ -48,7 +48,7 @@ end modelCategoryQuillen
 
 open modelCategoryQuillen
 
-instance : ModelCategory SSet.{u} where
+scoped instance modelCategoryQuillen.inst : ModelCategory SSet.{u} where
   cm4a i p _ _ _ := ModelCategory.joyal_trick_dual
     (by intros; infer_instance) _ _
 

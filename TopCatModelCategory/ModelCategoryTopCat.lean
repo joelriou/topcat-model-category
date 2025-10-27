@@ -163,7 +163,7 @@ def packageTopCat : TopPackage.{u} TopCat.{u} where
     rw [weakEquivalence_iff, rlp_I_iff,
       SSet.KanComplex.weakEquivalence_iff_of_fibration]
 
-scoped instance instModelCategory : ModelCategory TopCat.{u} :=
+scoped instance inst : ModelCategory TopCat.{u} :=
   packageTopCat.modelCategoryCat
 
 lemma weakEquivalence_iff_of_fibration {X Y : TopCat.{u}} (f : X ⟶ Y) [Fibration f] :

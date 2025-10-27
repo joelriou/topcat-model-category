@@ -1,8 +1,8 @@
 # topcat-model-category
 
-This project contains a formalization of the Quillen model category
-structure on the category of topological spaces. (Future work: formalize
-the Quillen model category structure on simplicial sets.)
+This project contains a formalization of the Quillen equivalent
+model category structures on the category of topological spaces
+and on the category of simplicial sets.
 
-The main definitions are in the file
-https://github.com/joelriou/topcat-model-category/blob/master/TopCatModelCategory/ModelCategoryTopCat.lean
+The main definitions are referenced in this file:
+https://github.com/joelriou/topcat-model-category/blob/master/TopCatModelCategory/Test.lean

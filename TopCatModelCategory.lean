@@ -151,6 +151,7 @@ import TopCatModelCategory.SemiSimplexCategory
 import TopCatModelCategory.Set
 import TopCatModelCategory.SimplicialPresheaves.LocalLiftingProperty
 import TopCatModelCategory.SmallObject
+import TopCatModelCategory.Test
 import TopCatModelCategory.ToTopObjHomeo
 import TopCatModelCategory.TopCat.Adj
 import TopCatModelCategory.TopCat.AttachCells

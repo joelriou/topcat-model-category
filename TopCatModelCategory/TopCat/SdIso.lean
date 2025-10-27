@@ -715,7 +715,22 @@ lemma mem_range_simplex_obj
   obtain ⟨f, hf, h₁, h₂⟩ := hx
   obtain ⟨a, ha, ha'⟩ : ∃ (a : Fin (σ.dim + 1)), f a = φ i ∧
       ∀ (b : Fin (σ.dim + 1)), φ i ≤ f b ↔ b ≤ a := by
-    sorry
+    let S : Finset (Fin (σ.dim + 1)) := { a | f a = φ i }
+    have hS : S.Nonempty := by
+      obtain ⟨j, hj⟩ := (exists_of_mem_values (φ i).2).1
+      obtain ⟨k, hk⟩ : ∃ (k : Fin (σ.dim + 1)), j ∈ σ.finsetDiff k := by
+        by_contra!
+        rw [h₂ j this] at hj
+        exact (ne_zero_of_mem_values (φ i).2) hj.symm
+      exact ⟨k, by simp [S, ← h₁ _ _ hk, hj]⟩
+    let m := S.max' hS
+    have hm : f m = φ i := by simpa [S, m] using S.max'_mem hS
+    refine ⟨m, hm, fun b ↦ ⟨fun hb ↦ ?_,
+      fun hb ↦ by simpa only [← hm] using hf hb⟩⟩
+    by_contra! hb'
+    have := le_antisymm (by simpa only [hm] using hf hb'.le) hb
+    have : b ≤ m := S.le_max' _ (by simpa [S])
+    omega
   have ha₀ : f a ∈ values x := by simp [ha]
   refine ⟨a, ?_⟩
   rw [σ.finset_eq_biUnion, ι'.finset]
