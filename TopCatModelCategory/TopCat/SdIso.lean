@@ -305,6 +305,11 @@ noncomputable def toι' : ι' n where
   hS₀ := s.nonempty_finsetDiff
   disjoint := s.disjoint_finsetDiff
 
+@[simp]
+lemma orderIsoN_simplex_obj (a : Fin (s.dim + 1)) :
+    stdSimplex.orderIsoN (s.simplex.obj a) = s.finset a := by
+  rfl
+
 end ι
 
 noncomputable def cocone₁ := SSet.toTop.mapCocone (B.{u}.obj Δ[n]).coconeN'
@@ -550,6 +555,13 @@ lemma subset_finset_of_le {i j : Fin (t.d + 1)} (h : j ≤ i) :
   simp only [finset, Finset.mem_biUnion, Finset.mem_filter, Finset.mem_univ, true_and]
   exact ⟨j, h, hx⟩
 
+lemma notMem_S {i j : Fin (t.d + 1)} (hij : j < i) {x : Fin (n + 1)} (h : x ∈ t.finset j) :
+    x ∉ t.S i := by
+  simp only [finset, Finset.mem_biUnion, Finset.mem_filter, Finset.mem_univ, true_and] at h
+  obtain ⟨a, ha, ha'⟩ := h
+  intro hx
+  exact Finset.disjoint_iff_ne.1 (t.disjoint (lt_of_le_of_lt ha hij).ne) _ ha' _ hx rfl
+
 lemma nonempty_finset (i : Fin (t.d + 1)) : (t.finset i).Nonempty :=
   Finset.Nonempty.mono (t.subset_finset_of_le (Fin.zero_le i)) (t.hS₀ 0)
 
@@ -577,6 +589,11 @@ lemma strictMono_simplexObj : StrictMono t.simplexObj := by
 noncomputable def simplex : (B.{u}.obj Δ[n]) _⦋t.d⦌ :=
   t.strictMono_simplexObj.monotone.functor
 
+@[simp]
+lemma orderIsoN_simplex_obj (i : Fin (t.d + 1)) :
+  (stdSimplex.orderIsoN (t.simplex.obj i)).1 = t.finset i := by
+  simp [simplex, simplexObj]
+
 lemma nonDegenerate : t.simplex ∈ SSet.nonDegenerate _ _ := by
   dsimp [B]
   rw [PartialOrder.mem_nerve_nonDegenerate_iff_strictMono]
@@ -585,9 +602,23 @@ lemma nonDegenerate : t.simplex ∈ SSet.nonDegenerate _ _ := by
 @[simps! dim simplex]
 noncomputable def toι : ι.{u} n := N.mk t.simplex t.nonDegenerate
 
+lemma toι_finset :
+    t.toι.finset = t.finset := by
+  ext a : 1
+  exact t.orderIsoN_simplex_obj a
+
 @[simp]
 lemma finsetDiff_toι : t.toι.finsetDiff = t.S := by
-  sorry
+  ext a i
+  simp only [ι.finsetDiff, toι_finset, toι_dim, Finset.mem_sdiff, Finset.mem_biUnion,
+    Finset.mem_filter, Finset.mem_univ, true_and, not_exists, not_and]
+  refine ⟨fun ⟨h₁, h₂⟩ ↦ ?_, fun h ↦ ⟨t.subset_finset_of_le le_rfl h,
+    fun b hb hb' ↦ t.notMem_S hb hb' h⟩⟩
+  simp only [finset, Finset.mem_biUnion, Finset.mem_filter, Finset.mem_univ, true_and] at h₁
+  obtain ⟨b, hb, hb'⟩ := h₁
+  obtain hb | rfl := hb.lt_or_eq
+  · exact (h₂ b hb (t.subset_finset_of_le le_rfl hb')).elim
+  · exact hb'
 
 lemma toι_toι' : t.toι.toι' = t :=
   ι'.ext rfl (by simp)
@@ -666,7 +697,9 @@ lemma mem_range : x ∈ Set.range ((cocone₂ n).ι (t hφ).toι) := by
 
 lemma mem_range_simplex_obj
     {σ : ι.{u} n} (hx : x ∈ Set.range ((cocone₂ n).ι σ)) (i : Fin (d + 1)) :
-    ∃ (a : Fin (σ.dim + 1)), σ.simplex.obj a = (t hφ).simplex.obj i := by
+    ∃ (a : Fin (σ.dim + 1)), σ.finset a = (t hφ).finset i := by
+  rw [ι.mem_range_iff] at hx
+  obtain ⟨f, hf, h₁, h₂⟩ := hx
   sorry
 
 end exists'
@@ -684,7 +717,8 @@ lemma exists' (x : stdSimplex ℝ (Fin (n + 1))) :
   intro s
   simp only [Finset.mem_image, Finset.mem_univ, true_and, forall_exists_index]
   rintro i rfl
-  exact mem_range_simplex_obj _ hσ _
+  obtain ⟨a, ha⟩ := mem_range_simplex_obj hφ hσ i
+  exact ⟨a, stdSimplex.orderIsoN.injective (by ext; aesop)⟩
 
 variable {n} in
 lemma exists_iff (x : stdSimplex ℝ (Fin (n + 1))) :
