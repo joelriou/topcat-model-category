@@ -269,6 +269,15 @@ lemma disjoint_finsetDiff {i j : Fin (s.dim + 1)} (hij : i ≠ j) :
     Finset.notMem_empty, iff_false, and_imp]
   exact fun _ h₂ h₃ ↦ (h₂ j h h₃).elim
 
+lemma pairwiseDisjoint_finsetDiff :
+    Set.PairwiseDisjoint (.univ : Finset (Fin (s.dim + 1))) s.finsetDiff :=
+  fun _ _ _ _ ↦ s.disjoint_finsetDiff
+
+lemma card_finset_eq_sum (i : Fin (s.dim + 1)) :
+    (s.finset i).card = ∑ j with j ≤ i, (s.finsetDiff j).card := by
+  rw [← Finset.card_disjiUnion _ _ (fun _ _ _ _ ↦ s.disjoint_finsetDiff),
+    Finset.disjiUnion_eq_biUnion, finset_eq_biUnion]
+
 lemma nonempty_finsetDiff (i) : (s.finsetDiff i).Nonempty := by
   obtain rfl | ⟨i, rfl⟩ := i.eq_zero_or_eq_succ
   · simp [Finset.nonempty_iff_ne_empty]
@@ -478,7 +487,29 @@ lemma mem_range_iff (x : stdSimplex ℝ (Fin (n + 1))) :
         rw [Finset.sum_eq_single (a := Fin.last _) (by simp) (by simp)] at this
         rw [← this, ← h₁ _ _ (hi (Fin.last _))]
         exact x.2.1 _
-    · sorry
+    · trans ∑ j, (σ.finsetDiff j).card * f j
+      · simp only [hg, card_finset_eq_sum, Nat.cast_sum, Finset.mul_sum]
+        rw [Finset.sum_sigma' (t := fun j ↦ { i | i ≤ j }) (f := fun i j ↦
+          g i * (σ.finsetDiff j).card),
+          Finset.sum_sigma' (t := fun j ↦ { i | j ≤ i }) (f := fun i j ↦
+           (σ.finsetDiff i).card * g j)]
+        exact Finset.sum_equiv (e :=
+          { toFun x := ⟨x.2, x.1⟩
+            invFun x := ⟨x.2, x.1⟩
+            left_inv _ := rfl
+            right_inv _ := rfl }) (by simp) (fun _ _ ↦ mul_comm _ _)
+      · rw [← x.2.2, ← Finset.sum_subset
+          (s₁ := Finset.disjiUnion _ _ (σ.pairwiseDisjoint_finsetDiff))
+          (by simp) (fun i _ hi ↦ by exact h₂ _ (by simpa using hi)),
+          Finset.sum_disjiUnion]
+        congr 1
+        ext i
+        trans (∑ j ∈ σ.finsetDiff i, 1) * f i
+        · simp
+        · simp only [Finset.sum_mul, one_mul]
+          refine Finset.sum_congr rfl ?_
+          intro j hj
+          exact (h₁ i j hj).symm
     · ext j
       by_cases hj : ∃ a, j ∈ σ.finsetDiff a
       · obtain ⟨a, ha⟩ := hj
