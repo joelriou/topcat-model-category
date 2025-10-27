@@ -156,6 +156,15 @@ structure ι' where
   disjoint {i j} (hij : i ≠ j) : Disjoint (S i) (S j)
 
 variable {n} in
+lemma ι'.ext {s s' : ι' n} (h₁ : s.d = s'.d)
+    (h₂ : ∀ (i : Fin (s.d + 1)), s.S i = s'.S ⟨i.1, by rw [← h₁]; exact i.2⟩) : s = s' := by
+  obtain ⟨d, S, _, _⟩ := s
+  obtain ⟨d', S', _, _⟩ := s'
+  obtain rfl : d = d' := h₁
+  obtain rfl : S = S' := by aesop
+  rfl
+
+variable {n} in
 noncomputable def isobary (S : Finset (Fin (n + 1))) (a : Fin (n + 1)) : ℝ :=
   if a ∈ S then S.card⁻¹ else 0
 
@@ -289,6 +298,7 @@ lemma nonempty_finsetDiff (i) : (s.finsetDiff i).Nonempty := by
     intro h₃
     exact h₂ (s.monotone_finset hj h₃)
 
+@[simps]
 noncomputable def toι' : ι' n where
   d := s.dim
   S := s.finsetDiff
@@ -572,7 +582,15 @@ lemma nonDegenerate : t.simplex ∈ SSet.nonDegenerate _ _ := by
   rw [PartialOrder.mem_nerve_nonDegenerate_iff_strictMono]
   exact t.strictMono_simplexObj
 
+@[simps! dim simplex]
 noncomputable def toι : ι.{u} n := N.mk t.simplex t.nonDegenerate
+
+@[simp]
+lemma finsetDiff_toι : t.toι.finsetDiff = t.S := by
+  sorry
+
+lemma toι_toι' : t.toι.toι' = t :=
+  ι'.ext rfl (by simp)
 
 end ι'
 
@@ -587,8 +605,16 @@ lemma exists_of_mem_values {y : ℝ} (hy : y ∈ values x) :
     (∃ i, x i = y) ∧ y ≠ 0 := by
   simpa [values] using hy
 
-lemma nonempty_values : (values x).Nonempty  := by
-  sorry
+variable {x} in
+lemma mem_values_of_ne_zero {i : Fin (n + 1)} (hi : x i ≠ 0) : x i ∈ values x := by
+  simpa [values]
+
+lemma nonempty_values : (values x).Nonempty := by
+  by_contra! hx
+  simp only [Finset.not_nonempty_iff_eq_empty] at hx
+  have (i : Fin (n +1)) : x i = 0 := by
+    simpa [← hx, values] using Finset.notMem_empty (x i)
+  simpa [this] using x.2.2
 
 lemma exists_card_values_eq_succ :
     ∃ (d : ℕ), (values x).card = d + 1 := by
@@ -597,7 +623,10 @@ lemma exists_card_values_eq_succ :
 variable {x}
 
 lemma exists_strictAnti {d : ℕ} (hd : (values x).card = d + 1) :
-    ∃ (φ : Fin (d + 1) ≃ values x), StrictAnti φ := sorry
+    ∃ (φ : Fin (d + 1) ≃ values x), StrictAnti φ := by
+  let e := Finset.orderIsoOfFin _ hd
+  let e' : Fin (d + 1) ≃ Fin (d + 1) := ⟨Fin.rev, Fin.rev, fun _ ↦ by simp, fun _ ↦ by simp⟩
+  exact ⟨e'.trans e.toEquiv, e.strictMono.comp_strictAnti Fin.rev_strictAnti⟩
 
 variable {d : ℕ} (φ : Fin (d + 1) ≃ values x)
 
@@ -616,6 +645,7 @@ lemma nonempty_S (a : Fin (d + 1)) :
 
 variable {φ} (hφ : StrictAnti φ)
 
+@[simps]
 noncomputable def t : ι' n where
   d := d
   S := S φ
@@ -628,21 +658,33 @@ noncomputable def t : ι' n where
 
 lemma mem_range : x ∈ Set.range ((cocone₂ n).ι (t hφ).toι) := by
   rw [ι.mem_range_iff]
-  refine ⟨fun i ↦ φ i, hφ.antitone, ?_, ?_⟩
-  · sorry
-  · sorry
+  refine ⟨fun i ↦ φ i, hφ.antitone, by simp, fun j hj ↦ ?_⟩
+  simp only [ι'.toι_dim, t_d, ι'.finsetDiff_toι, t_S, mem_S_iff] at hj
+  by_contra!
+  obtain ⟨i, hi⟩ := φ.surjective ⟨_, mem_values_of_ne_zero this⟩
+  exact hj i (Subtype.ext_iff.1 hi.symm)
+
+lemma mem_range_simplex_obj
+    {σ : ι.{u} n} (hx : x ∈ Set.range ((cocone₂ n).ι σ)) (i : Fin (d + 1)) :
+    ∃ (a : Fin (σ.dim + 1)), σ.simplex.obj a = (t hφ).simplex.obj i := by
+  sorry
 
 end exists'
 
 open exists' in
 variable {n} in
 lemma exists' (x : stdSimplex ℝ (Fin (n + 1))) :
-    ∃ (σ₀ : ι.{u} n) (h₀ : x ∈ Set.range ((cocone₂ n).ι σ₀)),
+    ∃ (σ₀ : ι.{u} n) (_ : x ∈ Set.range ((cocone₂ n).ι σ₀)),
       ∀ (σ : ι.{u} n), x ∈ Set.range ((cocone₂ n).ι σ) → σ₀ ≤ σ := by
   obtain ⟨d, hd⟩ := exists_card_values_eq_succ x
   obtain ⟨φ, hφ⟩ := exists_strictAnti hd
-  refine ⟨(t hφ).toι, mem_range hφ, ?_⟩
-  sorry
+  refine ⟨(t hφ).toι, mem_range hφ, fun σ hσ ↦ ?_⟩
+  rw [← PartialOrder.NonemptyFiniteChains.ofN_le_ofN_iff]
+  dsimp [PartialOrder.NonemptyFiniteChains.ofN, PartialOrder.NonemptyFiniteChains.ofS]
+  intro s
+  simp only [Finset.mem_image, Finset.mem_univ, true_and, forall_exists_index]
+  rintro i rfl
+  exact mem_range_simplex_obj _ hσ _
 
 variable {n} in
 lemma exists_iff (x : stdSimplex ℝ (Fin (n + 1))) :
