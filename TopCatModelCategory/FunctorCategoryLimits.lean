@@ -28,10 +28,16 @@ lemma preservesFiniteLimits_iff (F : J ⥤ C) :
     preservesFiniteLimits F ↔ PreservesFiniteLimits F := Iff.rfl
 
 variable (J C) in
-lemma closedUnderColimitsOfShape_preservesLimitsOfShape (K' : Type*) [Category K']
+instance closedUnderColimitsOfShape_preservesLimitsOfShape (K' : Type*) [Category K']
     [HasColimitsOfShape K' C] [HasLimitsOfShape K C]
     [PreservesLimitsOfShape K (colim (J := K') (C := C))] :
-    ClosedUnderColimitsOfShape K' (preservesLimitsOfShape K : ObjectProperty (J ⥤ C)) := by
+    ObjectProperty.IsClosedUnderColimitsOfShape
+      (preservesLimitsOfShape K : ObjectProperty (J ⥤ C)) K' := by
+  -- the proof needs a small fix
+  suffices ∀ (F : K' ⥤ J ⥤ C) (c : Cocone F) (hc : IsColimit c)
+    (hF : ∀ x, preservesLimitsOfShape K (F.obj x)), preservesLimitsOfShape K c.pt from ⟨by
+      rintro F ⟨h⟩
+      exact this _ _ h.isColimit h.prop_diag_obj⟩
   intro F c hc h
   simp only [preservesLimitsOfShape_iff] at h ⊢
   have : PreservesLimitsOfShape K F.flip := ⟨fun {G} ↦ ⟨fun {c} hc ↦
@@ -42,14 +48,20 @@ lemma closedUnderColimitsOfShape_preservesLimitsOfShape (K' : Type*) [Category K
   exact preservesLimitsOfShape_of_natIso e
 
 variable (J C) in
-lemma closedUnderColimitsOfShape_preservesFiniteLimits (K' : Type*) [Category K']
+instance closedUnderColimitsOfShape_preservesFiniteLimits (K' : Type*) [Category K']
     [HasColimitsOfShape K' C] [HasFiniteLimits C]
     [HasExactColimitsOfShape K' C] :
-    ClosedUnderColimitsOfShape K' (preservesFiniteLimits : ObjectProperty (J ⥤ C)) := by
+    ObjectProperty.IsClosedUnderColimitsOfShape (preservesFiniteLimits : ObjectProperty (J ⥤ C)) K' := by
+  -- the proof needs a small fix
+  suffices ∀ (F : K' ⥤ J ⥤ C) (c : Cocone F) (hc : IsColimit c)
+    (hF : ∀ x, preservesFiniteLimits (F.obj x)), preservesFiniteLimits c.pt from ⟨by
+      rintro F ⟨h⟩
+      exact this _ _ h.isColimit h.prop_diag_obj⟩
   intro F c hc h
   constructor
   intro K _ _
   simp only [preservesFiniteLimits_iff] at h
-  exact closedUnderColimitsOfShape_preservesLimitsOfShape K J C K' hc (fun k' ↦ by
-    rw [preservesLimitsOfShape_iff]
-    infer_instance)
+  exact (preservesLimitsOfShape K : ObjectProperty (J ⥤ C)).prop_of_isColimit hc
+    (fun k' ↦ by
+      rw [preservesLimitsOfShape_iff]
+      infer_instance)

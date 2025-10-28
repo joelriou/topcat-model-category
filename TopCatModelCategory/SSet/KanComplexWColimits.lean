@@ -142,9 +142,12 @@ lemma πNatTrans_app_toπFunctor_app {X : SSet.{u}} (f : A.quotient ⟶ X) :
 instance (J : Type*) [Category J] [h₁ : Small.{u} J] [LocallySmall.{u} J]
     [IsFiltered J] [B.IsFinite] :
     PreservesColimitsOfShape J A.πFunctor := by
-  apply ObjectProperty.closedUnderColimitsOfShape_preservesColimitsOfShape
-    J SSet.{u} (Type u) WalkingParallelPair (Subcomplex.isColimitπFunctor A)
-  rintro (_ | _) <;> simp <;> infer_instance
+  have : (ObjectProperty.preservesColimitsOfShape J :
+      ObjectProperty (SSet.{u} ⥤ Type u)).IsClosedUnderColimitsOfShape WalkingParallelPair :=
+    ObjectProperty.closedUnderColimitsOfShape_preservesColimitsOfShape ..
+  apply (ObjectProperty.preservesColimitsOfShape J).prop_of_isColimit
+    (Subcomplex.isColimitπFunctor A) (by
+      rintro (_ | _) <;> simp <;> infer_instance)
 
 namespace πFunctorEquiv
 

@@ -18,11 +18,15 @@ def preservesColimitsOfShape : ObjectProperty (J ⥤ C) :=
 @[simp]
 lemma preservesColimitsOfShape_iff (F : J ⥤ C) :
     preservesColimitsOfShape K F ↔ PreservesColimitsOfShape K F := Iff.rfl
-
 variable (J C) in
 lemma closedUnderColimitsOfShape_preservesColimitsOfShape (K' : Type*) [Category K']
     [HasColimitsOfShape K' C] :
-    ClosedUnderColimitsOfShape K' (preservesColimitsOfShape K : ObjectProperty (J ⥤ C)) := by
+    IsClosedUnderColimitsOfShape (preservesColimitsOfShape K : ObjectProperty (J ⥤ C)) K' := by
+  -- the proof needs a small fix
+  suffices ∀ (F : K' ⥤ J ⥤ C) (c : Cocone F) (hc : IsColimit c)
+    (hF : ∀ x, preservesColimitsOfShape K (F.obj x)), preservesColimitsOfShape K c.pt from ⟨by
+      rintro F ⟨h⟩
+      exact this _ _ h.isColimit h.prop_diag_obj⟩
   intro F c hc hF
   simp only [preservesColimitsOfShape_iff] at hF ⊢
   refine ⟨fun {G} ↦ ⟨fun {d} hd ↦ ⟨?_⟩⟩⟩

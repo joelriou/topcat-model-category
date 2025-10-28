@@ -16,9 +16,14 @@ variable {C D : Type*} [Category C] [Category D] {F G : C ⥤ D} (τ : F ⟶ G)
 def isIsoNatTransApp : ObjectProperty C :=
   fun X ↦ IsIso (τ.app X)
 
-lemma closedUnderCoproducts_isIsoNatTransApp (J : Type*) [Category J]
+instance closedUnderCoproducts_isIsoNatTransApp (J : Type*) [Category J]
     [PreservesColimitsOfShape J F] [PreservesColimitsOfShape J G] :
-    ClosedUnderColimitsOfShape J (isIsoNatTransApp τ) := by
+    IsClosedUnderColimitsOfShape (isIsoNatTransApp τ) J := by
+  -- the proof needs a small fix
+  suffices ∀ (F : J ⥤ C) (c : Cocone F) (hc : IsColimit c)
+    (hF : ∀ x, isIsoNatTransApp τ (F.obj x)), isIsoNatTransApp τ c.pt from ⟨by
+      rintro F ⟨h⟩
+      exact this _ _ h.isColimit h.prop_diag_obj⟩
   intro K c hc hK
   have (j : J) : IsIso (τ.app (K.obj j)) := by simpa [isIsoNatTransApp] using hK j
   let e (j : J) : F.obj (K.obj j) ≅ G.obj (K.obj j) := asIso (τ.app (K.obj j))
@@ -124,8 +129,7 @@ lemma isIsoWhiskerRightSSetTopAdjUnitπ₀FunctorApp_eq_top :
   change ObjectProperty.isIsoNatTransApp _ = ⊤
   ext X
   simp only [Pi.top_apply, «Prop».top_eq_true, iff_true]
-  apply ObjectProperty.closedUnderCoproducts_isIsoNatTransApp
-    (Functor.whiskerRight sSetTopAdj.unit π₀Functor) (Discrete X.π₀) (π₀.isColimitCofan X)
+  apply ObjectProperty.prop_of_isColimit _ (π₀.isColimitCofan X)
   rintro ⟨c⟩
   apply isIsoWhiskerRightSSetTopAdjUnitπ₀FunctorApp_of_connected
   dsimp

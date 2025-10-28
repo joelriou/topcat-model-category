@@ -291,6 +291,7 @@ lemma nonempty_finsetDiff (i) : (s.finsetDiff i).Nonempty := by
   obtain rfl | ⟨i, rfl⟩ := i.eq_zero_or_eq_succ
   · simp [Finset.nonempty_iff_ne_empty]
   · have := s.strictMono_finset i.castSucc_lt_succ
+    simp only [Finset.lt_eq_subset] at this
     obtain ⟨a, h₁, h₂⟩ := (Finset.ssubset_iff_of_subset this.subset).1 this
     simp [Finset.nonempty_def, finsetDiff]
     refine ⟨a, h₁, fun j hj ↦ ?_⟩

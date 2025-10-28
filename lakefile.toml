@@ -7,6 +7,6 @@ name = "TopCatModelCategory"
 
 [[require]]
 name = "mathlib"
-git = "https://github.com/joelriou/mathlib4.git"
-rev = "81294d19f6d4dbb251bfabc5072cf0cfdd239863"
+git = "https://github.com/leanprover-community/mathlib4.git"
+rev = "6c193806481aaf608f1396601b6dc95277ddcfe8"
 

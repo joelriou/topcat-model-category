@@ -79,9 +79,13 @@ def isColimitCoforkπ₀Functor : IsColimit coforkπ₀Functor.{u} :=
           exact congr_fun hm x)))
 
 instance {J : Type*} [Category J] [Small.{u} J] :
-    PreservesColimitsOfShape J π₀Functor.{u} :=
-  ObjectProperty.closedUnderColimitsOfShape_preservesColimitsOfShape
-    J SSet.{u} (Type u) WalkingParallelPair isColimitCoforkπ₀Functor.{u} (by
+    PreservesColimitsOfShape J π₀Functor.{u} := by
+  have : (ObjectProperty.preservesColimitsOfShape J :
+      ObjectProperty (SSet.{u} ⥤ Type u)).IsClosedUnderColimitsOfShape
+        WalkingParallelPair :=
+    ObjectProperty.closedUnderColimitsOfShape_preservesColimitsOfShape ..
+  exact (ObjectProperty.preservesColimitsOfShape J).prop_of_isColimit
+    isColimitCoforkπ₀Functor (by
       rintro (_ | _) <;> apply evaluation_preservesColimitsOfShape)
 
 

@@ -133,8 +133,9 @@ instance (X : C) : PreservesFiniteLimits (uliftYoneda.{max w u}.lan.obj
 
 open ObjectProperty in
 instance [IsCofiltered F.Elements] :
-    PreservesFiniteLimits (uliftYoneda.{max w u}.lan.obj F) :=
-  closedUnderColimitsOfShape_preservesFiniteLimits _ _ _
+    PreservesFiniteLimits (uliftYoneda.{max w u}.lan.obj F) := by
+  rw [← preservesFiniteLimits_iff]
+  refine preservesFiniteLimits.prop_of_isColimit
     (isColimitOfPreserves (uliftYoneda.{max w u}.lan)
     (Functor.colimitOfCorepresentable.{max w u} F)) (fun x ↦ by
       rw [preservesFiniteLimits_iff]

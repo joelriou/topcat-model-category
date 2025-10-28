@@ -341,10 +341,10 @@ lemma toTopSet_obj_face_compl (S : Finset (Fin (n + 1))) :
       rw [← CategoryTheory.epi_iff_surjective]
       exact inferInstanceAs (Epi ((toTop.{0} ⋙ forget _).map iso.inv))),
       range_ιToTop_comp_stdSimplex_map.{0} φ]
-    have : (Set.range φ)ᶜ = S.toSet := by
-      suffices Set.range φ = Sᶜ.toSet by rw [this]; simp
+    have : (Set.range φ)ᶜ = (S : Set (Fin (n + 1))) := by
+      suffices Set.range φ = (Sᶜ : Set (Fin (n + 1))) by rw [this]; simp
       ext (j : Fin (n + 1))
-      simp only [SimplexCategory.len_mk, Set.mem_range, Finset.coe_compl, Set.mem_compl_iff,
+      simp only [SimplexCategory.len_mk, Set.mem_range, Set.mem_compl_iff,
         Finset.mem_coe]
       constructor
       · rintro ⟨i, rfl⟩
