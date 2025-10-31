@@ -167,6 +167,7 @@ lemma map_mem_obj {n m : SimplexCategoryᵒᵖ} (x : X.obj n) (f : n ⟶ m)
 
 variable (X)
 
+-- added in #31122
 @[simps! inv_app_coe]
 def topIso : ((⊤ : X.Subcomplex) : SSet) ≅ X :=
   NatIso.ofComponents (fun n ↦ (Equiv.Set.univ (X.obj n)).toIso)
