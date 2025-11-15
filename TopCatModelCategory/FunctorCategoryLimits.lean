@@ -3,6 +3,8 @@ import Mathlib.CategoryTheory.Limits.FunctorCategory.Basic
 import Mathlib.CategoryTheory.ObjectProperty.Basic
 import Mathlib.CategoryTheory.Abelian.GrothendieckAxioms.Basic
 
+-- #31645
+
 namespace CategoryTheory
 
 open Limits
