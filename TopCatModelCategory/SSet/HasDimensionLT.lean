@@ -1,5 +1,6 @@
 import TopCatModelCategory.SSet.Degenerate
 
+-- #32201
 universe u
 
 open CategoryTheory Opposite Simplicial
