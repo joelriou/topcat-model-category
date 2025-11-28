@@ -1,6 +1,7 @@
 import TopCatModelCategory.SSet.StandardSimplex
 import Mathlib.Data.Finite.Sigma
 
+-- #32202
 universe u
 
 open Simplicial CategoryTheory
