@@ -24,71 +24,31 @@ namespace SemiSimplexCategory
 
 scoped[Simplicial] notation "⦋" n "⦌ₛ" => SemiSimplexCategory.mk n
 
-protected def Hom (a b : SemiSimplexCategory) :=
-  Fin (a.len + 1) ↪o Fin (b.len + 1)
-
-namespace Hom
-
-def mk {a b : SemiSimplexCategory} (f : Fin (a.len + 1) ↪o Fin (b.len + 1)) :
-    SemiSimplexCategory.Hom a b :=
-  f
-
-def toOrderEmbedding {a b : SemiSimplexCategory} (f : SemiSimplexCategory.Hom a b) :
-    Fin (a.len + 1) ↪o Fin (b.len + 1) :=
-  f
-
-theorem ext' {a b : SemiSimplexCategory} (f g : SemiSimplexCategory.Hom a b) :
-    f.toOrderEmbedding = g.toOrderEmbedding → f = g :=
-  id
-
-@[simp]
-theorem mk_toOrderEmbedding {a b : SemiSimplexCategory} (f : SemiSimplexCategory.Hom a b) :
-    mk f.toOrderEmbedding = f :=
-  rfl
-
-@[simp]
-theorem toOrderEmbedding_mk {a b : SemiSimplexCategory} (f : Fin (a.len + 1) ↪o Fin (b.len + 1)) :
-    (mk f).toOrderEmbedding = f :=
-  rfl
-
-theorem mk_toOrderEmbedding_apply {a b : SemiSimplexCategory}
-    (f : Fin (a.len + 1) ↪o Fin (b.len + 1))
-    (i : Fin (a.len + 1)) : (mk f).toOrderEmbedding i = f i :=
-  rfl
-
-@[simp]
-def id (a : SemiSimplexCategory) : SemiSimplexCategory.Hom a a :=
-  mk (.refl _)
-
-@[simp]
-def comp {a b c : SemiSimplexCategory}
-    (f : SemiSimplexCategory.Hom b c) (g : SemiSimplexCategory.Hom a b) :
-    SemiSimplexCategory.Hom a c :=
-  mk <| g.toOrderEmbedding.trans f.toOrderEmbedding
-
-end Hom
-
 instance smallCategory : SmallCategory.{0} SemiSimplexCategory where
-  Hom n m := SemiSimplexCategory.Hom n m
-  id _ := SemiSimplexCategory.Hom.id _
-  comp f g := SemiSimplexCategory.Hom.comp g f
+  Hom n m := Fin (n.len + 1) ↪o Fin (m.len + 1)
+  id _ := .refl _
+  comp f g := f.trans g
+
+def homEquiv {n m : SemiSimplexCategory} :
+    (n ⟶ m) ≃ (Fin (n.len + 1) ↪o Fin (m.len + 1)) :=
+  .refl _
 
 @[simp]
-lemma id_toOrderEmbedding (a : SemiSimplexCategory) :
-    Hom.toOrderEmbedding (𝟙 a) = .refl _ := rfl
+lemma homEquiv_id (a : SemiSimplexCategory) :
+    homEquiv (𝟙 a) = .refl _ := rfl
 
 @[simp]
-lemma comp_toOrderEmbedding {a b c : SemiSimplexCategory} (f : a ⟶ b) (g : b ⟶ c) :
-    (f ≫ g).toOrderEmbedding = f.toOrderEmbedding.trans g.toOrderEmbedding := rfl
+lemma homEquiv_comp {a b c : SemiSimplexCategory} (f : a ⟶ b) (g : b ⟶ c) :
+    homEquiv (f ≫ g) = (homEquiv f).trans (homEquiv g) := rfl
 
 @[ext]
-theorem Hom.ext {a b : SemiSimplexCategory} (f g : a ⟶ b) :
-    f.toOrderEmbedding = g.toOrderEmbedding → f = g :=
-  Hom.ext' _ _
+theorem hom_ext {a b : SemiSimplexCategory} {f g : a ⟶ b}
+    (h : homEquiv f = homEquiv g) : f = g :=
+  homEquiv.injective h
 
 def toSimplexCategory : SemiSimplexCategory ⥤ SimplexCategory where
   obj n := ⦋n.len⦌
-  map f := SimplexCategory.Hom.mk f.toOrderEmbedding.toOrderHom
+  map f := SimplexCategory.Hom.mk (homEquiv.symm f).toOrderHom
 
 @[simp]
 lemma toSimplexCategory_obj (n : ℕ) :
@@ -101,7 +61,7 @@ instance : toSimplexCategory.Faithful where
 
 instance {n m : SemiSimplexCategory} (f : n ⟶ m) : Mono (toSimplexCategory.map f) := by
   rw [SimplexCategory.mono_iff_injective]
-  exact f.toOrderEmbedding.injective
+  exact (homEquiv f).injective
 
 instance {n m : SemiSimplexCategory} (f : n ⟶ m) : Mono f where
   right_cancellation g₁ g₂ h := by
@@ -110,7 +70,7 @@ instance {n m : SemiSimplexCategory} (f : n ⟶ m) : Mono f where
 
 def homOfMono {n m : SemiSimplexCategory}
     (f : toSimplexCategory.obj n ⟶ toSimplexCategory.obj m) [Mono f] : n ⟶ m :=
-  Hom.mk (OrderEmbedding.ofStrictMono f.toOrderHom
+  homEquiv.symm (OrderEmbedding.ofStrictMono f.toOrderHom
     ((SimplexCategory.Hom.toOrderHom f).monotone.strictMono_of_injective
       (by rwa [← SimplexCategory.mono_iff_injective])))
 

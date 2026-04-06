@@ -895,7 +895,7 @@ end
 
 lemma toStdSimplex_naturality {n m : ℕ} (f : ⦋n⦌ₛ ⟶ ⦋m⦌ₛ) (y : |B.{u}.obj Δ[n]|) :
     toStdSimplex m (SSet.toTop.map (B.map (toSSet.map f)) y) =
-      stdSimplex.map f.toOrderEmbedding (toStdSimplex n y) := by
+      stdSimplex.map (SemiSimplexCategory.homEquiv f) (toStdSimplex n y) := by
   let x : (Δ[m] : SSet.{u}).N :=
     N.mk (n := n) (stdSimplex.objEquiv.symm (toSimplexCategory.map f)) (by
       rw [stdSimplex.mem_nonDegenerate_iff_mono, Equiv.apply_symm_apply]
