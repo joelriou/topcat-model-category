@@ -61,7 +61,7 @@ lemma monoOfLE_comp (h : x ≤ y) (h' : y ≤ z) :
 
 end
 
-@[simps]
+@[simps obj map]
 noncomputable def toSemiSimplexCategory : X.N ⥤ SemiSimplexCategory where
   obj s := ⦋s.dim⦌ₛ
   map f := SemiSimplexCategory.homOfMono' (monoOfLE (leOfHom f))

@@ -85,9 +85,9 @@ lemma toTopSdIso_hom_naturality
   dsimp
   simp only [toTopSdIsoCocone_ι_app, Category.assoc]
   dsimp
-  rw [toTop_map_sd_map_yonedaEquiv_symm_comp_toTopSdIso_hom_assoc _ _ hx]
+  erw [toTop_map_sd_map_yonedaEquiv_symm_comp_toTopSdIso_hom_assoc _ _ hx]
   nth_rw 2 [← toTop.map_comp_assoc]
-  rw [← sd.map_comp, yonedaEquiv_symm_comp,
+  erw [← sd.map_comp, yonedaEquiv_symm_comp,
     toTop_map_sd_map_yonedaEquiv_symm_comp_toTopSdIso_hom _ _ (hf _ hx)]
   dsimp
   rw [← yonedaEquiv_symm_comp, Functor.map_comp]

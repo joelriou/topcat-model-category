@@ -16,24 +16,13 @@ lemma refl_trans : (RelEmbedding.refl _).trans f = f := rfl
 
 end RelEmbedding
 
-def SemiSimplexCategory : Type := ℕ
+@[ext]
+structure SemiSimplexCategory : Type where
+  mk :: len : ℕ
 
 namespace SemiSimplexCategory
 
-def mk (n : ℕ) : SemiSimplexCategory := n
-
 scoped[Simplicial] notation "⦋" n "⦌ₛ" => SemiSimplexCategory.mk n
-
-def len (n : SemiSimplexCategory) : ℕ := n
-
-@[ext]
-theorem ext (a b : SemiSimplexCategory) : a.len = b.len → a = b := id
-
-attribute [irreducible] SemiSimplexCategory
-
-protected def rec {F : SemiSimplexCategory → Sort*} (h : ∀ n : ℕ, F ⦋n⦌ₛ) :
-    ∀ X, F X :=
-  fun n => h n.len
 
 protected def Hom (a b : SemiSimplexCategory) :=
   Fin (a.len + 1) ↪o Fin (b.len + 1)
@@ -51,8 +40,6 @@ def toOrderEmbedding {a b : SemiSimplexCategory} (f : SemiSimplexCategory.Hom a 
 theorem ext' {a b : SemiSimplexCategory} (f g : SemiSimplexCategory.Hom a b) :
     f.toOrderEmbedding = g.toOrderEmbedding → f = g :=
   id
-
-attribute [irreducible] SemiSimplexCategory.Hom
 
 @[simp]
 theorem mk_toOrderEmbedding {a b : SemiSimplexCategory} (f : SemiSimplexCategory.Hom a b) :
