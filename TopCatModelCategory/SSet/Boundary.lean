@@ -24,7 +24,7 @@ lemma face_le_boundary (i : Fin (n + 1)) :
 
 lemma non_mem_boundary (n : ℕ) :
     stdSimplex.objMk .id ∉ (boundary.{u} n).obj (op ⦋n⦌) := by
-  simp [boundary_eq_iSup]
+  simp only [boundary_eq_iSup, Subpresheaf.iSup_obj, Set.mem_iUnion, not_exists]
   intro i hi
   simpa using @hi i (by aesop)
 

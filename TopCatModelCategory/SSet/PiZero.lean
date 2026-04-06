@@ -70,8 +70,7 @@ def isColimitCoforkπ₀Functor : IsColimit coforkπ₀Functor.{u} :=
       (Cofork.IsColimit.mk _ (fun s ↦ Quot.lift s.π (by
           dsimp at s
           rintro _ _ ⟨h, rfl, rfl⟩
-          exact congr_fun s.condition h
-          ))
+          exact congr_fun s.condition h))
         (fun s ↦ rfl) (fun s m hm ↦ by
           ext x
           obtain ⟨x, rfl⟩ := x.mk_surjective
@@ -87,7 +86,6 @@ instance {J : Type*} [Category J] [Small.{u} J] :
   exact (ObjectProperty.preservesColimitsOfShape J).prop_of_isColimit
     isColimitCoforkπ₀Functor (by
       rintro (_ | _) <;> apply evaluation_preservesColimitsOfShape)
-
 
 variable (X)
 abbrev IsPreconnected : Prop := Subsingleton (π₀ X)
