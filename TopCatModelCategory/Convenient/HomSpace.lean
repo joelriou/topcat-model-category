@@ -1,5 +1,5 @@
 import Mathlib.Topology.CompactOpen
-import TopCatModelCategory.Convenient.Category
+import TopCatModelCategory.Convenient.ContinuousMapGeneratedBy
 
 -- Escardó, Lawson, Simpson
 
