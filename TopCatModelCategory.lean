@@ -8,6 +8,7 @@ import TopCatModelCategory.ColimitsType
 import TopCatModelCategory.CommSq
 import TopCatModelCategory.Convenient.CartesianClosed
 import TopCatModelCategory.Convenient.Category
+import TopCatModelCategory.Convenient.Closed
 import TopCatModelCategory.Convenient.Colimits
 import TopCatModelCategory.Convenient.ContinuousMapGeneratedBy
 import TopCatModelCategory.Convenient.DeltaGenerated

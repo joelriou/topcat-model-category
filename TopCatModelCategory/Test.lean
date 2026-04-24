@@ -11,6 +11,7 @@ example : ModelCategory SSet.{u} := SSet.modelCategoryQuillen.inst
 #print axioms TopCat.modelCategory.inst
 #print axioms SSet.modelCategoryQuillen.inst
 
+#check SSet.instFibrationTopCatMapToTop_topCatModelCategory
 #check TopCat.fibration_of_isOpenCover
 #check SSet.AffineMap
 #check SSet.AffineMap.sd
@@ -18,6 +19,7 @@ example : ModelCategory SSet.{u} := SSet.modelCategoryQuillen.inst
 #check SSet.AffineMap.mesh_sd_le
 #check SSet.toTopSdIso
 #check SemiSimplexCategory.sdIso
+#check SemiSimplexCategory.BIso.isColimit₂
 
 
 #check CategoryTheory.MorphismProperty.IsCardinalForSmallObjectArgument
