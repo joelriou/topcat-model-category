@@ -63,7 +63,7 @@ variable {J : Type v} [LinearOrder J] [OrderBot J] [SuccOrder J] [WellFoundedLT 
   {basicCell : (j : J) → (i : α j) → A j i ⟶ B j i}
   {X₀ X : TopCat.{u}} {f : X₀ ⟶ X}
   (hf : RelativeCellComplex.{w} basicCell f)
-  (h : ∀ j i, t₁Inclusions (basicCell j i))
+  (h : ∀ j i, closedT₁Embeddings (basicCell j i))
 
 namespace RelativeT₁CellComplex
 
@@ -73,8 +73,8 @@ section
 
 include h
 
-def t₁InclusionsTransfiniteCompositionOfShape :
-    t₁Inclusions.TransfiniteCompositionOfShape J f where
+def closedT₁EmbeddingsTransfiniteCompositionOfShape :
+    closedT₁Embeddings.TransfiniteCompositionOfShape J f where
   toTransfiniteCompositionOfShape := hf.toTransfiniteCompositionOfShape
   map_mem j hj := by
     refine (?_ : _ ≤ (_ : MorphismProperty _)) _ (hf.attachCells j hj).pushouts_coproducts
@@ -82,17 +82,17 @@ def t₁InclusionsTransfiniteCompositionOfShape :
     rintro _ _ _ ⟨i⟩
     apply h
 
-lemma isT₁Inclusion : IsT₁Inclusion f :=
-  t₁Inclusions.transfiniteCompositionsOfShape_le _ _
-    (t₁InclusionsTransfiniteCompositionOfShape hf h).mem
+lemma isClosedT₁Embedding : IsClosedT₁Embedding f :=
+  closedT₁Embeddings.transfiniteCompositionsOfShape_le _ _
+    (closedT₁EmbeddingsTransfiniteCompositionOfShape hf h).mem
 
-lemma isT₁Inclusion_incl_app (j : J) :
-    IsT₁Inclusion (hf.incl.app j) :=
-  (t₁InclusionsTransfiniteCompositionOfShape hf h).mem_incl_app j
+lemma isClosedT₁Embedding_incl_app (j : J) :
+    IsClosedT₁Embedding (hf.incl.app j) :=
+  (closedT₁EmbeddingsTransfiniteCompositionOfShape hf h).mem_incl_app j
 
-lemma isT₁Inclusion_map {i j : J} (g : i ⟶ j) :
-    IsT₁Inclusion (hf.F.map g) :=
-  (t₁InclusionsTransfiniteCompositionOfShape hf h).mem_map g
+lemma isClosedT₁Embedding_map {i j : J} (g : i ⟶ j) :
+    IsClosedT₁Embedding (hf.F.map g) :=
+  (closedT₁EmbeddingsTransfiniteCompositionOfShape hf h).mem_map g
 
 end
 
@@ -254,7 +254,7 @@ lemma notMem_range_incl_app
   rintro ⟨a, ha⟩
   let H := (hf.attachCells c.j c.hj).map (forget _)
   refine (H.equiv (fun _ ↦ (h _ _).injective) ⟨c.k, ⟨b, hb⟩⟩).2
-    ⟨a, (isT₁Inclusion_incl_app hf h (Order.succ c.j)).injective ?_⟩
+    ⟨a, (isClosedT₁Embedding_incl_app hf h (Order.succ c.j)).injective ?_⟩
   dsimp
   rw [← ConcreteCategory.comp_apply, NatTrans.naturality]
   exact ha
@@ -304,7 +304,7 @@ lemma ι_injective_on_compl {b₁ b₂ : B c.j c.i} (hb : c.ι b₁ = c.ι b₂)
     b₁ = b₂ :=
   ((hf.attachCells c.j c.hj).map (forget _)).cell_injective_on
     (fun a ↦ (h _ a).injective)
-    ((isT₁Inclusion_incl_app hf h (Order.succ c.j)).injective hb) hb₁ hb₂
+    ((isClosedT₁Embedding_incl_app hf h (Order.succ c.j)).injective hb) hb₁ hb₂
 
 noncomputable def equivInteriorCell :
     ((Set.range (basicCell c.j c.i))ᶜ : Set _) ≃ interiorCell c := by
@@ -344,8 +344,8 @@ lemma disjoint_interiorCell {c' : hf.Cells} (hcc' : c ≠ c') :
     obtain ⟨j, hj, k⟩ := c
     obtain ⟨j', hj', k'⟩ := c'
     obtain rfl : j = j' := hjj'
-    replace hb₂ := (isT₁Inclusion_incl_app hf h _).injective hb₂
-    replace hb'₂ := (isT₁Inclusion_incl_app hf h _).injective hb'₂
+    replace hb₂ := (isClosedT₁Embedding_incl_app hf h _).injective hb₂
+    replace hb'₂ := (isClosedT₁Embedding_incl_app hf h _).injective hb'₂
     dsimp [RelativeCellComplex.Cells.i] at b hb₁ hb₂ b' hb'₁ hb'₂ hcc'
     replace hcc' : k ≠ k' := by simpa using hcc'
     let H := (hf.attachCells j hj).map (forget _)

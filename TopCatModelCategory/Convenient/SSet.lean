@@ -185,7 +185,7 @@ noncomputable def boundaryHomeo : boundary n ≃ₜ (|∂Δ[n]| : Type u) := by
   · exact ((boundaryHomeoBoundary' (n + 1)).trans
       (Homeomorph.restrict ((stdSimplexHomeo (n + 1)).trans ⦋n + 1⦌.toTopHomeo.symm)
         (boundary'_eq_preimage (n + 1)).symm)).trans
-      (SSet.boundary.t₁Inclusions_toTop_map_ι.{u} (n + 1)).homeomorphRange.symm
+      (SSet.boundary.closedT₁Embeddings_toTop_map_ι.{u} (n + 1)).homeomorphRange.symm
 
 lemma boundary_subset_barycenterCompl : boundary n ⊆ barycenterCompl n := by
   rintro x ⟨hx, i, hi⟩

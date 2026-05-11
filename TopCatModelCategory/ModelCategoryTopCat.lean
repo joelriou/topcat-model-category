@@ -53,10 +53,10 @@ instance : IsSmall.{v} J.{u} := by dsimp [J]; infer_instance
 -- this could be generalized to more general well ordered types...
 -- ... and cleaned up
 instance :
-    (t₁Inclusions.{u} ⊓ weakEquivalences TopCat.{u}).IsStableUnderTransfiniteCompositionOfShape ℕ where
+    (closedT₁Embeddings.{u} ⊓ weakEquivalences TopCat.{u}).IsStableUnderTransfiniteCompositionOfShape ℕ where
   le := by
     rintro X Y f ⟨hf⟩
-    refine ⟨t₁Inclusions.isT₁Inclusion_of_transfiniteCompositionOfShape
+    refine ⟨closedT₁Embeddings.isClosedT₁Embedding_of_transfiniteCompositionOfShape
       (hf.ofLE inf_le_left), ?_⟩
     rw [weakEquivalences_eq, inverseImage_iff]
     apply MorphismProperty.colimitsOfShape_le (J := ℕ)
@@ -67,7 +67,7 @@ instance :
       have : CompactSpace (SimplexCategory.toTop.{u}.obj n) :=
         inferInstanceAs (CompactSpace (ULift (stdSimplex ℝ (Fin (n.len + 1)))))
       have : PreservesColimit hf.F _ :=
-        t₁Inclusions.preservesColimit_coyoneda_obj_of_compactSpace
+        closedT₁Embeddings.preservesColimit_coyoneda_obj_of_compactSpace
                 (hf.ofLE inf_le_left) (SimplexCategory.toTop.obj n)
       refine (IsColimit.equivOfNatIsoOfIso (NatIso.ofComponents (fun n ↦ Equiv.ulift.toIso))
         _ _ ?_).2 (isColimitOfPreserves
@@ -106,15 +106,15 @@ lemma deformationRetracts_le_weakEquivalences :
   rw [weakEquivalences_eq, inverseImage_iff]
   exact SSet.KanComplex.W.homotopyEquivHom (.ofDeformationRetract r.toSSet)
 
-lemma I_le_t₁Inclusions : TopCat.modelCategory.I ≤ t₁Inclusions := by
+lemma I_le_t₁Inclusions : TopCat.modelCategory.I ≤ closedT₁Embeddings := by
   intro _ _ _ ⟨n⟩
-  apply SSet.t₁Inclusions_toObj_map_of_mono
+  apply SSet.closedT₁Embeddings_toObj_map_of_mono
 
-lemma J_le_t₁Inclusions : TopCat.modelCategory.J ≤ t₁Inclusions := by
+lemma J_le_t₁Inclusions : TopCat.modelCategory.J ≤ closedT₁Embeddings := by
   intro _ _ _ h
   simp only [J, iSup_iff] at h
   obtain ⟨n, ⟨i⟩⟩ := h
-  apply SSet.t₁Inclusions_toObj_map_of_mono
+  apply SSet.closedT₁Embeddings_toObj_map_of_mono
 
 lemma J_le_deformationRetracts : TopCat.modelCategory.J ≤ deformationRetracts := by
   intro _ _ _ h
@@ -146,15 +146,15 @@ def packageTopCat : TopPackage.{u} TopCat.{u} where
   preservesColimit' := by
     rintro _ ⟨⟨T, hT⟩, rfl⟩ X Y f hf
     have : T.IsFinite := hT
-    refine TopCat.t₁Inclusions.preservesColimit_coyoneda_obj_of_compactSpace
+    refine TopCat.closedT₁Embeddings.preservesColimit_coyoneda_obj_of_compactSpace
       ((hf.transfiniteCompositionOfShape).ofLE ?_) _
     simp only [ofHoms_homFamily, pushouts_le_iff, coproducts_le_iff, sup_le_iff]
     exact ⟨I_le_t₁Inclusions, J_le_t₁Inclusions⟩
   infiniteCompositions_le_W' := by
     refine (transfiniteCompositionsOfShape_monotone ℕ ?_).trans
-      (((t₁Inclusions ⊓ weakEquivalences TopCat).transfiniteCompositionsOfShape_le ℕ).trans
+      (((closedT₁Embeddings ⊓ weakEquivalences TopCat).transfiniteCompositionsOfShape_le ℕ).trans
         (by simp))
-    trans t₁Inclusions ⊓ deformationRetracts
+    trans closedT₁Embeddings ⊓ deformationRetracts
     · simp only [le_inf_iff, pushouts_le_iff, coproducts_le_iff]
       exact ⟨J_le_t₁Inclusions, J_le_deformationRetracts⟩
     · exact inf_le_inf (by simp) deformationRetracts_le_weakEquivalences

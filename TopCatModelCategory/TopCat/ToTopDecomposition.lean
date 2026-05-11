@@ -208,7 +208,7 @@ lemma sigmaToTop_bijective : Function.Bijective X.sigmaToTop := by
         rintro ⟨s, y, hy⟩
         aesop }
   let e₂ := TopCat.RelativeT₁CellComplex.sigmaEquiv hX
-    (fun _ _ ↦ boundary.t₁Inclusions_toTop_map_ι _)
+    (fun _ _ ↦ boundary.closedT₁Embeddings_toTop_map_ι _)
   let e : (Σ (s : X.N), stdSimplex.interior (Fin (s.dim + 1))) ≃ |X| :=
     (e₁.trans e₂).trans (Equiv.subtypeUnivEquiv (by simp))
   convert e.bijective

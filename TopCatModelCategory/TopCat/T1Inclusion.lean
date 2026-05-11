@@ -23,21 +23,21 @@ namespace Topology
 variable {X Y Z : Type*} [TopologicalSpace X] [TopologicalSpace Y] [TopologicalSpace Z]
 
 @[mk_iff]
-structure IsT₁Inclusion (f : X → Y) : Prop extends IsClosedEmbedding f where
+structure IsClosedT₁Embedding (f : X → Y) : Prop extends IsClosedEmbedding f where
   isClosed_singleton (y : Y) (_ : y ∉ Set.range f) : IsClosed {y}
 
-lemma IsT₁Inclusion.of_homeo (e : Homeomorph X Y) :
-    IsT₁Inclusion e where
+lemma IsClosedT₁Embedding.of_homeomorph (e : Homeomorph X Y) :
+    IsClosedT₁Embedding e where
   toIsClosedEmbedding := Homeomorph.isClosedEmbedding e
   isClosed_singleton _ hy := by simp at hy
 
 variable (X) in
-lemma IsT₁Inclusion.id : IsT₁Inclusion (id : X → X) :=
-  IsT₁Inclusion.of_homeo (Homeomorph.refl X)
+lemma IsClosedT₁Embedding.id : IsClosedT₁Embedding (id : X → X) :=
+  IsClosedT₁Embedding.of_homeomorph (Homeomorph.refl X)
 
-lemma IsT₁Inclusion.comp {g : Y → Z} {f : X → Y}
-    (hg : IsT₁Inclusion g) (hf : IsT₁Inclusion f) :
-    IsT₁Inclusion (g.comp f) where
+lemma IsClosedT₁Embedding.comp {g : Y → Z} {f : X → Y}
+    (hg : IsClosedT₁Embedding g) (hf : IsClosedT₁Embedding f) :
+    IsClosedT₁Embedding (g.comp f) where
   toIsClosedEmbedding := hg.toIsClosedEmbedding.comp hf.toIsClosedEmbedding
   isClosed_singleton z hz := by
     by_cases hz' : z ∈ Set.range g
@@ -48,7 +48,7 @@ lemma IsT₁Inclusion.comp {g : Y → Z} {f : X → Y}
       aesop
     · exact hg.isClosed_singleton _ hz'
 
-lemma IsT₁Inclusion.isClosed_of_finite {f : X → Y} (hf : IsT₁Inclusion f)
+lemma IsClosedT₁Embedding.isClosed_of_finite {f : X → Y} (hf : IsClosedT₁Embedding f)
     (S : Set Y) (h : S.Finite) (h' : S ∩ Set.range f = ⊥) :
     IsClosed S := by
   have : Finite S := h
@@ -63,34 +63,34 @@ end Topology
 
 namespace TopCat
 
-def t₁Inclusions : MorphismProperty TopCat.{u} :=
-  fun _ _ f ↦ IsT₁Inclusion f
+abbrev closedT₁Embeddings : MorphismProperty TopCat.{u} :=
+  fun _ _ f ↦ IsClosedT₁Embedding f
 
-lemma t₁Inclusions_le_closedEmbeddings :
-    t₁Inclusions.{u} ≤ closedEmbeddings := fun _ _ _ h ↦ h.toIsClosedEmbedding
+lemma closedT₁Embeddings_le_closedEmbeddings :
+    closedT₁Embeddings.{u} ≤ closedEmbeddings := fun _ _ _ h ↦ h.toIsClosedEmbedding
 
-lemma t₁Inclusions_le_monomorphisms :
-    t₁Inclusions.{u} ≤ monomorphisms _ := by
+lemma closedT₁Embeddings_le_monomorphisms :
+    closedT₁Embeddings.{u} ≤ monomorphisms _ := by
   intro _ _ f hf
   apply Functor.mono_of_mono_map (forget TopCat)
   rw [CategoryTheory.mono_iff_injective]
   exact hf.injective
 
-namespace t₁Inclusions
+namespace closedT₁Embeddings
 
-instance : t₁Inclusions.{u}.IsMultiplicative where
-  id_mem _ := IsT₁Inclusion.id _
+instance : closedT₁Embeddings.{u}.IsMultiplicative where
+  id_mem _ := IsClosedT₁Embedding.id _
   comp_mem _ _ hf hg := hg.comp hf
 
-instance : t₁Inclusions.{u}.RespectsIso :=
+instance : closedT₁Embeddings.{u}.RespectsIso :=
   MorphismProperty.respectsIso_of_isStableUnderComposition (fun _ _ f (_ : IsIso f) ↦
-    IsT₁Inclusion.of_homeo (TopCat.homeoOfIso (asIso f)))
+    IsClosedT₁Embedding.of_homeomorph (TopCat.homeoOfIso (asIso f)))
 
-lemma isT₁Inclusion_of_isPushout
+lemma isClosedT₁Embedding_of_isPushout
     {X₁ X₂ X₃ X₄ : TopCat.{u}} {t : X₁ ⟶ X₂} {l : X₁ ⟶ X₃} {r : X₂ ⟶ X₄} {b : X₃ ⟶ X₄}
     (sq : IsPushout t l r b)
-    (ht : IsT₁Inclusion t) :
-    IsT₁Inclusion b where
+    (ht : IsClosedT₁Embedding t) :
+    IsClosedT₁Embedding b where
   toIsClosedEmbedding := isClosedEmbedding_of_isPushout sq ht.toIsClosedEmbedding
   isClosed_singleton y hy := by
     rw [isClosed_iff_of_isPushout sq]
@@ -107,12 +107,12 @@ lemma isT₁Inclusion_of_isPushout
         · exact (hx₂ ⟨_, rfl⟩).elim
     · simpa only [show b ⁻¹' {y} = ∅ by aesop] using isClosed_empty
 
-lemma isT₁Inclusion_of_isColimit_cofan
+lemma isClosedT₁Embedding_of_isColimit_cofan
     {J : Type u'} {X₁ : J → TopCat.{u}} {X₂ : J → TopCat.{u}}
     (f : ∀ j, X₁ j ⟶ X₂ j) {c₁ : Cofan X₁} (h₁ : IsColimit c₁) {c₂ : Cofan X₂}
     (h₂ : IsColimit c₂) (φ : c₁.pt ⟶ c₂.pt) (hφ : ∀ j, c₁.inj j ≫ φ = f j ≫ c₂.inj j)
-    (hf : ∀ j, IsT₁Inclusion (f j)) :
-    IsT₁Inclusion φ where
+    (hf : ∀ j, IsClosedT₁Embedding (f j)) :
+    IsClosedT₁Embedding φ where
   toIsClosedEmbedding := isClosedEmbedding_of_isColimit f h₁ h₂ φ hφ
     (fun j ↦ (hf j).toIsClosedEmbedding)
   isClosed_singleton y hy := by
@@ -136,13 +136,13 @@ lemma isT₁Inclusion_of_isColimit_cofan
       intro h
       exact hj (eq_cofanInj_apply_eq_of_isColimit h₂ _ _ h.symm)
 
-lemma isT₁Inclusion_of_transfiniteCompositionOfShape {J : Type u'} [LinearOrder J]
+lemma isClosedT₁Embedding_of_transfiniteCompositionOfShape {J : Type u'} [LinearOrder J]
     [SuccOrder J] [OrderBot J] [WellFoundedLT J]
     {X Y : TopCat.{u}} {f : X ⟶ Y}
-    (hf : t₁Inclusions.TransfiniteCompositionOfShape J f) :
-    IsT₁Inclusion f where
+    (hf : closedT₁Embeddings.TransfiniteCompositionOfShape J f) :
+    IsClosedT₁Embedding f where
   toIsClosedEmbedding :=
-    isClosedEmbedding_of_transfiniteCompositionOfShape (hf.ofLE t₁Inclusions_le_closedEmbeddings)
+    isClosedEmbedding_of_transfiniteCompositionOfShape (hf.ofLE closedT₁Embeddings_le_closedEmbeddings)
   isClosed_singleton y hy := by
     let S := setOf (fun j ↦ y ∈ Set.range (hf.incl.app j))
     have hS : S.Nonempty := Types.jointly_surjective_of_isColimit
@@ -165,29 +165,29 @@ lemma isT₁Inclusion_of_transfiniteCompositionOfShape {J : Type u'} [LinearOrde
         exact (lt_irrefl _ (lt_of_lt_of_le hk (hi k y
           (congr_fun ((forget _).congr_map (hf.incl.naturality (homOfLE hk.le)).symm) y)))).elim
     simpa using (isClosedEmbedding_of_transfiniteCompositionOfShape
-      ((hf.ici (Order.succ j)).ofLE t₁Inclusions_le_closedEmbeddings)).isClosedMap _
+      ((hf.ici (Order.succ j)).ofLE closedT₁Embeddings_le_closedEmbeddings)).isClosedMap _
         ((hf.map_mem j hj).isClosed_singleton x (fun ⟨y, hy⟩ ↦
           not_le.2 (Order.lt_succ_of_not_isMax hj) (hi j y (by
             rw [← hy]
             exact congr_fun ((forget _).congr_map
               (hf.incl.naturality (homOfLE (Order.le_succ j))).symm) y))))
 
-instance : t₁Inclusions.{u}.IsStableUnderCobaseChange where
-  of_isPushout sq hl := isT₁Inclusion_of_isPushout sq.flip hl
+instance : closedT₁Embeddings.{u}.IsStableUnderCobaseChange where
+  of_isPushout sq hl := isClosedT₁Embedding_of_isPushout sq.flip hl
 
-instance : IsStableUnderCoproducts.{u'} t₁Inclusions.{u} where
+instance : IsStableUnderCoproducts.{u'} closedT₁Embeddings.{u} where
   isStableUnderCoproductsOfShape J := by
     apply IsStableUnderCoproductsOfShape.mk
     intro X₁ X₂ _ _ f hf
-    exact isT₁Inclusion_of_isColimit_cofan f (colimit.isColimit _)
+    exact isClosedT₁Embedding_of_isColimit_cofan f (colimit.isColimit _)
       (colimit.isColimit _) _ (fun j ↦ colimit.ι_desc _ _) hf
 
-instance : IsStableUnderTransfiniteComposition.{u'} t₁Inclusions.{u} where
+instance : IsStableUnderTransfiniteComposition.{u'} closedT₁Embeddings.{u} where
   isStableUnderTransfiniteCompositionOfShape _ _ _ _ _ :=
-    ⟨fun _ _ _ ⟨hf⟩ ↦ isT₁Inclusion_of_transfiniteCompositionOfShape hf⟩
+    ⟨fun _ _ _ ⟨hf⟩ ↦ isClosedT₁Embedding_of_transfiniteCompositionOfShape hf⟩
 
 lemma isClosed_of_subsingleton_compl {X Y : TopCat.{u}} {f : X ⟶ Y}
-    (hf : t₁Inclusions f) {Z : Set Y} (hZ : IsClosed (f ⁻¹' Z))
+    (hf : closedT₁Embeddings f) {Z : Set Y} (hZ : IsClosed (f ⁻¹' Z))
     (hZ' : Subsingleton ((Set.range f)ᶜ ∩ Z : Set _)) : IsClosed Z := by
   rw [show Z = f '' (f ⁻¹' Z) ∪ ((Set.range f)ᶜ ∩ Z) by grind]
   refine IsClosed.union (hf.1.isClosedMap _ hZ) ?_
@@ -203,7 +203,7 @@ section
 
 variable {J : Type*} [LinearOrder J] [OrderBot J] [SuccOrder J]
   [WellFoundedLT J] {X Y : TopCat.{u}} {f : X ⟶ Y}
-  (hf : t₁Inclusions.TransfiniteCompositionOfShape J f) {T : TopCat.{u}}
+  (hf : closedT₁Embeddings.TransfiniteCompositionOfShape J f) {T : TopCat.{u}}
   [CompactSpace T]
 
 lemma range_le_of_transfiniteCompositionOfShape (g : T ⟶ Y) :
@@ -250,14 +250,14 @@ lemma range_le_of_transfiniteCompositionOfShape (g : T ⟶ Y) :
       rw [← h]
       exact hR (hj.monotone (by omega)) (hy₂ a)
   let c := closedEmbeddings.coconeOfTransfiniteCompositionOfShape
-    (hf.ofLE t₁Inclusions_le_closedEmbeddings) hj
+    (hf.ofLE closedT₁Embeddings_le_closedEmbeddings) hj
   have hc : IsColimit c := closedEmbeddings.isColimitCoconeOfTransfiniteCompositionOfShape
-      (hf.ofLE t₁Inclusions_le_closedEmbeddings) hj
+      (hf.ofLE closedT₁Embeddings_le_closedEmbeddings) hj
   let Z : Set Y := ⋃ (n : ℕ), R (j n)
   let ι : Z → Y := Subtype.val
   have hι : IsClosedEmbedding ι :=
     closedEmbeddings.coconeOfTransfiniteCompositionOfShape.closedEmbeddings_ιPoint
-      (hf.ofLE t₁Inclusions_le_closedEmbeddings) hj
+      (hf.ofLE closedT₁Embeddings_le_closedEmbeddings) hj
   have hy₅ : Set.range y ⊆ Z := by
     rintro _ ⟨n, rfl⟩
     simp only [Set.mem_iUnion, Z]
@@ -268,7 +268,7 @@ lemma range_le_of_transfiniteCompositionOfShape (g : T ⟶ Y) :
       isClosed_iff_of_isColimit _ hc]
     refine forall_congr' (fun n ↦ ?_)
     have hn : IsClosedEmbedding (hf.incl.app (j n)) :=
-      (isT₁Inclusion_of_transfiniteCompositionOfShape (hf.ici (j n))).toIsClosedEmbedding
+      (isClosedT₁Embedding_of_transfiniteCompositionOfShape (hf.ici (j n))).toIsClosedEmbedding
     have : (c.ι.app n) ⁻¹' (ι ⁻¹' A) = (hf.incl.app (j n)) ⁻¹' (A ∩ R (j n)) := by
       ext x
       constructor
@@ -280,7 +280,7 @@ lemma range_le_of_transfiniteCompositionOfShape (g : T ⟶ Y) :
   have hy₆ (S : Set Y) (hS : S ⊆ Set.range y) : IsClosed S := by
     rw [hZ' _ (hS.trans hy₅)]
     intro n
-    apply (isT₁Inclusion_of_transfiniteCompositionOfShape hf).isClosed_of_finite
+    apply (isClosedT₁Embedding_of_transfiniteCompositionOfShape hf).isClosed_of_finite
     · let S₀ := Set.range (fun (i : Fin n) ↦ y i.1)
       have : S₀.Finite := Set.finite_range _
       have h : S ∩ R (j n) ⊆ S₀ := by
@@ -330,18 +330,18 @@ lemma preservesColimit_coyoneda_obj_of_compactSpace :
       let g' : T ⟶ .of (Set.range (hf.incl.app j)) :=
         ofHom ⟨fun t ↦ ⟨g t, hj (by aesop)⟩, by continuity⟩
       exact ⟨j, g' ≫ (TopCat.isoOfHomeo
-        (isT₁Inclusion_of_transfiniteCompositionOfShape (hf.ici j)).homeomorphRange).inv,
+        (isClosedT₁Embedding_of_transfiniteCompositionOfShape (hf.ici j)).homeomorphRange).inv,
           by aesop⟩
     · intro j g₁ g₂ hg
       have : Mono (hf.incl.app j) :=
-        t₁Inclusions_le_monomorphisms _
-          (isT₁Inclusion_of_transfiniteCompositionOfShape (hf.ici j))
+        closedT₁Embeddings_le_monomorphisms _
+          (isClosedT₁Embedding_of_transfiniteCompositionOfShape (hf.ici j))
       refine ⟨j, 𝟙 _, ?_⟩
       simpa only [Functor.comp_obj, coyoneda_obj_obj, FunctorToTypes.map_id_apply,
         ← cancel_mono (hf.incl.app j)])
 
 end
 
-end t₁Inclusions
+end closedT₁Embeddings
 
 end TopCat

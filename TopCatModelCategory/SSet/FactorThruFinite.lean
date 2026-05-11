@@ -21,7 +21,7 @@ lemma exists_finite_subcomplex_of_compactSpace [CompactSpace K] :
   let α := { c : hX.Cells // (TopCat.RelativeT₁CellComplex.interiorCell c ∩
     Set.range ⇑(ConcreteCategory.hom f)).Nonempty }
   have : Finite α := TopCat.RelativeT₁CellComplex.finite_inter_interiorCell_of_isCompact hX
-    (fun j _ ↦ boundary.t₁Inclusions_toTop_map_ι j) (F := Set.range f) (by aesop)
+    (fun j _ ↦ boundary.closedT₁Embeddings_toTop_map_ι j) (F := Set.range f) (by aesop)
     (isCompact_range (by continuity))
   let ι : Set X.N := (Sigma.fst ∘ X.sigmaEquivToTop.symm) '' (Set.range f)
   have : Finite ι := by

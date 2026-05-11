@@ -77,7 +77,7 @@ lemma toEqualizerTop_coe (x : |Subcomplex.equalizer' f g|) :
 lemma isEmbedding : IsEmbedding (toEqualizerTop f g) := by
   dsimp
   rw [← IsEmbedding.subtypeVal.of_comp_iff]
-  exact (t₁Inclusions_toObj_map_of_mono (Subcomplex.equalizer' f g).ι).toIsEmbedding
+  exact (closedT₁Embeddings_toObj_map_of_mono (Subcomplex.equalizer' f g).ι).toIsEmbedding
 
 lemma surjective : Function.Surjective (toEqualizerTop f g) := by
   rintro ⟨e, he⟩

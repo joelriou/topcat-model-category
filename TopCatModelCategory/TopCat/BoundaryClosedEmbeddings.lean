@@ -389,27 +389,27 @@ lemma boundary.closedEmbeddings_toTop_map_ι (n : ℕ) :
     · simp only [stdSimplex.toTopSet_obj_face_compl]
       aesop
 
-lemma boundary.t₁Inclusions_toTop_map_ι (n : ℕ) :
-    TopCat.t₁Inclusions (toTop.map ∂Δ[n].ι) :=
+lemma boundary.closedT₁Embeddings_toTop_map_ι (n : ℕ) :
+    TopCat.closedT₁Embeddings (toTop.map ∂Δ[n].ι) :=
   ⟨closedEmbeddings_toTop_map_ι n, fun _ _ ↦ isClosed_singleton⟩
 
-lemma t₁Inclusions_toObj_map_of_mono {X Y : SSet.{u}} (i : X ⟶ Y) [Mono i] :
-    t₁Inclusions (SSet.toTop.map i) := by
+lemma closedT₁Embeddings_toObj_map_of_mono {X Y : SSet.{u}} (i : X ⟶ Y) [Mono i] :
+    closedT₁Embeddings (SSet.toTop.map i) := by
   have : (MorphismProperty.coproducts.{u} I).pushouts ≤
-      (t₁Inclusions.{u}).inverseImage SSet.toTop := by
+      (closedT₁Embeddings.{u}).inverseImage SSet.toTop := by
     rw [← MorphismProperty.map_le_iff]
     refine ((coproducts I).map_pushouts_le SSet.toTop.{u}).trans ?_
     simp only [pushouts_le_iff]
     refine (I.map_coproducts_le SSet.toTop).trans ?_
     simp only [coproducts_le_iff, MorphismProperty.map_le_iff]
     intro _ _ _ ⟨n⟩
-    apply SSet.boundary.t₁Inclusions_toTop_map_ι
-  exact t₁Inclusions.isT₁Inclusion_of_transfiniteCompositionOfShape
+    apply SSet.boundary.closedT₁Embeddings_toTop_map_ι
+  exact closedT₁Embeddings.isClosedT₁Embedding_of_transfiniteCompositionOfShape
     ((transfiniteCompositionOfMono i).ofLE this).map
 
 lemma closedEmbeddings_toObj_map_of_mono {X Y : SSet.{u}} (i : X ⟶ Y) [Mono i] :
     closedEmbeddings (SSet.toTop.map i) :=
-  (t₁Inclusions_toObj_map_of_mono i).toIsClosedEmbedding
+  (closedT₁Embeddings_toObj_map_of_mono i).toIsClosedEmbedding
 
 namespace Subcomplex
 
@@ -418,7 +418,7 @@ variable {X : SSet.{u}} {Ω : Type u} {ι : |X| → Ω}
 
 instance : IsIso ((toTopNatTrans hι).app A) :=
   isIso_toTopNatTrans_app hι A
-    (hι.comp (t₁Inclusions_toObj_map_of_mono A.ι).1)
+    (hι.comp (closedT₁Embeddings_toObj_map_of_mono A.ι).1)
 
 noncomputable def arrowMkToTopMapιIso :
     Arrow.mk (toTop.map A.ι) ≅
