@@ -191,7 +191,6 @@ noncomputable def δ :
   notMem := by
     simp [Subcomplex.mem_unionProd_iff, mem_horn_iff_notMem_range,
       mem_boundary_iff_notMem_range, stdSimplex.δ_apply]
-    have := hl
     constructor
     · intro j hj
       obtain ⟨i, hi⟩ := mem_range_left k hd j hj
