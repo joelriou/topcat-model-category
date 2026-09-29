@@ -1,10 +1,14 @@
-import TopCatModelCategory.CommSq
-import TopCatModelCategory.IsFibrant
-import TopCatModelCategory.SSet.Square
-import TopCatModelCategory.SSet.Horn
-import TopCatModelCategory.SSet.HomotopyBasic
-import TopCatModelCategory.SSet.AnodyneExtensionsDefs
-import TopCatModelCategory.SSet.Monoidal
+module
+
+public import TopCatModelCategory.CommSq
+public import TopCatModelCategory.IsFibrant
+public import TopCatModelCategory.SSet.Square
+public import TopCatModelCategory.SSet.Horn
+public import TopCatModelCategory.SSet.HomotopyBasic
+public import TopCatModelCategory.SSet.AnodyneExtensionsDefs
+public import TopCatModelCategory.SSet.Monoidal
+
+@[expose] public section
 
 universe u
 

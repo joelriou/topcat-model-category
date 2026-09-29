@@ -1,5 +1,9 @@
-import Mathlib.AlgebraicTopology.SimplexCategory.Basic
-import Mathlib.AlgebraicTopology.SimplicialObject.Basic
+module
+
+public import Mathlib.AlgebraicTopology.SimplexCategory.Basic
+public import Mathlib.AlgebraicTopology.SimplicialObject.Basic
+
+@[expose] public section
 
 open CategoryTheory Simplicial
 

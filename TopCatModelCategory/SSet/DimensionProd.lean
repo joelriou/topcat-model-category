@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.NonDegenerateProdSimplex
-import TopCatModelCategory.SSet.Finite
+module
+
+public import TopCatModelCategory.SSet.NonDegenerateProdSimplex
+public import TopCatModelCategory.SSet.Finite
+
+@[expose] public section
 
 universe u
 

@@ -1,7 +1,11 @@
-import Mathlib.CategoryTheory.Limits.Presheaf
-import TopCatModelCategory.LeftKanExtensionAlongUliftYoneda
-import TopCatModelCategory.FunctorCategoryLimits
-import TopCatModelCategory.HasExactColimitsOfShape
+module
+
+public import Mathlib.CategoryTheory.Limits.Presheaf
+public import TopCatModelCategory.LeftKanExtensionAlongUliftYoneda
+public import TopCatModelCategory.FunctorCategoryLimits
+public import TopCatModelCategory.HasExactColimitsOfShape
+
+@[expose] public section
 
 universe w w' v u
 

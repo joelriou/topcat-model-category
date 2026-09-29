@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.AnodyneExtensionsDefs
-import TopCatModelCategory.SSet.ProdSimplex
+module
+
+public import TopCatModelCategory.SSet.AnodyneExtensionsDefs
+public import TopCatModelCategory.SSet.ProdSimplex
+
+@[expose] public section
 
 open HomotopicalAlgebra CategoryTheory Limits SSet.modelCategoryQuillen MonoidalCategory
   Simplicial Opposite

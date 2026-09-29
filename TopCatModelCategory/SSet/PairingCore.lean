@@ -1,4 +1,8 @@
-import TopCatModelCategory.SSet.Pairing
+module
+
+public import TopCatModelCategory.SSet.Pairing
+
+@[expose] public section
 
 universe v u
 

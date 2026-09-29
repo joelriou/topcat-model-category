@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.Pairing
-import TopCatModelCategory.SSet.NonemptyFiniteChains
+module
+
+public import TopCatModelCategory.SSet.Pairing
+public import TopCatModelCategory.SSet.NonemptyFiniteChains
+
+@[expose] public section
 
 universe u
 

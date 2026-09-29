@@ -1,7 +1,11 @@
-import TopCatModelCategory.SSet.AffineMap
-import TopCatModelCategory.SSet.NonDegenerateSimplices
-import Mathlib.Topology.MetricSpace.Bounded
-import Mathlib.Analysis.Normed.Module.Convex
+module
+
+public import TopCatModelCategory.SSet.AffineMap
+public import TopCatModelCategory.SSet.NonDegenerateSimplices
+public import Mathlib.Topology.MetricSpace.Bounded
+public import Mathlib.Analysis.Normed.Module.Convex
+
+@[expose] public section
 
 universe v u
 

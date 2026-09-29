@@ -1,5 +1,9 @@
-import Mathlib.AlgebraicTopology.SimplicialSet.Basic
-import TopCatModelCategory.SSet.Subcomplex
+module
+
+public import Mathlib.AlgebraicTopology.SimplicialSet.Basic
+public import TopCatModelCategory.SSet.Subcomplex
+
+@[expose] public section
 
 open CategoryTheory Simplicial
 

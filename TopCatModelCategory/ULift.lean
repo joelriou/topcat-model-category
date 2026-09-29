@@ -1,4 +1,8 @@
-import Mathlib.Order.Shrink
+module
+
+public import Mathlib.Order.Shrink
+
+@[expose] public section
 
 universe v u
 

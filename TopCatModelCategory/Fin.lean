@@ -1,9 +1,13 @@
-import Mathlib.Algebra.Group.Nat.Defs
-import Mathlib.Order.Fin.Basic
-import Mathlib.Order.Fin.Finset
-import Mathlib.Data.Fintype.Card
-import Mathlib.Data.Fintype.EquivFin
-import Mathlib.Tactic.FinCases
+module
+
+public import Mathlib.Algebra.Group.Nat.Defs
+public import Mathlib.Order.Fin.Basic
+public import Mathlib.Order.Fin.Finset
+public import Mathlib.Data.Fintype.Card
+public import Mathlib.Data.Fintype.EquivFin
+public import Mathlib.Tactic.FinCases
+
+@[expose] public section
 
 namespace Fin
 

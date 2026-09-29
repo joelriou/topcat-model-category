@@ -1,5 +1,9 @@
-import Mathlib.AlgebraicTopology.ModelCategory.Basic
-import Mathlib.AlgebraicTopology.ModelCategory.IsCofibrant
+module
+
+public import Mathlib.AlgebraicTopology.ModelCategory.Basic
+public import Mathlib.AlgebraicTopology.ModelCategory.IsCofibrant
+
+@[expose] public section
 
 open HomotopicalAlgebra
 

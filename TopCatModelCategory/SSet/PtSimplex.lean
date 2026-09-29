@@ -1,7 +1,11 @@
-import TopCatModelCategory.SSet.Horn
-import TopCatModelCategory.SSet.HomotopyBasic
-import TopCatModelCategory.SSet.FundamentalGroupoid
-import TopCatModelCategory.SSet.ProdSimplexOne
+module
+
+public import TopCatModelCategory.SSet.Horn
+public import TopCatModelCategory.SSet.HomotopyBasic
+public import TopCatModelCategory.SSet.FundamentalGroupoid
+public import TopCatModelCategory.SSet.ProdSimplexOne
+
+@[expose] public section
 
 universe u
 

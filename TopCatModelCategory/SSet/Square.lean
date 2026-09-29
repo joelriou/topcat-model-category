@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.NonDegenerateProdSimplex
-import TopCatModelCategory.SSet.Monoidal
+module
+
+public import TopCatModelCategory.SSet.NonDegenerateProdSimplex
+public import TopCatModelCategory.SSet.Monoidal
+
+@[expose] public section
 
 universe u
 

@@ -1,7 +1,11 @@
-import TopCatModelCategory.SSet.Basic
-import TopCatModelCategory.SSet.Subcomplex
-import TopCatModelCategory.SSet.CategoryWithFibrations
-import TopCatModelCategory.IsFibrant
+module
+
+public import TopCatModelCategory.SSet.Basic
+public import TopCatModelCategory.SSet.Subcomplex
+public import TopCatModelCategory.SSet.CategoryWithFibrations
+public import TopCatModelCategory.IsFibrant
+
+@[expose] public section
 
 universe u
 

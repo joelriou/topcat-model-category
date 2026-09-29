@@ -1,9 +1,13 @@
-import TopCatModelCategory.SSet.Finite
-import TopCatModelCategory.SSet.Nonempty
-import TopCatModelCategory.SSet.Boundary
-import TopCatModelCategory.SSet.NonDegenerateSimplices
-import Mathlib.Order.OrderIsoNat
-import Mathlib.Data.Finite.Card
+module
+
+public import TopCatModelCategory.SSet.Finite
+public import TopCatModelCategory.SSet.Nonempty
+public import TopCatModelCategory.SSet.Boundary
+public import TopCatModelCategory.SSet.NonDegenerateSimplices
+public import Mathlib.Order.OrderIsoNat
+public import Mathlib.Data.Finite.Card
+
+@[expose] public section
 
 universe u
 

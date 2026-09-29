@@ -1,8 +1,12 @@
-import TopCatModelCategory.MorphismProperty
-import TopCatModelCategory.SSet.CategoryWithFibrations
-import TopCatModelCategory.SSet.Presentable
-import TopCatModelCategory.SSet.Skeleton
-import Mathlib.CategoryTheory.SmallObject.Basic
+module
+
+public import TopCatModelCategory.MorphismProperty
+public import TopCatModelCategory.SSet.CategoryWithFibrations
+public import TopCatModelCategory.SSet.Presentable
+public import TopCatModelCategory.SSet.Skeleton
+public import Mathlib.CategoryTheory.SmallObject.Basic
+
+@[expose] public section
 
 open HomotopicalAlgebra CategoryTheory Limits
 

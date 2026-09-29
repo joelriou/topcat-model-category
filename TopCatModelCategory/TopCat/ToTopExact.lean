@@ -1,9 +1,13 @@
-import Mathlib.CategoryTheory.Limits.Constructions.LimitsOfProductsAndEqualizers
-import TopCatModelCategory.IsTerminal
-import TopCatModelCategory.TopCat.ToTopEqualizers
-import TopCatModelCategory.TopCat.ToTopProducts
-import TopCatModelCategory.Convenient.Fibrations
-import TopCatModelCategory.CommSq
+module
+
+public import Mathlib.CategoryTheory.Limits.Constructions.LimitsOfProductsAndEqualizers
+public import TopCatModelCategory.IsTerminal
+public import TopCatModelCategory.TopCat.ToTopEqualizers
+public import TopCatModelCategory.TopCat.ToTopProducts
+public import TopCatModelCategory.Convenient.Fibrations
+public import TopCatModelCategory.CommSq
+
+@[expose] public section
 
 open CategoryTheory Limits Simplicial HomotopicalAlgebra TopCat.modelCategory
 

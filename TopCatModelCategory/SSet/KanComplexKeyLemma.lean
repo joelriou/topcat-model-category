@@ -1,8 +1,12 @@
-import TopCatModelCategory.SSet.Deformation
-import TopCatModelCategory.SSet.KanComplexW
-import TopCatModelCategory.SSet.FundamentalGroupoidPiOne
-import TopCatModelCategory.SSet.HomotopySequence
-import TopCatModelCategory.SSet.SmallObject
+module
+
+public import TopCatModelCategory.SSet.Deformation
+public import TopCatModelCategory.SSet.KanComplexW
+public import TopCatModelCategory.SSet.FundamentalGroupoidPiOne
+public import TopCatModelCategory.SSet.HomotopySequence
+public import TopCatModelCategory.SSet.SmallObject
+
+@[expose] public section
 
 universe u
 

@@ -1,8 +1,12 @@
-import TopCatModelCategory.TrivialBundle
-import TopCatModelCategory.MorphismPropertyLocally
-import TopCatModelCategory.CommSq
-import TopCatModelCategory.Pullback
-import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
+module
+
+public import TopCatModelCategory.TrivialBundle
+public import TopCatModelCategory.MorphismPropertyLocally
+public import TopCatModelCategory.CommSq
+public import TopCatModelCategory.Pullback
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
+
+@[expose] public section
 
 namespace CategoryTheory
 

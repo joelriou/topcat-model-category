@@ -1,5 +1,9 @@
-import TopCatModelCategory.TopCat.Adj
-import TopCatModelCategory.TopCat.CoconeTop
+module
+
+public import TopCatModelCategory.TopCat.Adj
+public import TopCatModelCategory.TopCat.CoconeTop
+
+@[expose] public section
 
 universe v u
 

@@ -1,5 +1,9 @@
-import TopCatModelCategory.Polar
-import Mathlib.Topology.Maps.Basic
+module
+
+public import TopCatModelCategory.Polar
+public import Mathlib.Topology.Maps.Basic
+
+@[expose] public section
 
 open Topology
 

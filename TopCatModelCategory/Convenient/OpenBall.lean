@@ -1,6 +1,10 @@
-import TopCatModelCategory.Convenient.GeneratedBy
-import TopCatModelCategory.Convenient.Open
-import TopCatModelCategory.UnitBallRetract
+module
+
+public import TopCatModelCategory.Convenient.GeneratedBy
+public import TopCatModelCategory.Convenient.Open
+public import TopCatModelCategory.UnitBallRetract
+
+@[expose] public section
 
 universe v v' t u
 

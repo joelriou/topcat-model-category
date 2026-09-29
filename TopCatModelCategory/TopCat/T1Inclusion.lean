@@ -1,9 +1,13 @@
-import TopCatModelCategory.TopCat.ClosedEmbeddings
-import Mathlib.CategoryTheory.MorphismProperty.Composition
-import Mathlib.CategoryTheory.MorphismProperty.Limits
-import Mathlib.CategoryTheory.Types.Monomorphisms
+module
+
+public import TopCatModelCategory.TopCat.ClosedEmbeddings
+public import Mathlib.CategoryTheory.MorphismProperty.Composition
+public import Mathlib.CategoryTheory.MorphismProperty.Limits
+public import Mathlib.CategoryTheory.Types.Monomorphisms
 --import Mathlib.CategoryTheory.Limits.Shapes.Types
-import Mathlib.Topology.Category.TopCat.Limits.Basic
+public import Mathlib.Topology.Category.TopCat.Limits.Basic
+
+@[expose] public section
 
 universe u
 

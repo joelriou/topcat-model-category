@@ -1,5 +1,9 @@
-import Mathlib.Topology.Category.TopCat.Limits.Basic
-import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+module
+
+public import Mathlib.Topology.Category.TopCat.Limits.Basic
+public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+
+@[expose] public section
 
 universe w v' u' u
 

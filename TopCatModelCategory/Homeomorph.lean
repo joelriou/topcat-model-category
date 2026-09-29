@@ -1,4 +1,8 @@
-import Mathlib.Topology.Homeomorph.Lemmas
+module
+
+public import Mathlib.Topology.Homeomorph.Lemmas
+
+@[expose] public section
 
 @[simps]
 def Equiv.ofSetEq {X : Type*} {S T : Set X} (h : S = T) : S ≃ T where

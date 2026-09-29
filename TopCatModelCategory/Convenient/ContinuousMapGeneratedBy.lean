@@ -1,4 +1,8 @@
-import TopCatModelCategory.Convenient.GeneratedBy
+module
+
+public import TopCatModelCategory.Convenient.GeneratedBy
+
+@[expose] public section
 
 open Topology
 

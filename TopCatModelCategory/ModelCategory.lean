@@ -1,5 +1,9 @@
-import TopCatModelCategory.MorphismProperty
-import Mathlib.AlgebraicTopology.ModelCategory.Basic
+module
+
+public import TopCatModelCategory.MorphismProperty
+public import Mathlib.AlgebraicTopology.ModelCategory.Basic
+
+@[expose] public section
 
 universe w v u
 

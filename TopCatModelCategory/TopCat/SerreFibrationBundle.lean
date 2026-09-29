@@ -1,8 +1,12 @@
-import TopCatModelCategory.TopCat.SerreFibrationLocal
-import TopCatModelCategory.Convenient.GrothendieckTopology
-import TopCatModelCategory.Convenient.Fibrations
-import TopCatModelCategory.MorphismPropertyLocally
-import TopCatModelCategory.TrivialBundleGluing
+module
+
+public import TopCatModelCategory.TopCat.SerreFibrationLocal
+public import TopCatModelCategory.Convenient.GrothendieckTopology
+public import TopCatModelCategory.Convenient.Fibrations
+public import TopCatModelCategory.MorphismPropertyLocally
+public import TopCatModelCategory.TrivialBundleGluing
+
+@[expose] public section
 
 universe u
 

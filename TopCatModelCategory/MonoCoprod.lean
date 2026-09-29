@@ -1,4 +1,8 @@
-import Mathlib.CategoryTheory.Limits.MonoCoprod
+module
+
+public import Mathlib.CategoryTheory.Limits.MonoCoprod
+
+@[expose] public section
 
 universe v v' u u'
 

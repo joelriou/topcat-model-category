@@ -1,11 +1,15 @@
-import TopCatModelCategory.SSet.FundamentalGroupoid
-import TopCatModelCategory.SSet.Fibrations
-import TopCatModelCategory.SSet.Fiber
-import TopCatModelCategory.SSet.Monoidal
-import TopCatModelCategory.SSet.HomotopyBasic
-import TopCatModelCategory.IsFibrant
-import TopCatModelCategory.SSet.AnodyneExtensions
-import TopCatModelCategory.SSet.Horn
+module
+
+public import TopCatModelCategory.SSet.FundamentalGroupoid
+public import TopCatModelCategory.SSet.Fibrations
+public import TopCatModelCategory.SSet.Fiber
+public import TopCatModelCategory.SSet.Monoidal
+public import TopCatModelCategory.SSet.HomotopyBasic
+public import TopCatModelCategory.IsFibrant
+public import TopCatModelCategory.SSet.AnodyneExtensions
+public import TopCatModelCategory.SSet.Horn
+
+@[expose] public section
 
 open HomotopicalAlgebra CategoryTheory Category Simplicial MonoidalCategory Opposite
   CartesianMonoidalCategory Limits SSet.modelCategoryQuillen

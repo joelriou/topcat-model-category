@@ -1,7 +1,11 @@
-import TopCatModelCategory.Interval.Cosimplicial
-import TopCatModelCategory.TopCat.Adj
-import TopCatModelCategory.Elements
-import Mathlib.Data.NNReal.Basic
+module
+
+public import TopCatModelCategory.Interval.Cosimplicial
+public import TopCatModelCategory.TopCat.Adj
+public import TopCatModelCategory.Elements
+public import Mathlib.Data.NNReal.Basic
+
+@[expose] public section
 
 namespace CategoryTheory
 

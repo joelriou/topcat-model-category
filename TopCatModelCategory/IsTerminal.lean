@@ -1,4 +1,8 @@
-import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Terminal
+module
+
+public import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Terminal
+
+@[expose] public section
 
 namespace CategoryTheory.Limits
 

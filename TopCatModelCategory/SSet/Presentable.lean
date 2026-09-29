@@ -1,7 +1,11 @@
-import TopCatModelCategory.SSet.IsFiniteCoproducts
-import TopCatModelCategory.SSet.EffectiveEpi
-import TopCatModelCategory.SSet.DimensionProd
-import Mathlib.CategoryTheory.Presentable.Limits
+module
+
+public import TopCatModelCategory.SSet.IsFiniteCoproducts
+public import TopCatModelCategory.SSet.EffectiveEpi
+public import TopCatModelCategory.SSet.DimensionProd
+public import Mathlib.CategoryTheory.Presentable.Limits
+
+@[expose] public section
 
 universe u
 

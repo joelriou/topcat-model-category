@@ -1,13 +1,17 @@
-import Mathlib.CategoryTheory.Limits.Presheaf
-import Mathlib.SetTheory.Cardinal.Finite
-import TopCatModelCategory.SSet.NonemptyFiniteChains
-import TopCatModelCategory.SSet.NonDegenerateSimplices
-import TopCatModelCategory.SSet.StandardSimplex
-import TopCatModelCategory.SSet.Skeleton
-import TopCatModelCategory.SSet.Monomorphisms
-import TopCatModelCategory.SSet.Nonempty
-import TopCatModelCategory.MorphismProperty
-import TopCatModelCategory.ULift
+module
+
+public import Mathlib.CategoryTheory.Limits.Presheaf
+public import Mathlib.SetTheory.Cardinal.Finite
+public import TopCatModelCategory.SSet.NonemptyFiniteChains
+public import TopCatModelCategory.SSet.NonDegenerateSimplices
+public import TopCatModelCategory.SSet.StandardSimplex
+public import TopCatModelCategory.SSet.Skeleton
+public import TopCatModelCategory.SSet.Monomorphisms
+public import TopCatModelCategory.SSet.Nonempty
+public import TopCatModelCategory.MorphismProperty
+public import TopCatModelCategory.ULift
+
+@[expose] public section
 
 -- Jardine, *Simplicial approximation*
 

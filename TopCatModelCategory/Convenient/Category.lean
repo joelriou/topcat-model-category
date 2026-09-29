@@ -1,7 +1,11 @@
-import TopCatModelCategory.Convenient.ContinuousMapGeneratedBy
-import Mathlib.CategoryTheory.ConcreteCategory.Basic
-import Mathlib.CategoryTheory.Adjunction.Basic
-import Mathlib.Topology.Category.TopCat.Basic
+module
+
+public import TopCatModelCategory.Convenient.ContinuousMapGeneratedBy
+public import Mathlib.CategoryTheory.ConcreteCategory.Basic
+public import Mathlib.CategoryTheory.Adjunction.Basic
+public import Mathlib.Topology.Category.TopCat.Basic
+
+@[expose] public section
 
 universe v t u
 

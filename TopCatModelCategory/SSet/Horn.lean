@@ -1,5 +1,9 @@
-import TopCatModelCategory.CommSq
-import TopCatModelCategory.SSet.Boundary
+module
+
+public import TopCatModelCategory.CommSq
+public import TopCatModelCategory.SSet.Boundary
+
+@[expose] public section
 
 universe u
 

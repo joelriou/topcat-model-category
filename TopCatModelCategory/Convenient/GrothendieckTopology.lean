@@ -1,12 +1,16 @@
-import TopCatModelCategory.Convenient.Limits
-import TopCatModelCategory.Convenient.Open
-import TopCatModelCategory.TopCat.Limits
-import TopCatModelCategory.ColimitsType
-import TopCatModelCategory.CommSq
-import TopCatModelCategory.MorphismPropertyLocally
-import Mathlib.CategoryTheory.MorphismProperty.Limits
-import Mathlib.CategoryTheory.Sites.Pretopology
-import Mathlib.Topology.Sets.Opens
+module
+
+public import TopCatModelCategory.Convenient.Limits
+public import TopCatModelCategory.Convenient.Open
+public import TopCatModelCategory.TopCat.Limits
+public import TopCatModelCategory.ColimitsType
+public import TopCatModelCategory.CommSq
+public import TopCatModelCategory.MorphismPropertyLocally
+public import Mathlib.CategoryTheory.MorphismProperty.Limits
+public import Mathlib.CategoryTheory.Sites.Pretopology
+public import Mathlib.Topology.Sets.Opens
+
+@[expose] public section
 
 universe w v t u
 

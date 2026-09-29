@@ -1,4 +1,8 @@
-import Mathlib.CategoryTheory.LiftingProperties.Basic
+module
+
+public import Mathlib.CategoryTheory.LiftingProperties.Basic
+
+@[expose] public section
 
 namespace CategoryTheory
 

@@ -1,6 +1,10 @@
-import TopCatModelCategory.SSet.AnodyneExtensionsAdjunctions
-import TopCatModelCategory.SSet.Monoidal
-import TopCatModelCategory.SSet.Fiber
+module
+
+public import TopCatModelCategory.SSet.AnodyneExtensionsAdjunctions
+public import TopCatModelCategory.SSet.Monoidal
+public import TopCatModelCategory.SSet.Fiber
+
+@[expose] public section
 
 universe u
 

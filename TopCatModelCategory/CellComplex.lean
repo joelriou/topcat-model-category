@@ -1,7 +1,11 @@
-import TopCatModelCategory.AttachCells
-import Mathlib.Order.SuccPred.Basic
-import Mathlib.CategoryTheory.MorphismProperty.TransfiniteComposition
-import Mathlib.AlgebraicTopology.RelativeCellComplex.Basic
+module
+
+public import TopCatModelCategory.AttachCells
+public import Mathlib.Order.SuccPred.Basic
+public import Mathlib.CategoryTheory.MorphismProperty.TransfiniteComposition
+public import Mathlib.AlgebraicTopology.RelativeCellComplex.Basic
+
+@[expose] public section
 
 --universe w t w' v u
 

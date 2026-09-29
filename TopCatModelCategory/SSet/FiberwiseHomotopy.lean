@@ -1,6 +1,10 @@
-import TopCatModelCategory.SSet.Homotopy
-import TopCatModelCategory.SSet.DeformationRetract
-import TopCatModelCategory.SSet.KanComplexWHomotopy
+module
+
+public import TopCatModelCategory.SSet.Homotopy
+public import TopCatModelCategory.SSet.DeformationRetract
+public import TopCatModelCategory.SSet.KanComplexWHomotopy
+
+@[expose] public section
 
 universe u
 

@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.FundamentalGroupoid
-import Mathlib.CategoryTheory.Bicategory.Functor.LocallyDiscrete
+module
+
+public import TopCatModelCategory.SSet.FundamentalGroupoid
+public import Mathlib.CategoryTheory.Bicategory.Functor.LocallyDiscrete
+
+@[expose] public section
 
 universe u
 

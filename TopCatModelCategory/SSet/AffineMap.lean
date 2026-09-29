@@ -1,9 +1,13 @@
-import TopCatModelCategory.TopCat.Adj
-import TopCatModelCategory.SSet.CoconeNPrime
-import TopCatModelCategory.FunctorIterate
-import Mathlib.Analysis.Normed.Module.Basic
-import Mathlib.Analysis.Convex.Combination
-import Mathlib.Algebra.Module.BigOperators
+module
+
+public import TopCatModelCategory.TopCat.Adj
+public import TopCatModelCategory.SSet.CoconeNPrime
+public import TopCatModelCategory.FunctorIterate
+public import Mathlib.Analysis.Normed.Module.Basic
+public import Mathlib.Analysis.Convex.Combination
+public import Mathlib.Algebra.Module.BigOperators
+
+@[expose] public section
 
 open CategoryTheory Simplicial Opposite NNReal Limits
 

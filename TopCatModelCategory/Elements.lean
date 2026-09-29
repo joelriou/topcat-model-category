@@ -1,4 +1,8 @@
-import Mathlib.CategoryTheory.Elements
+module
+
+public import Mathlib.CategoryTheory.Elements
+
+@[expose] public section
 
 universe w v u
 

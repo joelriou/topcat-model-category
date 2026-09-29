@@ -1,10 +1,14 @@
-import Mathlib.CategoryTheory.SmallObject.Basic
-import Mathlib.AlgebraicTopology.ModelCategory.Basic
-import TopCatModelCategory.AlephZero
-import TopCatModelCategory.JoyalTrickDual
-import TopCatModelCategory.Factorization
-import TopCatModelCategory.ModelCategoryCopy
-import TopCatModelCategory.CellComplex
+module
+
+public import Mathlib.CategoryTheory.SmallObject.Basic
+public import Mathlib.AlgebraicTopology.ModelCategory.Basic
+public import TopCatModelCategory.AlephZero
+public import TopCatModelCategory.JoyalTrickDual
+public import TopCatModelCategory.Factorization
+public import TopCatModelCategory.ModelCategoryCopy
+public import TopCatModelCategory.CellComplex
+
+@[expose] public section
 
 open CategoryTheory Limits MorphismProperty
 

@@ -1,11 +1,15 @@
-import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
-import TopCatModelCategory.Convenient.DeltaGenerated
-import TopCatModelCategory.Convenient.Colimits
-import TopCatModelCategory.Convenient.Open
-import TopCatModelCategory.ToTopObjHomeo
-import TopCatModelCategory.Homeomorph
-import TopCatModelCategory.ConvexCompact
-import TopCatModelCategory.TopCat.ToTopDecomposition
+module
+
+public import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
+public import TopCatModelCategory.Convenient.DeltaGenerated
+public import TopCatModelCategory.Convenient.Colimits
+public import TopCatModelCategory.Convenient.Open
+public import TopCatModelCategory.ToTopObjHomeo
+public import TopCatModelCategory.Homeomorph
+public import TopCatModelCategory.ConvexCompact
+public import TopCatModelCategory.TopCat.ToTopDecomposition
+
+@[expose] public section
 
 universe u
 

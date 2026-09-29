@@ -1,5 +1,9 @@
-import TopCatModelCategory.TopCat.ClosedEmbeddings
-import TopCatModelCategory.SSet.Monomorphisms
+module
+
+public import TopCatModelCategory.TopCat.ClosedEmbeddings
+public import TopCatModelCategory.SSet.Monomorphisms
+
+@[expose] public section
 
 universe w w' t v u
 

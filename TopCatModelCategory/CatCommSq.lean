@@ -1,4 +1,8 @@
-import Mathlib.CategoryTheory.CatCommSq
+module
+
+public import Mathlib.CategoryTheory.CatCommSq
+
+@[expose] public section
 
 namespace CategoryTheory
 

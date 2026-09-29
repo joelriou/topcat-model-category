@@ -1,5 +1,9 @@
-import TopCatModelCategory.Interval.Basic
-import Mathlib.CategoryTheory.Filtered.Basic
+module
+
+public import TopCatModelCategory.Interval.Basic
+public import Mathlib.CategoryTheory.Filtered.Basic
+
+@[expose] public section
 
 universe v u
 

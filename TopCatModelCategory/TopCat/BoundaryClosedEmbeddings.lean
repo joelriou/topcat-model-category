@@ -1,7 +1,11 @@
-import TopCatModelCategory.TopCat.Adj
-import TopCatModelCategory.TopCat.Gluing
-import TopCatModelCategory.TopCat.ToTopULift
-import TopCatModelCategory.SSet.ULift
+module
+
+public import TopCatModelCategory.TopCat.Adj
+public import TopCatModelCategory.TopCat.Gluing
+public import TopCatModelCategory.TopCat.ToTopULift
+public import TopCatModelCategory.SSet.ULift
+
+@[expose] public section
 
 universe u
 

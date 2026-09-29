@@ -1,7 +1,11 @@
-import Mathlib.CategoryTheory.Limits.FullSubcategory
-import Mathlib.CategoryTheory.Limits.FunctorCategory.Basic
-import Mathlib.CategoryTheory.ObjectProperty.Basic
-import Mathlib.CategoryTheory.Abelian.GrothendieckAxioms.Basic
+module
+
+public import Mathlib.CategoryTheory.Limits.FullSubcategory
+public import Mathlib.CategoryTheory.Limits.FunctorCategory.Basic
+public import Mathlib.CategoryTheory.ObjectProperty.Basic
+public import Mathlib.CategoryTheory.Abelian.GrothendieckAxioms.Basic
+
+@[expose] public section
 
 -- #31645
 

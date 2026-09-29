@@ -1,6 +1,10 @@
-import TopCatModelCategory.TopCat.Cosimp
-import TopCatModelCategory.TopCat.Monoidal
-import Mathlib.Topology.Piecewise
+module
+
+public import TopCatModelCategory.TopCat.Cosimp
+public import TopCatModelCategory.TopCat.Monoidal
+public import Mathlib.Topology.Piecewise
+
+@[expose] public section
 
 open Simplicial
 

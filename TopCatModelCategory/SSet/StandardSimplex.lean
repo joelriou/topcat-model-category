@@ -1,7 +1,11 @@
-import TopCatModelCategory.SSet.HasDimensionLT
-import TopCatModelCategory.SSet.StrictSegal
-import TopCatModelCategory.SSet.Degenerate
-import TopCatModelCategory.SSet.SimplexCategory
+module
+
+public import TopCatModelCategory.SSet.HasDimensionLT
+public import TopCatModelCategory.SSet.StrictSegal
+public import TopCatModelCategory.SSet.Degenerate
+public import TopCatModelCategory.SSet.SimplexCategory
+
+@[expose] public section
 
 universe u
 

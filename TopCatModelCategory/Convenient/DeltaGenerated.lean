@@ -1,9 +1,13 @@
-import Mathlib.Data.Finite.Sum
-import Mathlib.Topology.Compactness.LocallyCompact
-import Mathlib.Topology.MetricSpace.ProperSpace.Real
-import Mathlib.CategoryTheory.MorphismProperty.Limits
-import TopCatModelCategory.Convenient.OpenBall
-import TopCatModelCategory.Convenient.CartesianClosed
+module
+
+public import Mathlib.Data.Finite.Sum
+public import Mathlib.Topology.Compactness.LocallyCompact
+public import Mathlib.Topology.MetricSpace.ProperSpace.Real
+public import Mathlib.CategoryTheory.MorphismProperty.Limits
+public import TopCatModelCategory.Convenient.OpenBall
+public import TopCatModelCategory.Convenient.CartesianClosed
+
+@[expose] public section
 
 universe u
 

@@ -1,9 +1,13 @@
-import TopCatModelCategory.SemiSimplexCategory
-import TopCatModelCategory.TopCat.Adj
-import TopCatModelCategory.TopCat.Gluing
-import TopCatModelCategory.SSet.AffineMap
-import TopCatModelCategory.SSet.NonemptyFiniteChains
-import TopCatModelCategory.Homeomorph
+module
+
+public import TopCatModelCategory.SemiSimplexCategory
+public import TopCatModelCategory.TopCat.Adj
+public import TopCatModelCategory.TopCat.Gluing
+public import TopCatModelCategory.SSet.AffineMap
+public import TopCatModelCategory.SSet.NonemptyFiniteChains
+public import TopCatModelCategory.Homeomorph
+
+@[expose] public section
 
 universe u
 

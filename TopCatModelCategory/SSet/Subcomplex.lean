@@ -3,22 +3,26 @@ Copyright (c) 2024 Joël Riou. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joël Riou
 -/
-import Mathlib.AlgebraicTopology.SimplicialSet.Monoidal
-import Mathlib.AlgebraicTopology.SimplicialSet.Horn
-import Mathlib.AlgebraicTopology.SimplicialSet.Boundary
-import Mathlib.CategoryTheory.Sites.Subsheaf
-import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Multiequalizer
-import Mathlib.CategoryTheory.MorphismProperty.Limits
-import Mathlib.CategoryTheory.Adhesive
-import TopCatModelCategory.ColimitsType
-import TopCatModelCategory.CommSq
-import TopCatModelCategory.SSet.Basic
-import TopCatModelCategory.SSet.ChosenFiniteProducts
+module
+
+public import Mathlib.AlgebraicTopology.SimplicialSet.Monoidal
+public import Mathlib.AlgebraicTopology.SimplicialSet.Horn
+public import Mathlib.AlgebraicTopology.SimplicialSet.Boundary
+public import Mathlib.CategoryTheory.Sites.Subsheaf
+public import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Multiequalizer
+public import Mathlib.CategoryTheory.MorphismProperty.Limits
+public import Mathlib.CategoryTheory.Adhesive
+public import TopCatModelCategory.ColimitsType
+public import TopCatModelCategory.CommSq
+public import TopCatModelCategory.SSet.Basic
+public import TopCatModelCategory.SSet.ChosenFiniteProducts
 
 /-!
 # Subcomplexes of simplicial sets
 
 -/
+
+@[expose] public section
 
 universe u
 

@@ -1,5 +1,9 @@
-import Mathlib.CategoryTheory.Abelian.GrothendieckAxioms.Basic
-import Mathlib.CategoryTheory.Limits.FilteredColimitCommutesFiniteLimit
+module
+
+public import Mathlib.CategoryTheory.Abelian.GrothendieckAxioms.Basic
+public import Mathlib.CategoryTheory.Limits.FilteredColimitCommutesFiniteLimit
+
+@[expose] public section
 
 universe v' u' u
 

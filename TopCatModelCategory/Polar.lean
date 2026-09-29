@@ -1,4 +1,8 @@
-import Mathlib.Analysis.Normed.Module.FiniteDimension
+module
+
+public import Mathlib.Analysis.Normed.Module.FiniteDimension
+
+@[expose] public section
 
 universe u
 

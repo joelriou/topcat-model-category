@@ -1,7 +1,11 @@
-import TopCatModelCategory.SSet.FundamentalGroupoidPiOne
-import TopCatModelCategory.SSet.SmallObject
-import TopCatModelCategory.SSet.Quotient
-import TopCatModelCategory.Arrow
+module
+
+public import TopCatModelCategory.SSet.FundamentalGroupoidPiOne
+public import TopCatModelCategory.SSet.SmallObject
+public import TopCatModelCategory.SSet.Quotient
+public import TopCatModelCategory.Arrow
+
+@[expose] public section
 
 universe u
 

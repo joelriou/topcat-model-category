@@ -1,5 +1,9 @@
-import Mathlib.CategoryTheory.Comma.Over.Pullback
-import Mathlib.CategoryTheory.Limits.Types.Shapes
+module
+
+public import Mathlib.CategoryTheory.Comma.Over.Pullback
+public import Mathlib.CategoryTheory.Limits.Types.Shapes
+
+@[expose] public section
 
 universe u
 

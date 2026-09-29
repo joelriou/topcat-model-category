@@ -3,7 +3,9 @@ Copyright (c) 2025 Joël Riou. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joël Riou
 -/
-import Mathlib.AlgebraicTopology.SimplicialObject.Basic
+module
+
+public import Mathlib.AlgebraicTopology.SimplicialObject.Basic
 
 /-!
 # A construction by Gabriel and Zisman
@@ -23,6 +25,8 @@ it sends faces to degeneracies and vice versa.
 * [P. Gabriel, M. Zisman, *Calculus of fractions and homotopy theory*][gabriel-zisman-1967]
 
 -/
+
+@[expose] public section
 
 open CategoryTheory Simplicial Opposite
 

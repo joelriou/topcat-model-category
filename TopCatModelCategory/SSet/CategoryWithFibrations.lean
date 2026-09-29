@@ -1,7 +1,11 @@
-import TopCatModelCategory.SSet.Boundary
-import Mathlib.AlgebraicTopology.ModelCategory.CategoryWithCofibrations
-import Mathlib.AlgebraicTopology.SimplicialSet.CategoryWithFibrations
-import Mathlib.CategoryTheory.MorphismProperty.LiftingProperty
+module
+
+public import TopCatModelCategory.SSet.Boundary
+public import Mathlib.AlgebraicTopology.ModelCategory.CategoryWithCofibrations
+public import Mathlib.AlgebraicTopology.SimplicialSet.CategoryWithFibrations
+public import Mathlib.CategoryTheory.MorphismProperty.LiftingProperty
+
+@[expose] public section
 
 open CategoryTheory HomotopicalAlgebra MorphismProperty
 

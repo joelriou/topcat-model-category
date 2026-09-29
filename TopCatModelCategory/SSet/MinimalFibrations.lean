@@ -1,7 +1,11 @@
-import TopCatModelCategory.SSet.DeformationRetract
-import TopCatModelCategory.SSet.Degenerate
-import TopCatModelCategory.SSet.Fibrations
-import TopCatModelCategory.SSet.FundamentalGroupoid
+module
+
+public import TopCatModelCategory.SSet.DeformationRetract
+public import TopCatModelCategory.SSet.Degenerate
+public import TopCatModelCategory.SSet.Fibrations
+public import TopCatModelCategory.SSet.FundamentalGroupoid
+
+@[expose] public section
 
 universe u
 

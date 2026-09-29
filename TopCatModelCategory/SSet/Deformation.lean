@@ -1,6 +1,10 @@
-import TopCatModelCategory.SSet.Fibrations
-import TopCatModelCategory.SSet.HomotopySequenceAction
-import TopCatModelCategory.LiftingProperties
+module
+
+public import TopCatModelCategory.SSet.Fibrations
+public import TopCatModelCategory.SSet.HomotopySequenceAction
+public import TopCatModelCategory.LiftingProperties
+
+@[expose] public section
 
 universe u
 

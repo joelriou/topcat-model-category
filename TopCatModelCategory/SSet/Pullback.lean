@@ -1,9 +1,13 @@
-import TopCatModelCategory.PullbackTypes
-import TopCatModelCategory.SSet.Monoidal
-import TopCatModelCategory.Pullback
-import Mathlib.CategoryTheory.Limits.FunctorCategory.Basic
-import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Pullbacks
-import Mathlib.CategoryTheory.Limits.Over
+module
+
+public import TopCatModelCategory.PullbackTypes
+public import TopCatModelCategory.SSet.Monoidal
+public import TopCatModelCategory.Pullback
+public import Mathlib.CategoryTheory.Limits.FunctorCategory.Basic
+public import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Pullbacks
+public import Mathlib.CategoryTheory.Limits.Over
+
+@[expose] public section
 
 universe u
 

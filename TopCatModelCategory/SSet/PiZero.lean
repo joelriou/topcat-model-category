@@ -1,7 +1,11 @@
-import Mathlib.AlgebraicTopology.SimplicialSet.Basic
-import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Equalizers
-import TopCatModelCategory.SSet.Nonempty
-import TopCatModelCategory.FunctorCategoryColimits
+module
+
+public import Mathlib.AlgebraicTopology.SimplicialSet.Basic
+public import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Equalizers
+public import TopCatModelCategory.SSet.Nonempty
+public import TopCatModelCategory.FunctorCategoryColimits
+
+@[expose] public section
 
 universe u
 

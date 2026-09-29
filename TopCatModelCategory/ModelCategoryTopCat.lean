@@ -1,8 +1,12 @@
-import TopCatModelCategory.SSet.KanComplexKeyLemma
-import TopCatModelCategory.SSet.KanComplexWColimits
-import TopCatModelCategory.TopPackage
-import TopCatModelCategory.TopCat.HornDeformationRetract
-import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
+module
+
+public import TopCatModelCategory.SSet.KanComplexKeyLemma
+public import TopCatModelCategory.SSet.KanComplexWColimits
+public import TopCatModelCategory.TopPackage
+public import TopCatModelCategory.TopCat.HornDeformationRetract
+public import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
+
+@[expose] public section
 
 universe v u
 

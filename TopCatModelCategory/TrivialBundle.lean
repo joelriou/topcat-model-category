@@ -1,5 +1,9 @@
-import TopCatModelCategory.MorphismProperty
-import Mathlib.CategoryTheory.Limits.Preserves.Shapes.BinaryProducts
+module
+
+public import TopCatModelCategory.MorphismProperty
+public import Mathlib.CategoryTheory.Limits.Preserves.Shapes.BinaryProducts
+
+@[expose] public section
 
 namespace CategoryTheory
 

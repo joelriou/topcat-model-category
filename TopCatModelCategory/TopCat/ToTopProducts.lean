@@ -1,7 +1,11 @@
-import TopCatModelCategory.Convenient.SSet
-import TopCatModelCategory.Convenient.Product
-import TopCatModelCategory.Interval.Iso
-import TopCatModelCategory.Flat
+module
+
+public import TopCatModelCategory.Convenient.SSet
+public import TopCatModelCategory.Convenient.Product
+public import TopCatModelCategory.Interval.Iso
+public import TopCatModelCategory.Flat
+
+@[expose] public section
 
 universe u
 

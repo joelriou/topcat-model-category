@@ -1,10 +1,14 @@
-import Mathlib.Topology.Category.TopCat.Basic
-import Mathlib.CategoryTheory.Limits.Types.Filtered
-import Mathlib.CategoryTheory.MorphismProperty.Composition
-import TopCatModelCategory.SSet.Monomorphisms
-import TopCatModelCategory.ColimitsType
-import TopCatModelCategory.TopCat.Colimits
-import TopCatModelCategory.TopCat.Limits
+module
+
+public import Mathlib.Topology.Category.TopCat.Basic
+public import Mathlib.CategoryTheory.Limits.Types.Filtered
+public import Mathlib.CategoryTheory.MorphismProperty.Composition
+public import TopCatModelCategory.SSet.Monomorphisms
+public import TopCatModelCategory.ColimitsType
+public import TopCatModelCategory.TopCat.Colimits
+public import TopCatModelCategory.TopCat.Limits
+
+@[expose] public section
 
 universe u
 

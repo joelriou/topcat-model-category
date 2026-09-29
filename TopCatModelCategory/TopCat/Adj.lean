@@ -1,14 +1,18 @@
-import Mathlib.AlgebraicTopology.SimplicialSet.Boundary
-import Mathlib.AlgebraicTopology.SimplicialSet.Horn
-import Mathlib.Topology.Category.TopCat.Limits.Basic
-import Mathlib.Topology.MetricSpace.Isometry
-import Mathlib.AlgebraicTopology.SingularSet
-import TopCatModelCategory.TopCat.W
-import TopCatModelCategory.TopCat.T1Inclusion
-import TopCatModelCategory.TopCat.DeformationRetract
-import TopCatModelCategory.SSet.Finite
-import TopCatModelCategory.SSet.Skeleton
-import TopCatModelCategory.SSet.Contractible
+module
+
+public import Mathlib.AlgebraicTopology.SimplicialSet.Boundary
+public import Mathlib.AlgebraicTopology.SimplicialSet.Horn
+public import Mathlib.Topology.Category.TopCat.Limits.Basic
+public import Mathlib.Topology.MetricSpace.Isometry
+public import Mathlib.AlgebraicTopology.SingularSet
+public import TopCatModelCategory.TopCat.W
+public import TopCatModelCategory.TopCat.T1Inclusion
+public import TopCatModelCategory.TopCat.DeformationRetract
+public import TopCatModelCategory.SSet.Finite
+public import TopCatModelCategory.SSet.Skeleton
+public import TopCatModelCategory.SSet.Contractible
+
+@[expose] public section
 
 universe u
 

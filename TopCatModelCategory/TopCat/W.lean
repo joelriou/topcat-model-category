@@ -1,7 +1,11 @@
-import TopCatModelCategory.SSet.KanComplexWHomotopy
-import TopCatModelCategory.SSet.KanComplexWRetracts
-import TopCatModelCategory.MorphismProperty
-import Mathlib.AlgebraicTopology.SingularSet
+module
+
+public import TopCatModelCategory.SSet.KanComplexWHomotopy
+public import TopCatModelCategory.SSet.KanComplexWRetracts
+public import TopCatModelCategory.MorphismProperty
+public import Mathlib.AlgebraicTopology.SingularSet
+
+@[expose] public section
 
 universe u
 

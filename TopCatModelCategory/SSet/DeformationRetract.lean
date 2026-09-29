@@ -1,6 +1,10 @@
-import TopCatModelCategory.SSet.Monoidal
-import TopCatModelCategory.SSet.Homotopy
-import Mathlib.CategoryTheory.Retract
+module
+
+public import TopCatModelCategory.SSet.Monoidal
+public import TopCatModelCategory.SSet.Homotopy
+public import Mathlib.CategoryTheory.Retract
+
+@[expose] public section
 
 universe u
 

@@ -1,6 +1,10 @@
-import TopCatModelCategory.Convenient.Category
-import TopCatModelCategory.TopCat.Colimits
-import TopCatModelCategory.ObjectPropertyLimits
+module
+
+public import TopCatModelCategory.Convenient.Category
+public import TopCatModelCategory.TopCat.Colimits
+public import TopCatModelCategory.ObjectPropertyLimits
+
+@[expose] public section
 
 universe v t u
 

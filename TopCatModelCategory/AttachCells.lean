@@ -1,5 +1,9 @@
-import Mathlib.AlgebraicTopology.RelativeCellComplex.AttachCells
-import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Products
+module
+
+public import Mathlib.AlgebraicTopology.RelativeCellComplex.AttachCells
+public import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Products
+
+@[expose] public section
 
 /-import Mathlib.CategoryTheory.MorphismProperty.Limits
 

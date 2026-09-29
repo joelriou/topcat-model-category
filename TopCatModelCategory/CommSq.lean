@@ -1,4 +1,8 @@
-import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+module
+
+public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+
+@[expose] public section
 
 namespace CategoryTheory
 

@@ -1,12 +1,16 @@
-import TopCatModelCategory.SSet.SubdivisionAnodyneExtensions
-import TopCatModelCategory.SSet.SmallObject
-import TopCatModelCategory.SSet.Mesh
-import TopCatModelCategory.TopCat.SdCompatibility
-import TopCatModelCategory.TopCat.Limits
-import TopCatModelCategory.ModelCategoryTopCat
-import TopCatModelCategory.SmallObject
-import Mathlib.CategoryTheory.SmallObject.TransfiniteCompositionLifting
-import Mathlib.Topology.Sets.OpenCover
+module
+
+public import TopCatModelCategory.SSet.SubdivisionAnodyneExtensions
+public import TopCatModelCategory.SSet.SmallObject
+public import TopCatModelCategory.SSet.Mesh
+public import TopCatModelCategory.TopCat.SdCompatibility
+public import TopCatModelCategory.TopCat.Limits
+public import TopCatModelCategory.ModelCategoryTopCat
+public import TopCatModelCategory.SmallObject
+public import Mathlib.CategoryTheory.SmallObject.TransfiniteCompositionLifting
+public import Mathlib.Topology.Sets.OpenCover
+
+@[expose] public section
 
 open CategoryTheory Simplicial HomotopicalAlgebra Limits
 

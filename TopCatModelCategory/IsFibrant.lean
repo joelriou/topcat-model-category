@@ -1,6 +1,10 @@
-import Mathlib.AlgebraicTopology.ModelCategory.CategoryWithCofibrations
-import Mathlib.AlgebraicTopology.ModelCategory.IsCofibrant
-import Mathlib.CategoryTheory.Limits.Shapes.Terminal
+module
+
+public import Mathlib.AlgebraicTopology.ModelCategory.CategoryWithCofibrations
+public import Mathlib.AlgebraicTopology.ModelCategory.IsCofibrant
+public import Mathlib.CategoryTheory.Limits.Shapes.Terminal
+
+@[expose] public section
 
 open CategoryTheory Limits
 

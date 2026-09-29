@@ -1,9 +1,13 @@
-import TopCatModelCategory.SSet.Contractible
-import TopCatModelCategory.SSet.HomotopySequence
-import TopCatModelCategory.SSet.Fibrations
-import TopCatModelCategory.SSet.KanComplexWHomotopy
-import TopCatModelCategory.SSet.FundamentalGroupoidPiOne
-import Mathlib.CategoryTheory.Adjunction.Unique
+module
+
+public import TopCatModelCategory.SSet.Contractible
+public import TopCatModelCategory.SSet.HomotopySequence
+public import TopCatModelCategory.SSet.Fibrations
+public import TopCatModelCategory.SSet.KanComplexWHomotopy
+public import TopCatModelCategory.SSet.FundamentalGroupoidPiOne
+public import Mathlib.CategoryTheory.Adjunction.Unique
+
+@[expose] public section
 
 universe u
 

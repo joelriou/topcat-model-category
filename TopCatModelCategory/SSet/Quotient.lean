@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.Monoidal
-import TopCatModelCategory.SSet.IsFiniteCoproducts
+module
+
+public import TopCatModelCategory.SSet.Monoidal
+public import TopCatModelCategory.SSet.IsFiniteCoproducts
+
+@[expose] public section
 
 universe u
 

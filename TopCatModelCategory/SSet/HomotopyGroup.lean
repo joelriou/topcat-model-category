@@ -1,4 +1,8 @@
-import TopCatModelCategory.SSet.PtSimplex
+module
+
+public import TopCatModelCategory.SSet.PtSimplex
+
+@[expose] public section
 
 open HomotopicalAlgebra CategoryTheory Simplicial Limits Opposite
   SSet.modelCategoryQuillen

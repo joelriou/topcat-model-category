@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.KeyLemma
-import TopCatModelCategory.QuillenAdjunction
+module
+
+public import TopCatModelCategory.SSet.KeyLemma
+public import TopCatModelCategory.QuillenAdjunction
+
+@[expose] public section
 
 universe u
 

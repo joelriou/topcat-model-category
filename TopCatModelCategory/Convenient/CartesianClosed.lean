@@ -1,6 +1,10 @@
-import TopCatModelCategory.Convenient.HomSpace
-import TopCatModelCategory.Convenient.Limits
-import Mathlib.CategoryTheory.Closed.Cartesian
+module
+
+public import TopCatModelCategory.Convenient.HomSpace
+public import TopCatModelCategory.Convenient.Limits
+public import Mathlib.CategoryTheory.Closed.Cartesian
+
+@[expose] public section
 
 open Topology CategoryTheory MonoidalCategory CartesianMonoidalCategory
 

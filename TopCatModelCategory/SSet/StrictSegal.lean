@@ -1,6 +1,10 @@
-import TopCatModelCategory.Fin
-import Mathlib.AlgebraicTopology.SimplicialSet.StrictSegal
-import Mathlib.CategoryTheory.Limits.FunctorCategory.EpiMono
+module
+
+public import TopCatModelCategory.Fin
+public import Mathlib.AlgebraicTopology.SimplicialSet.StrictSegal
+public import Mathlib.CategoryTheory.Limits.FunctorCategory.EpiMono
+
+@[expose] public section
 
 universe u
 

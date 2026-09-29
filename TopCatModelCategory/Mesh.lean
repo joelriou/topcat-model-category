@@ -1,4 +1,8 @@
-import Mathlib.Topology.MetricSpace.Bounded
+module
+
+public import Mathlib.Topology.MetricSpace.Bounded
+
+@[expose] public section
 
 universe u v
 

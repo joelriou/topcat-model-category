@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.KanComplexW
-import TopCatModelCategory.SSet.PiZero
+module
+
+public import TopCatModelCategory.SSet.KanComplexW
+public import TopCatModelCategory.SSet.PiZero
+
+@[expose] public section
 
 universe u
 

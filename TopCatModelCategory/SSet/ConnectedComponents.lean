@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.Subcomplex
-import TopCatModelCategory.SSet.PiZero
+module
+
+public import TopCatModelCategory.SSet.Subcomplex
+public import TopCatModelCategory.SSet.PiZero
+
+@[expose] public section
 
 universe u
 

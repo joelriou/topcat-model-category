@@ -1,10 +1,14 @@
-import Mathlib.AlgebraicTopology.RelativeCellComplex.Basic
-import Mathlib.CategoryTheory.Limits.Lattice
-import TopCatModelCategory.SSet.Degenerate
-import TopCatModelCategory.SSet.Evaluation
-import TopCatModelCategory.SSet.Monomorphisms
-import TopCatModelCategory.SSet.NonDegenerateSimplices
-import TopCatModelCategory.ColimitsType
+module
+
+public import Mathlib.AlgebraicTopology.RelativeCellComplex.Basic
+public import Mathlib.CategoryTheory.Limits.Lattice
+public import TopCatModelCategory.SSet.Degenerate
+public import TopCatModelCategory.SSet.Evaluation
+public import TopCatModelCategory.SSet.Monomorphisms
+public import TopCatModelCategory.SSet.NonDegenerateSimplices
+public import TopCatModelCategory.ColimitsType
+
+@[expose] public section
 
 open CategoryTheory Simplicial HomotopicalAlgebra Limits Opposite
 

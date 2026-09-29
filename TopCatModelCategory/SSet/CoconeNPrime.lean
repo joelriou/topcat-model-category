@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.Subdivision
-import TopCatModelCategory.SemiSimplexCategory
+module
+
+public import TopCatModelCategory.SSet.Subdivision
+public import TopCatModelCategory.SemiSimplexCategory
+
+@[expose] public section
 
 universe u
 

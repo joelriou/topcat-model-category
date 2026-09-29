@@ -1,8 +1,12 @@
-import Mathlib.Data.NNReal.Basic
-import TopCatModelCategory.TopCat.Adj
-import TopCatModelCategory.TopCat.Cosimp
-import TopCatModelCategory.TopCat.Monoidal
-import Mathlib.AlgebraicTopology.TopologicalSimplex
+module
+
+public import Mathlib.Data.NNReal.Basic
+public import TopCatModelCategory.TopCat.Adj
+public import TopCatModelCategory.TopCat.Cosimp
+public import TopCatModelCategory.TopCat.Monoidal
+public import Mathlib.AlgebraicTopology.TopologicalSimplex
+
+@[expose] public section
 
 universe u
 

@@ -1,4 +1,8 @@
-import Mathlib.CategoryTheory.Iso
+module
+
+public import Mathlib.CategoryTheory.Iso
+
+@[expose] public section
 
 namespace CategoryTheory
 

@@ -1,5 +1,9 @@
-import TopCatModelCategory.TopCat.ToTopSdIso
-import TopCatModelCategory.SSet.Mesh
+module
+
+public import TopCatModelCategory.TopCat.ToTopSdIso
+public import TopCatModelCategory.SSet.Mesh
+
+@[expose] public section
 
 universe u
 

@@ -1,5 +1,9 @@
-import Mathlib.CategoryTheory.SmallObject.IsCardinalForSmallObjectArgument
-import Mathlib.CategoryTheory.MorphismProperty.RetractArgument
+module
+
+public import Mathlib.CategoryTheory.SmallObject.IsCardinalForSmallObjectArgument
+public import Mathlib.CategoryTheory.MorphismProperty.RetractArgument
+
+@[expose] public section
 
 universe w v u
 

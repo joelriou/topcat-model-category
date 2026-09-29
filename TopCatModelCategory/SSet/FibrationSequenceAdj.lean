@@ -1,8 +1,12 @@
-import TopCatModelCategory.SSet.FibrationSequence
-import TopCatModelCategory.ModelCategoryTopCat
-import TopCatModelCategory.SSet.ToTopFibration
-import TopCatModelCategory.TopCat.ToTopExact
-import TopCatModelCategory.TopCat.Homotopy
+module
+
+public import TopCatModelCategory.SSet.FibrationSequence
+public import TopCatModelCategory.ModelCategoryTopCat
+public import TopCatModelCategory.SSet.ToTopFibration
+public import TopCatModelCategory.TopCat.ToTopExact
+public import TopCatModelCategory.TopCat.Homotopy
+
+@[expose] public section
 
 universe u
 

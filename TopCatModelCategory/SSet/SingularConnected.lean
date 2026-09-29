@@ -1,7 +1,11 @@
-import TopCatModelCategory.SSet.ConnectedComponents
-import TopCatModelCategory.SSet.PiZero
-import TopCatModelCategory.TopCat.Adj
-import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
+module
+
+public import TopCatModelCategory.SSet.ConnectedComponents
+public import TopCatModelCategory.SSet.PiZero
+public import TopCatModelCategory.TopCat.Adj
+public import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
+
+@[expose] public section
 
 universe u
 

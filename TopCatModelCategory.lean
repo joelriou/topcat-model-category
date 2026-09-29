@@ -1,198 +1,200 @@
-import TopCatModelCategory.AlephZero
-import TopCatModelCategory.Arrow
-import TopCatModelCategory.AttachCells
-import TopCatModelCategory.CWComplex
-import TopCatModelCategory.CatCommSq
-import TopCatModelCategory.CellComplex
-import TopCatModelCategory.ColimitsType
-import TopCatModelCategory.CommSq
-import TopCatModelCategory.Convenient.CartesianClosed
-import TopCatModelCategory.Convenient.Category
-import TopCatModelCategory.Convenient.Closed
-import TopCatModelCategory.Convenient.Colimits
-import TopCatModelCategory.Convenient.ContinuousMapGeneratedBy
-import TopCatModelCategory.Convenient.DeltaGenerated
-import TopCatModelCategory.Convenient.Fibrations
-import TopCatModelCategory.Convenient.GeneratedBy
-import TopCatModelCategory.Convenient.GrothendieckTopology
-import TopCatModelCategory.Convenient.HomSpace
-import TopCatModelCategory.Convenient.IsColimit
-import TopCatModelCategory.Convenient.Limits
-import TopCatModelCategory.Convenient.Open
-import TopCatModelCategory.Convenient.OpenBall
-import TopCatModelCategory.Convenient.Product
-import TopCatModelCategory.Convenient.SSet
-import TopCatModelCategory.Convenient.Sigma
-import TopCatModelCategory.ConvexCompact
-import TopCatModelCategory.Elements
-import TopCatModelCategory.Factorization
-import TopCatModelCategory.Fin
-import TopCatModelCategory.Flat
-import TopCatModelCategory.FunctorCategoryColimits
-import TopCatModelCategory.FunctorCategoryLimits
-import TopCatModelCategory.FunctorIterate
-import TopCatModelCategory.HasExactColimitsOfShape
-import TopCatModelCategory.Homeomorph
-import TopCatModelCategory.Homotopy.Basic
-import TopCatModelCategory.II
-import TopCatModelCategory.Interval.Basic
-import TopCatModelCategory.Interval.Cosimplicial
-import TopCatModelCategory.Interval.Iso
-import TopCatModelCategory.IsFibrant
-import TopCatModelCategory.IsTerminal
-import TopCatModelCategory.Iso
-import TopCatModelCategory.JoyalTrickDual
-import TopCatModelCategory.LeftKanExtensionAlongUliftYoneda
-import TopCatModelCategory.LiftingProperties
-import TopCatModelCategory.Mesh
-import TopCatModelCategory.ModelCategory
-import TopCatModelCategory.ModelCategoryCopy
-import TopCatModelCategory.ModelCategorySSet
-import TopCatModelCategory.ModelCategoryTopCat
-import TopCatModelCategory.MonoCoprod
-import TopCatModelCategory.MonoidalClosed
-import TopCatModelCategory.MorphismProperty
-import TopCatModelCategory.MorphismPropertyLocally
-import TopCatModelCategory.Multiequalizer
-import TopCatModelCategory.ObjectPropertyLimits
-import TopCatModelCategory.Polar
-import TopCatModelCategory.PseudoFunctor.LaxNatTrans
-import TopCatModelCategory.PseudoFunctor.MorphismProperty
-import TopCatModelCategory.PseudoFunctor.Pseudofunctor
-import TopCatModelCategory.Pullback
-import TopCatModelCategory.PullbackTypes
-import TopCatModelCategory.QuillenAdjunction
-import TopCatModelCategory.SSet.AffineMap
-import TopCatModelCategory.SSet.AnodyneExtensions
-import TopCatModelCategory.SSet.AnodyneExtensionsAdjunctions
-import TopCatModelCategory.SSet.AnodyneExtensionsDefs
-import TopCatModelCategory.SSet.Basic
-import TopCatModelCategory.SSet.Boundary
-import TopCatModelCategory.SSet.CategoryWithFibrations
-import TopCatModelCategory.SSet.CategoryWithWeakEquivalences
-import TopCatModelCategory.SSet.ChosenFiniteProducts
-import TopCatModelCategory.SSet.CoconeNPrime
-import TopCatModelCategory.SSet.ConnectedComponents
-import TopCatModelCategory.SSet.Contractible
-import TopCatModelCategory.SSet.Coproducts
-import TopCatModelCategory.SSet.Deformation
-import TopCatModelCategory.SSet.DeformationRetract
-import TopCatModelCategory.SSet.Degenerate
-import TopCatModelCategory.SSet.DimensionCoproducts
-import TopCatModelCategory.SSet.DimensionProd
-import TopCatModelCategory.SSet.EffectiveEpi
-import TopCatModelCategory.SSet.Evaluation
-import TopCatModelCategory.SSet.FactorThruFinite
-import TopCatModelCategory.SSet.Fiber
-import TopCatModelCategory.SSet.FiberwiseHomotopy
-import TopCatModelCategory.SSet.FibrationSequence
-import TopCatModelCategory.SSet.FibrationSequenceAdj
-import TopCatModelCategory.SSet.Fibrations
-import TopCatModelCategory.SSet.Finite
-import TopCatModelCategory.SSet.FiniteInduction
-import TopCatModelCategory.SSet.FundamentalGroupoid
-import TopCatModelCategory.SSet.FundamentalGroupoidAction
-import TopCatModelCategory.SSet.FundamentalGroupoidPiOne
-import TopCatModelCategory.SSet.HasDimensionLT
-import TopCatModelCategory.SSet.Homotopy
-import TopCatModelCategory.SSet.HomotopyBasic
-import TopCatModelCategory.SSet.HomotopyGroup
-import TopCatModelCategory.SSet.HomotopySequence
-import TopCatModelCategory.SSet.HomotopySequenceAction
-import TopCatModelCategory.SSet.Horn
-import TopCatModelCategory.SSet.IsFiniteCoproducts
-import TopCatModelCategory.SSet.KanComplexKeyLemma
-import TopCatModelCategory.SSet.KanComplexW
-import TopCatModelCategory.SSet.KanComplexWColimits
-import TopCatModelCategory.SSet.KanComplexWHomotopy
-import TopCatModelCategory.SSet.KanComplexWRetracts
-import TopCatModelCategory.SSet.KanComplexWUnit
-import TopCatModelCategory.SSet.KeyLemma
-import TopCatModelCategory.SSet.Loop
-import TopCatModelCategory.SSet.Mesh
-import TopCatModelCategory.SSet.MinimalFibrations
-import TopCatModelCategory.SSet.MinimalFibrationsFactorization
-import TopCatModelCategory.SSet.MinimalFibrationsLemmas
-import TopCatModelCategory.SSet.MonoCoprod
-import TopCatModelCategory.SSet.Monoidal
-import TopCatModelCategory.SSet.Monomorphisms
-import TopCatModelCategory.SSet.NonDegenerateProdSimplex
-import TopCatModelCategory.SSet.NonDegenerateSimplices
-import TopCatModelCategory.SSet.Nonempty
-import TopCatModelCategory.SSet.NonemptyFiniteChains
-import TopCatModelCategory.SSet.Pairing
-import TopCatModelCategory.SSet.PairingCore
-import TopCatModelCategory.SSet.PairingSubdivision
-import TopCatModelCategory.SSet.PairingUnionProd
-import TopCatModelCategory.SSet.Paths
-import TopCatModelCategory.SSet.PiZero
-import TopCatModelCategory.SSet.Presentable
-import TopCatModelCategory.SSet.ProdSimplex
-import TopCatModelCategory.SSet.ProdSimplexOne
-import TopCatModelCategory.SSet.Pseudofunctor
-import TopCatModelCategory.SSet.PtSimplex
-import TopCatModelCategory.SSet.Pullback
-import TopCatModelCategory.SSet.Quotient
-import TopCatModelCategory.SSet.Rev
-import TopCatModelCategory.SSet.RevStdSimplex
-import TopCatModelCategory.SSet.SimplexCategory
-import TopCatModelCategory.SSet.Simplices
-import TopCatModelCategory.SSet.SingularConnected
-import TopCatModelCategory.SSet.Skeleton
-import TopCatModelCategory.SSet.SmallObject
-import TopCatModelCategory.SSet.Square
-import TopCatModelCategory.SSet.StandardSimplex
-import TopCatModelCategory.SSet.StrictSegal
-import TopCatModelCategory.SSet.Subcomplex
-import TopCatModelCategory.SSet.Subdivision
-import TopCatModelCategory.SSet.SubdivisionAnodyneExtensions
-import TopCatModelCategory.SSet.ToTopFibration
-import TopCatModelCategory.SSet.ULift
-import TopCatModelCategory.SemiSimplexCategory
-import TopCatModelCategory.Set
-import TopCatModelCategory.SimplicialPresheaves.LocalLiftingProperty
-import TopCatModelCategory.SmallObject
-import TopCatModelCategory.Test
-import TopCatModelCategory.ToTopObjHomeo
-import TopCatModelCategory.TopCat.Adj
-import TopCatModelCategory.TopCat.AttachCells
-import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
-import TopCatModelCategory.TopCat.ClosedEmbeddings
-import TopCatModelCategory.TopCat.CoconeTop
-import TopCatModelCategory.TopCat.Colimits
-import TopCatModelCategory.TopCat.CompactOpen
-import TopCatModelCategory.TopCat.Cosimp
-import TopCatModelCategory.TopCat.CosimpActionTransitive
-import TopCatModelCategory.TopCat.CosimpInterior
-import TopCatModelCategory.TopCat.CosimpIso
-import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
-import TopCatModelCategory.TopCat.DeformationRetract
-import TopCatModelCategory.TopCat.Gluing
-import TopCatModelCategory.TopCat.Homotopy
-import TopCatModelCategory.TopCat.HornDeformationRetract
-import TopCatModelCategory.TopCat.Limits
-import TopCatModelCategory.TopCat.Monoidal
-import TopCatModelCategory.TopCat.Pullback
-import TopCatModelCategory.TopCat.RelativeT1CellComplex
-import TopCatModelCategory.TopCat.SdCompatibility
-import TopCatModelCategory.TopCat.SdIso
-import TopCatModelCategory.TopCat.SerreFibrationBundle
-import TopCatModelCategory.TopCat.SerreFibrationLocal
-import TopCatModelCategory.TopCat.T1Inclusion
-import TopCatModelCategory.TopCat.ToTopDecomposition
-import TopCatModelCategory.TopCat.ToTopEqualizers
-import TopCatModelCategory.TopCat.ToTopExact
-import TopCatModelCategory.TopCat.ToTopLocTrivial
-import TopCatModelCategory.TopCat.ToTopProducts
-import TopCatModelCategory.TopCat.ToTopSdIso
-import TopCatModelCategory.TopCat.ToTopULift
-import TopCatModelCategory.TopCat.TopologyOrderHom
-import TopCatModelCategory.TopCat.W
-import TopCatModelCategory.TopCatIsColimit
-import TopCatModelCategory.TopPackage
-import TopCatModelCategory.TrivialBundle
-import TopCatModelCategory.TrivialBundleGluing
-import TopCatModelCategory.TrivialBundleOver
-import TopCatModelCategory.ULift
-import TopCatModelCategory.UnitBallRetract
-import TopCatModelCategory.WellOrderContinuous
+module
+
+public import TopCatModelCategory.AlephZero
+public import TopCatModelCategory.Arrow
+public import TopCatModelCategory.AttachCells
+public import TopCatModelCategory.CWComplex
+public import TopCatModelCategory.CatCommSq
+public import TopCatModelCategory.CellComplex
+public import TopCatModelCategory.ColimitsType
+public import TopCatModelCategory.CommSq
+public import TopCatModelCategory.Convenient.CartesianClosed
+public import TopCatModelCategory.Convenient.Category
+public import TopCatModelCategory.Convenient.Closed
+public import TopCatModelCategory.Convenient.Colimits
+public import TopCatModelCategory.Convenient.ContinuousMapGeneratedBy
+public import TopCatModelCategory.Convenient.DeltaGenerated
+public import TopCatModelCategory.Convenient.Fibrations
+public import TopCatModelCategory.Convenient.GeneratedBy
+public import TopCatModelCategory.Convenient.GrothendieckTopology
+public import TopCatModelCategory.Convenient.HomSpace
+public import TopCatModelCategory.Convenient.IsColimit
+public import TopCatModelCategory.Convenient.Limits
+public import TopCatModelCategory.Convenient.Open
+public import TopCatModelCategory.Convenient.OpenBall
+public import TopCatModelCategory.Convenient.Product
+public import TopCatModelCategory.Convenient.SSet
+public import TopCatModelCategory.Convenient.Sigma
+public import TopCatModelCategory.ConvexCompact
+public import TopCatModelCategory.Elements
+public import TopCatModelCategory.Factorization
+public import TopCatModelCategory.Fin
+public import TopCatModelCategory.Flat
+public import TopCatModelCategory.FunctorCategoryColimits
+public import TopCatModelCategory.FunctorCategoryLimits
+public import TopCatModelCategory.FunctorIterate
+public import TopCatModelCategory.HasExactColimitsOfShape
+public import TopCatModelCategory.Homeomorph
+public import TopCatModelCategory.Homotopy.Basic
+public import TopCatModelCategory.II
+public import TopCatModelCategory.Interval.Basic
+public import TopCatModelCategory.Interval.Cosimplicial
+public import TopCatModelCategory.Interval.Iso
+public import TopCatModelCategory.IsFibrant
+public import TopCatModelCategory.IsTerminal
+public import TopCatModelCategory.Iso
+public import TopCatModelCategory.JoyalTrickDual
+public import TopCatModelCategory.LeftKanExtensionAlongUliftYoneda
+public import TopCatModelCategory.LiftingProperties
+public import TopCatModelCategory.Mesh
+public import TopCatModelCategory.ModelCategory
+public import TopCatModelCategory.ModelCategoryCopy
+public import TopCatModelCategory.ModelCategorySSet
+public import TopCatModelCategory.ModelCategoryTopCat
+public import TopCatModelCategory.MonoCoprod
+public import TopCatModelCategory.MonoidalClosed
+public import TopCatModelCategory.MorphismProperty
+public import TopCatModelCategory.MorphismPropertyLocally
+public import TopCatModelCategory.Multiequalizer
+public import TopCatModelCategory.ObjectPropertyLimits
+public import TopCatModelCategory.Polar
+public import TopCatModelCategory.PseudoFunctor.LaxNatTrans
+public import TopCatModelCategory.PseudoFunctor.MorphismProperty
+public import TopCatModelCategory.PseudoFunctor.Pseudofunctor
+public import TopCatModelCategory.Pullback
+public import TopCatModelCategory.PullbackTypes
+public import TopCatModelCategory.QuillenAdjunction
+public import TopCatModelCategory.SSet.AffineMap
+public import TopCatModelCategory.SSet.AnodyneExtensions
+public import TopCatModelCategory.SSet.AnodyneExtensionsAdjunctions
+public import TopCatModelCategory.SSet.AnodyneExtensionsDefs
+public import TopCatModelCategory.SSet.Basic
+public import TopCatModelCategory.SSet.Boundary
+public import TopCatModelCategory.SSet.CategoryWithFibrations
+public import TopCatModelCategory.SSet.CategoryWithWeakEquivalences
+public import TopCatModelCategory.SSet.ChosenFiniteProducts
+public import TopCatModelCategory.SSet.CoconeNPrime
+public import TopCatModelCategory.SSet.ConnectedComponents
+public import TopCatModelCategory.SSet.Contractible
+public import TopCatModelCategory.SSet.Coproducts
+public import TopCatModelCategory.SSet.Deformation
+public import TopCatModelCategory.SSet.DeformationRetract
+public import TopCatModelCategory.SSet.Degenerate
+public import TopCatModelCategory.SSet.DimensionCoproducts
+public import TopCatModelCategory.SSet.DimensionProd
+public import TopCatModelCategory.SSet.EffectiveEpi
+public import TopCatModelCategory.SSet.Evaluation
+public import TopCatModelCategory.SSet.FactorThruFinite
+public import TopCatModelCategory.SSet.Fiber
+public import TopCatModelCategory.SSet.FiberwiseHomotopy
+public import TopCatModelCategory.SSet.FibrationSequence
+public import TopCatModelCategory.SSet.FibrationSequenceAdj
+public import TopCatModelCategory.SSet.Fibrations
+public import TopCatModelCategory.SSet.Finite
+public import TopCatModelCategory.SSet.FiniteInduction
+public import TopCatModelCategory.SSet.FundamentalGroupoid
+public import TopCatModelCategory.SSet.FundamentalGroupoidAction
+public import TopCatModelCategory.SSet.FundamentalGroupoidPiOne
+public import TopCatModelCategory.SSet.HasDimensionLT
+public import TopCatModelCategory.SSet.Homotopy
+public import TopCatModelCategory.SSet.HomotopyBasic
+public import TopCatModelCategory.SSet.HomotopyGroup
+public import TopCatModelCategory.SSet.HomotopySequence
+public import TopCatModelCategory.SSet.HomotopySequenceAction
+public import TopCatModelCategory.SSet.Horn
+public import TopCatModelCategory.SSet.IsFiniteCoproducts
+public import TopCatModelCategory.SSet.KanComplexKeyLemma
+public import TopCatModelCategory.SSet.KanComplexW
+public import TopCatModelCategory.SSet.KanComplexWColimits
+public import TopCatModelCategory.SSet.KanComplexWHomotopy
+public import TopCatModelCategory.SSet.KanComplexWRetracts
+public import TopCatModelCategory.SSet.KanComplexWUnit
+public import TopCatModelCategory.SSet.KeyLemma
+public import TopCatModelCategory.SSet.Loop
+public import TopCatModelCategory.SSet.Mesh
+public import TopCatModelCategory.SSet.MinimalFibrations
+public import TopCatModelCategory.SSet.MinimalFibrationsFactorization
+public import TopCatModelCategory.SSet.MinimalFibrationsLemmas
+public import TopCatModelCategory.SSet.MonoCoprod
+public import TopCatModelCategory.SSet.Monoidal
+public import TopCatModelCategory.SSet.Monomorphisms
+public import TopCatModelCategory.SSet.NonDegenerateProdSimplex
+public import TopCatModelCategory.SSet.NonDegenerateSimplices
+public import TopCatModelCategory.SSet.Nonempty
+public import TopCatModelCategory.SSet.NonemptyFiniteChains
+public import TopCatModelCategory.SSet.Pairing
+public import TopCatModelCategory.SSet.PairingCore
+public import TopCatModelCategory.SSet.PairingSubdivision
+public import TopCatModelCategory.SSet.PairingUnionProd
+public import TopCatModelCategory.SSet.Paths
+public import TopCatModelCategory.SSet.PiZero
+public import TopCatModelCategory.SSet.Presentable
+public import TopCatModelCategory.SSet.ProdSimplex
+public import TopCatModelCategory.SSet.ProdSimplexOne
+public import TopCatModelCategory.SSet.Pseudofunctor
+public import TopCatModelCategory.SSet.PtSimplex
+public import TopCatModelCategory.SSet.Pullback
+public import TopCatModelCategory.SSet.Quotient
+public import TopCatModelCategory.SSet.Rev
+public import TopCatModelCategory.SSet.RevStdSimplex
+public import TopCatModelCategory.SSet.SimplexCategory
+public import TopCatModelCategory.SSet.Simplices
+public import TopCatModelCategory.SSet.SingularConnected
+public import TopCatModelCategory.SSet.Skeleton
+public import TopCatModelCategory.SSet.SmallObject
+public import TopCatModelCategory.SSet.Square
+public import TopCatModelCategory.SSet.StandardSimplex
+public import TopCatModelCategory.SSet.StrictSegal
+public import TopCatModelCategory.SSet.Subcomplex
+public import TopCatModelCategory.SSet.Subdivision
+public import TopCatModelCategory.SSet.SubdivisionAnodyneExtensions
+public import TopCatModelCategory.SSet.ToTopFibration
+public import TopCatModelCategory.SSet.ULift
+public import TopCatModelCategory.SemiSimplexCategory
+public import TopCatModelCategory.Set
+public import TopCatModelCategory.SimplicialPresheaves.LocalLiftingProperty
+public import TopCatModelCategory.SmallObject
+public import TopCatModelCategory.Test
+public import TopCatModelCategory.ToTopObjHomeo
+public import TopCatModelCategory.TopCat.Adj
+public import TopCatModelCategory.TopCat.AttachCells
+public import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
+public import TopCatModelCategory.TopCat.ClosedEmbeddings
+public import TopCatModelCategory.TopCat.CoconeTop
+public import TopCatModelCategory.TopCat.Colimits
+public import TopCatModelCategory.TopCat.CompactOpen
+public import TopCatModelCategory.TopCat.Cosimp
+public import TopCatModelCategory.TopCat.CosimpActionTransitive
+public import TopCatModelCategory.TopCat.CosimpInterior
+public import TopCatModelCategory.TopCat.CosimpIso
+public import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
+public import TopCatModelCategory.TopCat.DeformationRetract
+public import TopCatModelCategory.TopCat.Gluing
+public import TopCatModelCategory.TopCat.Homotopy
+public import TopCatModelCategory.TopCat.HornDeformationRetract
+public import TopCatModelCategory.TopCat.Limits
+public import TopCatModelCategory.TopCat.Monoidal
+public import TopCatModelCategory.TopCat.Pullback
+public import TopCatModelCategory.TopCat.RelativeT1CellComplex
+public import TopCatModelCategory.TopCat.SdCompatibility
+public import TopCatModelCategory.TopCat.SdIso
+public import TopCatModelCategory.TopCat.SerreFibrationBundle
+public import TopCatModelCategory.TopCat.SerreFibrationLocal
+public import TopCatModelCategory.TopCat.T1Inclusion
+public import TopCatModelCategory.TopCat.ToTopDecomposition
+public import TopCatModelCategory.TopCat.ToTopEqualizers
+public import TopCatModelCategory.TopCat.ToTopExact
+public import TopCatModelCategory.TopCat.ToTopLocTrivial
+public import TopCatModelCategory.TopCat.ToTopProducts
+public import TopCatModelCategory.TopCat.ToTopSdIso
+public import TopCatModelCategory.TopCat.ToTopULift
+public import TopCatModelCategory.TopCat.TopologyOrderHom
+public import TopCatModelCategory.TopCat.W
+public import TopCatModelCategory.TopCatIsColimit
+public import TopCatModelCategory.TopPackage
+public import TopCatModelCategory.TrivialBundle
+public import TopCatModelCategory.TrivialBundleGluing
+public import TopCatModelCategory.TrivialBundleOver
+public import TopCatModelCategory.ULift
+public import TopCatModelCategory.UnitBallRetract
+public import TopCatModelCategory.WellOrderContinuous

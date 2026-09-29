@@ -1,4 +1,8 @@
-import Mathlib.CategoryTheory.Limits.Presheaf
+module
+
+public import Mathlib.CategoryTheory.Limits.Presheaf
+
+@[expose] public section
 
 universe w v₁ v₂ u₁ u₂
 

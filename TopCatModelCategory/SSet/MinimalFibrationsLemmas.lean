@@ -1,9 +1,13 @@
-import TopCatModelCategory.SSet.MinimalFibrations
-import TopCatModelCategory.SSet.FiberwiseHomotopy
-import TopCatModelCategory.SSet.KanComplexWHomotopy
-import TopCatModelCategory.SSet.PiZero
-import TopCatModelCategory.TrivialBundle
-import TopCatModelCategory.CommSq
+module
+
+public import TopCatModelCategory.SSet.MinimalFibrations
+public import TopCatModelCategory.SSet.FiberwiseHomotopy
+public import TopCatModelCategory.SSet.KanComplexWHomotopy
+public import TopCatModelCategory.SSet.PiZero
+public import TopCatModelCategory.TrivialBundle
+public import TopCatModelCategory.CommSq
+
+@[expose] public section
 
 universe u
 

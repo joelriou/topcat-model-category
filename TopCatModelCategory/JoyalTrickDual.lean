@@ -1,6 +1,10 @@
-import Mathlib.AlgebraicTopology.ModelCategory.Basic
-import Mathlib.AlgebraicTopology.ModelCategory.JoyalTrick
-import Mathlib.CategoryTheory.MorphismProperty.Limits
+module
+
+public import Mathlib.AlgebraicTopology.ModelCategory.Basic
+public import Mathlib.AlgebraicTopology.ModelCategory.JoyalTrick
+public import Mathlib.CategoryTheory.MorphismProperty.Limits
+
+@[expose] public section
 
 open CategoryTheory Category Limits
 

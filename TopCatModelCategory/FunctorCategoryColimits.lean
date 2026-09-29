@@ -1,6 +1,10 @@
-import Mathlib.CategoryTheory.Limits.FullSubcategory
-import Mathlib.CategoryTheory.Limits.FunctorCategory.Basic
-import Mathlib.CategoryTheory.ObjectProperty.Basic
+module
+
+public import Mathlib.CategoryTheory.Limits.FullSubcategory
+public import Mathlib.CategoryTheory.Limits.FunctorCategory.Basic
+public import Mathlib.CategoryTheory.ObjectProperty.Basic
+
+@[expose] public section
 
 namespace CategoryTheory
 

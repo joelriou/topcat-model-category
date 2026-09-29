@@ -1,10 +1,14 @@
-import TopCatModelCategory.TopCat.Adj
-import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
-import TopCatModelCategory.TopCat.CosimpInterior
-import TopCatModelCategory.TopCat.CosimpIso
-import TopCatModelCategory.TopCat.RelativeT1CellComplex
-import TopCatModelCategory.CellComplex
-import TopCatModelCategory.Interval.Iso
+module
+
+public import TopCatModelCategory.TopCat.Adj
+public import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
+public import TopCatModelCategory.TopCat.CosimpInterior
+public import TopCatModelCategory.TopCat.CosimpIso
+public import TopCatModelCategory.TopCat.RelativeT1CellComplex
+public import TopCatModelCategory.CellComplex
+public import TopCatModelCategory.Interval.Iso
+
+@[expose] public section
 
 open Simplicial CategoryTheory HomotopicalAlgebra Limits
 

@@ -1,4 +1,8 @@
-import Mathlib.Topology.Homotopy.HomotopyGroup
+module
+
+public import Mathlib.Topology.Homotopy.HomotopyGroup
+
+@[expose] public section
 
 universe v u₁ u₂ u₃
 

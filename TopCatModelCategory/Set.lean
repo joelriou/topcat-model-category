@@ -1,6 +1,10 @@
-import TopCatModelCategory.ColimitsType
-import Mathlib.CategoryTheory.Limits.Types.Filtered
-import Mathlib.CategoryTheory.Limits.Set
+module
+
+public import TopCatModelCategory.ColimitsType
+public import Mathlib.CategoryTheory.Limits.Types.Filtered
+public import Mathlib.CategoryTheory.Limits.Set
+
+@[expose] public section
 
 open CategoryTheory Limits
 

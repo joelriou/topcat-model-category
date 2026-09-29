@@ -1,4 +1,8 @@
-import Mathlib.SetTheory.Ordinal.Basic
+module
+
+public import Mathlib.SetTheory.Ordinal.Basic
+
+@[expose] public section
 
 universe v u
 

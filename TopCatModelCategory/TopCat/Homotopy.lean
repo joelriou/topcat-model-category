@@ -1,6 +1,10 @@
-import TopCatModelCategory.TopCat.Monoidal
-import TopCatModelCategory.SSet.Homotopy
-import TopCatModelCategory.TopCat.ToTopExact
+module
+
+public import TopCatModelCategory.TopCat.Monoidal
+public import TopCatModelCategory.SSet.Homotopy
+public import TopCatModelCategory.TopCat.ToTopExact
+
+@[expose] public section
 
 universe u
 

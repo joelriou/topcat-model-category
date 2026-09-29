@@ -1,5 +1,9 @@
-import TopCatModelCategory.ModelCategory
-import TopCatModelCategory.ModelCategoryTopCat
+module
+
+public import TopCatModelCategory.ModelCategory
+public import TopCatModelCategory.ModelCategoryTopCat
+
+@[expose] public section
 
 universe u
 open HomotopicalAlgebra CategoryTheory Limits

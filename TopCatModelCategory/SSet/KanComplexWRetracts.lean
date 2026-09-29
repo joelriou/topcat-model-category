@@ -1,6 +1,10 @@
-import TopCatModelCategory.SSet.Pseudofunctor
-import TopCatModelCategory.PseudoFunctor.MorphismProperty
-import TopCatModelCategory.SSet.KanComplexW
+module
+
+public import TopCatModelCategory.SSet.Pseudofunctor
+public import TopCatModelCategory.PseudoFunctor.MorphismProperty
+public import TopCatModelCategory.SSet.KanComplexW
+
+@[expose] public section
 
 universe u
 

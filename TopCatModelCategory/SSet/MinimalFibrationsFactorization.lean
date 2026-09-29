@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.MinimalFibrationsLemmas
-import TopCatModelCategory.SSet.Deformation
+module
+
+public import TopCatModelCategory.SSet.MinimalFibrationsLemmas
+public import TopCatModelCategory.SSet.Deformation
+
+@[expose] public section
 
 universe u
 

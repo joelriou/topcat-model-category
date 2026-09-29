@@ -1,7 +1,11 @@
-import Mathlib.CategoryTheory.Bicategory.Functor.Pseudofunctor
-import Mathlib.CategoryTheory.Bicategory.LocallyDiscrete
-import Mathlib.CategoryTheory.CommSq
-import Mathlib.CategoryTheory.CatCommSq
+module
+
+public import Mathlib.CategoryTheory.Bicategory.Functor.Pseudofunctor
+public import Mathlib.CategoryTheory.Bicategory.LocallyDiscrete
+public import Mathlib.CategoryTheory.CommSq
+public import Mathlib.CategoryTheory.CatCommSq
+
+@[expose] public section
 
 universe w₂ v₁ v₂ u₁ u₂
 

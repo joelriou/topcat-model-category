@@ -1,5 +1,9 @@
-import Mathlib.Topology.ContinuousMap.Basic
-import Mathlib.Analysis.Normed.Module.FiniteDimension
+module
+
+public import Mathlib.Topology.ContinuousMap.Basic
+public import Mathlib.Analysis.Normed.Module.FiniteDimension
+
+@[expose] public section
 
 universe u
 

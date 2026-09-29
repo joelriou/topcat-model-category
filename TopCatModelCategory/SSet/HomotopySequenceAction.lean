@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.HomotopySequence
-import TopCatModelCategory.SSet.FundamentalGroupoidPiOne
+module
+
+public import TopCatModelCategory.SSet.HomotopySequence
+public import TopCatModelCategory.SSet.FundamentalGroupoidPiOne
+
+@[expose] public section
 
 universe u
 

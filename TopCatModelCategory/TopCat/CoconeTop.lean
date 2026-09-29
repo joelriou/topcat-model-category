@@ -1,8 +1,12 @@
-import TopCatModelCategory.TopCat.Colimits
-import TopCatModelCategory.ColimitsType
-import Mathlib.Topology.Connected.Basic
-import Mathlib.Topology.Connected.TotallyDisconnected
-import Mathlib.Topology.Homeomorph.Lemmas
+module
+
+public import TopCatModelCategory.TopCat.Colimits
+public import TopCatModelCategory.ColimitsType
+public import Mathlib.Topology.Connected.Basic
+public import Mathlib.Topology.Connected.TotallyDisconnected
+public import Mathlib.Topology.Homeomorph.Lemmas
+
+@[expose] public section
 
 universe w' w v u
 

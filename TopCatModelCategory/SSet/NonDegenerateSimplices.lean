@@ -1,6 +1,10 @@
-import TopCatModelCategory.SSet.Simplices
-import TopCatModelCategory.SSet.Finite
-import Mathlib.AlgebraicTopology.SimplicialSet.Degenerate
+module
+
+public import TopCatModelCategory.SSet.Simplices
+public import TopCatModelCategory.SSet.Finite
+public import Mathlib.AlgebraicTopology.SimplicialSet.Degenerate
+
+@[expose] public section
 
 universe u
 

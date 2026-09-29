@@ -1,5 +1,7 @@
-import Mathlib.CategoryTheory.Limits.Shapes.Multiequalizer
-import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Multiequalizer
+module
+
+public import Mathlib.CategoryTheory.Limits.Shapes.Multiequalizer
+public import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Multiequalizer
 
 /-!
 # Preservation of multicoequalizers
@@ -15,6 +17,8 @@ the colimit of `d.multispan`, we deduce that if `c` is a colimit,
 then `c.map F` also is (see `Multicofork.isColimitMapOfPreserves`).
 
 -/
+
+@[expose] public section
 
 universe w w' v u
 

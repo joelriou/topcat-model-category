@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.StandardSimplex
-import Mathlib.Data.Finite.Sigma
+module
+
+public import TopCatModelCategory.SSet.StandardSimplex
+public import Mathlib.Data.Finite.Sigma
+
+@[expose] public section
 
 -- #32202
 universe u

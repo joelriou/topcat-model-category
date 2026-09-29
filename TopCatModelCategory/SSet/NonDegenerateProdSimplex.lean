@@ -1,6 +1,10 @@
-import TopCatModelCategory.SSet.Degenerate
-import TopCatModelCategory.SSet.StandardSimplex
-import TopCatModelCategory.Fin
+module
+
+public import TopCatModelCategory.SSet.Degenerate
+public import TopCatModelCategory.SSet.StandardSimplex
+public import TopCatModelCategory.Fin
+
+@[expose] public section
 
 open CategoryTheory Simplicial MonoidalCategory Opposite
 

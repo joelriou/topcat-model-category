@@ -1,5 +1,9 @@
-import TopCatModelCategory.Convenient.SSet
-import TopCatModelCategory.ModelCategoryTopCat
+module
+
+public import TopCatModelCategory.Convenient.SSet
+public import TopCatModelCategory.ModelCategoryTopCat
+
+@[expose] public section
 
 open CategoryTheory HomotopicalAlgebra TopCat.modelCategory Topology Limits Opposite
 

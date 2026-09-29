@@ -1,7 +1,11 @@
-import TopCatModelCategory.Convenient.Category
-import TopCatModelCategory.ObjectPropertyLimits
-import TopCatModelCategory.TopCat.Monoidal
-import Mathlib.CategoryTheory.Limits.Shapes.BinaryProducts
+module
+
+public import TopCatModelCategory.Convenient.Category
+public import TopCatModelCategory.ObjectPropertyLimits
+public import TopCatModelCategory.TopCat.Monoidal
+public import Mathlib.CategoryTheory.Limits.Shapes.BinaryProducts
+
+@[expose] public section
 
 universe v t u
 

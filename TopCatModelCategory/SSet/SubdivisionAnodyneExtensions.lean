@@ -1,6 +1,10 @@
-import TopCatModelCategory.SSet.AnodyneExtensions
-import TopCatModelCategory.SSet.PairingSubdivision
-import TopCatModelCategory.SSet.Subdivision
+module
+
+public import TopCatModelCategory.SSet.AnodyneExtensions
+public import TopCatModelCategory.SSet.PairingSubdivision
+public import TopCatModelCategory.SSet.Subdivision
+
+@[expose] public section
 
 universe v u
 

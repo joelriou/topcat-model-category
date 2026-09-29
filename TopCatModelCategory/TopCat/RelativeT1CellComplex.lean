@@ -1,6 +1,10 @@
-import TopCatModelCategory.TopCat.T1Inclusion
-import TopCatModelCategory.TopCat.AttachCells
-import TopCatModelCategory.AttachCells
+module
+
+public import TopCatModelCategory.TopCat.T1Inclusion
+public import TopCatModelCategory.TopCat.AttachCells
+public import TopCatModelCategory.AttachCells
+
+@[expose] public section
 
 universe w w' t v u
 

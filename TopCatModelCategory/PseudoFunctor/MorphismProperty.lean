@@ -1,15 +1,19 @@
-import TopCatModelCategory.PseudoFunctor.LaxNatTrans
-import TopCatModelCategory.PseudoFunctor.Pseudofunctor
-import TopCatModelCategory.Iso
-import TopCatModelCategory.MorphismProperty
-import TopCatModelCategory.CatCommSq
-import Mathlib.CategoryTheory.Bicategory.LocallyDiscrete
-import Mathlib.CategoryTheory.Bicategory.Functor.Pseudofunctor
-import Mathlib.CategoryTheory.Category.Cat
-import Mathlib.CategoryTheory.MorphismProperty.Composition
-import Mathlib.CategoryTheory.MorphismProperty.Retract
-import Mathlib.CategoryTheory.MorphismProperty.Concrete
-import Mathlib.CategoryTheory.CommSq
+module
+
+public import TopCatModelCategory.PseudoFunctor.LaxNatTrans
+public import TopCatModelCategory.PseudoFunctor.Pseudofunctor
+public import TopCatModelCategory.Iso
+public import TopCatModelCategory.MorphismProperty
+public import TopCatModelCategory.CatCommSq
+public import Mathlib.CategoryTheory.Bicategory.LocallyDiscrete
+public import Mathlib.CategoryTheory.Bicategory.Functor.Pseudofunctor
+public import Mathlib.CategoryTheory.Category.Cat
+public import Mathlib.CategoryTheory.MorphismProperty.Composition
+public import Mathlib.CategoryTheory.MorphismProperty.Retract
+public import Mathlib.CategoryTheory.MorphismProperty.Concrete
+public import Mathlib.CategoryTheory.CommSq
+
+@[expose] public section
 
 universe w₁ w₂ v₁ v₂ u₁ u₂
 

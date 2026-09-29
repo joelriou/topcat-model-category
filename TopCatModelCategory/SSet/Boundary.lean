@@ -1,7 +1,11 @@
-import TopCatModelCategory.SSet.Subcomplex
-import TopCatModelCategory.SSet.StandardSimplex
-import TopCatModelCategory.SSet.HasDimensionLT
-import TopCatModelCategory.SSet.Monoidal
+module
+
+public import TopCatModelCategory.SSet.Subcomplex
+public import TopCatModelCategory.SSet.StandardSimplex
+public import TopCatModelCategory.SSet.HasDimensionLT
+public import TopCatModelCategory.SSet.Monoidal
+
+@[expose] public section
 
 universe u
 

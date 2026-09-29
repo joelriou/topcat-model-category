@@ -1,7 +1,11 @@
-import Mathlib.CategoryTheory.MorphismProperty.TransfiniteComposition
-import Mathlib.CategoryTheory.SmallObject.IsCardinalForSmallObjectArgument
-import Mathlib.CategoryTheory.Adjunction.FullyFaithful
-import TopCatModelCategory.CommSq
+module
+
+public import Mathlib.CategoryTheory.MorphismProperty.TransfiniteComposition
+public import Mathlib.CategoryTheory.SmallObject.IsCardinalForSmallObjectArgument
+public import Mathlib.CategoryTheory.Adjunction.FullyFaithful
+public import TopCatModelCategory.CommSq
+
+@[expose] public section
 
 universe w' w v v' u u'
 

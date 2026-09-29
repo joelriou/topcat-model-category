@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.DimensionCoproducts
-import TopCatModelCategory.SSet.Finite
+module
+
+public import TopCatModelCategory.SSet.DimensionCoproducts
+public import TopCatModelCategory.SSet.Finite
+
+@[expose] public section
 
 universe v' u' u
 

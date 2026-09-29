@@ -1,6 +1,10 @@
-import TopCatModelCategory.SSet.Basic
-import Mathlib.CategoryTheory.EffectiveEpi.Basic
-import TopCatModelCategory.ColimitsType
+module
+
+public import TopCatModelCategory.SSet.Basic
+public import Mathlib.CategoryTheory.EffectiveEpi.Basic
+public import TopCatModelCategory.ColimitsType
+
+@[expose] public section
 
 universe u
 

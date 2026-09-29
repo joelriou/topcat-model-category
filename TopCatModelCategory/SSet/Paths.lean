@@ -1,5 +1,9 @@
-import Mathlib.AlgebraicTopology.SimplicialSet.Path
-import Mathlib.AlgebraicTopology.SimplicialSet.Monoidal
+module
+
+public import Mathlib.AlgebraicTopology.SimplicialSet.Path
+public import Mathlib.AlgebraicTopology.SimplicialSet.Monoidal
+
+@[expose] public section
 
 universe u
 

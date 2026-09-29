@@ -1,9 +1,13 @@
-import Mathlib.CategoryTheory.MorphismProperty.Retract
-import Mathlib.CategoryTheory.MorphismProperty.Limits
-import Mathlib.Topology.UnitInterval
-import TopCatModelCategory.TopCat.Monoidal
-import TopCatModelCategory.TopCat.CompactOpen
-import TopCatModelCategory.CommSq
+module
+
+public import Mathlib.CategoryTheory.MorphismProperty.Retract
+public import Mathlib.CategoryTheory.MorphismProperty.Limits
+public import Mathlib.Topology.UnitInterval
+public import TopCatModelCategory.TopCat.Monoidal
+public import TopCatModelCategory.TopCat.CompactOpen
+public import TopCatModelCategory.CommSq
+
+@[expose] public section
 
 universe w u
 

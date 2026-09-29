@@ -1,10 +1,14 @@
-import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
-import TopCatModelCategory.TopCat.RelativeT1CellComplex
-import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
-import TopCatModelCategory.TopCat.ToTopDecomposition
-import TopCatModelCategory.SSet.ConnectedComponents
-import TopCatModelCategory.SSet.IsFiniteCoproducts
-import TopCatModelCategory.CellComplex
+module
+
+public import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
+public import TopCatModelCategory.TopCat.RelativeT1CellComplex
+public import TopCatModelCategory.TopCat.CoyonedaPreservesCoproducts
+public import TopCatModelCategory.TopCat.ToTopDecomposition
+public import TopCatModelCategory.SSet.ConnectedComponents
+public import TopCatModelCategory.SSet.IsFiniteCoproducts
+public import TopCatModelCategory.CellComplex
+
+@[expose] public section
 
 universe u
 

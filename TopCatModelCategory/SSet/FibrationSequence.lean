@@ -1,6 +1,10 @@
-import TopCatModelCategory.SSet.HomotopySequenceAction
-import TopCatModelCategory.SSet.Fibrations
-import TopCatModelCategory.SSet.Loop
+module
+
+public import TopCatModelCategory.SSet.HomotopySequenceAction
+public import TopCatModelCategory.SSet.Fibrations
+public import TopCatModelCategory.SSet.Loop
+
+@[expose] public section
 
 open CategoryTheory Simplicial HomotopicalAlgebra
   SSet.modelCategoryQuillen Limits Opposite

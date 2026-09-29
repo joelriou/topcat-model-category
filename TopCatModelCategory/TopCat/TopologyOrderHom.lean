@@ -1,4 +1,8 @@
-import Mathlib.Topology.Category.TopCat.Basic
+module
+
+public import Mathlib.Topology.Category.TopCat.Basic
+
+@[expose] public section
 
 variable (A B : Type*) [Preorder A] [Preorder B] [TopologicalSpace B]
 

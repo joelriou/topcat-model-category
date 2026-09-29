@@ -1,7 +1,11 @@
-import Mathlib.AlgebraicTopology.SimplicialSet.Nerve
-import Mathlib.AlgebraicTopology.SimplicialSet.Subcomplex
-import Mathlib.AlgebraicTopology.SimplicialSet.Degenerate
-import TopCatModelCategory.SSet.NonDegenerateSimplices
+module
+
+public import Mathlib.AlgebraicTopology.SimplicialSet.Nerve
+public import Mathlib.AlgebraicTopology.SimplicialSet.Subcomplex
+public import Mathlib.AlgebraicTopology.SimplicialSet.Degenerate
+public import TopCatModelCategory.SSet.NonDegenerateSimplices
+
+@[expose] public section
 
 universe u
 

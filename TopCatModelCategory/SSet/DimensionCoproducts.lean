@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.HasDimensionLT
-import TopCatModelCategory.SSet.Coproducts
+module
+
+public import TopCatModelCategory.SSet.HasDimensionLT
+public import TopCatModelCategory.SSet.Coproducts
+
+@[expose] public section
 
 universe v u
 

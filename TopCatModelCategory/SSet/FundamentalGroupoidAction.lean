@@ -1,6 +1,10 @@
-import TopCatModelCategory.SSet.AnodyneExtensionsAdjunctions
-import TopCatModelCategory.SSet.FundamentalGroupoid
-import TopCatModelCategory.SSet.HomotopyGroup
+module
+
+public import TopCatModelCategory.SSet.AnodyneExtensionsAdjunctions
+public import TopCatModelCategory.SSet.FundamentalGroupoid
+public import TopCatModelCategory.SSet.HomotopyGroup
+
+@[expose] public section
 
 universe u
 

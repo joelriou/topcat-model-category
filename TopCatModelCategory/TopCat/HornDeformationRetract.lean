@@ -1,4 +1,8 @@
-import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
+module
+
+public import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
+
+@[expose] public section
 
 open CategoryTheory MorphismProperty TopCat Simplicial HomotopicalAlgebra
   SSet.modelCategoryQuillen NNReal MonoidalCategory

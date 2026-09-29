@@ -1,10 +1,14 @@
-import TopCatModelCategory.SSet.CategoryWithFibrations
-import TopCatModelCategory.ULift
-import Mathlib.AlgebraicTopology.RelativeCellComplex.Basic
-import Mathlib.CategoryTheory.MorphismProperty.TransfiniteComposition
-import Mathlib.CategoryTheory.MorphismProperty.FunctorCategory
-import Mathlib.CategoryTheory.Types.Monomorphisms
-import Mathlib.CategoryTheory.SmallObject.TransfiniteCompositionLifting
+module
+
+public import TopCatModelCategory.SSet.CategoryWithFibrations
+public import TopCatModelCategory.ULift
+public import Mathlib.AlgebraicTopology.RelativeCellComplex.Basic
+public import Mathlib.CategoryTheory.MorphismProperty.TransfiniteComposition
+public import Mathlib.CategoryTheory.MorphismProperty.FunctorCategory
+public import Mathlib.CategoryTheory.Types.Monomorphisms
+public import Mathlib.CategoryTheory.SmallObject.TransfiniteCompositionLifting
+
+@[expose] public section
 
 universe w v u
 

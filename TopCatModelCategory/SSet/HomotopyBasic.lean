@@ -1,8 +1,12 @@
-import TopCatModelCategory.SSet.Basic
-import TopCatModelCategory.SSet.Fiber
-import TopCatModelCategory.SSet.StandardSimplex
-import TopCatModelCategory.SSet.Monoidal
-import TopCatModelCategory.SSet.Subcomplex
+module
+
+public import TopCatModelCategory.SSet.Basic
+public import TopCatModelCategory.SSet.Fiber
+public import TopCatModelCategory.SSet.StandardSimplex
+public import TopCatModelCategory.SSet.Monoidal
+public import TopCatModelCategory.SSet.Subcomplex
+
+@[expose] public section
 
 open CategoryTheory Category Simplicial MonoidalCategory Opposite
   CartesianMonoidalCategory Limits

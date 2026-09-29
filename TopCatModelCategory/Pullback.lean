@@ -1,6 +1,10 @@
-import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
-import Mathlib.CategoryTheory.Limits.Over
-import Mathlib.CategoryTheory.Comma.Over.Pullback
+module
+
+public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+public import Mathlib.CategoryTheory.Limits.Over
+public import Mathlib.CategoryTheory.Comma.Over.Pullback
+
+@[expose] public section
 
 namespace CategoryTheory
 

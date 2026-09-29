@@ -1,4 +1,8 @@
-import TopCatModelCategory.ModelCategorySSet
+module
+
+public import TopCatModelCategory.ModelCategorySSet
+
+@[expose] public section
 
 universe u
 

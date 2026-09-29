@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.Subcomplex
-import TopCatModelCategory.Set
+module
+
+public import TopCatModelCategory.SSet.Subcomplex
+public import TopCatModelCategory.Set
+
+@[expose] public section
 
 universe u
 

@@ -1,13 +1,17 @@
-import TopCatModelCategory.SSet.Horn
-import TopCatModelCategory.SSet.CategoryWithFibrations
-import TopCatModelCategory.SSet.ChosenFiniteProducts
-import TopCatModelCategory.SSet.SimplexCategory
-import TopCatModelCategory.SSet.NonDegenerateProdSimplex
-import Mathlib.CategoryTheory.MorphismProperty.Limits
-import Mathlib.CategoryTheory.MorphismProperty.Retract
-import Mathlib.CategoryTheory.MorphismProperty.TransfiniteComposition
-import Mathlib.CategoryTheory.SmallObject.TransfiniteCompositionLifting
-import Mathlib.AlgebraicTopology.ModelCategory.IsCofibrant
+module
+
+public import TopCatModelCategory.SSet.Horn
+public import TopCatModelCategory.SSet.CategoryWithFibrations
+public import TopCatModelCategory.SSet.ChosenFiniteProducts
+public import TopCatModelCategory.SSet.SimplexCategory
+public import TopCatModelCategory.SSet.NonDegenerateProdSimplex
+public import Mathlib.CategoryTheory.MorphismProperty.Limits
+public import Mathlib.CategoryTheory.MorphismProperty.Retract
+public import Mathlib.CategoryTheory.MorphismProperty.TransfiniteComposition
+public import Mathlib.CategoryTheory.SmallObject.TransfiniteCompositionLifting
+public import Mathlib.AlgebraicTopology.ModelCategory.IsCofibrant
+
+@[expose] public section
 
 open HomotopicalAlgebra CategoryTheory Limits SSet.modelCategoryQuillen MonoidalCategory
   Simplicial Opposite

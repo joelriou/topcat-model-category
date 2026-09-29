@@ -1,6 +1,10 @@
-import TopCatModelCategory.TopCat.SdIso
-import TopCatModelCategory.SSet.CoconeNPrime
-import TopCatModelCategory.FunctorIterate
+module
+
+public import TopCatModelCategory.TopCat.SdIso
+public import TopCatModelCategory.SSet.CoconeNPrime
+public import TopCatModelCategory.FunctorIterate
+
+@[expose] public section
 
 universe u
 

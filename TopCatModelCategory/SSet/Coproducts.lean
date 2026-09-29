@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.MonoCoprod
-import TopCatModelCategory.SSet.Subcomplex
+module
+
+public import TopCatModelCategory.SSet.MonoCoprod
+public import TopCatModelCategory.SSet.Subcomplex
+
+@[expose] public section
 
 universe v' u' u
 open CategoryTheory Limits

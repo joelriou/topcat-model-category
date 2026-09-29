@@ -1,6 +1,10 @@
-import Mathlib.Topology.CompactOpen
-import Mathlib.CategoryTheory.Closed.Monoidal
-import TopCatModelCategory.TopCat.Monoidal
+module
+
+public import Mathlib.Topology.CompactOpen
+public import Mathlib.CategoryTheory.Closed.Monoidal
+public import TopCatModelCategory.TopCat.Monoidal
+
+@[expose] public section
 
 universe v' u' u
 

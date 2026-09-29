@@ -1,6 +1,10 @@
-import TopCatModelCategory.SSet.AnodyneExtensions
-import TopCatModelCategory.SSet.Skeleton
-import Mathlib.CategoryTheory.LiftingProperties.ParametrizedAdjunction
+module
+
+public import TopCatModelCategory.SSet.AnodyneExtensions
+public import TopCatModelCategory.SSet.Skeleton
+public import Mathlib.CategoryTheory.LiftingProperties.ParametrizedAdjunction
+
+@[expose] public section
 
 universe u
 

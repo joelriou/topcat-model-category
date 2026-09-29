@@ -1,6 +1,10 @@
-import TopCatModelCategory.TopCat.Adj
-import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
-import TopCatModelCategory.TopCat.ToTopDecomposition
+module
+
+public import TopCatModelCategory.TopCat.Adj
+public import TopCatModelCategory.TopCat.BoundaryClosedEmbeddings
+public import TopCatModelCategory.TopCat.ToTopDecomposition
+
+@[expose] public section
 
 open CategoryTheory Limits Simplicial Topology
 

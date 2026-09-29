@@ -1,9 +1,13 @@
-import TopCatModelCategory.PullbackTypes
-import TopCatModelCategory.Pullback
-import TopCatModelCategory.Convenient.GrothendieckTopology
-import TopCatModelCategory.Convenient.Open
-import TopCatModelCategory.Convenient.Colimits
-import TopCatModelCategory.TopCat.Colimits
+module
+
+public import TopCatModelCategory.PullbackTypes
+public import TopCatModelCategory.Pullback
+public import TopCatModelCategory.Convenient.GrothendieckTopology
+public import TopCatModelCategory.Convenient.Open
+public import TopCatModelCategory.Convenient.Colimits
+public import TopCatModelCategory.TopCat.Colimits
+
+@[expose] public section
 
 universe w' w t' t v u
 

@@ -1,5 +1,9 @@
-import TopCatModelCategory.II
-import Mathlib.Data.Fin.VecNotation
+module
+
+public import TopCatModelCategory.II
+public import Mathlib.Data.Fin.VecNotation
+
+@[expose] public section
 
 open CategoryTheory Simplicial
 

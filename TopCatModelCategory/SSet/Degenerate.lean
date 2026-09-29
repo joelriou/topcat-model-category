@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.Subcomplex
-import Mathlib.AlgebraicTopology.SimplicialSet.Degenerate
+module
+
+public import TopCatModelCategory.SSet.Subcomplex
+public import Mathlib.AlgebraicTopology.SimplicialSet.Degenerate
+
+@[expose] public section
 
 universe u
 

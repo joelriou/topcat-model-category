@@ -1,4 +1,8 @@
-import TopCatModelCategory.SSet.Degenerate
+module
+
+public import TopCatModelCategory.SSet.Degenerate
+
+@[expose] public section
 
 -- #32201
 universe u

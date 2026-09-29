@@ -1,5 +1,9 @@
-import Mathlib.Topology.CompactOpen
-import TopCatModelCategory.Convenient.ContinuousMapGeneratedBy
+module
+
+public import Mathlib.Topology.CompactOpen
+public import TopCatModelCategory.Convenient.ContinuousMapGeneratedBy
+
+@[expose] public section
 
 -- Escardó, Lawson, Simpson
 

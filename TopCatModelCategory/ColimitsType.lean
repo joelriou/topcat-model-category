@@ -1,14 +1,18 @@
-import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
-import Mathlib.CategoryTheory.Limits.Shapes.Multiequalizer
+module
+
+public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+public import Mathlib.CategoryTheory.Limits.Shapes.Multiequalizer
 --import Mathlib.CategoryTheory.Limits.Shapes.Types
-import Mathlib.CategoryTheory.Limits.Set
-import Mathlib.CategoryTheory.Limits.Types.Colimits
-import Mathlib.CategoryTheory.Limits.Types.ColimitType
-import Mathlib.CategoryTheory.Limits.Types.Limits
-import Mathlib.CategoryTheory.MorphismProperty.Limits
-import Mathlib.Order.CompleteLattice.MulticoequalizerDiagram
-import Mathlib.Data.Set.Lattice
-import TopCatModelCategory.Multiequalizer
+public import Mathlib.CategoryTheory.Limits.Set
+public import Mathlib.CategoryTheory.Limits.Types.Colimits
+public import Mathlib.CategoryTheory.Limits.Types.ColimitType
+public import Mathlib.CategoryTheory.Limits.Types.Limits
+public import Mathlib.CategoryTheory.MorphismProperty.Limits
+public import Mathlib.Order.CompleteLattice.MulticoequalizerDiagram
+public import Mathlib.Data.Set.Lattice
+public import TopCatModelCategory.Multiequalizer
+
+@[expose] public section
 
 universe w v u
 

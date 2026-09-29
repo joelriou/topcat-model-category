@@ -1,5 +1,9 @@
-import Mathlib.CategoryTheory.MorphismProperty.TransfiniteComposition
-import Mathlib.Order.SuccPred.InitialSeg
+module
+
+public import Mathlib.CategoryTheory.MorphismProperty.TransfiniteComposition
+public import Mathlib.Order.SuccPred.InitialSeg
+
+@[expose] public section
 
 universe w w' v u
 

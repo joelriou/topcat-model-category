@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.FibrationSequenceAdj
-import TopCatModelCategory.SSet.SingularConnected
+module
+
+public import TopCatModelCategory.SSet.FibrationSequenceAdj
+public import TopCatModelCategory.SSet.SingularConnected
+
+@[expose] public section
 
 open CategoryTheory HomotopicalAlgebra SSet.modelCategoryQuillen
   Simplicial

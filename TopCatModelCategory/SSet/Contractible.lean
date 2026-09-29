@@ -1,6 +1,10 @@
-import TopCatModelCategory.SSet.KanComplexWHomotopy
-import TopCatModelCategory.SSet.KanComplexKeyLemma
-import TopCatModelCategory.SSet.PiZero
+module
+
+public import TopCatModelCategory.SSet.KanComplexWHomotopy
+public import TopCatModelCategory.SSet.KanComplexKeyLemma
+public import TopCatModelCategory.SSet.PiZero
+
+@[expose] public section
 
 open CategoryTheory Simplicial HomotopicalAlgebra SSet.modelCategoryQuillen
 

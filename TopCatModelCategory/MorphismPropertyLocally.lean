@@ -1,7 +1,11 @@
-import Mathlib.CategoryTheory.MorphismProperty.Limits
-import Mathlib.CategoryTheory.Sites.Grothendieck
-import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
-import TopCatModelCategory.TrivialBundleOver
+module
+
+public import Mathlib.CategoryTheory.MorphismProperty.Limits
+public import Mathlib.CategoryTheory.Sites.Grothendieck
+public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+public import TopCatModelCategory.TrivialBundleOver
+
+@[expose] public section
 
 namespace CategoryTheory
 

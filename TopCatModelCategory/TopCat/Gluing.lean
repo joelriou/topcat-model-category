@@ -1,7 +1,11 @@
-import Mathlib.Topology.Category.TopCat.Limits.Basic
-import Mathlib.Topology.Homeomorph.Lemmas
-import TopCatModelCategory.ColimitsType
-import TopCatModelCategory.TopCat.CoconeTop
+module
+
+public import Mathlib.Topology.Category.TopCat.Limits.Basic
+public import Mathlib.Topology.Homeomorph.Lemmas
+public import TopCatModelCategory.ColimitsType
+public import TopCatModelCategory.TopCat.CoconeTop
+
+@[expose] public section
 
 universe w' w'' w v u
 

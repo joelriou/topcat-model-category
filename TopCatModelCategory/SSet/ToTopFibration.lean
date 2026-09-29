@@ -1,9 +1,13 @@
-import TopCatModelCategory.Convenient.Fibrations
-import TopCatModelCategory.SSet.MinimalFibrationsFactorization
-import TopCatModelCategory.TopCat.ToTopExact
-import TopCatModelCategory.TopCat.ToTopLocTrivial
-import TopCatModelCategory.SSet.FactorThruFinite
-import TopCatModelCategory.SSet.SingularConnected
+module
+
+public import TopCatModelCategory.Convenient.Fibrations
+public import TopCatModelCategory.SSet.MinimalFibrationsFactorization
+public import TopCatModelCategory.TopCat.ToTopExact
+public import TopCatModelCategory.TopCat.ToTopLocTrivial
+public import TopCatModelCategory.SSet.FactorThruFinite
+public import TopCatModelCategory.SSet.SingularConnected
+
+@[expose] public section
 
 universe u
 open CategoryTheory HomotopicalAlgebra SSet.modelCategoryQuillen

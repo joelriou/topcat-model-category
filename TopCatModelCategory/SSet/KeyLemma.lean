@@ -1,8 +1,12 @@
-import TopCatModelCategory.SSet.CategoryWithWeakEquivalences
-import TopCatModelCategory.SSet.SingularConnected
-import TopCatModelCategory.SSet.FibrationSequenceAdj
-import TopCatModelCategory.SSet.KanComplexWUnit
-import TopCatModelCategory.SSet.KanComplexKeyLemma
+module
+
+public import TopCatModelCategory.SSet.CategoryWithWeakEquivalences
+public import TopCatModelCategory.SSet.SingularConnected
+public import TopCatModelCategory.SSet.FibrationSequenceAdj
+public import TopCatModelCategory.SSet.KanComplexWUnit
+public import TopCatModelCategory.SSet.KanComplexKeyLemma
+
+@[expose] public section
 
 open CategoryTheory HomotopicalAlgebra Simplicial Opposite Limits
 

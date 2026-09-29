@@ -3,8 +3,10 @@ Copyright (c) 2025 Joël Riou. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joël Riou
 -/
-import Mathlib.Topology.ContinuousMap.Basic
-import Mathlib.Topology.Homeomorph.Lemmas
+module
+
+public import Mathlib.Topology.ContinuousMap.Basic
+public import Mathlib.Topology.Homeomorph.Lemmas
 
 /-!
 # The `X`-generated topology for a family of topological spaces
@@ -18,6 +20,8 @@ all continuous maps `X i → Y`. When the bijection
 we say that `Y` is `X`-generated (typeclass `IsGeneratedBy X Y`).
 
 -/
+
+@[expose] public section
 -- #29341
 universe v v' t u
 

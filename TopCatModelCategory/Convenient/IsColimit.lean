@@ -1,6 +1,10 @@
-import TopCatModelCategory.Convenient.Category
-import TopCatModelCategory.TopCat.Colimits
-import Mathlib.CategoryTheory.Limits.Types.Colimits
+module
+
+public import TopCatModelCategory.Convenient.Category
+public import TopCatModelCategory.TopCat.Colimits
+public import Mathlib.CategoryTheory.Limits.Types.Colimits
+
+@[expose] public section
 
 universe t u
 

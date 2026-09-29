@@ -1,4 +1,8 @@
-import Mathlib.CategoryTheory.MorphismProperty.Factorization
+module
+
+public import Mathlib.CategoryTheory.MorphismProperty.Factorization
+
+@[expose] public section
 
 namespace CategoryTheory
 

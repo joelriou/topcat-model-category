@@ -1,7 +1,11 @@
-import Mathlib.CategoryTheory.MorphismProperty.Limits
-import Mathlib.CategoryTheory.Limits.Comma
-import Mathlib.CategoryTheory.Limits.Types.Filtered
-import TopCatModelCategory.ColimitsType
+module
+
+public import Mathlib.CategoryTheory.MorphismProperty.Limits
+public import Mathlib.CategoryTheory.Limits.Comma
+public import Mathlib.CategoryTheory.Limits.Types.Filtered
+public import TopCatModelCategory.ColimitsType
+
+@[expose] public section
 
 universe u
 

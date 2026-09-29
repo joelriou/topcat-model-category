@@ -1,15 +1,19 @@
-import TopCatModelCategory.SSet.NonDegenerateSimplices
-import TopCatModelCategory.SSet.AnodyneExtensionsDefs
-import TopCatModelCategory.SSet.Evaluation
-import TopCatModelCategory.SSet.Monomorphisms
-import TopCatModelCategory.SSet.Skeleton
-import TopCatModelCategory.SSet.Horn
-import TopCatModelCategory.ColimitsType
-import Mathlib.AlgebraicTopology.RelativeCellComplex.Basic
-import Mathlib.CategoryTheory.Limits.Lattice
-import Mathlib.SetTheory.Ordinal.Rank
-import Mathlib.Order.OrderIsoNat
-import Mathlib.Order.ConditionallyCompleteLattice.Finset
+module
+
+public import TopCatModelCategory.SSet.NonDegenerateSimplices
+public import TopCatModelCategory.SSet.AnodyneExtensionsDefs
+public import TopCatModelCategory.SSet.Evaluation
+public import TopCatModelCategory.SSet.Monomorphisms
+public import TopCatModelCategory.SSet.Skeleton
+public import TopCatModelCategory.SSet.Horn
+public import TopCatModelCategory.ColimitsType
+public import Mathlib.AlgebraicTopology.RelativeCellComplex.Basic
+public import Mathlib.CategoryTheory.Limits.Lattice
+public import Mathlib.SetTheory.Ordinal.Rank
+public import Mathlib.Order.OrderIsoNat
+public import Mathlib.Order.ConditionallyCompleteLattice.Finset
+
+@[expose] public section
 
 -- Sean Moss, Another approach to the Kan-Quillen model structure
 

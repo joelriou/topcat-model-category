@@ -1,4 +1,8 @@
-import TopCatModelCategory.SSet.FundamentalGroupoidAction
+module
+
+public import TopCatModelCategory.SSet.FundamentalGroupoidAction
+
+@[expose] public section
 
 universe u
 

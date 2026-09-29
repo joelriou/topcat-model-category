@@ -1,6 +1,10 @@
-import TopCatModelCategory.TopCat.Adj
-import TopCatModelCategory.LeftKanExtensionAlongUliftYoneda
-import TopCatModelCategory.SSet.ULift
+module
+
+public import TopCatModelCategory.TopCat.Adj
+public import TopCatModelCategory.LeftKanExtensionAlongUliftYoneda
+public import TopCatModelCategory.SSet.ULift
+
+@[expose] public section
 
 universe v v' u u'
 

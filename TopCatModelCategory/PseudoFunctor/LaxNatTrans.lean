@@ -3,7 +3,9 @@ Copyright (c) 2024 Joël Riou. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joël Riou, Yuma Mizuno
 -/
-import Mathlib.CategoryTheory.Bicategory.Functor.Lax
+module
+
+public import Mathlib.CategoryTheory.Bicategory.Functor.Lax
 
 /-!
 # Lax natural transformations
@@ -23,6 +25,8 @@ transformations.
 * `NatTrans.category F G` : the category structure on the lax natural transformations
   between `F` and `G`
 -/
+
+@[expose] public section
 
 namespace CategoryTheory
 

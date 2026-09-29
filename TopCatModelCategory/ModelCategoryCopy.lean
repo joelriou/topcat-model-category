@@ -1,5 +1,9 @@
-import Mathlib.AlgebraicTopology.ModelCategory.Basic
-import TopCatModelCategory.MorphismProperty
+module
+
+public import Mathlib.AlgebraicTopology.ModelCategory.Basic
+public import TopCatModelCategory.MorphismProperty
+
+@[expose] public section
 
 open CategoryTheory Limits
 

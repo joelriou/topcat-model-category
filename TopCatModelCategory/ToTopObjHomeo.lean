@@ -1,6 +1,10 @@
-import Mathlib.AlgebraicTopology.TopologicalSimplex
-import Mathlib.Analysis.Normed.Module.FiniteDimension
-import TopCatModelCategory.TopCat.Adj
+module
+
+public import Mathlib.AlgebraicTopology.TopologicalSimplex
+public import Mathlib.Analysis.Normed.Module.FiniteDimension
+public import TopCatModelCategory.TopCat.Adj
+
+@[expose] public section
 
 open Simplicial
 

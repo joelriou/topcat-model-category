@@ -1,5 +1,9 @@
-import TopCatModelCategory.SSet.Rev
-import TopCatModelCategory.SSet.StandardSimplex
+module
+
+public import TopCatModelCategory.SSet.Rev
+public import TopCatModelCategory.SSet.StandardSimplex
+
+@[expose] public section
 
 universe u
 

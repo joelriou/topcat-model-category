@@ -1,4 +1,8 @@
-import TopCatModelCategory.SSet.CategoryWithFibrations
+module
+
+public import TopCatModelCategory.SSet.CategoryWithFibrations
+
+@[expose] public section
 
 universe v v' u u'
 

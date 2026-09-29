@@ -1,6 +1,10 @@
-import Mathlib.Topology.Category.TopCat.Limits.Products
-import Mathlib.Topology.UnitInterval
-import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
+module
+
+public import Mathlib.Topology.Category.TopCat.Limits.Products
+public import Mathlib.Topology.UnitInterval
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
+
+@[expose] public section
 
 universe u
 

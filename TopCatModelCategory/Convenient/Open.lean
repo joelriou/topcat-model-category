@@ -1,6 +1,10 @@
-import TopCatModelCategory.Convenient.GeneratedBy
-import Mathlib.Topology.Sets.Opens
-import Mathlib.Topology.Homeomorph.Lemmas
+module
+
+public import TopCatModelCategory.Convenient.GeneratedBy
+public import Mathlib.Topology.Sets.Opens
+public import Mathlib.Topology.Homeomorph.Lemmas
+
+@[expose] public section
 
 universe v v' t u
 

@@ -1,5 +1,9 @@
-import TopCatModelCategory.TrivialBundle
-import TopCatModelCategory.CommSq
+module
+
+public import TopCatModelCategory.TrivialBundle
+public import TopCatModelCategory.CommSq
+
+@[expose] public section
 
 namespace CategoryTheory
 

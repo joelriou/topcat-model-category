@@ -1,10 +1,14 @@
-import Mathlib.AlgebraicTopology.SimplicialSet.Monoidal
-import Mathlib.CategoryTheory.Closed.FunctorToTypes
-import Mathlib.CategoryTheory.Closed.Monoidal
-import Mathlib.CategoryTheory.Adjunction.Unique
-import TopCatModelCategory.MonoidalClosed
-import TopCatModelCategory.SSet.Basic
-import TopCatModelCategory.SSet.StandardSimplex
+module
+
+public import Mathlib.AlgebraicTopology.SimplicialSet.Monoidal
+public import Mathlib.CategoryTheory.Closed.FunctorToTypes
+public import Mathlib.CategoryTheory.Closed.Monoidal
+public import Mathlib.CategoryTheory.Adjunction.Unique
+public import TopCatModelCategory.MonoidalClosed
+public import TopCatModelCategory.SSet.Basic
+public import TopCatModelCategory.SSet.StandardSimplex
+
+@[expose] public section
 
 universe u
 

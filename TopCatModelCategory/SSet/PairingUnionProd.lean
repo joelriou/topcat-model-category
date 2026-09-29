@@ -1,6 +1,10 @@
-import TopCatModelCategory.SSet.PairingCore
-import TopCatModelCategory.SSet.StandardSimplex
-import TopCatModelCategory.SSet.NonDegenerateProdSimplex
+module
+
+public import TopCatModelCategory.SSet.PairingCore
+public import TopCatModelCategory.SSet.StandardSimplex
+public import TopCatModelCategory.SSet.NonDegenerateProdSimplex
+
+@[expose] public section
 
 open CategoryTheory Simplicial MonoidalCategory Opposite
 

@@ -1,6 +1,10 @@
-import TopCatModelCategory.CellComplex
-import Mathlib.Analysis.InnerProductSpace.PiL2
-import Mathlib.Topology.Category.TopCat.Limits.Basic
+module
+
+public import TopCatModelCategory.CellComplex
+public import Mathlib.Analysis.InnerProductSpace.PiL2
+public import Mathlib.Topology.Category.TopCat.Limits.Basic
+
+@[expose] public section
 
 universe u
 

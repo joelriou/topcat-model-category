@@ -1,6 +1,10 @@
-import Mathlib.Topology.Category.TopCat.Limits.Basic
-import Mathlib.Topology.Category.TopCat.Adjunctions
-import Mathlib.CategoryTheory.Adjunction.Limits
+module
+
+public import Mathlib.Topology.Category.TopCat.Limits.Basic
+public import Mathlib.Topology.Category.TopCat.Adjunctions
+public import Mathlib.CategoryTheory.Adjunction.Limits
+
+@[expose] public section
 
 universe v u w
 

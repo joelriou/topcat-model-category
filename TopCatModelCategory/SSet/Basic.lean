@@ -1,4 +1,8 @@
-import Mathlib.AlgebraicTopology.SimplicialSet.StdSimplex
+module
+
+public import Mathlib.AlgebraicTopology.SimplicialSet.StdSimplex
+
+@[expose] public section
 
 universe u
 

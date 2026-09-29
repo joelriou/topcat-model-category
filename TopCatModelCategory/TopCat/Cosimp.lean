@@ -1,9 +1,13 @@
-import TopCatModelCategory.II
-import TopCatModelCategory.TopCat.TopologyOrderHom
-import TopCatModelCategory.SSet.NonDegenerateProdSimplex
-import Mathlib.Topology.Category.TopCat.Basic
-import Mathlib.Topology.Order.MonotoneContinuity
-import Mathlib.Order.Fin.Tuple
+module
+
+public import TopCatModelCategory.II
+public import TopCatModelCategory.TopCat.TopologyOrderHom
+public import TopCatModelCategory.SSet.NonDegenerateProdSimplex
+public import Mathlib.Topology.Category.TopCat.Basic
+public import Mathlib.Topology.Order.MonotoneContinuity
+public import Mathlib.Order.Fin.Tuple
+
+@[expose] public section
 
 universe u
 

@@ -1,5 +1,9 @@
-import Mathlib.AlgebraicTopology.SimplicialSet.Basic
-import TopCatModelCategory.MonoCoprod
+module
+
+public import Mathlib.AlgebraicTopology.SimplicialSet.Basic
+public import TopCatModelCategory.MonoCoprod
+
+@[expose] public section
 
 universe u
 
