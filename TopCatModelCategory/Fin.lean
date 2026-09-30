@@ -126,7 +126,7 @@ lemma strictMono_iff {α : Type*} [PartialOrder α] {n : ℕ} (f : Fin (n + 1) �
     StrictMono f ↔ ∀ (i : Fin n), f i.castSucc < f i.succ := by
   constructor
   · intro hf i
-    exact hf (castSucc_lt_succ i)
+    exact hf (by grind)
   · intro h
     let φ : Fin (n + 1) →o α :=
       { toFun := f
@@ -192,9 +192,9 @@ lemma orderHom_ext_of_injective {α : Type*} [PartialOrder α] [DecidableEq α]
     · exact orderHom_ext_of_injective_aux hf h.symm _
         (fun k hk ↦ (hi k hk (by omega)).symm)
 
-@[simp]
+/-@[simp]
 lemma range_succAboveOrderEmb {n : ℕ} (i : Fin (n + 1)) :
-    Set.range (Fin.succAboveOrderEmb i).toOrderHom = {i}ᶜ := by aesop
+    Set.range (Fin.succAboveOrderEmb i).toOrderHom = {i}ᶜ := by aesop-/
 
 lemma eq_id_of_strictMono {n : ℕ} (f : Fin (n + 1) →o Fin (n + 1)) (hf : StrictMono f) :
     f = .id := by
@@ -228,7 +228,7 @@ def insert (i₀ : Fin (n + 1)) (x : α) (i : Fin (n + 1)) : α :=
 @[simp]
 lemma insert_self (i₀ : Fin (n + 1)) (x : α) :
     insert f i₀ x i₀ = x :=
-  dif_pos rfl
+  dite_eq_left rfl
 
 @[simp] lemma insert_zero_succ (x : α) (i : Fin n) :
     insert f 0 x i.succ = f i := rfl
@@ -239,14 +239,14 @@ lemma insert_last_castSucc (x : α) (i : Fin n) :
   dsimp [insert]
   have : i.castSucc ≠ last n := fun h ↦ by
     rw [Fin.ext_iff] at h
-    simp only [coe_castSucc, val_last] at h
+    simp only [Fin.val_castSucc, val_last] at h
     omega
-  rw [dif_neg this, dif_pos (castSucc_lt_last i)]
+  rw [dite_eq_right this, dite_eq_left (castSucc_lt_last i)]
 
 lemma insert_apply (i : Fin n) (x : α) (j : Fin (n + 1)) (hj : j ≠ i.succ) :
     insert f i.succ x j = f (i.predAbove j) := by
   dsimp [insert]
-  rw [dif_neg hj]
+  rw [dite_eq_right hj]
   split_ifs with h <;> congr 1
   · rw [predAbove_of_lt_succ _ _ h]
     rfl
@@ -256,13 +256,13 @@ lemma insert_apply (i : Fin n) (x : α) (j : Fin (n + 1)) (hj : j ≠ i.succ) :
 lemma insert_apply_succAbove (i : Fin (n + 1)) (x : α) (j : Fin n) :
     insert f i x (i.succAbove j) = f j := by
   dsimp [insert]
-  rw [dif_neg (succAbove_ne i j)]
+  rw [dite_eq_right (succAbove_ne i j)]
   by_cases h : j.castSucc < i
-  · simp only [Fin.succAbove_of_castSucc_lt i j h, dif_pos h,
-      coe_castSucc, Fin.eta]
+  · simp only [Fin.succAbove_of_castSucc_lt i j h, dite_eq_left h,
+      Fin.val_castSucc, Fin.eta]
   · simp only [not_lt] at h
     simp only [Fin.succAbove_of_le_castSucc i j h,
-      dif_neg (not_lt.2 (h.trans j.castSucc_le_succ)), pred_succ]
+      dite_eq_right (not_lt.2 (h.trans j.castSucc_le_succ)), pred_succ]
 
 end
 
@@ -275,7 +275,7 @@ lemma monotone_insert_zero (f : Fin (n + 1) →o α) (x : α) (hx : x ≤ f 0) :
   rw [monotone_iff]
   intro i
   obtain rfl | ⟨j, rfl⟩ := i.eq_zero_or_eq_succ
-  · simpa [insert_zero_succ f x 0] using hx
+  · simpa [insert_zero_succ f x 0] using! hx
   · simpa only [← succ_castSucc, insert_zero_succ]
       using f.monotone (castSucc_le_succ j)
 
@@ -324,9 +324,9 @@ lemma strictMono_insert_zero(f : Fin (n + 1) → α) (hf : StrictMono f)
   rw [strictMono_iff]
   intro i
   obtain rfl | ⟨j, rfl⟩ := i.eq_zero_or_eq_succ
-  · simpa [insert_zero_succ f x 0] using hx
+  · simpa [insert_zero_succ f x 0] using! hx
   · simpa only [← succ_castSucc, insert_zero_succ]
-      using hf (castSucc_lt_succ j)
+      using hf (by grind)
 
 lemma strictMono_insert_last (f : Fin (n + 1) → α) (hf : StrictMono f)
     (x : α) (hx : f (Fin.last _) < x) :
@@ -336,7 +336,7 @@ lemma strictMono_insert_last (f : Fin (n + 1) → α) (hf : StrictMono f)
   obtain rfl | ⟨j, rfl⟩ := i.eq_last_or_eq_castSucc
   · simpa
   · simpa only [insert_last_castSucc, succ_castSucc]
-      using hf (castSucc_lt_succ j)
+      using hf (by grind)
 
 lemma predAbove_eq_predAdove_iff_of_lt (i : Fin n) (j k : Fin (n + 1))
     (hjk : j < k) :
@@ -377,7 +377,7 @@ lemma strictMono_insert (f : Fin (n + 1) → α) (hf : StrictMono f)
     apply hf
     obtain h | h := (i.castSucc.predAbove_right_monotone (castSucc_le_succ j)).lt_or_eq
     · exact h
-    · rw [predAbove_eq_predAdove_iff_of_lt _ _ _ (castSucc_lt_succ j)] at h
+    · rw [predAbove_eq_predAdove_iff_of_lt _ _ _ (by grind)] at h
       simp only [castSucc_inj, succ_inj, and_self, ne_eq] at h hj
       tauto
   · simp only [Classical.not_and_iff_not_or_not,

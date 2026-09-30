@@ -99,14 +99,18 @@ namespace Multicofork
 
 namespace isColimitPrecomposeObjOfIsIsoOfEpi
 
+set_option backward.isDefEq.respectTransparency false in
+open WalkingMultispan in
 noncomputable abbrev multicofork
     (hR : ∀ (i : J.R), IsIso (φ.app (.right i)))
     (hL : ∀ (i : J.L), Epi (φ.app (.left i)))
     (s : Multicofork d₁) : Multicofork d₂ :=
-  Multicofork.ofπ _ s.pt (fun i ↦ (inv (φ.app (.right i))) ≫ s.π i) (fun i ↦ by
+  Multicofork.ofπ _ s.pt (fun i ↦ (inv (φ.app (.right i)) :) ≫ s.π i) (fun i ↦ by
     have h₁ := φ.naturality (WalkingMultispan.Hom.fst i)
     have h₂ := φ.naturality (WalkingMultispan.Hom.snd i)
-    rw [← cancel_epi (φ.app (.left i))]
+    dsimp at h₁ h₂ ⊢
+    dsimp at hL
+    rw [← cancel_epi (φ.app (.left i) )]
     dsimp at h₁ h₂ ⊢
     rw [← reassoc_of% h₁, ← reassoc_of% h₂,
       IsIso.hom_inv_id_assoc, IsIso.hom_inv_id_assoc, condition])
@@ -114,23 +118,25 @@ noncomputable abbrev multicofork
 end isColimitPrecomposeObjOfIsIsoOfEpi
 
 open isColimitPrecomposeObjOfIsIsoOfEpi in
+set_option backward.isDefEq.respectTransparency false in
+set_option backward.defeqAttrib.useBackward true in
 variable {c₂} in
 noncomputable def isColimitPrecomposeObjOfIsIsoOfEpi (hc₂ : IsColimit c₂)
     (hR : ∀ (i : J.R), IsIso (φ.app (.right i)))
     (hL : ∀ (i : J.L), Epi (φ.app (.left i))) :
-    IsColimit ((Cocones.precompose φ).obj c₂) :=
+    IsColimit ((Cocone.precompose φ).obj c₂) :=
   Multicofork.IsColimit.mk _ (fun s ↦ hc₂.desc (multicofork φ hR hL s))
     (fun s i ↦ by
       have := hc₂.fac (multicofork φ hR hL s) (.right i)
       dsimp at this
-      dsimp [Cocones.precompose]
+      dsimp [Cocone.precompose]
       rw [← cancel_epi (inv (φ.app (.right i))), ← this, Multicofork.π]
       simp)
     (fun s m hm ↦ Multicofork.IsColimit.hom_ext hc₂ (fun i ↦ by
       have := hc₂.fac (multicofork φ hR hL s) (.right i)
       dsimp at this ⊢
       rw [this, ← hm]
-      dsimp only [Cocones.precompose, Multicofork.π]
+      dsimp only [Cocone.precompose, Multicofork.π]
       simp))
 
 end Multicofork

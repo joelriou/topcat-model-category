@@ -1,8 +1,7 @@
 module
 
-public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+public import Mathlib.CategoryTheory.Limits.Types.Pushouts
 public import Mathlib.CategoryTheory.Limits.Shapes.Multiequalizer
---import Mathlib.CategoryTheory.Limits.Shapes.Types
 public import Mathlib.CategoryTheory.Limits.Set
 public import Mathlib.CategoryTheory.Limits.Types.Colimits
 public import Mathlib.CategoryTheory.Limits.Types.ColimitType
@@ -53,11 +52,11 @@ lemma le (h : MulticoequalizerDiagram A U V) (i : ι) : U i ≤ A := by
   exact le_iSup U i
 
 lemma le₁ (h : MulticoequalizerDiagram A U V) (i j : ι) : V i j ≤ U i := by
-  rw [h.min_eq]
+  rw [h.eq_inf]
   exact inf_le_left
 
 lemma le₂ (h : MulticoequalizerDiagram A U V) (i j : ι) : V i j ≤ U j := by
-  rw [h.min_eq]
+  rw [h.eq_inf]
   exact inf_le_right
 
 end CompleteLattice.MulticoequalizerDiagram
@@ -76,13 +75,13 @@ variable {X X' : Type u} (f : X' → X) (A B : Set X) (A' B' : Set X')
 
 def pushoutCoconeOfPullbackSets :
     PushoutCocone
-      (fun ⟨a', ha'⟩ ↦ ⟨f a', by
+      (↾fun ⟨a', ha'⟩ ↦ ⟨f a', by
         rw [hA'] at ha'
-        exact ha'.1⟩ : _ ⟶ (A : Type u) )
+        exact ha'.1⟩ : _ ⟶ (A : Type u))
       (Set.functorToTypes.map (homOfLE (by rw [hA']; exact inf_le_right)) : (A' : Type u) ⟶ B') :=
   PushoutCocone.mk (W := (B : Type u))
     (Set.functorToTypes.map (homOfLE (by rw [hB]; exact le_sup_left)) : (A : Type u) ⟶ B)
-    (fun ⟨b', hb'⟩ ↦ ⟨f b', by rw [hB]; exact Or.inr (by aesop)⟩) rfl
+    (↾fun ⟨b', hb'⟩ ↦ ⟨f b', by rw [hB]; exact Or.inr (by aesop)⟩) rfl
 
 variable (T : Set X)
 
@@ -90,7 +89,7 @@ open Classical in
 noncomputable def isColimitPushoutCoconeOfPullbackSets
     (hf : Function.Injective (fun (b : (A'ᶜ : Set _)) ↦ f b)) :
     IsColimit (pushoutCoconeOfPullbackSets f A B A' B' hA' hB) := by
-  let g₁ : (A' : Type u) ⟶ A := fun ⟨a', ha'⟩ ↦ ⟨f a', by
+  let g₁ : (A' : Type u) ⟶ A := ↾fun ⟨a', ha'⟩ ↦ ⟨f a', by
         rw [hA'] at ha'
         exact ha'.1⟩
   let g₂ : (A' : Type u) ⟶ B' :=
@@ -98,21 +97,21 @@ noncomputable def isColimitPushoutCoconeOfPullbackSets
   have imp {b : X} (hb : b ∈ B) (hb' : b ∉ A) : b ∈ f '' B' := by
     simp only [hB, Set.sup_eq_union, Set.mem_union] at hb
     tauto
-  let desc (s : PushoutCocone g₁ g₂) : (B : Type u) ⟶ s.pt := fun ⟨b, hb⟩ ↦
+  let desc (s : PushoutCocone g₁ g₂) : (B : Type u) ⟶ s.pt := ↾fun ⟨b, hb⟩ ↦
     if hb' : b ∈ A then
       s.inl ⟨b, hb'⟩
     else
       s.inr ⟨(imp hb hb').choose, (imp hb hb').choose_spec.1⟩
   have inl_desc_apply (s) (a : A) : desc s ⟨a, by
     rw [hB]
-    exact Or.inl a.2⟩ = s.inl a := dif_pos a.2
+    exact Or.inl a.2⟩ = s.inl a := dite_eq_left a.2
   have inr_desc_apply (s) (b' : B') : desc s ⟨f b', by
       rw [hB]
       exact Or.inr ⟨b'.1, b'.2, rfl⟩⟩ = s.inr b' := by
     obtain ⟨b', hb'⟩ := b'
     dsimp [desc]
     split_ifs with hb''
-    · exact congr_fun s.condition ⟨b', by rw [hA']; exact ⟨hb'', hb'⟩⟩
+    · exact ConcreteCategory.congr_hom s.condition ⟨b', by rw [hA']; exact ⟨hb'', hb'⟩⟩
     · apply congr_arg
       ext
       have hb''' : f b' ∈ B := by
@@ -136,11 +135,11 @@ noncomputable def isColimitPushoutCoconeOfPullbackSets
   dsimp
   by_cases hb' : b ∈ f '' B'
   · obtain ⟨b', hb', rfl⟩ := hb'
-    exact (congr_fun h₂ ⟨b', hb'⟩).trans (inr_desc_apply s ⟨b', hb'⟩ ).symm
+    exact (ConcreteCategory.congr_hom h₂ ⟨b', hb'⟩).trans (inr_desc_apply s ⟨b', hb'⟩ ).symm
   · have hb : b ∈ A := by
       simp only [hB, Set.sup_eq_union, Set.mem_union] at hb
       tauto
-    exact (congr_fun h₁ ⟨b, hb⟩).trans (inl_desc_apply s ⟨b, hb⟩).symm
+    exact (ConcreteCategory.congr_hom h₁ ⟨b, hb⟩).trans (inl_desc_apply s ⟨b, hb⟩).symm
 
 end
 
@@ -156,7 +155,7 @@ def pushoutCoconeOfBicartSqOfSets :
 noncomputable def isColimitPushoutCoconeOfBicartSqOfSets :
     IsColimit (pushoutCoconeOfBicartSqOfSets sq) :=
   isColimitPushoutCoconeOfPullbackSets id A₂ A₄ A₁ A₃
-    sq.min_eq.symm (by simpa using sq.max_eq.symm)
+    sq.inf_eq.symm (by simpa using sq.sup_eq.symm)
       (by rintro ⟨a, _⟩ ⟨b, _⟩ rfl; rfl)
 
 end
@@ -283,6 +282,7 @@ namespace IsColimit
 variable {P : Type v}
 
 include hc in
+set_option backward.isDefEq.respectTransparency false in
 lemma funext {f g : c.pt → P} (h : ∀ (b : J.R), f ∘ c.π b = g ∘ c.π b) : f = g := by
   apply hc.funext
   rintro (a | b)
@@ -339,11 +339,13 @@ variable {d} (s : Multicofork (d.multispanIndex.map Set.functorToTypes))
 
 noncomputable def desc (x : X) : s.pt := s.π (index d x) ⟨x, mem d x⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 lemma fac_apply (i : ι) (u : U i) :
     desc s ⟨u, by simp only [← d.iSup_eq]; aesop⟩ = s.π i u :=
-  congr_fun (s.condition ⟨index d _, i⟩) ⟨u, by
+  ConcreteCategory.congr_hom (s.condition ⟨index d _, i⟩) ⟨u, by
     dsimp
-    simp only [d.min_eq, Set.inf_eq_inter, Set.mem_inter_iff, Subtype.coe_prop, and_true]
+    simp only [d.eq_inf, Set.inf_eq_inter, Set.mem_inter_iff, Subtype.coe_prop, and_true]
     apply mem⟩
 
 end
@@ -377,10 +379,11 @@ end isColimitMulticoforkMapSetToTypes
 
 open isColimitMulticoforkMapSetToTypes in
 noncomputable def isColimitMulticoforkMapSetToTypes :
-    IsColimit (d.multicofork.map Set.functorToTypes) :=
-  Multicofork.IsColimit.mk _ desc (fun s i ↦ by ext x; apply fac_apply) (fun s m hm ↦ by
-    ext x
-    exact congr_fun (hm (index d x)) ⟨x.1, mem d x⟩)
+    IsColimit (d.multicofork.map Set.functorToTypes) := by
+  refine Multicofork.IsColimit.mk _ (fun s ↦ ↾(desc s))
+    (fun s i ↦ by ext x; apply fac_apply) (fun s m hm ↦ by
+      ext x
+      exact ConcreteCategory.congr_hom (hm (index d x)) ⟨x.1, mem d x⟩)
 
 abbrev multicoforkTypesMapSetToTypes :
     (d.multispanIndex.map Set.functorToTypes).MulticoforkTypes :=
@@ -391,6 +394,8 @@ lemma isColimit_multicoforkTypesMapSetToTypes :
   (isColimit_iff_coconeTypesIsColimit _).1
     ⟨isColimitMulticoforkMapSetToTypes d⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 open isColimitMulticoforkMapSetToTypes in
 noncomputable def isColimitMulticoforkMapSetToTypes' [LinearOrder ι] :
     IsColimit (d.multicofork.toLinearOrder.map Set.functorToTypes) :=
@@ -398,7 +403,7 @@ noncomputable def isColimitMulticoforkMapSetToTypes' [LinearOrder ι] :
     (d.multicofork.map Set.functorToTypes) (isColimitMulticoforkMapSetToTypes _)
     { iso i j := Set.functorToTypes.mapIso (eqToIso (by
         dsimp
-        rw [d.min_eq, d.min_eq, inf_comm]))
+        rw [d.eq_inf, d.eq_inf, inf_comm]))
       iso_hom_fst _ _ := rfl
       iso_hom_snd _ _ := rfl
       fst_eq_snd _ := rfl }
@@ -426,7 +431,7 @@ lemma exists_desc : ∃ (φ : X → Y), ∀ (i : ι) (x : U i), φ ⟨x.1, d.le 
 
 noncomputable def desc : X → Y := (exists_desc d f hf).choose
 
-noncomputable def fac {i : ι} (x : U i) : desc d f hf ⟨x.1, d.le i x.2⟩ = f i x :=
+lemma fac {i : ι} (x : U i) : desc d f hf ⟨x.1, d.le i x.2⟩ = f i x :=
   (exists_desc d f hf).choose_spec i x
 
 end MulticoequalizerDiagram
@@ -438,22 +443,24 @@ section
 variable {X₁ X₂ X₃ X₄ X₅ : Type u} {t : X₁ ⟶ X₂} {r : X₂ ⟶ X₄}
   {l : X₁ ⟶ X₃} {b : X₃ ⟶ X₄}
 
-lemma eq_or_eq_of_isPushout (h : IsPushout t l r b)
+/-lemma eq_or_eq_of_isPushout (h : IsPushout t l r b)
     (x₄ : X₄) : (∃ x₂, x₄ = r x₂) ∨ ∃ x₃, x₄ = b x₃ := by
   obtain ⟨j, x, rfl⟩ := jointly_surjective_of_isColimit h.isColimit x₄
   obtain (_ | _ | _) := j
-  · exact Or.inl ⟨t x, by simp⟩
+  · exact Or.inl ⟨t x, by cat_disch⟩
   · exact Or.inl ⟨x, rfl⟩
   · exact Or.inr ⟨x, rfl⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 lemma eq_or_eq_of_isPushout' (h : IsPushout t l r b)
     (x₄ : X₄) : (∃ x₂, x₄ = r x₂) ∨ ∃ x₃, x₄ = b x₃ ∧ x₃ ∉ Set.range l := by
   obtain h₁ | ⟨x₃, hx₃⟩ := eq_or_eq_of_isPushout h x₄
   · refine Or.inl h₁
   · by_cases h₂ : x₃ ∈ Set.range l
     · obtain ⟨x₁, rfl⟩ := h₂
-      exact Or.inl ⟨t x₁, by simpa only [hx₃] using congr_fun h.w.symm x₁⟩
-    · exact Or.inr ⟨x₃, hx₃, h₂⟩
+      exact Or.inl ⟨t x₁, by simpa [hx₃] using ConcreteCategory.congr_hom h.w.symm x₁⟩
+    · exact Or.inr ⟨x₃, hx₃, h₂⟩-/
 
 lemma exists_of_inl_eq_inr_of_isPushout (h : IsPushout t l r b) (ht : Function.Injective t)
     (x₂ : X₂) (x₃ : X₃) (hx : r x₂ = b x₃) :
@@ -470,7 +477,7 @@ lemma exists_of_inl_eq_inr_of_isPushout (h : IsPushout t l r b) (ht : Function.I
 --  apply Pushout.inl_eq_inr_iff
 
 
-lemma ext_of_isPullback (h : IsPullback t l r b) {x₁ y₁ : X₁}
+/-lemma ext_of_isPullback (h : IsPullback t l r b) {x₁ y₁ : X₁}
     (h₁ : t x₁ = t y₁) (h₂ : l x₁ = l y₁) : x₁ = y₁ := by
   apply (h.isLimit.conePointUniqueUpToIso
     (Types.pullbackLimitCone _ _).isLimit).toEquiv.injective
@@ -483,12 +490,12 @@ lemma exists_of_isPullback (h : IsPullback t l r b)
   obtain ⟨x₁, hx₁⟩ := e.surjective ⟨⟨x₂, x₃⟩, hx⟩
   rw [Subtype.ext_iff] at hx₁
   exact ⟨x₁, congr_arg _root_.Prod.fst hx₁.symm,
-    congr_arg _root_.Prod.snd hx₁.symm⟩
+    congr_arg _root_.Prod.snd hx₁.symm⟩-/
 
 
 open MorphismProperty
 
-lemma mono_of_isPushout_of_isPullback (h₁ : IsPushout t l r b)
+/-lemma mono_of_isPushout_of_isPullback (h₁ : IsPushout t l r b)
     {r' : X₂ ⟶ X₅} {b' : X₃ ⟶ X₅} (h₂ : IsPullback t l r' b')
     (facr : r ≫ k = r') (facb : b ≫ k = b') [hr' : Mono r']
     (H : ∀ (x₃ y₃ : X₃) (_ : x₃ ∉ Set.range l)
@@ -545,11 +552,11 @@ lemma isPushout_of_isPullback_of_mono'
     (H : ∀ (x₃ y₃ : X₃) (_ : x₃ ∉ Set.range l)
       (_ : y₃ ∉ Set.range l), b x₃ = b y₃ → x₃ = y₃) :
     IsPushout t l r b :=
-  isPushout_of_isPullback_of_mono (k := 𝟙 _) h₁ (by simp) (by simp) h₂ H
+  isPushout_of_isPullback_of_mono (k := 𝟙 _) h₁ (by simp) (by simp) h₂ H-/
 
 end
 
-lemma isPullback_iff {X₁ X₂ X₃ X₄ : Type u} (t : X₁ ⟶ X₂) (l : X₁ ⟶ X₃) (r : X₂ ⟶ X₄)
+/-lemma isPullback_iff {X₁ X₂ X₃ X₄ : Type u} (t : X₁ ⟶ X₂) (l : X₁ ⟶ X₃) (r : X₂ ⟶ X₄)
     (b : X₃ ⟶ X₄) :
   IsPullback t l r b ↔ t ≫ r = l ≫ b ∧
     (∀ x₁ y₁, t x₁ = t y₁ ∧ l x₁ = l y₁ → x₁ = y₁) ∧
@@ -569,12 +576,12 @@ lemma isPullback_iff {X₁ X₂ X₃ X₄ : Type u} (t : X₁ ⟶ X₂) (l : X�
         obtain ⟨x₁, rfl, rfl⟩ := h₂ x₂ x₃ h
         exact ⟨x₁, rfl⟩
     exact ⟨⟨w⟩, ⟨IsLimit.ofIsoLimit ((Types.pullbackLimitCone r b).isLimit)
-      (PullbackCone.ext (asIso φ)).symm⟩⟩
+      (PullbackCone.ext (asIso φ)).symm⟩⟩-/
 
 lemma isPullback_of_eq_setPreimage {X Y : Type u} (f : X ⟶ Y) (B : Set Y) {A : Set X}
     (hA : A = B.preimage f) :
-    IsPullback (fun (⟨a, ha⟩ : A) ↦ (⟨f a, by simpa [hA] using ha⟩ : B))
-      Subtype.val Subtype.val f:= by
+    IsPullback (↾fun (⟨a, ha⟩ : A) ↦ (⟨f a, by simpa [hA] using ha⟩ : B))
+      (↾Subtype.val) (↾Subtype.val) f := by
   rw [isPullback_iff]
   refine ⟨rfl, ?_, ?_⟩
   · rintro ⟨x₁, _⟩ ⟨_, _⟩ ⟨_, rfl⟩
@@ -633,7 +640,8 @@ lemma preimage_image_eq_of_coproducts
     (φ : c.pt ⟶ c'.pt) (hφ : ∀ i, c.inj i ≫ φ = f i ≫ c'.inj i)
     (i : ι) (F : Set (X' i)) :
     φ ⁻¹' (c'.inj i '' F) = c.inj i '' ((f i) ⁻¹' F) := by
-  replace hφ {i : ι} (x : X i) : φ (c.inj i x) = c'.inj i (f i x) := congr_fun (hφ i) x
+  replace hφ {i : ι} (x : X i) : φ (c.inj i x) = c'.inj i (f i x) :=
+    ConcreteCategory.congr_hom (hφ i) x
   ext y
   simp only [Set.mem_preimage, Set.mem_image]
   constructor
@@ -663,7 +671,7 @@ lemma pushoutCocone_inl_eq_inl_imp_of_iso {c c' : PushoutCocone f g} (e : c ≅ 
     (x₁ y₁ : X₁) (h : c.inl x₁ = c.inl y₁) :
     c'.inl x₁ = c'.inl y₁ := by
   convert congr_arg e.hom.hom h
-  all_goals apply congr_fun (e.hom.w WalkingSpan.left).symm
+  all_goals apply ConcreteCategory.congr_hom (e.hom.w WalkingSpan.left).symm
 
 lemma pushoutCocone_inl_eq_inl_iff_of_iso {c c' : PushoutCocone f g} (e : c ≅ c')
     (x₁ y₁ : X₁) :
@@ -677,8 +685,8 @@ lemma pushoutCocone_inl_eq_inl_iff_of_isColimit {c : PushoutCocone f g} (hc : Is
     c.inl x₁ = c.inl y₁ ↔
       x₁ = y₁ ∨ ∃ x₀ y₀, x₁ = f x₀ ∧ y₁ = f y₀ ∧ g x₀ = g y₀ := by
   rw [pushoutCocone_inl_eq_inl_iff_of_iso
-    (Cocones.ext (IsColimit.coconePointUniqueUpToIso hc (Pushout.isColimitCocone f g))
-    (by simp))]
+    (Cocone.ext (IsColimit.coconePointUniqueUpToIso hc (Pushout.isColimitCocone f g))
+    (by cat_disch))]
   have := (mono_iff_injective f).2 h₁
   apply Pushout.inl_eq_inl_iff f g
 
@@ -701,7 +709,7 @@ lemma preimage_image_eq_of_isPushout (sq : IsPushout t l r b) (ht : Function.Inj
       sq.isColimit ht x₂ x₃).1 hx₃'.symm
     exact ⟨x₁, hx₃, rfl⟩
   · rintro ⟨x₁, hx₁, rfl⟩
-    exact ⟨l x₁, hx₁, congr_fun sq.w.symm x₁⟩
+    exact ⟨l x₁, hx₁, ConcreteCategory.congr_hom sq.w.symm x₁⟩
 
 lemma preimage_range_eq_of_isPushout (sq : IsPushout t l r b) (ht : Function.Injective t) :
     r ⁻¹' (Set.range b) = Set.range t := by
@@ -735,7 +743,7 @@ noncomputable def equivOfIsPushoutOfInjective :
       · refine ⟨⟨x₂, ?_⟩, rfl⟩
         rintro ⟨x₁, rfl⟩
         simp only [Set.mem_compl_iff, Set.mem_range, not_exists] at hx₄
-        exact hx₄ (l x₁) (congr_fun sq.w.symm x₁))
+        exact hx₄ (l x₁) (ConcreteCategory.congr_hom sq.w.symm x₁))
 
 @[simp]
 lemma equivOfIsPushoutOfInjective_apply (x : ((Set.range t)ᶜ : Set _)) :
@@ -792,6 +800,7 @@ lemma isColimit_mk (c : F.CofanTypes)
       obtain ⟨i, y, rfl⟩ := h₁ x
       exact ⟨F.ιColimitType ⟨i⟩ y, rfl⟩
 
+set_option backward.isDefEq.respectTransparency false in
 variable (F) in
 lemma isColimit_sigma : CoconeTypes.IsColimit (sigma F) :=
   isColimit_mk _ (by aesop)
@@ -811,7 +820,7 @@ include hc
 
 lemma bijective_fromSigma_of_isColimit :
     Function.Bijective c.fromSigma := by
-  rw [← Function.Bijective.of_comp_iff _ (isColimit_sigma F).bijective]
+  erw [← Function.Bijective.of_comp_iff _ (isColimit_sigma F).bijective]
   convert hc.bijective
   ext ⟨⟨i⟩, x⟩
   rfl
