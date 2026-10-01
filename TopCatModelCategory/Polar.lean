@@ -10,12 +10,15 @@ open Topology NNReal
 
 theorem Topology.IsQuotientMap.restrictPreimage_isClosed {X Y : Type*}
     [TopologicalSpace X] [TopologicalSpace Y] {f : X → Y} (hf : IsQuotientMap f)
-    {s : Set Y} (hs : IsClosed s) : IsQuotientMap (s.restrictPreimage f) :=
-  isQuotientMap_iff.2 ⟨hf.surjective.restrictPreimage _, fun U ↦ by
+    {s : Set Y} (hs : IsClosed s) : IsQuotientMap (s.restrictPreimage f) := by
+  rw [isQuotientMap_iff, isCoinducing_iff]
+  constructor
+  · intro U
     simp only [← isClosed_compl_iff,
       hs.isClosedEmbedding_subtypeVal.isClosed_iff_image_isClosed, ← hf.isClosed_preimage,
       (hs.preimage hf.continuous).isClosedEmbedding_subtypeVal.isClosed_iff_image_isClosed,
-      Set.preimage_diff, Set.image_val_compl, Set.image_val_preimage_restrictPreimage]⟩
+      Set.preimage_sdiff, Set.image_val_compl, Set.image_val_preimage_restrictPreimage]
+  · exact hf.surjective.restrictPreimage _
 
 namespace NormedSpace
 
@@ -36,7 +39,7 @@ lemma smul_sphere_eq_iff {r₁ r₂ : ℝ} (hr₁ : 0 < r₁) (hr₂ : 0 < r₂)
   · rintro ⟨rfl, rfl⟩
     rfl
 
-@[simps]
+@[simps apply]
 def polarParametrization : C(ℝ≥0 × Metric.sphere (0 : E) 1, E) where
   toFun := fun ⟨t, u⟩ ↦ (t : ℝ) • u
 
@@ -77,7 +80,7 @@ lemma preimage_param_zero : (polarParametrization E) ⁻¹' {0} = p₁ E ⁻¹' 
 
 variable {E} [Nontrivial E]
 
-instance (u : E) (r : ℝ≥0) [Nontrivial E] : Nonempty (Metric.sphere (u : E) r) := by
+instance (u : E) (r : ℝ≥0) : Nonempty (Metric.sphere (u : E) r) := by
   wlog hu : u = 0 generalizing u
   · obtain ⟨v, hv⟩ := this _ rfl
     exact ⟨⟨u + v, by simpa using hv⟩⟩
@@ -92,8 +95,14 @@ lemma param_surjective : Function.Surjective (polarParametrization E) := fun v �
   wlog hv : v ≠ 0 generalizing v
   · obtain rfl : v = 0 := by simpa using hv
     exact ⟨⟨0, Classical.arbitrary _⟩, by simp⟩
-  exact ⟨⟨⟨‖v‖, by simp⟩, ⟨‖v‖ ⁻¹ • v, by simp [hv, norm_smul]⟩⟩, by simp [hv]⟩
+  exact ⟨⟨⟨‖v‖, by simp⟩, ⟨‖v‖ ⁻¹ • v, by simp [hv, norm_smul]⟩⟩, by
+    rw [polarParametrization_apply]
+    dsimp
+    erw [coe_mk]
+    simp [hv]⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 lemma param_isQuotientMap_aux [ProperSpace E]
     (U : Set E) (hU₀ : 0 ∈ U) (hU : IsOpen ((polarParametrization E) ⁻¹' U)) :
     ∃ ε > 0, Metric.ball 0 ε ⊆ U := by
@@ -127,25 +136,29 @@ lemma param_isQuotientMap_aux [ProperSpace E]
     exact s.2.2.1
   refine ⟨r₀, hr₀, fun x hx ↦ ?_⟩
   obtain ⟨⟨⟨r, hr⟩, v⟩, rfl⟩ := param_surjective x
+  simp at hx
   obtain hr | rfl := hr.lt_or_eq
   · have := hu (Set.mem_univ v)
     simp at this
     obtain ⟨i, ⟨⟨h₁, h₂, h₃⟩, h₄⟩, h₅⟩ := this
-    simp [norm_smul, abs_of_pos hr] at hx
+    simp [norm_smul] at hx
+    change r < r₀ at hx
     have : r₀ ≤ i.2 := (Finset.image ρ u).min'_le i.2 (by
       simp
       exact ⟨i, ⟨h₁, h₂, h₃⟩, h₄, rfl⟩)
-    exact h₃ ⟨v, h₅⟩ r hr.le (by grind)
-  · simpa
+    exact h₃ ⟨v, h₅⟩ r hr.le (by grind)--grind)
+  · simp
+    erw [zero_smul]
+    simpa
 
 end polarParametrization
 
 open polarParametrization in
 lemma isQuotientMap_polarParametrization [Nontrivial E] [ProperSpace E] :
     IsQuotientMap (polarParametrization E) := by
-  rw [isQuotientMap_iff]
-  refine ⟨param_surjective,
-    fun U ↦ ⟨fun hU ↦ (polarParametrization E).continuous.isOpen_preimage U hU, fun hU ↦ ?_⟩⟩
+  rw [isQuotientMap_iff, isCoinducing_iff]
+  refine ⟨fun U ↦ ⟨fun hU ↦ ?_, fun hU ↦ (polarParametrization E).continuous.isOpen_preimage U hU⟩,
+    param_surjective⟩
   wlog hU₀ : 0 ∉ U generalizing U with h₁; swap
   · let s : Set E := {0}ᶜ
     let j : s → E := Subtype.val
@@ -168,7 +181,7 @@ lemma isQuotientMap_polarParametrization [Nontrivial E] [ProperSpace E] :
           · rintro ⟨a, ha, b, hb, h⟩ rfl
             rw [Prod.ext_iff, Subtype.ext_iff] at h
             simp [f] at h
-            obtain rfl : a = 0 := h.1
+            obtain rfl : a = 0 := Subtype.ext_iff.1 h.1
             simp at ha
           · intro hx
             exact ⟨x, lt_of_le_of_ne x.2 (Ne.symm (by simpa)), y, hy, rfl⟩
@@ -204,12 +217,13 @@ lemma isQuotientMap_polarParametrization [Nontrivial E] [ProperSpace E] :
       · exact hu.1
       · exact h₃ hu
 
+set_option backward.isDefEq.respectTransparency false in
 def polarParametrizationPreimageClosedBallHomeo :
     ((polarParametrization E) ⁻¹' Metric.closedBall (0 : E) 1) ≃ₜ
       unitInterval × (Metric.sphere (0 : E) 1) where
   toFun := fun ⟨⟨t, v⟩, h⟩ ↦ ⟨⟨t.1, ⟨t.2, by simpa [norm_smul] using h⟩⟩, v⟩
   invFun := fun ⟨t, v⟩ ↦ ⟨⟨⟨t, unitInterval.nonneg t⟩, v⟩, by
-    simpa [norm_smul, abs_of_nonneg t.2.1] using t.2.2⟩
+    simpa [norm_smul, abs_of_nonneg t.2.1] using! t.2.2⟩
   continuous_toFun := Isometry.continuous (fun _ _ ↦ rfl)
   continuous_invFun := Isometry.continuous (fun _ _ ↦ rfl)
 
