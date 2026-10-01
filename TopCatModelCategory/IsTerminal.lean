@@ -13,7 +13,7 @@ lemma IsTerminal.preservesLimit (hX : IsTerminal X) {F : C ⥤ D}
     PreservesLimit (Functor.empty.{0} C) F :=
   preservesLimit_of_preserves_limit_cone hX (by
     refine (IsLimit.equivOfNatIsoOfIso (Functor.emptyExt _ _) _ _ ?_).1 hX'
-    exact Cones.ext (Iso.refl _))
+    exact Cone.ext (Iso.refl _))
 
 lemma IsTerminal.preservesTerminal (hX : IsTerminal X) {F : C ⥤ D}
     (hX' : IsTerminal (F.obj X)) :

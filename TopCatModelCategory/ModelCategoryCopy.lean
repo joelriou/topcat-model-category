@@ -13,6 +13,7 @@ namespace ModelCategory
 
 variable {C : Type*} [Category C]
 
+@[instance_reducible]
 def copy [cof : CategoryWithCofibrations C]
     [fib : CategoryWithFibrations C] [W : CategoryWithWeakEquivalences C]
     (h : ModelCategory C) (h₁ : cofibrations C = h.categoryWithCofibrations.cofibrations)

@@ -11,35 +11,39 @@ open CategoryTheory Opposite Simplicial
 
 namespace SSet
 
-@[mk_iff]
+/-@[mk_iff]
 class HasDimensionLT (X : SSet.{u}) (d : ℕ) : Prop where
   degenerate_eq_top (n : ℕ) (hn : d ≤ n) : X.degenerate n = ⊤
 
-abbrev HasDimensionLE (X : SSet.{u}) (d : ℕ) := X.HasDimensionLT (d + 1)
+abbrev HasDimensionLE (X : SSet.{u}) (d : ℕ) := X.HasDimensionLT (d + 1)-/
 
 section
 
 variable (X : SSet.{u}) (d : ℕ) [X.HasDimensionLT d] (n : ℕ)
 
-lemma degenerate_eq_top_of_hasDimensionLT (hn : d ≤ n) : X.degenerate n = ⊤ :=
-  HasDimensionLT.degenerate_eq_top n hn
+/-lemma degenerate_eq_top_of_hasDimensionLT (hn : d ≤ n) : X.degenerate n = ⊤ :=
+  HasDimensionLT.degenerate_eq_top n hn-/
 
-lemma nondegenerate_eq_bot_of_hasDimensionLT (hn : d ≤ n) : X.nonDegenerate n = ⊥ := by
-  simp [nonDegenerate, X.degenerate_eq_top_of_hasDimensionLT d n hn]
+
+lemma nondegenerate_eq_empty_of_hasDimensionLT (hn : d ≤ n) : X.nonDegenerate n = ⊥ := by
+  simp [nonDegenerate, X.degenerate_eq_univ_of_hasDimensionLT d n hn]
+
+@[deprecated (since := "2026-10-01" )] alias nondegenerate_eq_bot_of_hasDimensionLT :=
+  nondegenerate_eq_empty_of_hasDimensionLT
 
 lemma dim_lt_of_nondegenerate {n : ℕ} (x : X.nonDegenerate n) (d : ℕ)
     [X.HasDimensionLT d] : n < d := by
   by_contra!
   obtain ⟨x, hx⟩ := x
-  simp [X.nondegenerate_eq_bot_of_hasDimensionLT d n this] at hx
+  simp [X.nondegenerate_eq_empty_of_hasDimensionLT d n this] at hx
 
 lemma dim_le_of_nondegenerate {n : ℕ} (x : X.nonDegenerate n) (d : ℕ)
     [X.HasDimensionLE d] : n ≤ d :=
   Nat.le_of_lt_succ (X.dim_lt_of_nondegenerate x (d + 1))
 
-lemma hasDimensionLT_of_le (hn : d ≤ n) : HasDimensionLT X n where
+/-lemma hasDimensionLT_of_le (hn : d ≤ n) : HasDimensionLT X n where
   degenerate_eq_top i hi :=
-    X.degenerate_eq_top_of_hasDimensionLT d i (hn.trans hi)
+    X.degenerate_eq_top_of_hasDimensionLT d i (hn.trans hi)-/
 
 end
 
@@ -50,9 +54,9 @@ variable {X : SSet.{u}} (A : X.Subcomplex)
 instance (d : ℕ) [X.HasDimensionLT d] : HasDimensionLT A d where
   degenerate_eq_top (n : ℕ) (hd : d ≤ n) := by
     ext x
-    simp [A.mem_degenerate_iff, X.degenerate_eq_top_of_hasDimensionLT d n hd]
+    simp [A.mem_degenerate_iff, X.degenerate_eq_univ_of_hasDimensionLT d n hd]
 
-lemma eq_top_iff_of_hasDimensionLT (d : ℕ) [X.HasDimensionLT d] :
+/-lemma eq_top_iff_of_hasDimensionLT (d : ℕ) [X.HasDimensionLT d] :
     A = ⊤ ↔ ∀ (i : ℕ) (_ : i < d), X.nonDegenerate i ⊆ A.obj _ := by
   constructor
   · rintro rfl
@@ -62,11 +66,11 @@ lemma eq_top_iff_of_hasDimensionLT (d : ℕ) [X.HasDimensionLT d] :
     intro i
     by_cases hi : i < d
     · exact h i hi
-    · simp [X.nondegenerate_eq_bot_of_hasDimensionLT d i (by simpa using hi)]
+    · simp [X.nondegenerate_eq_bot_of_hasDimensionLT d i (by simpa using hi)]-/
 
 end Subcomplex
 
-lemma hasDimensionLT_of_mono {X Y : SSet.{u}} (f : X ⟶ Y) [Mono f] (d : ℕ)
+/-lemma hasDimensionLT_of_mono {X Y : SSet.{u}} (f : X ⟶ Y) [Mono f] (d : ℕ)
     [Y.HasDimensionLT d] : X.HasDimensionLT d where
   degenerate_eq_top n hn := by
     ext x
@@ -99,16 +103,19 @@ instance {X Y : SSet.{u}} (f : X ⟶ Y) (d : ℕ) [X.HasDimensionLT d] :
 lemma hasDimensionLT_iSup_iff {X : SSet.{u}} {ι : Type*} (A : ι → X.Subcomplex) (d : ℕ) :
     HasDimensionLT (⨆ i, A i :) d ↔ ∀ i, HasDimensionLT (A i) d := by
   simp only [hasDimensionLT_iff, Subcomplex.degenerate_eq_top_iff]
-  aesop
+  aesop-/
 
-lemma hasDimensionLT_iff_subcomplex_top (X : SSet.{u}) (d : ℕ) :
+/-lemma hasDimensionLT_iff_subcomplex_top (X : SSet.{u}) (d : ℕ) :
     X.HasDimensionLT d ↔ HasDimensionLT (⊤ : X.Subcomplex) d := by
   constructor
   · intro
     infer_instance
   · intro h
     simp only [hasDimensionLT_iff, Subcomplex.degenerate_eq_top_iff] at h
-    simpa [hasDimensionLT_iff] using h
+    simpa [hasDimensionLT_iff] using h-/
+
+@[deprecated (since := "2026-10-01")] alias hasDimensionLT_iff_subcomplex_top :=
+  hasDimensionLT_subcomplex_top_iff
 
 instance {X : SSet.{u}} (n : ℕ) : HasDimensionLT ((⊥ : X.Subcomplex)) n where
   degenerate_eq_top k hk := by

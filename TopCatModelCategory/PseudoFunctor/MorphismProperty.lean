@@ -53,11 +53,11 @@ section
 
 variable (F)
 
-def ofPseudofunctor : MorphismProperty B := fun _ _ f ↦ (F.map ⟨f⟩).IsEquivalence
+def ofPseudofunctor : MorphismProperty B := fun _ _ f ↦ (F.map ⟨f⟩).toFunctor.IsEquivalence
 
 @[simp]
 lemma ofPseudofunctor_iff {X Y : B} (f : X ⟶ Y) :
-    ofPseudofunctor F f ↔ (F.map ⟨f⟩).IsEquivalence := Iff.rfl
+    ofPseudofunctor F f ↔ (F.map ⟨f⟩).toFunctor.IsEquivalence := Iff.rfl
 
 instance : (ofPseudofunctor F).IsMultiplicative where
   id_mem X := Functor.isEquivalence_of_iso (show _ ≅ 𝟭 _ from F.mapId ⟨X⟩).symm
