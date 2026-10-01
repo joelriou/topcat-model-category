@@ -37,13 +37,13 @@ lemma mono_iff_of_strictSegal [IsStrictSegal X] :
     fin_cases i
     apply hf
     dsimp [StrictSegal.spineEquiv]
-    simp only [Fin.isValue, SimplexCategory.mkOfSucc_zero, op_id, FunctorToTypes.map_id_apply,
-      σ_naturality_apply, h]
+    simp only [Fin.isValue, SimplexCategory.mkOfSucc_zero, op_id,
+      CategoryTheory.Functor.map_id, id_apply, σ_naturality_apply, h]
   · intro x y h
     apply (IsStrictSegal.segal _).1
     ext i
     apply hf
     dsimp [StrictSegal.spineEquiv]
-    simp only [FunctorToTypes.naturality, h]
+    simp [h]
 
 end SSet

@@ -36,11 +36,11 @@ lemma nondegenerate_zero : X.NonDegenerate 0 = ⊤ := by
 variable {n : ℕ}
 
 @[deprecated (since := "2025-03-19")]
-alias mem_nondegenerate_iff_not_mem_degenerate := mem_nonDegenerate_iff_not_mem_degenerate
+alias mem_nondegenerate_iff_not_mem_degenerate := mem_nonDegenerate_iff_notMem_degenerate
 --lemma mem_nondegenerate_iff_not_mem_degenerate (x : X _[n]) :
 --    x ∈ X.nonDegenerate n ↔ x ∉ X.degenerate n := Iff.rfl
 @[deprecated (since := "2025-03-19")]
-alias mem_degenerate_iff_non_mem_nondegenerate := mem_degenerate_iff_not_mem_nonDegenerate
+alias mem_degenerate_iff_non_mem_nondegenerate := mem_degenerate_iff_notMem_nonDegenerate
 --lemma mem_degenerate_iff_non_mem_nondegenerate (x : X _[n]) :
 --    x ∈ X.Degenerate n ↔ x ∉ X.NonDegenerate n := by
 --  simp [NonDegenerate]
@@ -290,7 +290,7 @@ variable {X} {Y : SSet.{u}}
 lemma degenerate_map {n : ℕ} {x : X _⦋n⦌} (hx : x ∈ X.degenerate n) (f : X ⟶ Y) :
     f.app _ x ∈ Y.degenerate n := by
   obtain ⟨m, hm, g, y, rfl⟩ := hx
-  exact ⟨m, hm, g, f.app _ y, by rw [FunctorToTypes.naturality]⟩
+  exact ⟨m, hm, g, f.app _ y, by simp⟩
 
 /-lemma degenerate_le_preimage (f : X ⟶ Y) (n : ℕ) :
     X.degenerate n ⊆ Set.preimage (f.app _) (Y.degenerate n) :=
@@ -371,7 +371,7 @@ lemma Subcomplex.range_le_iff_nonDegenerate {Y : SSet.{u}} (f : X ⟶ Y) (B : Y.
   · intro h
     rw [le_iff_contains_nonDegenerate]
     rintro n ⟨y, hy⟩ h
-    simp only [Subpresheaf.range_obj, Set.mem_range] at h
+    simp only [Subfunctor.range_obj, Set.mem_range] at h
     obtain ⟨x, rfl⟩ := h
     refine h n ⟨x, ?_⟩
     rw [mem_nonDegenerate_iff_notMem_degenerate] at hy ⊢

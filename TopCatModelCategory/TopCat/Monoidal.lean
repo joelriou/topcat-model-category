@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.Topology.Category.TopCat.Limits.Products
+public import Mathlib.Topology.Category.TopCat.Monoidal
 public import Mathlib.Topology.UnitInterval
 public import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
 
@@ -12,7 +13,7 @@ open CategoryTheory Limits MonoidalCategory
 
 namespace TopCat
 
-def const {X Y : TopCat.{u}} (y : Y) : X ⟶ Y :=
+/-def const {X Y : TopCat.{u}} (y : Y) : X ⟶ Y :=
   ofHom ⟨fun _ ↦ y, by continuity⟩
 
 @[simp]
@@ -107,13 +108,13 @@ theorem braiding_inv_apply {X Y : TopCat.{u}} {x : X} {y : Y} :
 @[simp]
 protected theorem lift_apply {X Y Z : TopCat.{u}} {f : X ⟶ Y} {g : X ⟶ Z} {x : X} :
     CartesianMonoidalCategory.lift f g x = (f x, g x) :=
-  rfl
+  rfl-/
 
-def I : TopCat.{u} := TopCat.of (ULift unitInterval)
+/-def I : TopCat.{u} := TopCat.of (ULift unitInterval)
 
 instance : LocallyCompactSpace I := by
   dsimp [I]
-  infer_instance
+  infer_instance-/
 
 def homeomorphI : I ≃ₜ unitInterval := Homeomorph.ulift
 
@@ -124,11 +125,10 @@ lemma I.continuous_mk : Continuous I.mk.{u} := by
   change Continuous ULift.up
   continuity
 
-def I.symm : I.{u} → I.{u} := fun t ↦ I.mk (unitInterval.symm t.down)
+/-def I.symm : I.{u} → I.{u} := fun t ↦ I.mk (unitInterval.symm t.down)-/
 
 @[continuity]
 lemma I.continuous_symm : Continuous I.symm.{u} := by
-  change Continuous ((I.mk.comp unitInterval.symm).comp ULift.down)
   continuity
 
 open NNReal
@@ -144,15 +144,15 @@ lemma I.continuous_toℝ : Continuous I.toℝ.{u} := by
 instance : OfNat I 0 := ⟨I.mk 0⟩
 instance : OfNat I 1 := ⟨I.mk 1⟩
 
-@[simp] lemma I.symm_one : I.symm 1 = 0 := by simp [I.symm]; rfl
-@[simp] lemma I.symm_zero : I.symm 0 = 1 := by simp [I.symm]; rfl
+/-@[simp] lemma I.symm_one : I.symm 1 = 0 := by simp [I.symm]; rfl
+@[simp] lemma I.symm_zero : I.symm 0 = 1 := by simp [I.symm]; rfl-/
 
 @[simp] lemma I.toℝ_zero : I.toℝ 0 = 0 := rfl
 @[simp] lemma I.toℝ_one : I.toℝ 1 = 1 := rfl
 
 open CartesianMonoidalCategory
 
-noncomputable def ι₀ {X : TopCat.{u}} : X ⟶ X ⊗ I :=
+/-noncomputable def ι₀ {X : TopCat.{u}} : X ⟶ X ⊗ I :=
   lift (𝟙 X) (const 0)
 
 @[reassoc (attr := simp)]
@@ -187,6 +187,6 @@ lemma ι₁_snd (X : TopCat.{u}) :
 
 @[simp]
 lemma ι₁_apply {X : TopCat.{u}} (x : X) : ι₁ x = ⟨x, 1⟩ :=
-  rfl
+  rfl-/
 
 end TopCat

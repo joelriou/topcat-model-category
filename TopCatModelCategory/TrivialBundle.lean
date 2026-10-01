@@ -16,7 +16,7 @@ namespace Limits.BinaryFan.IsLimit
 variable {X₁ X₂ : C} {c : BinaryFan X₁ X₂} (hc : IsLimit c)
   {T : C} (f₁ : T ⟶ X₁) (f₂ : T ⟶ X₂)
 
-def lift : T ⟶ c.pt :=
+/-def lift : T ⟶ c.pt :=
   (Limits.BinaryFan.IsLimit.lift' hc f₁ f₂).1
 
 @[reassoc (attr := simp)]
@@ -25,7 +25,7 @@ lemma lift_fst : lift hc f₁ f₂ ≫ c.fst = f₁ :=
 
 @[reassoc (attr := simp)]
 lemma lift_snd : lift hc f₁ f₂ ≫ c.snd = f₂ :=
-  (Limits.BinaryFan.IsLimit.lift' hc f₁ f₂).2.2
+  (Limits.BinaryFan.IsLimit.lift' hc f₁ f₂).2.2-/
 
 lemma exists_lift
     {X₁ X₂ : C} {c : BinaryFan X₁ X₂} (hc : IsLimit c)
@@ -68,7 +68,7 @@ def chg {F' : C} (e : F' ≅ F) : TrivialBundleWithFiber F' p where
     refine (IsLimit.equivOfNatIsoOfIso e' _ _ ?_).2 h.isLimit
     refine BinaryFan.ext (Iso.refl _) ?_ ?_
     all_goals
-      dsimp [Cones.postcompose, BinaryFan.fst, BinaryFan.snd, e']
+      dsimp [Cone.postcompose, BinaryFan.fst, BinaryFan.snd, e']
       simp
 
 @[simps]
@@ -101,6 +101,7 @@ def ofIsTerminal (hB : IsTerminal B) : TrivialBundleWithFiber E p where
       (fun s ↦ by simp)
       (fun s m _ hm ↦ by simpa using hm)
 
+set_option backward.defeqAttrib.useBackward true in
 @[simps hom]
 def isoOfIsTerminal (h : TrivialBundleWithFiber F p) (hB : IsTerminal B) : E ≅ F where
   hom := h.r
@@ -108,9 +109,7 @@ def isoOfIsTerminal (h : TrivialBundleWithFiber F p) (hB : IsTerminal B) : E ≅
   hom_inv_id := by
     apply BinaryFan.IsLimit.hom_ext h.isLimit
     · apply hB.hom_ext
-    · have := (BinaryFan.IsLimit.lift' h.isLimit (hB.from _) (𝟙 _)).2.2
-      dsimp at this ⊢
-      simp [this]
+    · simp [dsimp% (BinaryFan.IsLimit.lift' h.isLimit (hB.from _) (𝟙 _)).2.2]
   inv_hom_id := (BinaryFan.IsLimit.lift' h.isLimit (hB.from _) (𝟙 _)).2.2
 
 lemma isPullback_of_isTerminal {T : C} (hT : IsTerminal T) :
