@@ -65,23 +65,27 @@ variable {B C : Type*} [Bicategory B] [Bicategory C]
   [IsLocallyDiscrete B]
   (F : Pseudofunctor B C)
 
+set_option backward.isDefEq.respectTransparency false in
 lemma mapComp'_comp_id {b₀ b₁ : B} (f : b₀ ⟶ b₁) :
     F.mapComp' f (𝟙 b₁) f (by nth_rw 1 [Category.comp_id f]) =
     (ρ_ _).symm ≪≫ whiskerLeftIso _ (F.mapId b₁).symm := by
   ext
   dsimp [mapComp']
   rw [mapComp_id_right_hom, Subsingleton.elim (ρ_ f).hom (eqToHom (by simp)),
-    ← Category.assoc, ← PrelaxFunctor.map₂_comp, eqToHom_trans, eqToHom_refl,
-    F.map₂_id, Category.id_comp]
+    ← Category.assoc]
+  erw [← PrelaxFunctor.map₂_comp]
+  simp
 
+set_option backward.isDefEq.respectTransparency false in
 lemma mapComp'_id_comp {b₀ b₁ : B} (f : b₀ ⟶ b₁) :
     F.mapComp' (𝟙 b₀) f f (by nth_rw 1 [Category.id_comp f]) =
       (λ_ _).symm ≪≫ whiskerRightIso (F.mapId b₀).symm _ := by
   ext
   dsimp [mapComp']
   rw [mapComp_id_left_hom, Subsingleton.elim ((λ_ f).hom) (eqToHom (by simp)),
-    ← Category.assoc, ← PrelaxFunctor.map₂_comp, eqToHom_trans, eqToHom_refl,
-    F.map₂_id, Category.id_comp]
+    ← Category.assoc]
+  erw [← PrelaxFunctor.map₂_comp]
+  simp
 
 @[reassoc]
 lemma mapComp'_assoc {b₀ b₁ b₂ b₃ : B} (f₀₁ : b₀ ⟶ b₁)
@@ -166,6 +170,8 @@ variable {t : X₁ ⟶ Y₁} {t' : Y₁ ⟶ Z₁}
 
 include ht hb sq sq'
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 lemma isoMapOfSq_horiz_comp :
     F.isoMapOfSq (sq.horiz_comp' sq' ht hb) =
       whiskerRightIso (F.mapComp' t t' t'' (by rw [← ht])) (F.map r) ≪≫
@@ -210,10 +216,11 @@ variable {X₁ X₂ Y₁ Y₂ : B} {t : X₁ ⟶ Y₁} {l : X₁ ⟶ X₂} {r : 
 def isoMapOfSq' : F.map ⟨t⟩ ≫ F.map ⟨r⟩ ≅ F.map ⟨l⟩ ≫ F.map ⟨b⟩ :=
   isoMapOfSq _ ⟨congr_arg Quiver.Hom.toLoc sq.w⟩
 
-@[simps]
+@[instance_reducible, simps]
 def catCommSqOfSq :
-    CatCommSq (F.map ⟨t⟩) (F.map ⟨l⟩) (F.map ⟨r⟩) (F.map ⟨b⟩) :=
-  ⟨F.isoMapOfSq' sq⟩
+    CatCommSq (F.map ⟨t⟩).toFunctor (F.map ⟨l⟩).toFunctor (F.map ⟨r⟩).toFunctor
+      (F.map ⟨b⟩).toFunctor :=
+  ⟨Cat.Hom.toNatIso (F.isoMapOfSq' sq)⟩
 
 lemma isoMapOfSq'_eq (φ : X₁ ⟶ Y₂) (hφ : t ≫ r = φ) :
     F.isoMapOfSq' sq =
@@ -229,10 +236,10 @@ section
 variable {X Y : B} (f : X ⟶ Y)
 
 lemma isoMapOfSq'_horiz_id :
-    F.isoMapOfSq' (t := 𝟙 _) (b := 𝟙 _) (l := f) (r := f) ⟨by simp⟩ =
-        Functor.isoWhiskerRight (F.mapId ⟨X⟩) (F.map ⟨f⟩) ≪≫
+    (F.isoMapOfSq' (t := 𝟙 _) (b := 𝟙 _) (l := f) (r := f) ⟨by simp⟩) =
+        Cat.Hom.isoMk (Functor.isoWhiskerRight (Cat.Hom.toNatIso (F.mapId ⟨X⟩)) (F.map ⟨f⟩).toFunctor ≪≫
         Functor.leftUnitor _ ≪≫ (Functor.rightUnitor _).symm ≪≫
-        (Functor.isoWhiskerLeft (F.map ⟨f⟩) (F.mapId ⟨Y⟩)).symm := by
+        (Functor.isoWhiskerLeft (F.map ⟨f⟩).toFunctor (Cat.Hom.toNatIso (F.mapId ⟨Y⟩))).symm) := by
   apply isoMapOfSq_horiz_id
 
 end
@@ -250,12 +257,14 @@ include ht hb sq sq'
 
 lemma isoMapOfSq'_horiz_comp :
     F.isoMapOfSq' (sq.horiz_comp' sq' ht hb) =
-      Functor.isoWhiskerRight (F.mapComp' ⟨t⟩ ⟨t'⟩ ⟨t''⟩ (by rw [← ht]; rfl)) (F.map ⟨r⟩) ≪≫
-      Functor.associator _ _ _ ≪≫ Functor.isoWhiskerLeft (F.map ⟨t⟩) (F.isoMapOfSq' sq') ≪≫
-      (Functor.associator _ _ _).symm ≪≫ Functor.isoWhiskerRight (F.isoMapOfSq' sq) (F.map ⟨b'⟩) ≪≫
-      Functor.associator _ _ _ ≪≫ Functor.isoWhiskerLeft (F.map ⟨l⟩)
-        ((F.mapComp' ⟨b⟩ ⟨b'⟩ ⟨b''⟩ (by rw [← hb]; rfl)).symm) :=
-  isoMapOfSq_horiz_comp _ _ _ (by rw [← ht]; rfl) (by rw [← hb]; rfl)
+      Cat.Hom.isoMk (
+      Functor.isoWhiskerRight (Cat.Hom.toNatIso (F.mapComp' ⟨t⟩ ⟨t'⟩ ⟨t''⟩ (by rw [← ht]; rfl))) (F.map ⟨r⟩).toFunctor ≪≫
+      Functor.associator _ _ _ ≪≫ Functor.isoWhiskerLeft (F.map ⟨t⟩).toFunctor (Cat.Hom.toNatIso (F.isoMapOfSq' sq')) ≪≫
+      (Functor.associator _ _ _).symm ≪≫ Functor.isoWhiskerRight (Cat.Hom.toNatIso (F.isoMapOfSq' sq)) (F.map ⟨b'⟩).toFunctor ≪≫
+      Functor.associator _ _ _ ≪≫ Functor.isoWhiskerLeft (F.map ⟨l⟩).toFunctor
+        ((Cat.Hom.toNatIso (F.mapComp' ⟨b⟩ ⟨b'⟩ ⟨b''⟩ (by rw [← hb]; rfl))).symm)) :=
+  isoMapOfSq_horiz_comp _ ⟨congr($(sq.w).toLoc)⟩ ⟨congr($(sq'.w).toLoc)⟩
+    (by rw [← ht]; rfl) (by rw [← hb]; rfl)
 
 end
 

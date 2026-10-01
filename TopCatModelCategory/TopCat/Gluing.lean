@@ -61,16 +61,18 @@ lemma continuous_iff {B : Type*} [TopologicalSpace B] (f : A → B) :
   simp only [continuous_coinduced_dom]
   rfl
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 noncomputable def multicoforkIsColimit : IsColimit h.multicofork :=
   Multicofork.IsColimit.mk _
     (fun s ↦ ofHom ⟨(Types.isColimitMulticoforkMapSetToTypes
         h.toMulticoequalizerDiagram).desc (Multicofork.map s (forget _)), by
         rw [h.continuous_iff]
         intro i
-        convert (s.ι.app (.right i)).hom.continuous using 1
-        dsimp
-        exact (Types.isColimitMulticoforkMapSetToTypes
-          h.toMulticoequalizerDiagram).fac (Multicofork.map s (forget _)) (.right i)⟩)
+        convert! (s.ι.app (.right i)).hom.continuous
+        exact ConcreteCategory.congr_hom
+          ((Types.isColimitMulticoforkMapSetToTypes
+            h.toMulticoequalizerDiagram).fac (Multicofork.map s (forget _)) (.right i)) _⟩)
     (fun s j ↦ (forget _).map_injective
       (((Types.isColimitMulticoforkMapSetToTypes h.toMulticoequalizerDiagram).fac
         (Multicofork.map s (forget _)) (.right j))))
@@ -152,7 +154,7 @@ lemma exists_desc : ∃ (φ : C(A, Y)), ∀ (i : ι) (x : U i), φ ⟨x.1, h.le 
 noncomputable def desc : C(A, Y) := (exists_desc h f hf hf').choose
 
 @[simp]
-noncomputable def fac {i : ι} (x : U i) : desc h f hf hf' ⟨x.1, h.le i x.2⟩ = f i x :=
+lemma fac {i : ι} (x : U i) : desc h f hf hf' ⟨x.1, h.le i x.2⟩ = f i x :=
   (exists_desc h f hf hf').choose_spec i x
 
 end
@@ -193,6 +195,7 @@ lemma homeo_symm_apply (x : X) (i : ι) (hx : x ∈ U i) :
     (homeo φ hφ₁ hφ₂ i).symm ⟨φ x, by simpa only [← hφ₁] using ⟨x, hx, rfl⟩⟩ = ⟨x, hx⟩ :=
   (homeo φ hφ₁ hφ₂ i).symm_apply_apply ⟨x, hx⟩
 
+set_option backward.isDefEq.respectTransparency false in
 include h hφ₃ in
 lemma exists_inv : ∃ (ψ : C(A', A)), ∀ (i : ι) (u' : U' i),
     (ψ ⟨u'.1, by
@@ -205,7 +208,7 @@ lemma exists_inv : ∃ (ψ : C(A', A)), ∀ (i : ι) (u' : U' i),
           (homeo φ hφ₁ hφ₂ i).symm.continuous) (fun i j ↦ by
       rintro ⟨v', hv'⟩
       obtain ⟨v, hv, rfl⟩ := hφ₃ _ _ hv'
-      rw [h.min_eq] at hv
+      rw [h.eq_inf] at hv
       ext
       dsimp
       rw [homeo_symm_apply _ _ _ _ _ hv.1, homeo_symm_apply _ _ _ _ _ hv.2])

@@ -44,7 +44,7 @@ lemma Sigma.exists_continuousMap_of_connectedSpace
   let t₀ : T := Classical.arbitrary _
   generalize hi : (f t₀).1 = i
   have (t : T) : (f t).1 = i := by
-    letI : TopologicalSpace ι := ⊥
+    let : TopologicalSpace ι := ⊥
     have : DiscreteTopology ι := ⟨rfl⟩
     exact (PreconnectedSpace.constant (f := Sigma.fst ∘ f) inferInstance
       (by continuity) (x := t) (y := t₀)).trans hi
@@ -125,7 +125,7 @@ lemma homeomorph_symm_apply (hc : c.IsColimit) (i : J) (x : F.obj i) :
     hc.homeomorph.symm (c.ι i x) = (F ⋙ forget _).ιColimitType i x :=
   hc.homeomorph.injective (by simp)
 
-def funext (hc : c.IsColimit) {T : Type*}
+lemma funext (hc : c.IsColimit) {T : Type*}
     {f₁ f₂ : c.pt → T} (h : ∀ i, f₁ ∘ c.ι i = f₂ ∘ c.ι i) : f₁ = f₂ := by
   ext x
   obtain ⟨x, rfl⟩ := hc.homeomorph.surjective x
@@ -133,7 +133,7 @@ def funext (hc : c.IsColimit) {T : Type*}
   rw [hc.homeomorph_apply]
   exact congr_fun (h i) x
 
-def funext' (hc : c.IsColimit) {T : Type*}
+lemma funext' (hc : c.IsColimit) {T : Type*}
     {f₁ f₂ : c.pt → T} (h : ∀ i, f₁ ∘ c.ι i = f₂ ∘ c.ι i) (x : c.pt) : f₁ x = f₂ x := by
   rw [hc.funext h]
 
@@ -187,14 +187,16 @@ lemma _root_.CategoryTheory.Functor.CoconeTop.IsColimit.isColimit_toCofanTypes
     c.toCofanTypes.IsColimit := hc.isColimit_coconeTypes
 
 variable (F) in
+@[implicit_reducible]
 def sigma : F.CofanTop where
   toCoconeTypes := CofanTypes.sigma (F ⋙ forget _)
-  topPt := inferInstanceAs (TopologicalSpace (Σ (i : J), F.obj ⟨i⟩))
+  topPt := (inferInstance : (TopologicalSpace (Σ (i : J), F.obj ⟨i⟩)))
   continuous_ι := by
     rintro ⟨i⟩
     exact continuous_sigmaMk (σ := fun i ↦ F.obj ⟨i⟩) (i := i)
 
 variable (F) in
+set_option backward.isDefEq.respectTransparency false in
 lemma isColimit_sigma : (sigma F).IsColimit where
   isHomeomorph := by
     constructor
@@ -206,9 +208,9 @@ lemma isColimit_sigma : (sigma F).IsColimit where
       intro i
       replace hU := hU ⟨i⟩
       rw [isOpen_coinduced] at hU ⊢
-      convert hU
+      convert! hU
       ext (x : F.obj ⟨i⟩)
-      simp only [CofanTypes.sigma_pt, comp_obj, Set.mem_preimage, Set.mem_image]
+      simp only [comp_obj, Set.mem_preimage, Set.mem_image]
       constructor
       · rintro ⟨y, hy, h⟩
         obtain ⟨⟨i'⟩, x', rfl⟩ := ιColimitType_jointly_surjective _ y
@@ -229,6 +231,7 @@ variable (hc : c.IsColimit)
 
 variable (T : Type*) [TopologicalSpace T] [ConnectedSpace T]
 
+set_option backward.isDefEq.respectTransparency false in
 include hc in
 lemma bijective_continuousMap_of_isColimit_of_connectedSpace :
     Function.Bijective (α := Σ (i : J), C(T, F.obj ⟨i⟩))

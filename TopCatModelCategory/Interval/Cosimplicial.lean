@@ -81,11 +81,13 @@ def toCosimplicialObjectUliftFunctorObj (X : Interval.{u}) :
       ((toCosimplicialObjectObjEquiv.symm).trans Equiv.ulift.symm))))
 
 instance : Nonempty X.toCosimplicialObject.Elements :=
-  ⟨⟨⦋0⦌, toCosimplicialObjectObjEquiv.symm (default : IntervalHom (Fin 2) X)⟩⟩
+  ⟨Functor.elementsMk _ ⦋0⦌ (toCosimplicialObjectObjEquiv.symm (default : IntervalHom (Fin 2) X))⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 instance [Nontrivial X] : IsCofiltered X.toCosimplicialObject.Elements where
   cone_objs := by
-    rintro ⟨n, x⟩ ⟨m, y⟩
+    rintro @⟨n, x⟩ @⟨m, y⟩
     obtain ⟨f, rfl⟩ := toCosimplicialObjectObjEquiv.symm.surjective x
     obtain ⟨g, rfl⟩ := toCosimplicialObjectObjEquiv.symm.surjective y
     obtain ⟨J, hf, hg⟩ : ∃ (J : Finset X), (∀ i, f i ∈ J) ∧ (∀ i, g i ∈ J) :=
@@ -101,9 +103,9 @@ instance [Nontrivial X] : IsCofiltered X.toCosimplicialObject.Elements where
       { orderHom := ⟨fun i ↦ ⟨_, hg i⟩, fun _ _ h ↦ g.orderHom.monotone h ⟩ }
     obtain ⟨φ, hφ⟩ := (e.symm.toIntervalHom.comp f').exists_simplexCategoryHom
     obtain ⟨φ', hφ'⟩ := (e.symm.toIntervalHom.comp g').exists_simplexCategoryHom
-    refine ⟨.mk ⦋d⦌ (toCosimplicialObjectObjEquiv.symm (ι.comp e.toIntervalHom)),
-      CategoryOfElements.homMk _ _ φ (toCosimplicialObjectObjEquiv.injective ?_),
-      CategoryOfElements.homMk _ _ φ' (toCosimplicialObjectObjEquiv.injective ?_), ⟨⟩⟩
+    refine ⟨Functor.elementsMk _ ⦋d⦌ (toCosimplicialObjectObjEquiv.symm (ι.comp e.toIntervalHom)),
+      Functor.Elements.homMk φ (toCosimplicialObjectObjEquiv.injective ?_),
+      Functor.Elements.homMk φ' (toCosimplicialObjectObjEquiv.injective ?_), ⟨⟩⟩
     · dsimp
       rw [toCosimplicialObjectObjEquiv_naturality, Equiv.apply_symm_apply, hφ]
       erw [Equiv.apply_symm_apply]
@@ -113,7 +115,7 @@ instance [Nontrivial X] : IsCofiltered X.toCosimplicialObject.Elements where
       erw [Equiv.apply_symm_apply]
       aesop
   cone_maps := by
-    rintro ⟨n, x⟩ ⟨n', x'⟩ ⟨g, hg⟩ ⟨g', hg'⟩
+    rintro @⟨n, x⟩ @⟨n', x'⟩ ⟨g, hg⟩ ⟨g', hg'⟩
     obtain ⟨f, rfl⟩ := toCosimplicialObjectObjEquiv.symm.surjective x
     obtain ⟨f', rfl⟩ := toCosimplicialObjectObjEquiv.symm.surjective x'
     dsimp at g g' hg hg'
@@ -129,8 +131,8 @@ instance [Nontrivial X] : IsCofiltered X.toCosimplicialObject.Elements where
     let f'' : IntervalHom (Fin (n.len + 2)) J :=
       { orderHom := ⟨fun i ↦ ⟨_, hJ i⟩, fun _ _ h ↦ f.orderHom.monotone h ⟩ }
     obtain ⟨φ, hφ⟩ := (e.symm.toIntervalHom.comp f'').exists_simplexCategoryHom
-    refine ⟨.mk ⦋d⦌ (toCosimplicialObjectObjEquiv.symm (ι.comp e.toIntervalHom)),
-      CategoryOfElements.homMk _ _ φ (toCosimplicialObjectObjEquiv.injective ?_), ?_⟩
+    refine ⟨Functor.elementsMk _ ⦋d⦌ (toCosimplicialObjectObjEquiv.symm (ι.comp e.toIntervalHom)),
+      Functor.Elements.homMk φ (toCosimplicialObjectObjEquiv.injective ?_), ?_⟩
     · dsimp
       rw [toCosimplicialObjectObjEquiv_naturality, Equiv.apply_symm_apply, hφ]
       dsimp

@@ -109,9 +109,10 @@ lemma src_J_le_S {A B : T} (j : A ⟶ B) (hj : π.J j) : A ∈ π.S :=
 attribute [local instance] Cardinal.aleph0_isRegular
   Cardinal.orderbot_aleph0_ord_to_type
 
+set_option backward.isDefEq.respectTransparency false in
 lemma preservesColimit (X : π.Cat) (hX : X ∈ π.S) {A B : T} (f : A ⟶ B)
     (hf : RelativeCellComplex.{w}
-      (fun (_ : Cardinal.aleph0.{w}.ord.toType) ↦ (π.I ⊔ π.J).homFamily) f) :
+      (fun (_ : Cardinal.aleph0.{w}.ord.ToType) ↦ (π.I ⊔ π.J).homFamily) f) :
     PreservesColimit hf.F (coyoneda.obj (Opposite.op X)) := by
   let hf' := hf.ofOrderIso Cardinal.aleph0OrdToTypeOrderIso.{w}.symm
   have := π.preservesColimit' X hX f hf'
@@ -157,7 +158,7 @@ lemma infiniteCompositions_le_weakEquivalences :
 
 lemma transfiniteCompositionsOfShape_aleph0_le_weakEquivalences :
     (coproducts.{w} π.J).pushouts.transfiniteCompositionsOfShape
-      Cardinal.aleph0.{w}.ord.toType ≤ weakEquivalences π.Cat := by
+      Cardinal.aleph0.{w}.ord.ToType ≤ weakEquivalences π.Cat := by
   rw [transfiniteCompositionsOfShape_eq_of_orderIso _
     Cardinal.aleph0OrdToTypeOrderIso.{w}]
   exact π.infiniteCompositions_le_weakEquivalences
@@ -230,6 +231,7 @@ lemma trivialCofibrations_eq_llp_rlp_J :
     trivialCofibrations π.Cat = π.J.rlp.llp := by
   rw [← fibrations_eq, fibrations_llp π.Cat]
 
+@[instance_reducible]
 def modelCategory
     [CategoryWithCofibrations T] [CategoryWithFibrations T]
     (h₁ : cofibrations T = π.I.rlp.llp)

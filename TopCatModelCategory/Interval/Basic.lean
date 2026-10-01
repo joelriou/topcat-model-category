@@ -154,7 +154,7 @@ lemma toIntervalHom_comp {n m p : SimplexCategory} (f : n ⟶ m) (g : m ⟶ p) :
 
 end Hom
 
-@[simps]
+@[simps, implicit_reducible]
 def toInterval₀ : SimplexCategory ⥤ Interval.{0}ᵒᵖ where
   obj n := op (Interval.of (Fin (n.len + 2)))
   map f := Quiver.Hom.op (Interval.homMk (f.toIntervalHom))
