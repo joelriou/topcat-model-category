@@ -37,7 +37,7 @@ def comp (g : IntervalHom I₂ I₃) (f : IntervalHom I₁ I₂) : IntervalHom I
 
 instance : FunLike (IntervalHom I₁ I₂) I₁ I₂ where
   coe f := f.orderHom
-  coe_injective' _ _ _ := by aesop
+  coe_injective _ _ _ := by aesop
 
 lemma ext_iff' {f g : IntervalHom I₁ I₂} : f = g ↔ ∀ x, f x = g x := by
   aesop
@@ -76,15 +76,13 @@ open CategoryTheory Opposite
 
 namespace CategoryTheory
 
-structure Interval where private mk ::
+structure Interval where of ::
   I : Type u
   [linearOrder : LinearOrder I]
   [orderBot : OrderBot I]
   [orderTop : OrderTop I]
 
 namespace Interval
-
-abbrev of (I : Type u) [LinearOrder I] [OrderBot I] [OrderTop I] : Interval.{u} := mk I
 
 variable (X Y : Interval.{u})
 
@@ -103,7 +101,7 @@ variable {X Y}
 
 instance : FunLike (Hom X Y) X Y where
   coe f := f.hom
-  coe_injective' _ _ _ := by aesop
+  coe_injective _ _ _ := by aesop
 
 instance : Category Interval.{u} where
   Hom := Hom
@@ -120,6 +118,8 @@ abbrev homMk (f : IntervalHom X Y) : X ⟶ Y where
 @[ext]
 lemma hom_ext {f g : X ⟶ Y} (h : f.hom = g.hom) : f = g := Hom.ext h
 
+set_option backward.isDefEq.respectTransparency false in
+@[implicit_reducible]
 def uliftFunctor : Interval.{u} ⥤ Interval.{max u v} where
   obj X := .of (ULift X)
   map f := homMk
@@ -236,7 +236,7 @@ lemma map'_f_apply (j : Fin (m + 2)) :
             Fin.castSucc_le_castSucc_iff, le_iff] using h'
         · simpa using Fin.le_last _
   · dsimp
-    simpa only [II.map'_last] using g.hom.map_top.symm
+    simpa only [II.map'_last] using! g.hom.map_top.symm
 
 end toInterval₀Full
 

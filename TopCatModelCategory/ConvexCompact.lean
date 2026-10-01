@@ -87,7 +87,7 @@ lemma isLUB_sup {v : E} (hv : v ≠ 0) : IsLUB (set X v) (sup X v) :=
 include hX₃ in
 lemma sup_zero : sup X 0 = 0 := by
   dsimp [sup, Real.sSup_def]
-  apply dif_neg
+  apply dite_eq_right
   rintro ⟨_, ⟨x, hx⟩⟩
   simp only [mem_upperBounds, mem_set_iff, smul_zero, and_imp] at hx
   have hx₀ := hx 0 (by simp) (interior_subset hX₃)
@@ -468,6 +468,7 @@ lemma continuous_retraction : Continuous (retraction hX₁ hX₂ hX₃) :=
     ((Homeomorph.continuous_symm _).comp (Continuous.subtype_mk
       ((Continuous.inv₀ (by continuity) (by simp)).smul continuous_subtype_val) _))) _
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma retraction_boundaryι_apply (x : boundary X) :
     retraction hX₁ hX₂ hX₃ (boundaryι hX₃ x) = x := by
@@ -480,7 +481,7 @@ lemma retraction_boundaryι_apply (x : boundary X) :
     simp
   · have h₁ := inducedMap_apply hX₁ hX₂ hX₃ ⟨1, x⟩
     rw [Subtype.ext_iff] at h₁
-    convert h₁
+    convert! h₁
     · simp [norm_smul, smul_smul, inv_mul_cancel₀ (a := (r : ℝ)) (by simpa)]
     · simp only [polarParametrization_apply, mem_boundary_iff] at hx
       rw [sup_smul hX₁ hX₂ hX₃ (by simp), smul_eq_mul,

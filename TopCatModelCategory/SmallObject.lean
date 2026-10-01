@@ -15,10 +15,10 @@ variable {C : Type u} [Category.{v} C] {I : MorphismProperty C}
 
 lemma exists_retract_relativeCellComplex_of_llp_rlp
     {X Y : C} {f : X ⟶ Y} (hp : I.rlp.llp f)
-    (κ : Cardinal.{w}) [Fact κ.IsRegular] [OrderBot κ.ord.toType]
+    (κ : Cardinal.{w}) [Fact κ.IsRegular] [OrderBot κ.ord.ToType]
     [I.IsCardinalForSmallObjectArgument κ] :
     ∃ (Y' : C) (r : Retract Y Y') (f' : X ⟶ Y') (_ : f ≫ r.i = f'),
-      Nonempty (RelativeCellComplex.{w} (fun (_ : κ.ord.toType) => I.homFamily) f') := by
+      Nonempty (RelativeCellComplex.{w} (fun (_ : κ.ord.ToType) => I.homFamily) f') := by
   have := hp _ (rlp_πObj I κ f)
   let ρ := RetractArrow.ofLeftLiftingProperty (ιObj_πObj I κ f)
   have fac : f ≫ ρ.i.right = ιObj I κ f := by
@@ -29,10 +29,10 @@ lemma exists_retract_relativeCellComplex_of_llp_rlp
 
 lemma exists_retractArrow_relativeCellComplex_of_llp_rlp
     {X Y : C} {f : X ⟶ Y} (hp : I.rlp.llp f)
-    (κ : Cardinal.{w}) [Fact κ.IsRegular] [OrderBot κ.ord.toType]
+    (κ : Cardinal.{w}) [Fact κ.IsRegular] [OrderBot κ.ord.ToType]
     [I.IsCardinalForSmallObjectArgument κ] :
     ∃ (X' Y' : C) (f' : X' ⟶ Y') (_ : RetractArrow f f'),
-      Nonempty (RelativeCellComplex.{w} (fun (_ : κ.ord.toType) => I.homFamily) f') := by
+      Nonempty (RelativeCellComplex.{w} (fun (_ : κ.ord.ToType) => I.homFamily) f') := by
   obtain ⟨Y', r, f', fac, ⟨hf'⟩⟩ := exists_retract_relativeCellComplex_of_llp_rlp hp κ
   exact ⟨_, _, f', { i := Arrow.homMk (𝟙 X) r.i, r := Arrow.homMk (𝟙 X) r.r }, ⟨hf'⟩⟩
 
