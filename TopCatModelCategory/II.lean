@@ -269,7 +269,7 @@ lemma strictMono_map' (f : Fin (n + 1) →o Fin (m + 1)) (hf : Function.Surjecti
     · rw [map'_eq_last_iff] at h
       exact (lt_self_iff_false _).1 (h i)
 
-def injective_map' {f g : Fin (n + 1) →o Fin (m + 1)}
+lemma injective_map' {f g : Fin (n + 1) →o Fin (m + 1)}
      (h : map' f = map' g) : f = g := by
   ext i : 2
   wlog h' : g i ≤ f i generalizing f g
@@ -306,6 +306,8 @@ lemma II'_σ {n : ℕ} (i : Fin (n + 1)) :
     II.σ i = (δ i.succ.castSucc).op :=
   Quiver.Hom.unop_inj (by ext x : 3; apply II.map'_predAbove)
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 lemma II.castSucc_lt_map_apply {n m : SimplexCategory} (f : n ⟶ m)
     (i : Fin (m.len + 2)) (j : Fin (n.len + 1)) :
     j.castSucc < (II.map f).unop i ↔ (f j).castSucc < i := by
@@ -320,7 +322,7 @@ lemma II.castSucc_lt_map_apply {n m : SimplexCategory} (f : n ⟶ m)
       by_contra!
       simp only [Fin.castSucc_le_castSucc_iff] at this
       refine hj.not_ge (h.1.trans ?_)
-      simpa only [Fin.castSucc_le_castSucc_iff] using f.toOrderHom.monotone this
+      simpa only [Fin.castSucc_le_castSucc_iff] using! f.toOrderHom.monotone this
   · refine ⟨fun _ ↦ ?_, fun _ ↦ j.castSucc_lt_last⟩
     simp only [II_obj, len_mk, map'_eq_last_iff] at h
     apply h

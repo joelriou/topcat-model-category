@@ -13,7 +13,7 @@ lemma Topology.IsQuotientMap.retraction
     {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
     (r : C(X, Y)) (s : C(Y, X)) (hrs : r.comp s = .id _) :
     IsQuotientMap r := by
-  refine ⟨fun y ↦ ⟨s y, DFunLike.congr_fun hrs y⟩, ?_⟩
+  refine ⟨⟨?_⟩, fun y ↦ ⟨s y, DFunLike.congr_fun hrs y⟩⟩
   ext U
   change IsOpen U ↔ IsOpen (r ⁻¹' U)
   refine ⟨fun h ↦ r.continuous.isOpen_preimage U h,
@@ -39,13 +39,13 @@ lemma retraction_of_dist_le_one (v : E) (hv : ‖v‖ ≤ 1) :
 lemma retraction_of_one_le_dist (v : E) (hv : 1 ≤ ‖v‖) :
     retraction E v = ⟨‖v‖⁻¹ • v, by simpa [norm_smul] using inv_mul_le_one⟩ := by
   obtain hv | hv := hv.lt_or_eq
-  · exact dif_neg (by aesop)
+  · exact dite_eq_right (by aesop)
   · simp [retraction_of_dist_le_one v (by grind), hv.symm]
 
 variable (E)
 
 lemma retraction_restrict_closedBall :
-    (closedBall 0 1).restrict (retraction E) = fun v ↦ v := by
+    (closedBall 0 1).domRestrict (retraction E) = fun v ↦ v := by
   ext v
   dsimp
   rw [retraction_of_dist_le_one _ (by simpa [closedBall] using v.2)]
@@ -59,23 +59,23 @@ lemma continuous_retraction : Continuous (retraction E) := by
   rw [this]
   apply ContinuousOn.union_of_isClosed _ _ isClosed_closedBall
     (isClosed_le (by continuity) (by continuity))
-  · have : (closedBall 0 1).restrict (retraction E) = id := by
+  · have : (closedBall 0 1).domRestrict (retraction E) = id := by
       ext v
       dsimp
       rw [retraction_of_dist_le_one _ (by simpa [closedBall] using v.2)]
-    rw [continuousOn_iff_continuous_restrict,
+    rw [continuousOn_iff_continuous_domRestrict,
       retraction_restrict_closedBall]
     continuity
-  · have : ({v | 1 ≤ ‖v‖}.restrict (retraction E)) =
+  · have : ({v | 1 ≤ ‖v‖}.domRestrict (retraction E)) =
         fun v ↦ ⟨‖v.1‖⁻¹ • v, by simpa [norm_smul] using inv_mul_le_one⟩ := by
       ext v
       dsimp
       rw [retraction_of_one_le_dist _ v.2]
-    rw [continuousOn_iff_continuous_restrict, this]
+    rw [continuousOn_iff_continuous_domRestrict, this]
     refine Continuous.subtype_mk (Continuous.smul (Continuous.inv₀ (by continuity) ?_)
       continuous_induced_dom) _
     rintro ⟨x, hx⟩
-    simp only [Set.mem_setOf_eq] at hx
+    simp only [Set.mem_ofPred_eq] at hx
     grind
 
 @[simp]

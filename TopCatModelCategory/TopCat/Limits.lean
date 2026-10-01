@@ -1,7 +1,7 @@
 module
 
 public import Mathlib.Topology.Category.TopCat.Limits.Basic
-public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Defs
 
 @[expose] public section
 
@@ -16,7 +16,7 @@ lemma isPullbackRestrictPreimage {E B : TopCat.{u}} (p : E ⟶ B) (U : Set B) :
     (fun s ↦ ofHom ⟨fun x ↦ ⟨s.fst x, by
       simp only [Set.mem_preimage]
       have := ConcreteCategory.congr_hom s.condition x
-      convert (s.snd x).2⟩, by continuity⟩)
+      convert! (s.snd x).2⟩, by continuity⟩)
     (fun s ↦ rfl)
     (fun s ↦ by
       ext x

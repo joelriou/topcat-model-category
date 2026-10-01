@@ -1,7 +1,7 @@
 module
 
 public import Mathlib.Topology.Category.TopCat.Limits.Basic
-public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Basic
 
 @[expose] public section
 
@@ -30,8 +30,9 @@ lemma nonempty_isColimit_iff :
     exact ⟨⟨isColimitOfPreserves _ hc⟩ , coinduced_of_isColimit _ hc⟩
   · rintro ⟨⟨hc⟩, hc'⟩
     exact ⟨IsColimit.ofIsoColimit (isColimitCoconeOfForget _ hc)
-      (Cocones.ext (isoOfHomeo (Homeomorph.mk (.refl _) ⟨by aesop⟩
-        ⟨by aesop⟩)) (by aesop))⟩
+      (Cocone.ext (isoOfHomeo (Homeomorph.mk (.refl _)
+        ⟨fun U hU ↦ by rwa [hc'] at hU⟩
+        ⟨fun U hU ↦ by rwa [hc']⟩)) (by aesop))⟩
 
 section
 
@@ -101,7 +102,7 @@ lemma isQuotientMap :
     IsQuotientMap (Y := c.pt) (fun (x : Σ (j : J), F.obj j) ↦ c.ι.app x.1 x.2) where
   surjective y := by
     obtain ⟨j, x, rfl⟩ := Types.jointly_surjective_of_isColimit
-      (isColimitOfPreserves (forget _) hc) y
+      (isColimitOfPreserves (forget TopCat) hc) y
     exact ⟨⟨j, x⟩, rfl⟩
   eq_coinduced := by
     ext U
@@ -114,7 +115,7 @@ lemma funext {f g : c.pt → T}
     (h : ∀ (j : J), f.comp (c.ι.app j).hom = g.comp (c.ι.app j).hom) :
     f = g := by
   have hc' : ((Functor.coconeTypesEquiv _).symm ((forget TopCat).mapCocone c)).IsColimit :=
-    (Functor.CoconeTypes.isColimit_iff _).2 ⟨isColimitOfPreserves (forget _) hc⟩
+    (Functor.CoconeTypes.isColimit_iff _).2 ⟨isColimitOfPreserves (forget TopCat) hc⟩
   ext x
   obtain ⟨j, y, rfl⟩ := hc'.ι_jointly_surjective x
   exact congr_fun (h j) y
@@ -139,7 +140,7 @@ lemma existsUnique :
   refine existsUnique_of_exists_of_unique ?_
     (fun _ _ hf hg ↦ continuousMap_ext hc (fun j ↦ by rw [hf, hg]))
   have hc' : ((Functor.coconeTypesEquiv _).symm ((forget TopCat).mapCocone c)).IsColimit :=
-    (Functor.CoconeTypes.isColimit_iff _).2 ⟨isColimitOfPreserves (forget _) hc⟩
+    (Functor.CoconeTypes.isColimit_iff _).2 ⟨isColimitOfPreserves (forget TopCat) hc⟩
   let d : (F ⋙ forget TopCat).CoconeTypes :=
     { pt := T
       ι j := (φ j).toFun
