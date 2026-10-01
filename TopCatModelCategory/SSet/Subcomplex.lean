@@ -11,7 +11,7 @@ public import Mathlib.AlgebraicTopology.SimplicialSet.Boundary
 public import Mathlib.CategoryTheory.Sites.Subsheaf
 public import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Multiequalizer
 public import Mathlib.CategoryTheory.MorphismProperty.Limits
-public import Mathlib.CategoryTheory.Adhesive
+public import Mathlib.CategoryTheory.Adhesive.Basic
 public import TopCatModelCategory.ColimitsType
 public import TopCatModelCategory.CommSq
 public import TopCatModelCategory.SSet.Basic
@@ -171,6 +171,7 @@ lemma map_mem_obj {n m : SimplexCategoryᵒᵖ} (x : X.obj n) (f : n ⟶ m)
 
 variable (X)
 
+/-
 -- added in #31122
 @[simps! inv_app_coe]
 def topIso : ((⊤ : X.Subcomplex) : SSet) ≅ X :=
@@ -186,7 +187,7 @@ def isInitialBot : IsInitial ((⊥ : X.Subcomplex) : SSet.{u}) :=
   IsInitial.ofUniqueHom (fun P ↦
     { app i := fun ⟨x, hx⟩ ↦ by simp at hx
       naturality i j f := by ext ⟨x, hx⟩; simp at hx })
-    (fun _ _ ↦ by ext _ ⟨x, hx⟩; simp at hx)
+    (fun _ _ ↦ by ext _ ⟨x, hx⟩; simp at hx)-/
 
 variable {X}
 
@@ -216,7 +217,7 @@ lemma iSup_inf {ι : Type*} (S : ι → X.Subcomplex) (T : X.Subcomplex):
 
 @[simp]
 lemma ι_app {Δ : SimplexCategoryᵒᵖ} (x : S.obj Δ) :
-    S.ι.app Δ x = x.val := rfl-/
+    S.ι.app Δ x = x.val := rfl
 
 instance : Mono S.ι := by
   infer_instance
@@ -256,7 +257,7 @@ lemma homOfLE_ι : homOfLE h ≫ S₂.ι = S₁.ι := rfl
 
 instance mono_homOfLE : Mono (homOfLE h) := mono_of_mono_fac (homOfLE_ι h)
 
-end
+end-/
 
 @[simps]
 def toPresheafFunctor : X.Subcomplex ⥤ SSet.{u} where
@@ -280,7 +281,7 @@ def forget : X.Subcomplex ⥤ SSet.{u} where
   obj S := S
   map f := homOfLE (leOfHom f)
 
-noncomputable def unionProd : (X ⊗ Y).Subcomplex := ((⊤ : X.Subcomplex).prod T) ⊔ (S.prod ⊤)
+/-noncomputable def unionProd : (X ⊗ Y).Subcomplex := ((⊤ : X.Subcomplex).prod T) ⊔ (S.prod ⊤)
 
 lemma mem_unionProd_iff {n : SimplexCategoryᵒᵖ} (x : (X ⊗ Y).obj n) :
     x ∈ (unionProd S T).obj _ ↔ x.1 ∈ S.obj _ ∨ x.2 ∈ T.obj _ := by
@@ -298,7 +299,7 @@ lemma prod_le_prod_top : S.prod T ≤ S.prod ⊤ :=
   prod_monotone (by rfl) le_top
 
 lemma prod_le_unionProd : S.prod T ≤ S.unionProd T :=
-  (prod_le_prod_top S T).trans (prod_top_le_unionProd S T)
+  (prod_le_prod_top S T).trans (prod_top_le_unionProd S T)-/
 
 end Subcomplex
 
@@ -324,7 +325,7 @@ lemma subcomplexHorn_toSSet (n : ℕ) (i : Fin (n + 1)) :
     subcomplexHorn.{u} n i = Λ[n, i] := rfl
 
 lemma subcomplexHorn_ι (n : ℕ) (i : Fin (n + 1)) :
-    (subcomplexHorn.{u} n i).ι = hornInclusion n i := rfl-/
+    (subcomplexHorn.{u} n i).ι = hornInclusion n i := rfl
 
 lemma mem_horn_iff {n : ℕ} (i : Fin (n + 1)) {m : SimplexCategoryᵒᵖ}
     (x : (Δ[n] : SSet.{u}).obj m) :
@@ -337,14 +338,14 @@ lemma boundary_zero : boundary.{u} 0 = ⊥ := by
   intro x
   fin_cases x
   refine ⟨0, ?_⟩
-  apply Subsingleton.elim
+  apply Subsingleton.elim-/
 
 section
 
 variable {X Y}
 variable (f : X ⟶ Y)
 
-attribute [local simp] FunctorToTypes.naturality
+--attribute [local simp] FunctorToTypes.naturality
 
 /-abbrev Subcomplex.range : Y.Subcomplex := Subpresheaf.range f
 
@@ -357,10 +358,10 @@ def Subcomplex.range : Y.Subcomplex where
 
 @[simp]
 lemma Subcomplex.range_ι (A : X.Subcomplex) :
-    Subpresheaf.range A.ι = A := by
-  rw [Subpresheaf.range_ι]
+    Subfunctor.range A.ι = A := by
+  rw [Subfunctor.range_ι]
 
-abbrev toRangeSubcomplex : X ⟶ Subcomplex.range f := Subpresheaf.toRange f
+abbrev toRangeSubcomplex : X ⟶ Subcomplex.range f := Subfunctor.toRange f
 
 @[simp]
 lemma toRangeSubcomplex_apply_val {Δ : SimplexCategoryᵒᵖ} (x : X.obj Δ) :
@@ -370,7 +371,7 @@ lemma toRangeSubcomplex_apply_val {Δ : SimplexCategoryᵒᵖ} (x : X.obj Δ) :
 lemma toRangeSubcomplex_ι : toRangeSubcomplex f ≫ (Subcomplex.range f).ι = f := rfl
 
 instance : Epi (toRangeSubcomplex f) := by
-  change Epi (Subpresheaf.toRange f)
+  change Epi (Subfunctor.toRange f)
   infer_instance
 
 instance : Balanced SSet.{u} :=
@@ -380,13 +381,13 @@ instance {X Y : SSet.{u}} (f : X ⟶ Y) [Mono f] : IsIso (toRangeSubcomplex f) :
   have := mono_of_mono_fac (toRangeSubcomplex_ι f)
   apply isIso_of_mono_of_epi
 
-lemma Subcomplex.range_eq_top_iff : Subcomplex.range f = ⊤ ↔ Epi f := by
-  rw [NatTrans.epi_iff_epi_app, Subpresheaf.ext_iff, funext_iff]
-  simp only [epi_iff_surjective, Subpresheaf.range_obj, Subpresheaf.top_obj, Set.top_eq_univ,
+/-lemma Subcomplex.range_eq_top_iff : Subcomplex.range f = ⊤ ↔ Epi f := by
+  rw [NatTrans.epi_iff_epi_app, Subfunctor.ext_iff, funext_iff]
+  simp only [epi_iff_surjective, Subfunctor.range_obj, Subfunctor.top_obj, Set.top_eq_univ,
     Set.range_eq_univ]
 
 lemma Subcomplex.range_eq_top [Epi f] : Subcomplex.range f = ⊤ := by
-  rwa [range_eq_top_iff]
+  rwa [range_eq_top_iff]-/
 
 end
 
@@ -401,10 +402,10 @@ variable {A₁ A₂ A₃ A₄ : X.Subcomplex} (sq : Sq A₁ A₂ A₃ A₄)
 
 include sq
 
-lemma le₁₂ : A₁ ≤ A₂ := by rw [← sq.min_eq]; exact inf_le_left
-lemma le₁₃ : A₁ ≤ A₃ := by rw [← sq.min_eq]; exact inf_le_right
-lemma le₂₄ : A₂ ≤ A₄ := by rw [← sq.max_eq]; exact le_sup_left
-lemma le₃₄ : A₃ ≤ A₄ := by rw [← sq.max_eq]; exact le_sup_right
+lemma le₁₂ : A₁ ≤ A₂ := by rw [← sq.inf_eq]; exact inf_le_left
+lemma le₁₃ : A₁ ≤ A₃ := by rw [← sq.inf_eq]; exact inf_le_right
+lemma le₂₄ : A₂ ≤ A₄ := by rw [← sq.sup_eq]; exact le_sup_left
+lemma le₃₄ : A₃ ≤ A₄ := by rw [← sq.sup_eq]; exact le_sup_right
 
 -- the associated commutative square in `SSet`, which is both pushout and pullback
 lemma commSq : CommSq (homOfLE sq.le₁₂) (homOfLE sq.le₁₃)
@@ -412,11 +413,11 @@ lemma commSq : CommSq (homOfLE sq.le₁₂) (homOfLE sq.le₁₃)
 
 lemma obj (n : SimplexCategoryᵒᵖ) :
     Lattice.BicartSq (A₁.obj n) (A₂.obj n) (A₃.obj n) (A₄.obj n) where
-  max_eq := by
-    rw [← sq.max_eq]
+  sup_eq := by
+    rw [← sq.sup_eq]
     rfl
-  min_eq := by
-    rw [← sq.min_eq]
+  inf_eq := by
+    rw [← sq.inf_eq]
     rfl
 
 lemma isPushout : IsPushout (homOfLE sq.le₁₂) (homOfLE sq.le₁₃)
@@ -432,7 +433,8 @@ end Sq
 section
 
 variable {Y}
-@[simps]
+
+/-@[simps]
 def preimage (A : X.Subcomplex) (p : Y ⟶ X) : Y.Subcomplex where
   obj n := p.app n ⁻¹' (A.obj n)
   map f := (Set.preimage_mono (A.map f)).trans (by
@@ -463,7 +465,7 @@ def fromPreimage (A : X.Subcomplex) (p : Y ⟶ X) :
     ext ⟨y, hy⟩
     dsimp
     ext
-    exact FunctorToTypes.naturality _ _ p f y
+    exact FunctorToTypes.naturality _ _ p f y-/
 
 lemma ofSimplex_eq_range {X : SSet.{u}} {n : ℕ} (x : X _⦋n⦌) :
     Subcomplex.ofSimplex x = range (yonedaEquiv.symm x) := by
@@ -471,17 +473,17 @@ lemma ofSimplex_eq_range {X : SSet.{u}} {n : ℕ} (x : X _⦋n⦌) :
 
 lemma mem_ofSimplex₀_obj_iff {X : SSet.{u}} (x : X _⦋0⦌) {n : SimplexCategory} (y : X.obj (op n)) :
     y ∈ (Subcomplex.ofSimplex x).obj _ ↔ y = X.map (n.const ⦋0⦌ 0).op x := by
-  simp only [ofSimplex, Subpresheaf.ofSection, Set.mem_setOf_eq]
+  simp only [ofSimplex, Subfunctor.ofSection, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨⟨f⟩, rfl⟩
     obtain rfl := Subsingleton.elim f (n.const ⦋0⦌ 0)
     rfl
   · tauto
 
-@[simp]
+/-@[simp]
 lemma preimage_ι {X : SSet.{u}} (A : X.Subcomplex) :
     A.preimage A.ι = ⊤ := by
-  aesop
+  aesop-/
 
 @[simp]
 lemma range_const_ι {X Y : SSet.{u}} (y : Y _⦋0⦌) :
@@ -530,19 +532,19 @@ lemma le_ofSimplex_iff (x : X _⦋0⦌) (A : X.Subcomplex) :
     simp only [← A.range_ι, h]
     rintro m _ ⟨y, rfl⟩
     rw [const_app]
-    exact Subpresheaf.map _ _ (mem_ofSimplex_obj x)
+    exact Subfunctor.map _ _ (mem_ofSimplex_obj x)
 
 end
 
-section
+/-section
 
 variable {Y} (S : X.Subcomplex) (f : X ⟶ Y)
 
-abbrev image : Y.Subcomplex := Subpresheaf.image S f
+abbrev image : Y.Subcomplex := Subfunctor.image S f
 
 lemma image_le_iff (Z : Y.Subcomplex) :
     S.image f ≤ Z ↔ S ≤ Z.preimage f := by
-  simp [Subpresheaf.le_def]
+  simp [Subfunctor.le_def]
 
 lemma image_top : (⊤ : X.Subcomplex).image f = range f := by aesop
 
@@ -557,7 +559,7 @@ lemma range_comp {Z : SSet.{u}} (g : Y ⟶ Z) :
   simp only [← image_top, image_comp]
 
 lemma image_eq_range : S.image f = range (S.ι ≫ f) := by
-  simp only [range_comp, Subpresheaf.range_ι]
+  simp only [range_comp, Subfunctor.range_ι]
 
 lemma image_iSup {ι : Type*} (S : ι → X.Subcomplex) (f : X ⟶ Y) :
     image (⨆ i, S i) f = ⨆ i, (S i).image f := by
@@ -580,7 +582,7 @@ lemma image_ofSimplex {n : ℕ} (x : X _⦋n⦌) (f : X ⟶ Y) :
     exact ⟨x, mem_ofSimplex_obj _, rfl⟩
 
 def toImage : (S : SSet) ⟶ (S.image f : SSet) :=
-  (S.image f).lift (S.ι ≫ f) (by simp [Subpresheaf.range_comp])
+  (S.image f).lift (S.ι ≫ f) (by simp [Subfunctor.range_comp])
 
 @[reassoc (attr := simp)]
 lemma toImage_ι : S.toImage f ≫ (S.image f).ι = S.ι ≫ f := rfl
@@ -596,7 +598,7 @@ lemma image_monotone : Monotone (fun (S : X.Subcomplex) ↦ S.image f) := by
   rw [image_le_iff]
   exact h.trans (by rw [← image_le_iff])
 
-end
+end-/
 
 section
 
@@ -623,14 +625,14 @@ lemma _root_.Set.preimage_eq_iff {X Y : Type*} (f : X → Y)
 lemma preimage_eq_iff {X Y : SSet.{u}}
     (f : X ⟶ Y) (A : X.Subcomplex) (B : Y.Subcomplex) [Mono f] :
     B.preimage f = A ↔ B ⊓ Subcomplex.range f = A.image f := by
-  simp only [Subpresheaf.ext_iff, funext_iff]
+  simp only [Subfunctor.ext_iff, funext_iff]
   apply forall_congr'
   intro i
   apply Set.preimage_eq_iff
   rw [← mono_iff_injective]
   infer_instance
 
-@[simp]
+/-@[simp]
 lemma preimage_eq_top_iff {X Y : SSet.{u}}
     (f : X ⟶ Y) (B : Y.Subcomplex) :
     B.preimage f = ⊤ ↔ range f ≤ B := by
@@ -642,11 +644,11 @@ lemma preimage_image_of_isIso {X Y : SSet.{u}} (f : X ⟶ Y) (B : Y.Subcomplex) 
   apply le_antisymm
   · rw [image_le_iff]
   · intro n y hy
-    exact ⟨(inv f).app _ y, by simpa [← FunctorToTypes.comp]⟩
+    exact ⟨(inv f).app _ y, by simpa [← FunctorToTypes.comp]⟩-/
 
 end
 
-section
+/-section
 
 variable {Y} (f : X ⟶ Y) {B : Y.Subcomplex} (hf : B.preimage f = ⊤)
 
@@ -686,7 +688,7 @@ lemma yonedaEquiv_toOfSimplex :
 instance : Epi (toOfSimplex x) := by
   rw [← range_eq_top_iff]
   ext m ⟨_, u, rfl⟩
-  simp only [Subpresheaf.toPresheaf_obj, range_eq_ofSimplex, Subpresheaf.top_obj, Set.top_eq_univ,
+  simp only [Subfunctor.toPresheaf_obj, range_eq_ofSimplex, Subfunctor.top_obj, Set.top_eq_univ,
     Set.mem_univ, iff_true]
   refine ⟨u, ?_⟩
   dsimp
@@ -704,7 +706,7 @@ lemma isIso_toOfSimplex_iff :
     have := mono_of_mono_fac (toOfSimplex_ι x)
     apply isIso_of_mono_of_epi
 
-end
+end-/
 
 section
 
@@ -747,7 +749,7 @@ noncomputable def isColimitPushoutCoconeOfPullback [hf : Mono f] :
 
 end
 
-variable {Y} in
+/-variable {Y} in
 noncomputable def prodIso (S : X.Subcomplex) (T : Y.Subcomplex) :
     (S.prod T : SSet) ≅ (S : SSet) ⊗ (T : SSet) where
   hom := CartesianMonoidalCategory.lift
@@ -760,15 +762,15 @@ noncomputable def prodIso (S : X.Subcomplex) (T : Y.Subcomplex) :
   inv := lift (S.ι ⊗ₘ T.ι) (by
     ext n ⟨x, y⟩
     dsimp
-    simp only [Set.mem_preimage, tensorHom_app_apply, Subpresheaf.ι_app,
+    simp only [Set.mem_preimage, tensorHom_app_apply, Subfunctor.ι_app,
       Set.mem_univ, iff_true]
-    exact ⟨x.2, y.2⟩)
+    exact ⟨x.2, y.2⟩)-/
 
 namespace unionProd
 
 variable {Y} (S : X.Subcomplex) (T : Y.Subcomplex)
 
-noncomputable def ι₁ : X ⊗ T ⟶ unionProd S T :=
+/-noncomputable def ι₁ : X ⊗ T ⟶ unionProd S T :=
   lift (X ◁ T.ι) (by
     ext m ⟨x₁, x₂⟩
     simp [unionProd, Set.prod]
@@ -784,17 +786,17 @@ noncomputable def ι₂ : (S : SSet.{u}) ⊗ Y ⟶ (unionProd S T : SSet.{u}) :=
 lemma ι₁_ι : ι₁ S T ≫ (unionProd S T).ι = X ◁ T.ι := rfl
 
 @[reassoc (attr := simp)]
-lemma ι₂_ι : ι₂ S T ≫ (unionProd S T).ι = S.ι ▷ Y := rfl
+lemma ι₂_ι : ι₂ S T ≫ (unionProd S T).ι = S.ι ▷ Y := rfl-/
 
 lemma sq : Sq (S.prod T) ((⊤ : X.Subcomplex).prod T) (S.prod ⊤) (unionProd S T) where
-  max_eq := rfl
-  min_eq := by
+  sup_eq := rfl
+  inf_eq := by
     ext n ⟨x, y⟩
     change _ ∧ _ ↔ _
-    simp [prod, Set.prod, Membership.mem, Set.Mem, setOf]
+    simp [prod, Set.prod, Membership.mem, Set.Mem, Set.ofPred]
     tauto
 
-lemma isPushout : IsPushout (S.ι ▷ (T : SSet)) ((S : SSet) ◁ T.ι)
+/-lemma isPushout : IsPushout (S.ι ▷ (T : SSet)) ((S : SSet) ◁ T.ι)
     (unionProd.ι₁ S T) (unionProd.ι₂ S T) :=
   (sq S T).isPushout.of_iso
     (Subcomplex.prodIso _ _)
@@ -821,14 +823,13 @@ lemma image_β_hom : (unionProd S T).image (β_ _ _).hom = unionProd T S := by
 lemma image_β_inv : (unionProd S T).image (β_ _ _).hom = unionProd T S := by
   apply image_β_hom
 
-
 noncomputable def symmIso : (unionProd S T : SSet) ≅ (unionProd T S : SSet) where
   hom := lift ((unionProd S T).ι ≫ (β_ _ _).hom) (by
-    simp only [Subcomplex.preimage_eq_top_iff, range_comp, Subpresheaf.range_ι, image_β_hom,
+    simp only [Subcomplex.preimage_eq_top_iff, range_comp, Subfunctor.range_ι, image_β_hom,
       le_refl])
   inv := lift ((unionProd T S).ι ≫ (β_ _ _).hom) (by
-    simp only [Subcomplex.preimage_eq_top_iff, range_comp, Subpresheaf.range_ι, image_β_hom,
-      le_refl])
+    simp only [Subcomplex.preimage_eq_top_iff, range_comp, Subfunctor.range_ι, image_β_hom,
+      le_refl])-/
 
 end unionProd
 
@@ -843,16 +844,18 @@ noncomputable def multicoforkIsColimit :
   evaluationJointlyReflectsColimits _ (fun n ↦ by
     have h' : CompleteLattice.MulticoequalizerDiagram (A.obj n) (fun i ↦ (U i).obj n)
         (fun i j ↦ (V i j).obj n) :=
-      { min_eq := by simp [h.min_eq]
+      { eq_inf := by simp [h.eq_inf]
         iSup_eq := by simp [← h.iSup_eq] }
     exact (Multicofork.isColimitMapEquiv _ _).2 (Types.isColimitMulticoforkMapSetToTypes h'))
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 noncomputable def multicoforkIsColimit' [LinearOrder ι] :
     IsColimit (h.multicofork.toLinearOrder.map toPresheafFunctor) :=
   Multicofork.isColimitToLinearOrder _ (multicoforkIsColimit h)
     { iso i j := toPresheafFunctor.mapIso (eqToIso (by
         dsimp
-        rw [h.min_eq, h.min_eq, inf_comm]))
+        rw [h.eq_inf, h.eq_inf, inf_comm]))
       iso_hom_fst _ _ := rfl
       iso_hom_snd _ _ := rfl
       fst_eq_snd _ := rfl }
@@ -879,7 +882,7 @@ lemma preimage_preimage {X Y Z : SSet.{u}} (A : Z.Subcomplex) (f : X ⟶ Y) (g :
 lemma preimage_ι_comp_eq_top_iff {X Y : SSet.{u}} (B : Y.Subcomplex) (A : X.Subcomplex) (f : X ⟶ Y) :
     B.preimage (A.ι ≫ f) = ⊤ ↔ A ≤ B.preimage f := by
   simp only [← top_le_iff, preimage_preimage, ← Subcomplex.image_le_iff, image_top,
-    Subpresheaf.range_ι]
+    Subfunctor.range_ι]
 
 section
 
@@ -896,7 +899,7 @@ end
 @[simp]
 lemma iSup_obj {ι : Sort*} (S : ι → X.Subcomplex) (U : SimplexCategoryᵒᵖ) :
     (⨆ i, S i).obj U = ⋃ i, (S i).obj U := by
-  simp [iSup, Subpresheaf.sSup_obj]
+  simp [iSup, Subfunctor.sSup_obj]
 
 instance : Subsingleton ((⊥ : X.Subcomplex).toSSet ⟶ Y) where
   allEq f g := by
@@ -905,7 +908,7 @@ instance : Subsingleton ((⊥ : X.Subcomplex).toSSet ⟶ Y) where
 
 instance : Inhabited ((⊥ : X.Subcomplex).toSSet ⟶ Y) where
   default :=
-    { app _ := fun ⟨_, hx⟩ ↦ by simp at hx
+    { app _ := ↾fun ⟨_, hx⟩ ↦ by simp at hx
       naturality _ _ _ := by
         ext ⟨_, hx⟩
         simp at hx }
@@ -927,8 +930,10 @@ variable {A : X.Subcomplex} (h : CompleteLattice.CoproductDiagram A U)
 abbrev cofan : Cofan (fun i ↦ (U i : SSet)) :=
   Cofan.mk A (fun i ↦ homOfLE (by rw [← h.iSup_eq]; apply le_iSup))
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 noncomputable def isColimitCofan : IsColimit (cofan h) :=
-  mkCofanColimit _
+  Cofan.IsColimit.mk _
     (fun s ↦ (multicoforkIsColimit h).desc
       (Multicofork.ofπ _ s.pt (fun i ↦ s.inj i) (fun ⟨i, j⟩ ↦ by
         by_cases hij : i = j
@@ -936,7 +941,7 @@ noncomputable def isColimitCofan : IsColimit (cofan h) :=
           rfl
         · apply IsInitial.hom_ext
           dsimp
-          rw [if_neg hij]
+          erw [ite_eq_right hij]
           exact botIsInitial)))
     (fun s i ↦ (multicoforkIsColimit h).fac _ (.right i))
     (fun s m hm ↦ by
@@ -965,7 +970,7 @@ lemma preimage_image_of_mono (S : X.Subcomplex) (f : X ⟶ Y) [Mono f] :
     (S.image f).preimage f = S := by
   apply le_antisymm
   · intro n x hx
-    simp only [preimage_obj, Subpresheaf.image_obj, Set.mem_preimage, Set.mem_image] at hx
+    simp only [preimage_obj, Set.mem_preimage] at hx
     obtain ⟨y, hy, hxy⟩ := hx
     obtain rfl : y = x := (mono_iff_injective _).1 inferInstance hxy
     exact hy
@@ -982,13 +987,11 @@ def congrArrowι (e : X ≅ Y) {A : X.Subcomplex} {B : Y.Subcomplex}
     (h : A.image e.hom = B) :
     Arrow.mk A.ι ≅ Arrow.mk B.ι :=
   Arrow.isoMk
-    { hom := Subcomplex.lift (A.ι ≫ e.hom)
-        (le_antisymm (by simp) (by simp [range_comp, h]))
-      inv := Subcomplex.lift (B.ι ≫ e.inv)
-        (le_antisymm (by simp) (by
-          have h' : B.image e.inv = A := by
-            rw [← h, ← image_comp, e.hom_inv_id, image_id]
-          simp [range_comp, h']))
+    { hom := Subcomplex.lift (A.ι ≫ e.hom) (by simp [h, range_comp])
+      inv := Subcomplex.lift (B.ι ≫ e.inv) (by
+        have h' : B.image e.inv = A := by
+          rw [← h, ← image_comp, e.hom_inv_id, image_id]
+        simp [h', range_comp])
       hom_inv_id := by simp [← cancel_mono A.ι]
       inv_hom_id := by simp [← cancel_mono B.ι] } e
 

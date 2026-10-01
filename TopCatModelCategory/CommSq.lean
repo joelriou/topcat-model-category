@@ -1,6 +1,6 @@
 module
 
-public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Basic
 
 @[expose] public section
 
@@ -12,6 +12,7 @@ variable {C : Type*} [Category C]
 
 namespace IsPushout
 
+/-
 /-- Same as `IsPushout.of_iso`, but using the data and compatibilities involve
 the inverse isomorphisms instead. -/
 lemma of_iso' {Z X Y P : C} {f : Z ⟶ X} {g : Z ⟶ Y} {inl : X ⟶ P} {inr : Y ⟶ P}
@@ -27,14 +28,14 @@ lemma of_iso' {Z X Y P : C} {f : Z ⟶ X} {g : Z ⟶ Y} {inl : X ⟶ P} {inr : Y
   · simp only [Iso.symm_hom, Iso.comp_inv_eq, Category.assoc, ← commf, Iso.inv_hom_id_assoc]
   · simp only [Iso.symm_hom, Iso.comp_inv_eq, Category.assoc, ← commg, Iso.inv_hom_id_assoc]
   · simp only [Iso.symm_hom, Iso.comp_inv_eq, Category.assoc, ← comminl, Iso.inv_hom_id_assoc]
-  · simp only [Iso.symm_hom, Iso.comp_inv_eq, Category.assoc, ← comminr, Iso.inv_hom_id_assoc]
+  · simp only [Iso.symm_hom, Iso.comp_inv_eq, Category.assoc, ← comminr, Iso.inv_hom_id_assoc]-/
 
 variable {Z X Y P : C} {f : Z ⟶ X} {g : Z ⟶ Y} {inl : X ⟶ P} {inr : Y ⟶ P}
 
-lemma exists_desc (sq : IsPushout f g inl inr)
+/-lemma exists_desc (sq : IsPushout f g inl inr)
     {W : C} (h : X ⟶ W) (k : Y ⟶ W) (w : f ≫ h = g ≫ k) :
     ∃ (d : P ⟶ W), inl ≫ d = h ∧ inr ≫ d = k :=
-  ⟨sq.desc h k w, by simp, by simp⟩
+  ⟨sq.desc h k w, by simp, by simp⟩-/
 
 noncomputable def isColimitBinaryCofan (sq : IsPushout f g inl inr) (hZ : IsInitial Z) :
     IsColimit (BinaryCofan.mk inl inr) :=
@@ -47,10 +48,10 @@ namespace IsPullback
 
 variable {P X Y Z : C} {t : P ⟶ X} {l : P ⟶ Y} {r : X ⟶ Z} {b : Y ⟶ Z}
 
-lemma exists_lift (sq : IsPullback t l r b)
+/-lemma exists_lift (sq : IsPullback t l r b)
     {W : C} (h : W ⟶ X) (k : W ⟶ Y) (w : h ≫ r = k ≫ b) :
     ∃ (d : W ⟶ P), d ≫ t = h ∧ d ≫ l = k :=
-  ⟨sq.lift h k w, by simp, by simp⟩
+  ⟨sq.lift h k w, by simp, by simp⟩-/
 
 end IsPullback
 
@@ -130,6 +131,7 @@ lemma preservesLimit_of_iso (e : F.obj P ≅ Q) (he₁ : e.hom ≫ t' = F.map t)
       (IsLimit.ofIsoLimit sq'.isLimit
         (PullbackCone.ext e he₁.symm he₂.symm).symm))
 
+set_option backward.isDefEq.respectTransparency false in
 include sq sq' in
 lemma isIso_of_preservesLimit (φ : F.obj P ⟶ Q) (he₁ : φ ≫ t' = F.map t)
     (he₂ : φ ≫ l' = F.map l) [PreservesLimit (cospan f₁ f₂) F] : IsIso φ := by

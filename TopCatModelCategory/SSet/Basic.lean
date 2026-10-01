@@ -41,7 +41,7 @@ lemma stdSimplex.map_comp_yonedaEquiv_symm {X : SSet.{u}} {n m : SimplexCategory
   conv_rhs => rw [Equiv.apply_symm_apply, ← Category.id_comp f]
   rfl
 
-@[reassoc]
+/-@[reassoc]
 lemma stdSimplex.δ_comp_yonedaEquiv_symm {X : SSet.{u}} {n : ℕ} (i : Fin (n + 2))
     (x : X _⦋n + 1⦌) :
     stdSimplex.δ i ≫ yonedaEquiv.symm x = yonedaEquiv.symm (X.δ i x) := by
@@ -65,11 +65,10 @@ lemma yonedaEquiv_symm_zero {X : SSet.{u}} (x : X _⦋0⦌) :
 
 
 protected abbrev evaluation : SimplexCategoryᵒᵖ ⥤ SSet.{u} ⥤ Type u :=
-  evaluation _ _
+  evaluation _ _-/
 
-instance {J : Type*} [Category J] [HasColimitsOfShape J (Type u)] (n : SimplexCategoryᵒᵖ) :
+example {J : Type*} [Category J] [HasColimitsOfShape J (Type u)] (n : SimplexCategoryᵒᵖ) :
     PreservesColimitsOfShape J (SSet.evaluation.{u}.obj n) := by
-  change PreservesColimitsOfShape J ((evaluation _ _).obj n)
   infer_instance
 
 @[simps!]
