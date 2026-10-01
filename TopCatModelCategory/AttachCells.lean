@@ -144,7 +144,7 @@ variable {C D : Type*} [Category C] [Category D]
   [PreservesColimit (Discrete.functor (fun i ↦ B (hf.π i))) F]
   [PreservesColimit (span hf.g₁ hf.m) F]
 
-@[simps]
+@[simps, implicit_reducible]
 noncomputable def map : AttachCells (g := fun a ↦ F.map (g a)) (F.map f) where
   ι := hf.ι
   π := hf.π

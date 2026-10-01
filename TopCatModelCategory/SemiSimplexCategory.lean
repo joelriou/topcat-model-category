@@ -12,11 +12,11 @@ namespace RelEmbedding
 variable {α β : Type*} (r : α → α → Prop) (s : β → β → Prop)
   (f : RelEmbedding r s)
 
-@[simp]
+/-@[simp]
 lemma trans_refl : f.trans (.refl _) = f := rfl
 
 @[simp]
-lemma refl_trans : (RelEmbedding.refl _).trans f = f := rfl
+lemma refl_trans : (RelEmbedding.refl _).trans f = f := rfl-/
 
 end RelEmbedding
 
@@ -50,6 +50,7 @@ theorem hom_ext {a b : SemiSimplexCategory} {f g : a ⟶ b}
     (h : homEquiv f = homEquiv g) : f = g :=
   homEquiv.injective h
 
+@[implicit_reducible]
 def toSimplexCategory : SemiSimplexCategory ⥤ SimplexCategory where
   obj n := ⦋n.len⦌
   map f := SimplexCategory.Hom.mk (homEquiv.symm f).toOrderHom

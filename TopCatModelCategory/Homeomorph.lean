@@ -29,8 +29,12 @@ def Homeomorph.restrict {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
     (e : X ≃ₜ Y) {S : Set X} {T : Set Y} (h : e ⁻¹' T = S) :
     S ≃ₜ T where
   toEquiv := e.toEquiv.restrict h
-  continuous_toFun := by dsimp [Equiv.restrict]; continuity
-  continuous_invFun := by dsimp [Equiv.restrict]; continuity
+  continuous_toFun := by
+    simp [Equiv.restrict]
+    continuity
+  continuous_invFun := by
+    simp [Equiv.restrict]
+    continuity
 
 abbrev Homeomorph.continuousMap
     {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]

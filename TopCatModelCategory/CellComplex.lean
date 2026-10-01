@@ -126,7 +126,7 @@ def ofOrderIso (hf : RelativeCellComplex.{w} basicCell f) (e : J' ≃o J) :
       (Arrow.isoMk (Iso.refl _)
         (hf.F.mapIso (eqToIso (OrderIso.map_succ e j).symm)) (by
           dsimp
-          rw [id_comp, ← Functor.map_comp]
+          erw [id_comp, ← Functor.map_comp]
           rfl))
 
 section
@@ -136,7 +136,7 @@ variable (hf : RelativeCellComplex.{w} basicCell f)
     [∀ (T : Type w), PreservesColimitsOfShape (Discrete T) F]
     [PreservesColimitsOfShape WalkingSpan F]
 
-@[simps!]
+@[simps!, implicit_reducible]
 noncomputable def map :
     RelativeCellComplex.{w} (fun j i ↦ F.map (basicCell j i)) (F.map f) where
   toTransfiniteCompositionOfShape := hf.toTransfiniteCompositionOfShape.map F
@@ -153,6 +153,7 @@ def mapCellsEquiv : (hf.map F).Cells ≃ hf.Cells where
       hj := c.hj
       k := c.k }
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma ι_mapCellEquiv_symm (c : hf.Cells) :
     ((hf.mapCellsEquiv F).symm c).ι = F.map c.ι := by

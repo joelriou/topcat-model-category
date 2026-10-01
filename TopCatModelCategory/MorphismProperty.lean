@@ -13,8 +13,8 @@ local instance Cardinal.aleph0_isRegular : Fact Cardinal.aleph0.{w}.IsRegular wh
   out := Cardinal.isRegular_aleph0
 
 noncomputable local instance Cardinal.orderbot_aleph0_ord_to_type :
-    OrderBot Cardinal.aleph0.ord.toType :=
-  toTypeOrderBot Cardinal.isRegular_aleph0.ne_zero
+    OrderBot Cardinal.aleph0.ord.ToType :=
+  WellFoundedLT.toOrderBot _
 
 namespace CategoryTheory.MorphismProperty
 
@@ -37,44 +37,44 @@ lemma monotone_coproducts {W₁ W₂ : MorphismProperty C} (h : W₁ ≤ W₂) :
 lemma min_iff (W₁ W₂ : MorphismProperty C) {X Y : C} (f : X ⟶ Y) :
     (W₁ ⊓ W₂) f ↔ W₁ f ∧ W₂ f := Iff.rfl
 
-@[simp]
+/-@[simp]
 lemma sInf_iff (S : Set (MorphismProperty C)) {X Y : C} (f : X ⟶ Y) :
     sInf S f ↔ ∀ (W : S), W.1 f := by
   dsimp [sInf, iInf]
-  aesop
+  aesop-/
 
 @[simp]
 lemma max_iff (W₁ W₂ : MorphismProperty C) {X Y : C} (f : X ⟶ Y) :
     (W₁ ⊔ W₂) f ↔ W₁ f ∨ W₂ f := Iff.rfl
 
-instance isSmall_iSup {ι : Type w'} (W : ι → MorphismProperty C) [∀ i, IsSmall.{w} (W i)]
+/-instance isSmall_iSup {ι : Type w'} (W : ι → MorphismProperty C) [∀ i, IsSmall.{w} (W i)]
     [Small.{w} ι] :
     IsSmall.{w} (⨆ i, W i) := by
   have : ⨆ i, W i = .ofHoms (fun (j : Σ (i : ι), (W i).toSet) ↦ j.2.1.hom) := by
     ext
     simp [ofHoms_iff]
   rw [this]
-  infer_instance
+  infer_instance-/
 
 section
 
 variable {ι : Sort*} (W : ι → MorphismProperty C)
 
+-- `iInf_iff` needs to be fixed to accept `Sort*` instead of `Type*`
 @[simp]
-lemma iInf_iff {X Y : C} (f : X ⟶ Y) :
+lemma iInf_iff' {X Y : C} (f : X ⟶ Y) :
     iInf W f ↔ ∀ i, W i f := by
-  dsimp [sInf, iInf]
-  aesop
+  simp [← sInf_range]
 
 instance [∀ i, (W i).ContainsIdentities] : (⨅ (i : ι), W i).ContainsIdentities where
   id_mem X := by
-    simp only [iInf_iff]
+    simp only [iInf_iff']
     intro i
     apply id_mem
 
 instance [∀ i, (W i).IsStableUnderComposition] : (⨅ (i : ι), W i).IsStableUnderComposition where
   comp_mem f g hf hg := by
-    simp only [iInf_iff] at hf hg ⊢
+    simp only [iInf_iff'] at hf hg ⊢
     intro i
     exact comp_mem _ _ _ (hf i) (hg i)
 
@@ -82,17 +82,17 @@ instance [∀ i, (W i).IsMultiplicative] : (⨅ (i : ι), W i).IsMultiplicative 
 
 instance [∀ i, (W i).IsStableUnderRetracts] : (⨅ (i : ι), W i).IsStableUnderRetracts where
   of_retract hfg hg := by
-    simp only [iInf_iff] at hg ⊢
+    simp only [iInf_iff'] at hg ⊢
     intro i
     exact of_retract hfg (hg i)
 
 instance [∀ i, (W i).HasTwoOutOfThreeProperty] : (⨅ (i : ι), W i).HasTwoOutOfThreeProperty where
   of_postcomp f g hg hfg := by
-    simp only [iInf_iff] at hg hfg ⊢
+    simp only [iInf_iff'] at hg hfg ⊢
     intro i
     exact (W i).of_postcomp f g (hg i) (hfg i)
   of_precomp f g hf hfg := by
-    simp only [iInf_iff] at hf hfg ⊢
+    simp only [iInf_iff'] at hf hfg ⊢
     intro i
     exact (W i).of_precomp f g (hf i) (hfg i)
 
@@ -118,7 +118,7 @@ section
 variable (W : MorphismProperty D) (F : C ⥤ D)
 
 instance [W.IsStableUnderRetracts] : (W.inverseImage F).IsStableUnderRetracts where
-  of_retract r h := W.of_retract (r.map F.mapArrow) h
+  of_retract r h := W.of_retract (r.map F) h
 
 end
 
