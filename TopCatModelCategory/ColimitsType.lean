@@ -8,7 +8,6 @@ public import Mathlib.CategoryTheory.Limits.Types.ColimitType
 public import Mathlib.CategoryTheory.Limits.Types.Limits
 public import Mathlib.CategoryTheory.MorphismProperty.Limits
 public import Mathlib.Order.CompleteLattice.MulticoequalizerDiagram
-public import Mathlib.Data.Set.Lattice
 public import TopCatModelCategory.Multiequalizer
 
 @[expose] public section
