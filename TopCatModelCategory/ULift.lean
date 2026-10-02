@@ -15,5 +15,5 @@ def orderIsoULift [Preorder α] : α ≃o ULift.{v} α where
 instance [Preorder α] [SuccOrder α] : SuccOrder (ULift.{v} α) :=
   SuccOrder.ofOrderIso (orderIsoULift α)
 
-instance [Preorder α] [WellFoundedLT α] : WellFoundedLT (ULift.{v} α) where
-  wf := (orderIsoULift.{v} α).symm.toRelIsoLT.toRelEmbedding.isWellFounded.wf
+instance [Preorder α] [WellFoundedLT α] : WellFoundedLT (ULift.{v} α) :=
+  (orderIsoULift.{v} α).symm.toRelIsoLT.toRelEmbedding.wellFounded inferInstance
